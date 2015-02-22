@@ -68,9 +68,7 @@ ui_*.h
 
 # Gmsh meshes
 *.msh
-
-# Binaries
-/vfem
+!/data/approx/**/*.msh
 
 # Tecplot results
 *.plt
@@ -78,3 +76,14 @@ ui_*.h
 
 # Debug and temp files
 /*.txt
+
+# Binaries
+/vfem
+/other/symmetrize/symmetrize
+/other/symmetrize/bin
+/other/symmetrize/obj
+
+# Code::Blocks
+*.layout
+*.depend
+
