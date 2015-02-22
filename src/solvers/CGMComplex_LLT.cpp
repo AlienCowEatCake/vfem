@@ -74,11 +74,23 @@ void CGMComplex_LLT::make_LLT_decomposition()
     }
 }
 
-complex<double> CGMComplex_LLT::dot_prod(const complex<double> * a, const complex<double> * b) const
+complex<double> CGMComplex_LLT::dot_prod_nocj(const complex<double> * a, const complex<double> * b) const
 {
     complex<double> d_p = 0.0;
     for(size_t i = 0; i < n; i++)
-        d_p += a[i] * b[i];//conj(b[i]);
+        d_p += a[i] * b[i];
+    return d_p;
+}
+
+double CGMComplex_LLT::dot_prod_self(const complex<double> * a) const
+{
+    double d_p = 0.0;
+    for(size_t i = 0; i < n; i++)
+    {
+        double re = a[i].real();
+        double im = a[i].imag();
+        d_p += re * re + im * im;
+    }
     return d_p;
 }
 
@@ -128,16 +140,16 @@ void CGMComplex_LLT::solve_LLT(const complex<double> * f, complex<double> * x) c
     solve_LT(x, x);
 }
 
-bool CGMComplex_LLT::is_fpu_error(complex<double> x) const
+bool CGMComplex_LLT::is_fpu_error(double x) const
 {
-    complex<double> y = x - x;
-    return x.real() != x.real() || y.real() != y.real() || x.imag() != x.imag() || y.imag() != y.imag();
+    double y = x - x;
+    return x != x || y != y;
 }
 
 void CGMComplex_LLT::solve(complex<double> * solution, complex<double> * rp_s, double eps)
 {
     // Параметры решателя
-    size_t max_iter = 15000;
+    size_t max_iter = 20000;
 
     rp = rp_s;
 
@@ -156,9 +168,9 @@ void CGMComplex_LLT::solve(complex<double> * solution, complex<double> * rp_s, d
         p[i] = z[i];
 
     complex<double> alpha, beta, prod_1, prod_2;
-    complex<double> discr, rp_norm;
+    double discr, rp_norm;
 
-    rp_norm = sqrt(dot_prod(rp, rp));
+    rp_norm = sqrt(dot_prod_self(rp));
     if(is_fpu_error(rp_norm))
     {
         fprintf(stderr, "Error: FPU error detected in right part!\n");
@@ -168,14 +180,14 @@ void CGMComplex_LLT::solve(complex<double> * solution, complex<double> * rp_s, d
         return;
     }
 
-    prod_1 = dot_prod(p, r);
+    prod_1 = dot_prod_nocj(p, r);
 
     bool finished = false;
 
     size_t iter;
-    for(iter = 1;/* iter <= max_iter && */!finished; iter++)
+    for(iter = 1; iter <= max_iter && !finished; iter++)
     {
-        discr = sqrt(dot_prod(r, r));
+        discr = sqrt(dot_prod_self(r));
         if(is_fpu_error(discr))
         {
             fprintf(stderr, "Error: FPU error detected in (r, r)!\n");
@@ -185,17 +197,18 @@ void CGMComplex_LLT::solve(complex<double> * solution, complex<double> * rp_s, d
             return;
         }
 
+        double residual = discr / rp_norm;
         if(iter%10 == 0)
         {
-            printf("CCGM_LLT Residual:\t%5lu\t%.3e\r", (unsigned long)iter, abs(discr / rp_norm));
+            printf("CCGM_LLT Residual:\t%5lu\t%.3e\r", (unsigned long)iter, residual);
             fflush(stdout);
         }
 
-        if(eps < abs(discr / rp_norm))
+        if(residual > eps)
         {
             mul_matrix(z, s);
 
-            alpha = prod_1 / dot_prod(s, z);
+            alpha = prod_1 / dot_prod_nocj(s, z);
 
             for(size_t i = 0; i < n ; i++)
             {
@@ -204,7 +217,7 @@ void CGMComplex_LLT::solve(complex<double> * solution, complex<double> * rp_s, d
             }
 
             solve_LLT(r, p);
-            prod_2 = dot_prod(p, r);
+            prod_2 = dot_prod_nocj(p, r);
 
             beta = prod_2 / prod_1;
 
@@ -220,8 +233,8 @@ void CGMComplex_LLT::solve(complex<double> * solution, complex<double> * rp_s, d
     mul_matrix(x0, r);
     for(size_t i = 0; i < n; i++)
         r[i] = rp[i] - r[i];
-    discr = sqrt(dot_prod(r, r));
-    printf("CCGM_LLT Residual:\t%5lu\t%.3e\n", (unsigned long)iter, abs(discr / rp_norm));
+    discr = sqrt(dot_prod_self(r));
+    printf("CCGM_LLT Residual:\t%5lu\t%.3e\n", (unsigned long)iter, discr / rp_norm);
 
     if(iter >= max_iter)
         printf("Soulution can`t found, iteration limit exceeded!\n");
