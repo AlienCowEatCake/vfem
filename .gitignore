@@ -70,8 +70,7 @@ ui_*.h
 *.msh
 
 # Binaries
-vfem
-vfem.exe
+/vfem
 
 # Tecplot results
 *.plt
