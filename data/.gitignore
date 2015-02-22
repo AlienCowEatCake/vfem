@@ -1,0 +1,3 @@
+﻿# Важные сетки
+!approx/**/*.msh
+!area_point_source/**/*.msh
