@@ -1,7 +1,7 @@
 #include "problems.h"
 
 #if defined AREA_PML_SOURCE
-#if defined VFEM_USE_NONHOMOGENEOUS_FIRST || defined VFEM_USE_ANALYTICAL || !defined VFEM_USE_PML
+#if defined VFEM_USE_NONHOMOGENEOUS_FIRST || (!defined VFEM_USE_PML && defined VFEM_USE_ANALYTICAL)
 #error "Please, reconfigure!"
 #endif
 
@@ -28,7 +28,24 @@ cvector3 get_s(const point & p, const finite_element * fe, const phys_pml_area *
         return cvector3(1.0, 1.0, 1.0);
 
     double m = 3;
-    complex<double> chi(4, 3);
+//    complex<double> chi(4, 3);
+
+    static complex<double> chi(-1, -1);
+    if(chi.real() < 0)
+    {
+        ifstream chi_st;
+        char chi_name[] = "chi.txt";
+        chi_st.open(chi_name, ios::in);
+        if(!chi_st.good())
+        {
+            cerr << "Error in " << __FILE__ << ":" << __LINE__
+                 << " while reading file " << chi_name << endl;
+            throw IO_FILE_ERROR;
+        }
+        chi_st >> chi.real() >> chi.imag();
+        chi_st.close();
+    }
+
     double pml_thickness_x = 100.0;
     double pml_thickness_y = 100.0;
     double pml_thickness_z = 100.0;
@@ -83,9 +100,33 @@ cvector3 get_s(const point & p, const finite_element * fe, const phys_pml_area *
     return cvector3(1.0 + chi * power * cx, 1.0 + chi * power * cy, 1.0 + chi * power * cz);
 }
 
-string mesh_filename = "data/area_pml_source/2.msh";
-string phys_filename = "data/area_pml_source/1.txt";
+//string mesh_filename = "data/area_pml_source/2.msh";
+//string phys_filename = "data/area_pml_source/1.txt";
 string tecplot_filename = "area_pml_source.plt";
+
+string phys_filename_pml = "data/area_pml_source/3-1.txt";
+string phys_filename_nonpml = "data/area_pml_source/3-2.txt";
+string mesh_filename = "data/area_pml_source/3.msh";
+#if defined VFEM_USE_PML
+string phys_filename = phys_filename_pml;
+#else
+string phys_filename = phys_filename_nonpml;
+#endif
+string slae_dump_filename = "area_pml_source_slae.txt";
+
+#if defined VFEM_USE_ANALYTICAL
+cvector3 func_true(const point & p)
+{
+    static VFEM vfem_anal;
+    if(vfem_anal.fes_num == 0)
+    {
+        vfem_anal.input_phys(phys_filename_nonpml);
+        vfem_anal.input_mesh(mesh_filename);
+        vfem_anal.slae.restore(slae_dump_filename);
+    }
+    return vfem_anal.solution(p);
+}
+#endif
 
 void postprocessing(VFEM & v, char * timebuf)
 {
@@ -95,10 +136,36 @@ void postprocessing(VFEM & v, char * timebuf)
                    'Z', 0.0, 'X', -700, 700, 20.0, 'Y', -700, 700, 20.0);
     v.output_slice(string("area_pml_source_xz") + "_" + string(timebuf) + ".dat",
                    'Y', 0.0, 'X', -700, 700, 20.0, 'Z', -700, 700, 20.0);
-    v.output_slice(string("area_pml_source_xz1") + "_" + string(timebuf) + ".dat",
-                   'Y', 10.0, 'X', -700, 700, 20.0, 'Z', -700, 700, 20.0);
-    v.output_slice(string("area_pml_source_xz2") + "_" + string(timebuf) + ".dat",
-                   'Y', 80.0, 'X', -700, 700, 20.0, 'Z', -700, 700, 20.0);
+//    v.output_slice(string("area_pml_source_xz1") + "_" + string(timebuf) + ".dat",
+//                   'Y', 10.0, 'X', -700, 700, 20.0, 'Z', -700, 700, 20.0);
+//    v.output_slice(string("area_pml_source_xz2") + "_" + string(timebuf) + ".dat",
+//                   'Y', 80.0, 'X', -700, 700, 20.0, 'Z', -700, 700, 20.0);
+#if !defined VFEM_USE_PML
+    v.slae.dump(slae_dump_filename);
+#elif defined VFEM_USE_ANALYTICAL
+    double diff = 0.0, norm = 0.0;
+    for(size_t k = 0; k < v.fes_num; k++)
+    {
+        if(fabs(v.fes[k].barycenter.x) <= 600 && fabs(v.fes[k].barycenter.x) >= 180 &&
+           fabs(v.fes[k].barycenter.y) <= 600 && fabs(v.fes[k].barycenter.y) >= 180 &&
+           fabs(v.fes[k].barycenter.z) <= 600 && fabs(v.fes[k].barycenter.z) >= 180)
+        {
+            size_t pos[12];
+            for(size_t i = 0; i < 6; i++)
+            {
+                pos[i] = v.fes[k].get_edge(i).num;
+                pos[i+6] = v.fes[k].get_edge(i).num + v.slae.n / 2;
+            }
+            carray12 q_loc;
+            for(int i = 0; i < 12; i++)
+                q_loc[i] = v.slae.x[pos[i]];
+
+            diff += v.fes[k].diff_normL2(q_loc, func_true);
+            norm += v.fes[k].normL2(func_true);
+        }
+    }
+    cout << "Diff (L2): \t" << sqrt(diff / norm) << endl;
+#endif
 }
 
 #endif
