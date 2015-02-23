@@ -47,7 +47,7 @@ inline void show_progress(const char * message, size_t index, size_t num_all)
     MAYBE_UNUSED(index);
     MAYBE_UNUSED(num_all);
 /**/
-    const size_t tick = 100;
+    const size_t tick = 1000;
     const char progress[4] = {'|', '/', '-', '\\'};
     index++;
     if(!(index % tick))
