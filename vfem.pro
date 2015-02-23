@@ -63,4 +63,10 @@ CONFIG += warn_on
     QMAKE_CXXFLAGS_RELEASE *= -Ox
     DEFINES += _CRT_SECURE_NO_WARNINGS
     DEFINES += _USE_MATH_DEFINES
+    # Добавлено: 24 Feb 2015
+    # MSVC 2013 использует странные оптимизации
+    *msvc2013* {
+        QMAKE_CXXFLAGS_RELEASE -= -Ox
+        QMAKE_CXXFLAGS_RELEASE *= -O1
+    }
 }
