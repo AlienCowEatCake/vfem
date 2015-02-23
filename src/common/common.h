@@ -14,10 +14,6 @@
 #include <cmath>
 #endif
 
-#if defined _MSC_VER && _MSC_VER <= 1200
-#define for  if (0) {} else for
-#endif
-
 #if !defined M_PI
 #define M_PI 3.14159265358979323846
 #endif
@@ -85,29 +81,5 @@ inline bool is_fpu_error(double x)
 {
     return is_nan(x) || is_nan(x - x);
 }
-
-#if defined __WATCOMC__
-
-istream & getline(istream & is, string & str)
-{
-    const int bufsize = 255;
-    char buf[bufsize];
-    is.getline(buf, bufsize);
-    str.assign(buf);
-    return is;
-}
-
-ostream & operator << (ostream & os, const string & str)
-{
-    os << str.c_str();
-    return os;
-}
-
-ostream & operator << (ostream & os, const complex<double> & c)
-{
-    os << '(' << c.real() << ',' << c.imag() << ')';
-    return os;
-}
-#endif
 
 #endif // COMMON_H_INCLUDED
