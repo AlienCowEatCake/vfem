@@ -17,7 +17,7 @@ cvector3 func_rp(const point & p, const phys_area & phys)
 bool is_pml(const point & p, const finite_element * fe)
 {
     MAYBE_UNUSED(p);
-    if(fe->phys->gmsh_num == 21 || fe->phys->gmsh_num == 22)
+    if(fe->phys->gmsh_num == 21 || fe->phys->gmsh_num == 22 || fe->phys->gmsh_num == 31 || fe->phys->gmsh_num == 32)
         return true;
     return false;
 }
@@ -132,10 +132,12 @@ void postprocessing(VFEM & v, char * timebuf)
 {
     MAYBE_UNUSED(v);
     MAYBE_UNUSED(timebuf);
-    v.output_slice(string("area_pml_source_xy") + "_" + string(timebuf) + ".dat",
-                   'Z', 0.0, 'X', -700, 700, 20.0, 'Y', -700, 700, 20.0);
-    v.output_slice(string("area_pml_source_xz") + "_" + string(timebuf) + ".dat",
+    v.output_slice(string("area_pml_source") + "_" + string(timebuf) + ".dat",
                    'Y', 0.0, 'X', -700, 700, 20.0, 'Z', -700, 700, 20.0);
+//    v.output_slice(string("area_pml_source_xy") + "_" + string(timebuf) + ".dat",
+//                   'Z', 0.0, 'X', -700, 700, 20.0, 'Y', -700, 700, 20.0);
+//    v.output_slice(string("area_pml_source_xz") + "_" + string(timebuf) + ".dat",
+//                   'Y', 0.0, 'X', -700, 700, 20.0, 'Z', -700, 700, 20.0);
 //    v.output_slice(string("area_pml_source_xz1") + "_" + string(timebuf) + ".dat",
 //                   'Y', 10.0, 'X', -700, 700, 20.0, 'Z', -700, 700, 20.0);
 //    v.output_slice(string("area_pml_source_xz2") + "_" + string(timebuf) + ".dat",
