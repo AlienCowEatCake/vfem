@@ -87,3 +87,6 @@ ui_*.h
 *.layout
 *.depend
 
+# Temp directories
+/#*
+
