@@ -12,12 +12,12 @@ BiCGComplex_VC::BiCGComplex_VC()
 
 BiCGComplex_VC::~BiCGComplex_VC()
 {
-    if(r) delete [] r;
-    if(z) delete [] z;
-    if(s) delete [] s;
-    if(p) delete [] p;
-    if(t) delete [] t;
-    if(t1) delete [] t1;
+    delete [] r;
+    delete [] z;
+    delete [] s;
+    delete [] p;
+    delete [] t;
+    delete [] t1;
 }
 
 void BiCGComplex_VC::init(size_t * gi_s, size_t * gj_s, complex<double> * di_s,
@@ -29,12 +29,12 @@ void BiCGComplex_VC::init(size_t * gi_s, size_t * gj_s, complex<double> * di_s,
     gg = gg_s;
     n = n_s;
 
-    if(r) delete [] r;
-    if(z) delete [] z;
-    if(s) delete [] s;
-    if(p) delete [] p;
-    if(t) delete [] t;
-    if(t1) delete [] t1;
+    delete [] r;
+    delete [] z;
+    delete [] s;
+    delete [] p;
+    delete [] t;
+    delete [] t1;
 
     r = new complex<double> [n];
     z = new complex<double> [n];

@@ -12,12 +12,12 @@ CGMComplex_VC::CGMComplex_VC()
 
 CGMComplex_VC::~CGMComplex_VC()
 {
-    if(r) delete [] r;
-    if(w) delete [] w;
-    if(s) delete [] s;
-    if(p) delete [] p;
-    if(t) delete [] t;
-    if(u) delete [] u;
+    delete [] r;
+    delete [] w;
+    delete [] s;
+    delete [] p;
+    delete [] t;
+    delete [] u;
 }
 
 void CGMComplex_VC::init(size_t * gi_s, size_t * gj_s, complex<double> * di_s,
@@ -29,12 +29,12 @@ void CGMComplex_VC::init(size_t * gi_s, size_t * gj_s, complex<double> * di_s,
     gg = gg_s;
     n = n_s;
 
-    if(r) delete [] r;
-    if(w) delete [] w;
-    if(s) delete [] s;
-    if(p) delete [] p;
-    if(t) delete [] t;
-    if(u) delete [] u;
+    delete [] r;
+    delete [] w;
+    delete [] s;
+    delete [] p;
+    delete [] t;
+    delete [] u;
 
     r = new complex<double> [n];
     w = new complex<double> [n];

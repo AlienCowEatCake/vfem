@@ -26,14 +26,14 @@ VFEM::VFEM()
 
 VFEM::~VFEM()
 {
-    if(nodes)     delete [] nodes;
-    if(edges)     delete [] edges;
-    if(fes)       delete [] fes;
-    if(trs)       delete [] trs;
-    if(pss)       delete [] pss;
-    if(edges_src) delete [] edges_src;
+    delete [] nodes;
+    delete [] edges;
+    delete [] fes;
+    delete [] trs;
+    delete [] pss;
+    delete [] edges_src;
 #if defined VFEM_USE_PML
-    if(nodes_pml) delete [] nodes_pml;
+    delete [] nodes_pml;
 #endif
 }
 

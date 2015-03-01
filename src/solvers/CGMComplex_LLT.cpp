@@ -16,12 +16,12 @@ void CGMComplex_LLT::init(size_t * gi_s, size_t * gj_s, complex<double> * di_s,
 
     size_t m = gi[n];
 
-    if(r) delete [] r;
-    if(z) delete [] z;
-    if(p) delete [] p;
-    if(s) delete [] s;
-    if(L_di) delete [] L_di;
-    if(L_gg) delete [] L_gg;
+    delete [] r;
+    delete [] z;
+    delete [] p;
+    delete [] s;
+    delete [] L_di;
+    delete [] L_gg;
 
     r = new complex<double> [n];
     z = new complex<double> [n];
@@ -251,10 +251,10 @@ CGMComplex_LLT::CGMComplex_LLT()
 
 CGMComplex_LLT::~CGMComplex_LLT()
 {
-    if(r) delete [] r;
-    if(z) delete [] z;
-    if(p) delete [] p;
-    if(s) delete [] s;
-    if(L_di) delete [] L_di;
-    if(L_gg) delete [] L_gg;
+    delete [] r;
+    delete [] z;
+    delete [] p;
+    delete [] s;
+    delete [] L_di;
+    delete [] L_gg;
 }

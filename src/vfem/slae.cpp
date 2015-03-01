@@ -43,12 +43,12 @@ void SLAE::alloc_all(size_t n_size, size_t gg_size)
 
 void SLAE::dealloc_all()
 {
-    if(gg) delete [] gg;
-    if(di) delete [] di;
-    if(rp) delete [] rp;
-    if(x)  delete [] x;
-    if(ig) delete [] ig;
-    if(jg) delete [] jg;
+    delete [] gg;
+    delete [] di;
+    delete [] rp;
+    delete [] x;
+    delete [] ig;
+    delete [] jg;
     gg = di = rp = x = NULL;
     ig = jg = NULL;
     n = 0;

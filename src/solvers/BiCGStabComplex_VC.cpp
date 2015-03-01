@@ -12,12 +12,12 @@ BiCGStabComplex_VC::BiCGStabComplex_VC()
 
 BiCGStabComplex_VC::~BiCGStabComplex_VC()
 {
-    if(r) delete [] r;
-    if(v) delete [] v;
-    if(s) delete [] s;
-    if(p) delete [] p;
-    if(t) delete [] t;
-    if(r2) delete [] r2;
+    delete [] r;
+    delete [] v;
+    delete [] s;
+    delete [] p;
+    delete [] t;
+    delete [] r2;
 }
 
 void BiCGStabComplex_VC::init(size_t * gi_s, size_t * gj_s, complex<double> * di_s,
@@ -29,12 +29,12 @@ void BiCGStabComplex_VC::init(size_t * gi_s, size_t * gj_s, complex<double> * di
     gg = gg_s;
     n = n_s;
 
-    if(r) delete [] r;
-    if(v) delete [] v;
-    if(s) delete [] s;
-    if(p) delete [] p;
-    if(t) delete [] t;
-    if(r2) delete [] r2;
+    delete [] r;
+    delete [] v;
+    delete [] s;
+    delete [] p;
+    delete [] t;
+    delete [] r2;
 
     r = new complex<double> [n];
     v = new complex<double> [n];
