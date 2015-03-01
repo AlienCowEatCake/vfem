@@ -123,6 +123,13 @@ edge_src::edge_src()
     edge_main = NULL;
 }
 
+edge_src::edge_src(const edge_src & f) : edge(f.nodes[0], f.nodes[1], f.num)
+{
+    direction = f.direction;
+    phys = f.phys;
+    edge_main = f.edge_main;
+}
+
 const phys_area & edge_src::get_phys_area() const
 {
     if(!phys)
