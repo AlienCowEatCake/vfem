@@ -3,18 +3,21 @@
 
 #include "../common/common.h"
 
-static const double c = 299792458.0;                // Скорость света
-static const double mu0 = 4.0e-7 * M_PI;            // Магн. пр. вакуума
-static const double epsilon0 = 1.0 / (mu0 * c * c); // Диэл. пр. вакуума
+namespace consts
+{
+    static const double c = 299792458.0;                // Скорость света
+    static const double mu0 = 4.0e-7 * M_PI;            // Магн. пр. вакуума
+    static const double epsilon0 = 1.0 / (mu0 * c * c); // Диэл. пр. вакуума
+}
 
 // Класс физическая область
 class phys_area
 {
 public:
     double omega;           // Циклическая частота
-    double mu;              // Магнитная проницаемость (относительеая)
+    double mu;              // Магнитная проницаемость (относительная)
     double sigma;           // Электрическая проводимость
-    double epsilon;         // Диэлектрическая проницаемость (относительеая)
+    double epsilon;         // Диэлектрическая проницаемость (относительная)
     size_t gmsh_num;        // Номер области в Gmsh
     size_t type_of_elem;    // Тип элементов
     size_t type_of_bounds;  // Тип краевого условия

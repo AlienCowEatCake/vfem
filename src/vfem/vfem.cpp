@@ -192,7 +192,7 @@ void VFEM::assemble_matrix()
         l_matrix12 matrix_M = fes[k].M();
         phys_area ph = fes[k].get_phys_area();
         carray12 array_rp = fes[k].rp(func_rp);
-        complex<double> k2(- ph.epsilon * epsilon0 * ph.omega * ph.omega, ph.omega * ph.sigma);
+        complex<double> k2(- ph.epsilon * ph.omega * ph.omega, ph.omega * ph.sigma);
 
         for(size_t i = 0; i < 12; i++)
         {
@@ -205,10 +205,10 @@ void VFEM::assemble_matrix()
                 size_t j_num;
                 if(j < 6)   j_num = fes[k].get_edge(j).num;
                 else        j_num = fes[k].get_edge(j - 6).num + edges_num;
-                add = matrix_G[i][j] / (ph.mu * mu0) + matrix_M[i][j] * k2;
+                add = matrix_G[i][j] / ph.mu + matrix_M[i][j] * k2;
                 slae.add(i_num, j_num, add);
             }
-            add = matrix_G[i][i] / (ph.mu * mu0) + matrix_M[i][i] * k2;
+            add = matrix_G[i][i] / ph.mu + matrix_M[i][i] * k2;
             slae.di[i_num] += add;
             add = array_rp[i];
             slae.rp[i_num] += add;

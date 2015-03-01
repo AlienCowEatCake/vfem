@@ -40,6 +40,8 @@ void VFEM::input_phys(const string & phys_filename)
         if(id.type_of_element == 4)
         {
             phys_param >> ph->mu >> ph->epsilon >> ph->sigma;
+            ph->mu *= consts::mu0;
+            ph->epsilon *= consts::epsilon0;
             ph->omega = omega_global;
             ph->type_of_bounds = 0;
             ph->J0 = 0.0;
