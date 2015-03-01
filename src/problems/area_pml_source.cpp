@@ -42,7 +42,9 @@ cvector3 get_s(const point & p, const finite_element * fe, const phys_pml_area *
                  << " while reading file " << chi_name << endl;
             throw IO_FILE_ERROR;
         }
-        chi_st >> chi.real() >> chi.imag();
+        double chi_re, chi_im;
+        chi_st >> chi_re >> chi_im;
+        chi = complex<double>(chi_re, chi_im);
         chi_st.close();
     }
 
