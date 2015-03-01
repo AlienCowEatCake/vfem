@@ -64,6 +64,18 @@ complex<double> CGMComplex_VC::dot_prod_nocj(const complex<double> * a, const co
     return res;
 }
 
+double CGMComplex_VC::dot_prod_self(const complex<double> * a) const
+{
+    double res = 0.0;
+    for(size_t i = 0; i < n; i++)
+    {
+        double re = a[i].real();
+        double im = a[i].imag();
+        res += re * re + im * im;
+    }
+    return res;
+}
+
 void CGMComplex_VC::mul_matrix(const complex<double> * f, complex<double> * x) const
 {
     for(size_t i = 0; i < n; i++)
@@ -85,7 +97,7 @@ void CGMComplex_VC::solve(complex<double> * solution, complex<double> * rp, doub
     size_t max_iter = /*(size_t)sqrt(n)*/ 15000;
 
     complex<double> alpha, beta, alpha1, alpha2;
-    double rp_norm = sqrt(dot_prod(rp, rp).real());
+    double rp_norm = sqrt(dot_prod_self(rp));
     x0 = new complex<double> [n];
 
     mul_matrix(solution, t);
@@ -106,7 +118,7 @@ void CGMComplex_VC::solve(complex<double> * solution, complex<double> * rp, doub
     size_t iter;
     for(iter = 0; iter < max_iter && not_end; iter++)
     {
-        discr = sqrt(dot_prod(r, r).real());
+        discr = sqrt(dot_prod_self(r));
 
         if(iter%10 == 0)
         {
@@ -140,7 +152,7 @@ void CGMComplex_VC::solve(complex<double> * solution, complex<double> * rp, doub
     mul_matrix(x0, r);
     for(size_t i = 0; i < n; i++)
         r[i] = rp[i] - r[i];
-    discr = sqrt(dot_prod(r, r).real());
+    discr = sqrt(dot_prod_self(r));
     printf("CCGMVC Residual:\t%5lu\t%.3e\n", (unsigned long)iter, discr / rp_norm);
 
     if(iter >= max_iter)

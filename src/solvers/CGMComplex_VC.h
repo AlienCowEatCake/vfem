@@ -20,6 +20,7 @@ private:
     void mul_matrix(const complex<double> * f, complex<double> * x) const;
     complex<double> dot_prod(const complex<double> * a, const complex<double> * b) const;
     complex<double> dot_prod_nocj(const complex<double> * a, const complex<double> * b) const;
+    double dot_prod_self(const complex<double> * a) const;
 
     size_t n;
     size_t * gi, * gj;

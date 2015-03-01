@@ -64,6 +64,18 @@ complex<double> BiCGComplex_VC::dot_prod_nocj(const complex<double> * a, const c
     return res;
 }
 
+double BiCGComplex_VC::dot_prod_self(const complex<double> * a) const
+{
+    double res = 0.0;
+    for(size_t i = 0; i < n; i++)
+    {
+        double re = a[i].real();
+        double im = a[i].imag();
+        res += re * re + im * im;
+    }
+    return res;
+}
+
 void BiCGComplex_VC::mul_matrix(const complex<double> * f, complex<double> * x) const
 {
     for(size_t i = 0; i < n; i++)
@@ -85,7 +97,7 @@ void BiCGComplex_VC::solve(complex<double> * solution, complex<double> * rp, dou
     size_t max_iter = /*(size_t) 100 * sqrt(n)*/ 15000;
 
     complex<double> dp1, dp2, alpha, beta;
-    double rp_norm = sqrt(dot_prod(rp, rp).real());
+    double rp_norm = sqrt(dot_prod_self(rp));
     x0 = new complex<double> [n];
 
     mul_matrix(solution, t);
@@ -104,7 +116,7 @@ void BiCGComplex_VC::solve(complex<double> * solution, complex<double> * rp, dou
 
     for(iter = 0; iter < max_iter && not_end; iter++)
     {
-        discr = sqrt(dot_prod(r, r).real());
+        discr = sqrt(dot_prod_self(r));
 
         if(iter%10 == 0)
         {
@@ -144,7 +156,7 @@ void BiCGComplex_VC::solve(complex<double> * solution, complex<double> * rp, dou
     mul_matrix(x0, r);
     for(size_t i = 0; i < n; i++)
         r[i] = rp[i] - r[i];
-    discr = sqrt(dot_prod(r, r).real());
+    discr = sqrt(dot_prod_self(r));
     printf("BiCGVC Residual:\t%5lu\t%.3e\t%.3e\n", (unsigned long)iter, discr / rp_norm, gamma);
 
     if(iter >= max_iter)

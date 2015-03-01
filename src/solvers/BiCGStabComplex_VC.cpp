@@ -64,6 +64,18 @@ complex<double> BiCGStabComplex_VC::dot_prod_nocj(const complex<double> * a, con
     return res;
 }
 
+double BiCGStabComplex_VC::dot_prod_self(const complex<double> * a) const
+{
+    double res = 0.0;
+    for(size_t i = 0; i < n; i++)
+    {
+        double re = a[i].real();
+        double im = a[i].imag();
+        res += re * re + im * im;
+    }
+    return res;
+}
+
 void BiCGStabComplex_VC::mul_matrix(const complex<double> * f, complex<double> * x) const
 {
     for(size_t i = 0; i < n; i++)
@@ -84,8 +96,8 @@ void BiCGStabComplex_VC::solve(complex<double> *solution, complex<double> *rp, d
     double eps = gamma;
     size_t max_iter = /*(size_t)sqrt(n)*/ 15000;
 
-    complex<double> omega, alpha, ro, ro_prev, beta;
-    double rp_norm = sqrt(dot_prod(rp, rp).real());
+    complex<double> omega, alpha, ro, beta;
+    double rp_norm = sqrt(dot_prod_self(rp));
     x0 = new complex<double> [n];
 
     mul_matrix(solution, t);
@@ -102,11 +114,11 @@ void BiCGStabComplex_VC::solve(complex<double> *solution, complex<double> *rp, d
     complex<double> a1 = 0.0, a2 = 0.0, a3;
 
     bool not_end = true;
-    double discr = 2.0 * sqrt(dot_prod(r, r).real());
+    double discr = 2.0 * sqrt(dot_prod_self(r));
     size_t iter;
     for(iter = 0; iter < max_iter && not_end; iter++)
     {
-        discr = sqrt(dot_prod(r, r).real());
+        discr = sqrt(dot_prod_self(r));
 
         if(iter%10 == 0)
         {
@@ -147,7 +159,7 @@ void BiCGStabComplex_VC::solve(complex<double> *solution, complex<double> *rp, d
     mul_matrix(x0, r);
     for(size_t i = 0; i < n; i++)
         r[i] = rp[i] - r[i];
-    discr = sqrt(dot_prod(r, r).real());
+    discr = sqrt(dot_prod_self(r));
     printf("BiCGStabVC Residual:\t%5lu\t%.3e\n", (unsigned long)iter, discr / rp_norm);
 
     if(iter >= max_iter)
