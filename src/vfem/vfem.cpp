@@ -70,7 +70,7 @@ void VFEM::generate_portrait()
 
         size_t ien = i + edges_num;
         portrait[ien].insert(i);
-        for(set<size_t>::iterator j = portrait[i].begin(); j != portrait[i].end(); j++)
+        for(set<size_t>::iterator j = portrait[i].begin(); j != portrait[i].end(); ++j)
         {
             size_t jen = *j + edges_num;
             portrait[ien].insert(*j);
@@ -92,7 +92,7 @@ void VFEM::generate_portrait()
     {
         show_progress("step 3", i, n_size);
 
-        for(set<size_t>::iterator j = portrait[i].begin(); j != portrait[i].end(); j++)
+        for(set<size_t>::iterator j = portrait[i].begin(); j != portrait[i].end(); ++j)
         {
             slae.jg[tmp] = *j;
             tmp++;
@@ -142,7 +142,7 @@ void VFEM::generate_surf_portrait()
 
         size_t ien = i + edges_surf_num;
         portrait[ien].insert(i);
-        for(set<size_t>::iterator j = portrait[i].begin(); j != portrait[i].end(); j++)
+        for(set<size_t>::iterator j = portrait[i].begin(); j != portrait[i].end(); ++j)
         {
             size_t jen = *j + edges_surf_num;
             portrait[ien].insert(*j);
@@ -164,7 +164,7 @@ void VFEM::generate_surf_portrait()
     {
         show_progress("step 3", i, n_size);
 
-        for(set<size_t>::iterator j = portrait[i].begin(); j != portrait[i].end(); j++)
+        for(set<size_t>::iterator j = portrait[i].begin(); j != portrait[i].end(); ++j)
         {
             surf_slae.jg[tmp] = *j;
             tmp++;

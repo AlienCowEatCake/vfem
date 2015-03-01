@@ -91,7 +91,7 @@ public:
     SLAE surf_slae;         // СЛАУ по границе
 #endif
 protected:
-    size_t add_edge(edge ed, set<edge> & edges);  // Добавление ребра в множество ребер
+    size_t add_edge(edge ed, set<edge> & edges_set);    // Добавление ребра в множество ребер
 
     size_t nodes_num;   // Число узлов
     point * nodes;      // Узлы

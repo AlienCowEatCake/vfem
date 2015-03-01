@@ -1,12 +1,12 @@
 #include "vfem.h"
 
-size_t VFEM::add_edge(edge ed, set<edge> & edges)
+size_t VFEM::add_edge(edge ed, set<edge> & edges_set)
 {
-    set<edge>::iterator r = edges.find(ed);
-    if(r != edges.end())
+    set<edge>::iterator r = edges_set.find(ed);
+    if(r != edges_set.end())
         return r->num;
-    ed.num = edges.size();
-    edges.insert(ed);
+    ed.num = edges_set.size();
+    edges_set.insert(ed);
     return ed.num;
 }
 
@@ -339,7 +339,7 @@ void VFEM::input_mesh(const string & gmsh_filename)
     edges_num = edges_temp2.size();
     edges = new edge [edges_num];
     size_t ied = 0;
-    for(set<edge>::iterator i = edges_temp2.begin(); i != edges_temp2.end(); i++)
+    for(set<edge>::iterator i = edges_temp2.begin(); i != edges_temp2.end(); ++i)
     {
         edges[i->num] = *i;
         show_progress("edges", ied++, edges_num);
@@ -349,7 +349,7 @@ void VFEM::input_mesh(const string & gmsh_filename)
     if(bound1_num > 0)
     {
         edges_surf_num = edges_surf_temp2.size();
-        for(set<edge>::iterator i = edges_surf_temp2.begin(); i != edges_surf_temp2.end(); i++)
+        for(set<edge>::iterator i = edges_surf_temp2.begin(); i != edges_surf_temp2.end(); ++i)
         {
             set<edge>::iterator j = edges_temp2.find(*i);
             global_to_local[j->num] = i->num;
@@ -499,15 +499,16 @@ void VFEM::input_pml()
     };
 
     size_t i = 0;
-    for(map<point *, pair<cpoint *, finite_element *> >::iterator it = pml_nodes_tmp.begin(); it != pml_nodes_tmp.end(); it++)
+    for(map<point *, pair<cpoint *, finite_element *> >::iterator it = pml_nodes_tmp.begin(); it != pml_nodes_tmp.end(); ++it)
     {
         show_progress("replaced points", i++, pml_nodes_tmp.size());
 
-        it->second.first = nodes_pml + (size_t)(it->first - nodes);
+        point * p = it->first;
+        cpoint * cp = nodes_pml + (size_t)(p - nodes);
+        finite_element * fefe = it->second.second;
+        it->second.first = cp;
         double h[3] = {0, 0, 0}, beg[3] = {0, 0, 0};
         bool flag[3] = {false, false, false};
-        point * p = it->first;
-        finite_element * fefe = it->second.second;
 
         if(p->x > phys_pml.x1)
         {
@@ -575,10 +576,8 @@ void VFEM::input_pml()
         for(size_t j = 0; j < 3; j++)
         {
             if(flag[j])
-                (* (it->second.first))[j] = new_point[j] * h_small[j] / 2.0 + beg[j];
+                (*cp)[j] = new_point[j] * h_small[j] / 2.0 + beg[j];
         }
-
-        //cout << *(it->first) << " >> " << *(it->second.first) << endl;
     }
 
     for(size_t i = 0; i < fes_num; i++)
