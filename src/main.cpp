@@ -1,7 +1,7 @@
 #include "problems/problems.h"
 #include <ctime>
 
-void print_time(size_t seconds, string descr)
+void print_time(size_t seconds, const string & descr)
 {
     if(seconds > 3600)
     {

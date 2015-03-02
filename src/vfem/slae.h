@@ -16,7 +16,7 @@ public:
     void solve(double eps);
     void alloc_all(size_t n_size, size_t gg_size);
     void dealloc_all();
-    void add(size_t i, size_t j, complex<double> elem);
+    void add(size_t i, size_t j, const complex<double> & elem);
     complex<double> * gg, * di, * rp, * x;
     size_t * ig, * jg;
     size_t n;

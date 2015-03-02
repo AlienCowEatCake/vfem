@@ -54,11 +54,12 @@ void VFEM::input_phys(const string & phys_filename)
             map<phys_id, phys_area>::const_iterator parent = phys.find(phys_id(4, parent_phys));
             if(parent != phys.end())
             {
-                ph->omega = parent->second.omega;
-                ph->mu = parent->second.mu;
-                ph->epsilon = parent->second.epsilon;
-                ph->sigma = parent->second.sigma;
-                ph->J0 = parent->second.J0;
+                const phys_area * par = &(parent->second);
+                ph->omega = par->omega;
+                ph->mu = par->mu;
+                ph->epsilon = par->epsilon;
+                ph->sigma = par->sigma;
+                ph->J0 = par->J0;
             }
             else
             {
@@ -79,11 +80,12 @@ void VFEM::input_phys(const string & phys_filename)
             map<phys_id, phys_area>::const_iterator parent = phys.find(phys_id(4, parent_phys));
             if(parent != phys.end())
             {
-                ph->omega = parent->second.omega;
-                ph->mu = parent->second.mu;
-                ph->epsilon = parent->second.epsilon;
-                ph->sigma = parent->second.sigma;
-                ph->type_of_bounds = parent->second.type_of_bounds;
+                const phys_area * par = &(parent->second);
+                ph->omega = par->omega;
+                ph->mu = par->mu;
+                ph->epsilon = par->epsilon;
+                ph->sigma = par->sigma;
+                ph->type_of_bounds = par->type_of_bounds;
             }
             else
             {
@@ -198,7 +200,7 @@ void VFEM::input_mesh(const string & gmsh_filename)
 
     // Чтение конечных элементов
     gmsh_file >> fes_num;
-    size_t type_of_elem;
+    size_t type_of_elem = 0;
     finite_element fake_element;
     triangle fake_triangle;
     edge_src fake_edge_src;
@@ -212,7 +214,7 @@ void VFEM::input_mesh(const string & gmsh_filename)
         show_progress("", i, fes_num);
 
         gmsh_file >> fake_number >> type_of_elem;
-        size_t phys_num, tags_num;
+        size_t phys_num = 0, tags_num = 0;
         gmsh_file >> tags_num;
         if(tags_num == 2)
             gmsh_file >> phys_num >> fake_number;

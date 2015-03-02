@@ -54,7 +54,7 @@ void SLAE::dealloc_all()
     n = 0;
 }
 
-void SLAE::add(size_t i, size_t j, complex<double> elem)
+void SLAE::add(size_t i, size_t j, const complex<double> & elem)
 {
     if(j > i)
         swap(i, j);
