@@ -22,13 +22,13 @@ cvector3 func_rp(const point & p, const phys_area & phys)
     MAYBE_UNUSED(p);
     MAYBE_UNUSED(phys);
 
-    complex<double> k2(- phys.omega * phys.omega * phys.epsilon * epsilon0, phys.omega * phys.sigma);
+    complex<double> k2(- phys.omega * phys.omega * phys.epsilon, phys.omega * phys.sigma);
     //return k2 * cvector3(1.0, 0.0, 0.0);
     //return k2 * cvector3(- p.y - p.z, - p.x - p.z, - p.x - p.y);
     return cvector3(
-               -2.0 * exp(p.y + p.z) / (phys.mu * mu0) + k2 * exp(p.y + p.z),
-               -2.0 * exp(p.x + p.z) / (phys.mu * mu0) + k2 * exp(p.x + p.z),
-               -2.0 * exp(p.x + p.y) / (phys.mu * mu0) + k2 * exp(p.x + p.y)
+               -2.0 * exp(p.y + p.z) / phys.mu + k2 * exp(p.y + p.z),
+               -2.0 * exp(p.x + p.z) / phys.mu + k2 * exp(p.x + p.z),
+               -2.0 * exp(p.x + p.y) / phys.mu + k2 * exp(p.x + p.y)
            );
 }
 
