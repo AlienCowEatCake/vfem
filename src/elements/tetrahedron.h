@@ -7,6 +7,7 @@
 #include "../geometry/vector3.h"
 #include "../elements/edge.h"
 #include "../vfem/phys.h"
+#include "../elements/basis_config.h"
 
 // Класс тетраэдр (абстрактный)
 class tetrahedron_base
@@ -41,8 +42,7 @@ protected:
     vector3 grad_lambda(size_t i) const;    // градиент L-координаты
     double lambda(size_t i, const point & p) const; // L-координаты
 
-    point gauss_points[4];      // Точки Гаусса
-    double gauss_weights[4];    // Веса
+    point gauss_points[tet_integration::gauss_num]; // Точки Гаусса
     double jacobian;            // Якобиан
 };
 
@@ -81,7 +81,7 @@ protected:
     cvector3 grad_lambda_pml(size_t i) const;    // градиент L-координаты (в PML)
     complex<double> lambda_pml(size_t i, const cpoint & p) const; // L-координаты (в PML)
 
-    cpoint gauss_points_pml[4];     // Точки Гаусса (в PML)
+    cpoint gauss_points_pml[tet_integration::gauss_num];    // Точки Гаусса (в PML)
     complex<double> jacobian_pml;   // Якобиан (в PML)
 
     cvector3 w_pml(size_t i, const cpoint & p) const;     // Базисные функции (в PML)

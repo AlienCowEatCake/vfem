@@ -141,39 +141,16 @@ void tetrahedron_base::init()
 
     jacobian = fabs(D_det);
 
-    // Точки Гаусса на мастер-элементе
-    static const double gauss_a = (5.0 - sqrt(5.0)) / 20.0;
-    static const double gauss_b = (5.0 + 3.0 * sqrt(5.0)) / 20.0;
-    double Gauss_cord[4][4];
-    double Gauss_cord_gl[4][4];
-    // Заполнение матрицы в локальных координатах
-    Gauss_cord[0][0] = 1.0 - gauss_b - 2.0 * gauss_a;
-    Gauss_cord[1][0] = gauss_b;
-    Gauss_cord[2][0] = Gauss_cord[3][0] = gauss_a;
-    Gauss_cord[0][1] = 1.0 - gauss_b - 2.0 * gauss_a;
-    Gauss_cord[1][1] = Gauss_cord[3][1] = gauss_a;
-    Gauss_cord[2][1] = gauss_b;
-    Gauss_cord[0][2] = 1.0 - gauss_b - 2.0 * gauss_a;
-    Gauss_cord[1][2] = Gauss_cord[2][2] = gauss_a;
-    Gauss_cord[3][2] = gauss_b;
-    Gauss_cord[0][3] = 1.0 - 3.0 * gauss_a;
-    Gauss_cord[1][3] = Gauss_cord[2][3] = Gauss_cord[3][3] = gauss_a;
-
-    // Перевод на текущий тетраэдр
-    for(size_t i = 0; i < 4; i++)
+    // Перевод точек Гаусса с мастер-элемента на текущий тетраэдр
+    for(size_t i = 0; i < 3; i++)
     {
-        for(size_t j = 0 ; j < 4; j++)
+        for(size_t j = 0 ; j < tet_integration::gauss_num; j++)
         {
-            Gauss_cord_gl[i][j] = 0;
+            gauss_points[j][i] = 0;
             for(size_t k = 0; k < 4; k++)
-                Gauss_cord_gl[i][j] += D[i][k] * Gauss_cord[k][j];
+                gauss_points[j][i] += D[i][k] * tet_integration::gauss_points[j][k];
         }
     }
-    for(size_t i = 0; i < 4; i++)
-        for(size_t j = 0; j < 3; j++)
-            gauss_points[i][j] = Gauss_cord_gl[j][i];
-    for(size_t i = 0; i < 4; i++)
-        gauss_weights[i] = 1.0 / 24.0;
 
     // Расчет барицентра
     for(size_t i = 0; i < 3; i++)
@@ -234,8 +211,8 @@ bool tetrahedron_base::inside_tree(double x0, double x1, double y0, double y1, d
         return true;
 
     // Пересечение куба и тетраэдра, не обработанное выше
-    double t[6][6];     //параметры прямых для всех прямых (6) и всех плоскостей (6)
-    double cords_t[6][6][3];    //прямая, плоскость, координата
+    double t[6][6];     // Параметры прямых для всех прямых (6) и всех плоскостей (6)
+    double cords_t[6][6][3];    // Прямая, плоскость, координата
     for(size_t i = 0; i < 6; i++)
     {
         t[i][0] = (x0 - edges_b[i][0]) / edges_a[i][0]; // x = x0
@@ -251,7 +228,7 @@ bool tetrahedron_base::inside_tree(double x0, double x1, double y0, double y1, d
             for(size_t k = 0; k < 3; k++)
                 cords_t[i][j][k] = edges_a[i][k] * t[i][j] + edges_b[i][k];
 
-    for(size_t i = 0; i < 6; i++)   // берём прямоую и проверяем, что пересечение с плоскостью попадает в раcсматриваемый отрезок прямой и в рассатриваемую часть плоскости
+    for(size_t i = 0; i < 6; i++)   // Берем прямую и проверяем, что пересечение с плоскостью попадает в раcсматриваемый отрезок прямой и в рассатриваемую часть плоскости
     {
         if(
             (t[i][0] >= 0.0 && t[i][0] <= 1.0 && cords_t[i][0][1] >= y0 && cords_t[i][0][1] >= y1 && cords_t[i][0][2] >= z0 && cords_t[i][0][2] <= z1) || // x = x0
@@ -269,7 +246,7 @@ bool tetrahedron_base::inside_tree(double x0, double x1, double y0, double y1, d
 double tetrahedron_base::diff_normL2(const carray12 & q, cvector3(*func)(const point &)) const
 {
     complex<double> result = 0.0;
-    for(size_t k = 0; k < 4; k++)
+    for(size_t k = 0; k < tet_integration::gauss_num; k++)
     {
         cvector3 val(0.0, 0.0, 0.0);
         for(size_t i = 0; i < 12; i++)
@@ -278,7 +255,7 @@ double tetrahedron_base::diff_normL2(const carray12 & q, cvector3(*func)(const p
         cvector3 func_d_conj = func_d;
         for(size_t i = 0; i < 3; i++)
             func_d_conj[i] = conj(func_d_conj[i]);
-        result += gauss_weights[k] * (func_d * func_d_conj);
+        result += tet_integration::gauss_weights[k] * (func_d * func_d_conj);
     }
     result *= jacobian;
     return result.real();
@@ -287,13 +264,13 @@ double tetrahedron_base::diff_normL2(const carray12 & q, cvector3(*func)(const p
 double tetrahedron_base::normL2(cvector3(*func)(const point &)) const
 {
     complex<double> result = 0.0;
-    for(size_t k = 0; k < 4; k++)
+    for(size_t k = 0; k < tet_integration::gauss_num; k++)
     {
         cvector3 func_d = func(gauss_points[k]);
         cvector3 func_d_conj = func_d;
         for(size_t i = 0; i < 3; i++)
             func_d_conj[i] = conj(func_d_conj[i]);
-        result += gauss_weights[k] * (func_d * func_d_conj);
+        result += tet_integration::gauss_weights[k] * (func_d * func_d_conj);
     }
     result *= jacobian;
     return result.real();
@@ -304,8 +281,8 @@ double tetrahedron_base::normL2(cvector3(*func)(const point &)) const
 double tetrahedron::integrate_w(size_t i, size_t j) const
 {
     double result = 0.0;
-    for(size_t k = 0; k < 4; k++)
-        result += gauss_weights[k] *
+    for(size_t k = 0; k < tet_integration::gauss_num; k++)
+        result += tet_integration::gauss_weights[k] *
                   w(i, gauss_points[k]) *
                   w(j, gauss_points[k]);
     return result * jacobian;
@@ -314,8 +291,8 @@ double tetrahedron::integrate_w(size_t i, size_t j) const
 double tetrahedron::integrate_rotw(size_t i, size_t j) const
 {
     double result = 0.0;
-    for(size_t k = 0; k < 4; k++)
-        result += gauss_weights[k] *
+    for(size_t k = 0; k < tet_integration::gauss_num; k++)
+        result += tet_integration::gauss_weights[k] *
                   rotw(i, gauss_points[k]) *
                   rotw(j, gauss_points[k]);
     return result * jacobian;
@@ -324,8 +301,8 @@ double tetrahedron::integrate_rotw(size_t i, size_t j) const
 complex<double> tetrahedron::integrate_fw(cvector3(*func)(const point &, const phys_area &), size_t i) const
 {
     complex<double> result = 0.0;
-    for(size_t k = 0; k < 4; k++)
-        result += gauss_weights[k] *
+    for(size_t k = 0; k < tet_integration::gauss_num; k++)
+        result += tet_integration::gauss_weights[k] *
                   func(gauss_points[k], get_phys_area()) *
                   w(i, gauss_points[k]);
     return result * jacobian;
