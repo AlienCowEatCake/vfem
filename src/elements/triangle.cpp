@@ -81,15 +81,20 @@ void triangle_full::init()
     jacobian = fabs(D_det);
 
     // Точки Гаусса в локальной системе координат
-    point gauss_points_local[3];
-    gauss_points_local[0] = point(g1.norm() / 2.0, 0.0, 0.0);
-    gauss_points_local[1] = point(local_nodes[2][0] / 2.0, local_nodes[2][1] / 2.0, local_nodes[2][2] / 2.0);
-    gauss_points_local[2] = (transition_matrix * (0.5 * g1 + 0.5 * g2)).pnt();
-
-    gauss_weights[0] = gauss_weights[1] = gauss_weights[2] = 1.0 / 6.0;
+    point gauss_points_local[tr_integration::gauss_num];
+    for(size_t j = 0 ; j < tr_integration::gauss_num; j++)
+    {
+        for(size_t i = 0; i < 2; i++)
+        {
+            gauss_points_local[j][i] = 0.0;
+            for(size_t k = 0; k < 3; k++)
+                gauss_points_local[j][i] += D[i][k] * tr_integration::gauss_points[j][k];
+        }
+        gauss_points_local[j][2] = 0.0;
+    }
 
     // Точки Гаусса в глобальной системе координат
-    for(size_t i = 0; i < 3; i++)
+    for(size_t i = 0; i < tr_integration::gauss_num; i++)
         gauss_points[i] = to_global(gauss_points_local[i]);
 }
 
@@ -232,8 +237,8 @@ vector3 triangle_full::w(size_t i, const point & p) const
 double triangle_full::integrate_w(size_t i, size_t j) const
 {
     double result = 0.0;
-    for(size_t k = 0; k < 3; k++)
-        result += gauss_weights[k] *
+    for(size_t k = 0; k < tr_integration::gauss_num; k++)
+        result += tr_integration::gauss_weights[k] *
                   w(i, gauss_points[k]) *
                   w(j, gauss_points[k]);
     return result * jacobian;
@@ -242,8 +247,8 @@ double triangle_full::integrate_w(size_t i, size_t j) const
 complex<double> triangle_full::integrate_fw(cvector3(*func)(const point &, const triangle_full *), size_t i) const
 {
     complex<double> result(0.0, 0.0);
-    for(size_t k = 0; k < 3; k++)
-        result += gauss_weights[k] *
+    for(size_t k = 0; k < tr_integration::gauss_num; k++)
+        result += tr_integration::gauss_weights[k] *
                   func(gauss_points[k], this) *
                   w(i, gauss_points[k]);
     return result * jacobian;

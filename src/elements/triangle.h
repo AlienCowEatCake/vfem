@@ -7,6 +7,7 @@
 #include "../geometry/vector3.h"
 #include "../elements/edge.h"
 #include "../vfem/phys.h"
+#include "../elements/basis_config.h"
 
 // Класс треугольник (обычный)
 class triangle_base
@@ -44,8 +45,7 @@ protected:
     point to_global(const point & p) const;
     vector3 to_global(const vector3 & v) const;
 
-    point gauss_points[3];      // Точки Гаусса
-    double gauss_weights[3];    // Веса
+    point gauss_points[tr_integration::gauss_num];  // Точки Гаусса
     double jacobian;            // Якобиан
 
     double integrate_w(size_t i, size_t j) const;

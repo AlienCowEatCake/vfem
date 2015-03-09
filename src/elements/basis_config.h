@@ -42,11 +42,13 @@ namespace basis
 // ============================================================================
 
 #if BASIS_ORDER == 1
-#define tet_integration_4 tet_integration
+#define tet_integration_2 tet_integration
+#define tr_integration_2 tr_integration
 #endif
 
 #if BASIS_ORDER == 2
-
+#define tet_integration_4 tet_integration
+#define tr_integration_5 tr_integration
 #endif
 
 // ============================================================================
@@ -139,6 +141,83 @@ namespace tet_integration_4
 
 // ============================================================================
 
+// Численное интегрирование на треугольниках
+// https://people.fh-landshut.de/~maurer/numeth/node147.html
+
+namespace tr_integration_2
+{
+    static const size_t gauss_num = 3;
+    static const double gauss_weights[gauss_num] =
+    {
+        1.0 / 6.0,
+        1.0 / 6.0,
+        1.0 / 6.0
+    };
+    static const double gauss_points[gauss_num][3] =
+    {
+        { 1.0 / 2.0, 1.0 / 2.0, 0.0       },
+        { 0.0,       1.0 / 2.0, 1.0 / 2.0 },
+        { 1.0 / 2.0, 0.0,       1.0 / 2.0 }
+    };
+}
+
+namespace tr_integration_3
+{
+    static const size_t gauss_num = 4;
+    static const double gauss_weights[gauss_num] =
+    {
+        - 9.0 / 32.0,
+        25.0 / 96.0,
+        25.0 / 96.0,
+        25.0 / 96.0
+    };
+    static const double gauss_a = 1.0 / 3.0;
+    static const double gauss_b = 3.0 / 5.0;
+    static const double gauss_c = 1.0 / 5.0;
+    static const double gauss_points[gauss_num][3] =
+    {
+        { 1.0 - 2.0 * gauss_a,     gauss_a, gauss_a },
+        { 1.0 - gauss_b - gauss_c, gauss_b, gauss_c },
+        { 1.0 - gauss_b - gauss_c, gauss_c, gauss_b },
+        { 1.0 - 2.0 * gauss_c,     gauss_c, gauss_c }
+    };
+}
+
+namespace tr_integration_5
+{
+    static const size_t gauss_num = 7;
+    static const double gauss_f = 9.0 / 80.0;
+    static const double gauss_g = (155.0 + sqrt(15.0)) / 2400.0;
+    static const double gauss_h = (155.0 - sqrt(15.0)) / 2400.0;
+    static const double gauss_weights[gauss_num] =
+    {
+        gauss_f,
+        gauss_g,
+        gauss_g,
+        gauss_g,
+        gauss_h,
+        gauss_h,
+        gauss_h
+    };
+    static const double gauss_a = (6.0 + sqrt(15.0)) / 21.0;
+    static const double gauss_b = (6.0 - sqrt(15.0)) / 21.0;
+    static const double gauss_c = (9.0 + 2.0 * sqrt(15.0)) / 21.0;
+    static const double gauss_d = (9.0 - 2.0 * sqrt(15.0)) / 21.0;
+    static const double gauss_e = 1.0 / 3.0;
+    static const double gauss_points[gauss_num][3] =
+    {
+        { 1.0 - 2.0 * gauss_e,     gauss_e, gauss_e },
+        { 1.0 - gauss_a - gauss_d, gauss_a, gauss_d },
+        { 1.0 - 2.0 * gauss_a,     gauss_a, gauss_a },
+        { 1.0 - gauss_a - gauss_d, gauss_d, gauss_a },
+        { 1.0 - gauss_b - gauss_c, gauss_c, gauss_b },
+        { 1.0 - gauss_b - gauss_c, gauss_b, gauss_c },
+        { 1.0 - 2.0 * gauss_b,     gauss_b, gauss_b }
+    };
+}
+
+// ============================================================================
+
 #if defined tet_integration_2
 #undef tet_integration_2
 #endif
@@ -149,6 +228,18 @@ namespace tet_integration_4
 
 #if defined tet_integration_4
 #undef tet_integration_4
+#endif
+
+#if defined tr_integration_2
+#undef tr_integration_2
+#endif
+
+#if defined tr_integration_3
+#undef tr_integration_3
+#endif
+
+#if defined tr_integration_5
+#undef tr_integration_5
 #endif
 
 #endif // BASIS_H_INCLUDED
