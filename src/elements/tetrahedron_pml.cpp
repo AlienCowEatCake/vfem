@@ -2,11 +2,7 @@
 
 const cpoint & tetrahedron_pml::get_node_pml(size_t i) const
 {
-    if(!nodes_pml[i])
-    {
-        cerr << "Error: Null pointer at get_node_pml(" << i << ")" << endl;
-        throw NULL_PTR_ERROR;
-    }
+    assert(nodes_pml[i] != NULL);
     return (* nodes_pml[i]);
 }
 
@@ -50,6 +46,7 @@ cvector3 tetrahedron_pml::grad_lambda_pml(size_t i) const
 
 cvector3 tetrahedron_pml::w_pml(size_t i, const cpoint & p) const
 {
+    assert(i < basis::tet_bf_num);
     switch(i + 1)
     {
     case 1:
@@ -77,12 +74,12 @@ cvector3 tetrahedron_pml::w_pml(size_t i, const cpoint & p) const
     case 12:
         return lambda_pml(2, p) * grad_lambda_pml(3) + lambda_pml(3, p) * grad_lambda_pml(2);
     }
-    cerr << "Error: Incorrect basis function number!" << endl;
-    throw(ADDRESSING_ERROR);
+    return cvector3();
 }
 
 cvector3 tetrahedron_pml::rotw_pml(size_t i, const cpoint & p, const point & p_non_PML) const
 {
+    assert(i < basis::tet_bf_num);
     MAYBE_UNUSED(p);
     cvector3 grad1, grad2;
     switch(i + 1)
@@ -118,9 +115,6 @@ cvector3 tetrahedron_pml::rotw_pml(size_t i, const cpoint & p, const point & p_n
     case 11:
     case 12:
         return cvector3(0.0, 0.0, 0.0);
-    default:
-        cerr << "Error: Incorrect rot basis function number!" << endl;
-        throw(ADDRESSING_ERROR);
     }
 
     cvector3 s = get_s(p_non_PML, this, phys_pml);

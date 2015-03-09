@@ -13,31 +13,19 @@ tetrahedron_base::tetrahedron_base()
 
 const point & tetrahedron_base::get_node(size_t i) const
 {
-    if(!nodes[i])
-    {
-        cerr << "Error: Null pointer at get_node(" << i << ")" << endl;
-        throw NULL_PTR_ERROR;
-    }
+    assert(nodes[i] != NULL);
     return (* nodes[i]);
 }
 
 const edge & tetrahedron_base::get_edge(size_t i) const
 {
-    if(!edges[i])
-    {
-        cerr << "Error: Null pointer at get_edge(" << i << ")" << endl;
-        throw NULL_PTR_ERROR;
-    }
+    assert(edges[i] != NULL);
     return (* edges[i]);
 }
 
 const phys_area & tetrahedron_base::get_phys_area() const
 {
-    if(!phys)
-    {
-        cerr << "Error: Null pointer at get_phys_area()" << endl;
-        throw NULL_PTR_ERROR;
-    }
+    assert(phys != NULL);
     return * phys;
 }
 
@@ -53,6 +41,7 @@ vector3 tetrahedron_base::grad_lambda(size_t i) const
 
 vector3 tetrahedron_base::w(size_t i, const point & p) const
 {
+    assert(i < basis::tet_bf_num);
     switch(i + 1)
     {
     case 1:
@@ -80,12 +69,12 @@ vector3 tetrahedron_base::w(size_t i, const point & p) const
     case 12:
         return lambda(2, p) * grad_lambda(3) + lambda(3, p) * grad_lambda(2);
     }
-    cerr << "Error: Incorrect basis function number!" << endl;
-    throw(ADDRESSING_ERROR);
+    return vector3();
 }
 
 vector3 tetrahedron_base::rotw(size_t i, const point & p) const
 {
+    assert(i < basis::tet_bf_num);
     MAYBE_UNUSED(p);
     vector3 grad1, grad2;
     switch(i + 1)
@@ -121,9 +110,6 @@ vector3 tetrahedron_base::rotw(size_t i, const point & p) const
     case 11:
     case 12:
         return vector3(0.0, 0.0, 0.0);
-    default:
-        cerr << "Error: Incorrect rot basis function number!" << endl;
-        throw(ADDRESSING_ERROR);
     }
     return 2.0 * grad1.cross(grad2);
 }
