@@ -47,33 +47,51 @@ cvector3 tetrahedron_pml::grad_lambda_pml(size_t i) const
 cvector3 tetrahedron_pml::w_pml(size_t i, const cpoint & p) const
 {
     assert(i < basis::tet_bf_num);
-    switch(i + 1)
+    using namespace tet_basis_indexes;
+
+    // Первый неполный
+    if(i < 6)
     {
-    case 1:
-        return lambda_pml(0, p) * grad_lambda_pml(1) - lambda_pml(1, p) * grad_lambda_pml(0);
-    case 2:
-        return lambda_pml(0, p) * grad_lambda_pml(2) - lambda_pml(2, p) * grad_lambda_pml(0);
-    case 3:
-        return lambda_pml(0, p) * grad_lambda_pml(3) - lambda_pml(3, p) * grad_lambda_pml(0);
-    case 4:
-        return lambda_pml(1, p) * grad_lambda_pml(2) - lambda_pml(2, p) * grad_lambda_pml(1);
-    case 5:
-        return lambda_pml(1, p) * grad_lambda_pml(3) - lambda_pml(3, p) * grad_lambda_pml(1);
-    case 6:
-        return lambda_pml(2, p) * grad_lambda_pml(3) - lambda_pml(3, p) * grad_lambda_pml(2);
-    case 7:
-        return lambda_pml(0, p) * grad_lambda_pml(1) + lambda_pml(1, p) * grad_lambda_pml(0);
-    case 8:
-        return lambda_pml(0, p) * grad_lambda_pml(2) + lambda_pml(2, p) * grad_lambda_pml(0);
-    case 9:
-        return lambda_pml(0, p) * grad_lambda_pml(3) + lambda_pml(3, p) * grad_lambda_pml(0);
-    case 10:
-        return lambda_pml(1, p) * grad_lambda_pml(2) + lambda_pml(2, p) * grad_lambda_pml(1);
-    case 11:
-        return lambda_pml(1, p) * grad_lambda_pml(3) + lambda_pml(3, p) * grad_lambda_pml(1);
-    case 12:
-        return lambda_pml(2, p) * grad_lambda_pml(3) + lambda_pml(3, p) * grad_lambda_pml(2);
+        return lambda_pml(ind_e[i][0], p) * grad_lambda_pml(ind_e[i][1]) -
+               lambda_pml(ind_e[i][1], p) * grad_lambda_pml(ind_e[i][0]);
     }
+    // Первый полный
+    else if(i < 12)
+    {
+        size_t j = i - 6;
+        return lambda_pml(ind_e[j][0], p) * grad_lambda_pml(ind_e[j][1]) +
+               lambda_pml(ind_e[j][1], p) * grad_lambda_pml(ind_e[j][0]);
+    }
+    // Второй неполный
+    else if(i < 16)
+    {
+        size_t j = i - 13;
+        return lambda_pml(ind_f[j][1], p) * lambda_pml(ind_f[j][2], p) * grad_lambda_pml(ind_f[j][0]) +
+               lambda_pml(ind_f[j][0], p) * lambda_pml(ind_f[j][2], p) * grad_lambda_pml(ind_f[j][1]) -
+               2.0 * lambda_pml(ind_f[j][0], p) * lambda_pml(ind_f[j][1], p) * grad_lambda_pml(ind_f[j][2]);
+    }
+    else if(i < 20)
+    {
+        size_t j = i - 17;
+        return lambda_pml(ind_f[j][1], p) * lambda_pml(ind_f[j][2], p) * grad_lambda_pml(ind_f[j][0]) -
+               2.0 * lambda_pml(ind_f[j][0], p) * lambda_pml(ind_f[j][2], p) * grad_lambda_pml(ind_f[j][1]) +
+               lambda_pml(ind_f[j][0], p) * lambda_pml(ind_f[j][1], p) * grad_lambda_pml(ind_f[j][2]);
+    }
+    // Второй полный
+    else if(i < 24)
+    {
+        size_t j = i - 21;
+        return lambda_pml(ind_f[j][1], p) * lambda_pml(ind_f[j][2], p) * grad_lambda_pml(ind_f[j][0]) +
+               lambda_pml(ind_f[j][0], p) * lambda_pml(ind_f[j][2], p) * grad_lambda_pml(ind_f[j][1]) +
+               lambda_pml(ind_f[j][1], p) * lambda_pml(ind_f[j][1], p) * grad_lambda_pml(ind_f[j][2]);
+    }
+    else if(i < 30)
+    {
+        size_t j = i - 25;
+        return lambda_pml(ind_e[j][1], p) * (2.0 * lambda_pml(ind_e[j][0], p) - lambda_pml(ind_e[j][1], p)) * grad_lambda_pml(ind_e[j][0]) -
+               lambda_pml(ind_e[j][0], p) * (2.0 * lambda_pml(ind_e[j][1], p) - lambda_pml(ind_e[j][0], p)) * grad_lambda_pml(ind_e[j][1]);
+    }
+
     return cvector3();
 }
 
@@ -81,50 +99,29 @@ cvector3 tetrahedron_pml::rotw_pml(size_t i, const cpoint & p, const point & p_n
 {
     assert(i < basis::tet_bf_num);
     MAYBE_UNUSED(p);
-    cvector3 grad1, grad2;
-    switch(i + 1)
+    using namespace tet_basis_indexes;
+
+    // Первый неполный
+    if(i < 6)
     {
-    case 1:
-        grad1 = grad_lambda_pml(0);
-        grad2 = grad_lambda_pml(1);
-        break;
-    case 2:
-        grad1 = grad_lambda_pml(0);
-        grad2 = grad_lambda_pml(2);
-        break;
-    case 3:
-        grad1 = grad_lambda_pml(0);
-        grad2 = grad_lambda_pml(3);
-        break;
-    case 4:
-        grad1 = grad_lambda_pml(1);
-        grad2 = grad_lambda_pml(2);
-        break;
-    case 5:
-        grad1 = grad_lambda_pml(1);
-        grad2 = grad_lambda_pml(3);
-        break;
-    case 6:
-        grad1 = grad_lambda_pml(2);
-        grad2 = grad_lambda_pml(3);
-        break;
-    case 7:
-    case 8:
-    case 9:
-    case 10:
-    case 11:
-    case 12:
+        cvector3 grad1 = grad_lambda(ind_e[i][0]);
+        cvector3 grad2 = grad_lambda(ind_e[i][1]);
+
+        cvector3 s = get_s(p_non_PML, this, phys_pml);
+        for(size_t k = 0; k < 3; k++)
+        {
+            grad1[k] /= s[k];
+            grad2[k] /= s[k];
+        }
+        return 2.0 * grad1.cross(grad2);
+    }
+    // Первый полный
+    else if(i < 12)
+    {
         return cvector3(0.0, 0.0, 0.0);
     }
 
-    cvector3 s = get_s(p_non_PML, this, phys_pml);
-    for(size_t k = 0; k < 3; k++)
-    {
-        grad1[k] /= s[k];
-        grad2[k] /= s[k];
-    }
-
-    return 2.0 * grad1.cross(grad2);
+    return cvector3();
 }
 
 complex<double> tetrahedron_pml::integrate_w(size_t i, size_t j) const

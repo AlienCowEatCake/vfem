@@ -42,33 +42,51 @@ vector3 tetrahedron_base::grad_lambda(size_t i) const
 vector3 tetrahedron_base::w(size_t i, const point & p) const
 {
     assert(i < basis::tet_bf_num);
-    switch(i + 1)
+    using namespace tet_basis_indexes;
+
+    // Первый неполный
+    if(i < 6)
     {
-    case 1:
-        return lambda(0, p) * grad_lambda(1) - lambda(1, p) * grad_lambda(0);
-    case 2:
-        return lambda(0, p) * grad_lambda(2) - lambda(2, p) * grad_lambda(0);
-    case 3:
-        return lambda(0, p) * grad_lambda(3) - lambda(3, p) * grad_lambda(0);
-    case 4:
-        return lambda(1, p) * grad_lambda(2) - lambda(2, p) * grad_lambda(1);
-    case 5:
-        return lambda(1, p) * grad_lambda(3) - lambda(3, p) * grad_lambda(1);
-    case 6:
-        return lambda(2, p) * grad_lambda(3) - lambda(3, p) * grad_lambda(2);
-    case 7:
-        return lambda(0, p) * grad_lambda(1) + lambda(1, p) * grad_lambda(0);
-    case 8:
-        return lambda(0, p) * grad_lambda(2) + lambda(2, p) * grad_lambda(0);
-    case 9:
-        return lambda(0, p) * grad_lambda(3) + lambda(3, p) * grad_lambda(0);
-    case 10:
-        return lambda(1, p) * grad_lambda(2) + lambda(2, p) * grad_lambda(1);
-    case 11:
-        return lambda(1, p) * grad_lambda(3) + lambda(3, p) * grad_lambda(1);
-    case 12:
-        return lambda(2, p) * grad_lambda(3) + lambda(3, p) * grad_lambda(2);
+        return lambda(ind_e[i][0], p) * grad_lambda(ind_e[i][1]) -
+               lambda(ind_e[i][1], p) * grad_lambda(ind_e[i][0]);
     }
+    // Первый полный
+    else if(i < 12)
+    {
+        size_t j = i - 6;
+        return lambda(ind_e[j][0], p) * grad_lambda(ind_e[j][1]) +
+               lambda(ind_e[j][1], p) * grad_lambda(ind_e[j][0]);
+    }
+    // Второй неполный
+    else if(i < 16)
+    {
+        size_t j = i - 13;
+        return lambda(ind_f[j][1], p) * lambda(ind_f[j][2], p) * grad_lambda(ind_f[j][0]) +
+               lambda(ind_f[j][0], p) * lambda(ind_f[j][2], p) * grad_lambda(ind_f[j][1]) -
+               2.0 * lambda(ind_f[j][0], p) * lambda(ind_f[j][1], p) * grad_lambda(ind_f[j][2]);
+    }
+    else if(i < 20)
+    {
+        size_t j = i - 17;
+        return lambda(ind_f[j][1], p) * lambda(ind_f[j][2], p) * grad_lambda(ind_f[j][0]) -
+               2.0 * lambda(ind_f[j][0], p) * lambda(ind_f[j][2], p) * grad_lambda(ind_f[j][1]) +
+               lambda(ind_f[j][0], p) * lambda(ind_f[j][1], p) * grad_lambda(ind_f[j][2]);
+    }
+    // Второй полный
+    else if(i < 24)
+    {
+        size_t j = i - 21;
+        return lambda(ind_f[j][1], p) * lambda(ind_f[j][2], p) * grad_lambda(ind_f[j][0]) +
+               lambda(ind_f[j][0], p) * lambda(ind_f[j][2], p) * grad_lambda(ind_f[j][1]) +
+               lambda(ind_f[j][1], p) * lambda(ind_f[j][1], p) * grad_lambda(ind_f[j][2]);
+    }
+    else if(i < 30)
+    {
+        size_t j = i - 25;
+        return lambda(ind_e[j][1], p) * (2.0 * lambda(ind_e[j][0], p) - lambda(ind_e[j][1], p)) * grad_lambda(ind_e[j][0]) -
+               lambda(ind_e[j][0], p) * (2.0 * lambda(ind_e[j][1], p) - lambda(ind_e[j][0], p)) * grad_lambda(ind_e[j][1]);
+    }
+
     return vector3();
 }
 
@@ -76,42 +94,20 @@ vector3 tetrahedron_base::rotw(size_t i, const point & p) const
 {
     assert(i < basis::tet_bf_num);
     MAYBE_UNUSED(p);
-    vector3 grad1, grad2;
-    switch(i + 1)
+    using namespace tet_basis_indexes;
+
+    // Первый неполный
+    if(i < 6)
     {
-    case 1:
-        grad1 = grad_lambda(0);
-        grad2 = grad_lambda(1);
-        break;
-    case 2:
-        grad1 = grad_lambda(0);
-        grad2 = grad_lambda(2);
-        break;
-    case 3:
-        grad1 = grad_lambda(0);
-        grad2 = grad_lambda(3);
-        break;
-    case 4:
-        grad1 = grad_lambda(1);
-        grad2 = grad_lambda(2);
-        break;
-    case 5:
-        grad1 = grad_lambda(1);
-        grad2 = grad_lambda(3);
-        break;
-    case 6:
-        grad1 = grad_lambda(2);
-        grad2 = grad_lambda(3);
-        break;
-    case 7:
-    case 8:
-    case 9:
-    case 10:
-    case 11:
-    case 12:
+        return 2.0 * grad_lambda(ind_e[i][0]).cross(grad_lambda(ind_e[i][1]));
+    }
+    // Первый полный
+    else if(i < 12)
+    {
         return vector3(0.0, 0.0, 0.0);
     }
-    return 2.0 * grad1.cross(grad2);
+
+    return vector3();
 }
 
 void tetrahedron_base::init()

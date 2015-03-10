@@ -9,6 +9,29 @@
 #include "../vfem/phys.h"
 #include "../elements/basis_config.h"
 
+// Индексы для построения базисных функций на тетраэдрах и их роторов
+namespace tet_basis_indexes
+{
+    // Edges (Ребра) // k, l : k < l
+    static const size_t ind_e[6][2] =
+    {
+        { 0, 1 },
+        { 0, 2 },
+        { 0, 3 },
+        { 1, 2 },
+        { 1, 3 },
+        { 2, 3 }
+    };
+    // Faces (Грани) // j, k, l : j < k < l
+    static const size_t ind_f[4][3] =
+    {
+        { 0, 1, 2 },
+        { 0, 1, 3 },
+        { 0, 2, 3 },
+        { 1, 2, 3 }
+    };
+}
+
 // Класс тетраэдр (абстрактный)
 class tetrahedron_base
 {
