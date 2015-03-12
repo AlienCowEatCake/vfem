@@ -108,10 +108,10 @@ cvector3 tetrahedron_pml::rotw_pml(size_t i, const cpoint & p, const point & p_n
         cvector3 grad2 = grad_lambda_pml(ind_e[i][1]);
 
         cvector3 s = get_s(p_non_PML, this, phys_pml);
-        for(size_t k = 0; k < 3; k++)
+        for(size_t ind = 0; ind < 3; ind++)
         {
-            grad1[k] /= s[k];
-            grad2[k] /= s[k];
+            grad1[ind] /= s[ind];
+            grad2[ind] /= s[ind];
         }
         return 2.0 * grad1.cross(grad2);
     }
@@ -130,6 +130,15 @@ cvector3 tetrahedron_pml::rotw_pml(size_t i, const cpoint & p, const point & p_n
         cvector3 grad_lambda_j = grad_lambda_pml(ind_f[ii][0]);
         cvector3 grad_lambda_k = grad_lambda_pml(ind_f[ii][1]);
         cvector3 grad_lambda_l = grad_lambda_pml(ind_f[ii][2]);
+
+        cvector3 s = get_s(p_non_PML, this, phys_pml);
+        for(size_t ind = 0; ind < 3; ind++)
+        {
+            grad_lambda_j[ind] /= s[ind];
+            grad_lambda_k[ind] /= s[ind];
+            grad_lambda_l[ind] /= s[ind];
+        }
+
         return (lambda_l * grad_lambda_k + lambda_k * grad_lambda_l).cross(grad_lambda_j) +
                (lambda_l * grad_lambda_j + lambda_j * grad_lambda_l).cross(grad_lambda_k) -
                2.0 * (lambda_k * grad_lambda_j + lambda_j * grad_lambda_k).cross(grad_lambda_l);
@@ -143,6 +152,15 @@ cvector3 tetrahedron_pml::rotw_pml(size_t i, const cpoint & p, const point & p_n
         cvector3 grad_lambda_j = grad_lambda_pml(ind_f[ii][0]);
         cvector3 grad_lambda_k = grad_lambda_pml(ind_f[ii][1]);
         cvector3 grad_lambda_l = grad_lambda_pml(ind_f[ii][2]);
+
+        cvector3 s = get_s(p_non_PML, this, phys_pml);
+        for(size_t ind = 0; ind < 3; ind++)
+        {
+            grad_lambda_j[ind] /= s[ind];
+            grad_lambda_k[ind] /= s[ind];
+            grad_lambda_l[ind] /= s[ind];
+        }
+
         return (lambda_l * grad_lambda_k + lambda_k * grad_lambda_l).cross(grad_lambda_j) -
                2.0 * (lambda_l * grad_lambda_j + lambda_j * grad_lambda_l).cross(grad_lambda_k) +
                (lambda_k * grad_lambda_j + lambda_j * grad_lambda_k).cross(grad_lambda_l);
