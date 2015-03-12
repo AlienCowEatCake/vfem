@@ -9,18 +9,6 @@
 #include "../vfem/phys.h"
 #include "../elements/basis_config.h"
 
-// Индексы для построения базисных функций на треугольниках
-namespace tr_basis_indexes
-{
-    // Edges (Ребра) // k, l : k < l
-    static const size_t ind_e[3][2] =
-    {
-        { 0, 1 },
-        { 0, 2 },
-        { 1, 2 }
-    };
-}
-
 // Класс треугольник (обычный)
 class triangle_base
 {
@@ -41,19 +29,21 @@ class triangle_full : public triangle_base
 {
 public:
     void init();
-    matrix6 M() const;  // Локальная матрица массы
-    carray6 rp(cvector3(*func)(const point &, const triangle_full *)) const; // Локальная правая часть
+    // Локальная матрица массы
+    matrix_t<double, basis::tr_bf_num, basis::tr_bf_num> M() const;
+    // Локальная правая часть
+    array_t<complex<double>, basis::tr_bf_num> rp(cvector3(*func)(const point &, const triangle_full *)) const;
 
     size_t edges_surf[3];   // Номера ребер в массиве по границе
 
 protected:
-    matrix3 L;  // Матрица L-координат
+    matrix_t<double, 3, 3> L;   // Матрица L-координат
     double lambda(size_t i, const point & p) const; // L-координаты
     vector3 grad_lambda(size_t i) const;    // Градиент L-координат в глобальных координатах
 
     vector3 w(size_t i, const point & p) const;     // Базисные функции
 
-    matrix3 transition_matrix;  // Матрица перехода между локальной и глобальной с.к.
+    matrix_t<double, 3, 3> transition_matrix;   // Матрица перехода между локальной и глобальной с.к.
     point to_local(const point & p) const;
     point to_global(const point & p) const;
     vector3 to_global(const vector3 & v) const;

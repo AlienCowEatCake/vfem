@@ -148,7 +148,7 @@ void tetrahedron_base::init()
 {
     using namespace tet_integration;
 
-    matrix4 D;
+    matrix_t<double, 4, 4> D;
     for(size_t i = 0; i < 3; i++)
         for(size_t j = 0; j < 4; j++)
             D[i][j] = get_node(j)[i];
@@ -331,32 +331,34 @@ complex<double> tetrahedron::integrate_fw(cvector3(*func)(const point &, const p
     return result * jacobian;
 }
 
-matrix12 tetrahedron::G() const
+matrix_t<double, basis::tet_bf_num, basis::tet_bf_num>
+tetrahedron::G() const
 {
-    matrix12 matr;
-    for(size_t i = 0; i < 12; i++)
-        for(size_t j = 0; j < 12; j++)
-            matr[i][j] = 0.0;
-
-    for(size_t i = 0; i < 6; i++)
+    using namespace basis;
+    matrix_t<double, tet_bf_num, tet_bf_num> matr;
+    for(size_t i = 0; i < tet_bf_num; i++)
         for(size_t j = 0; j <= i; j++)
             matr[j][i] = matr[i][j] = integrate_rotw(i, j);
     return matr;
 }
 
-matrix12 tetrahedron::M() const
+matrix_t<double, basis::tet_bf_num, basis::tet_bf_num>
+tetrahedron::M() const
 {
-    matrix12 matr;
-    for(size_t i = 0; i < 12; i++)
+    using namespace basis;
+    matrix_t<double, tet_bf_num, tet_bf_num> matr;
+    for(size_t i = 0; i < tet_bf_num; i++)
         for(size_t j = 0; j <= i; j++)
             matr[j][i] = matr[i][j] = integrate_w(i, j);
     return matr;
 }
 
-carray12 tetrahedron::rp(cvector3(*func)(const point &, const phys_area &)) const
+array_t<complex<double>, basis::tet_bf_num>
+tetrahedron::rp(cvector3(*func)(const point &, const phys_area &)) const
 {
-    carray12 arr;
-    for(size_t i = 0; i < 12; i++)
+    using namespace basis;
+    array_t<complex<double>, tet_bf_num> arr;
+    for(size_t i = 0; i < tet_bf_num; i++)
         arr[i] = integrate_fw(func, i);
     return arr;
 }

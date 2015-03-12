@@ -9,29 +9,6 @@
 #include "../vfem/phys.h"
 #include "../elements/basis_config.h"
 
-// Индексы для построения базисных функций на тетраэдрах и их роторов
-namespace tet_basis_indexes
-{
-    // Edges (Ребра) // k, l : k < l
-    static const size_t ind_e[6][2] =
-    {
-        { 0, 1 },
-        { 0, 2 },
-        { 0, 3 },
-        { 1, 2 },
-        { 1, 3 },
-        { 2, 3 }
-    };
-    // Faces (Грани) // j, k, l : j < k < l
-    static const size_t ind_f[4][3] =
-    {
-        { 0, 1, 2 },
-        { 0, 1, 3 },
-        { 0, 2, 3 },
-        { 1, 2, 3 }
-    };
-}
-
 // Класс тетраэдр (абстрактный)
 class tetrahedron_base
 {
@@ -61,7 +38,7 @@ public:
     double normL2(cvector3(*func)(const point &)) const;
 
 protected:
-    matrix4 L;  // Матрица L-координат
+    matrix_t<double, 4, 4> L;   // Матрица L-координат
     vector3 grad_lambda(size_t i) const;    // градиент L-координаты
     double lambda(size_t i, const point & p) const; // L-координаты
 
@@ -73,9 +50,12 @@ protected:
 class tetrahedron : public tetrahedron_base
 {
 public:
-    matrix12 G() const;   // Локальная матрица жескости
-    matrix12 M() const;   // Локальная матрица массы
-    carray12 rp(cvector3(*func)(const point & , const phys_area &)) const; // Локальная правая часть
+    // Локальная матрица жескости
+    matrix_t<double, basis::tet_bf_num, basis::tet_bf_num> G() const;
+    // Локальная матрица массы
+    matrix_t<double, basis::tet_bf_num, basis::tet_bf_num> M() const;
+    // Локальная правая часть
+    array_t<complex<double>, basis::tet_bf_num> rp(cvector3(*func)(const point & , const phys_area &)) const;
 
 protected:
     double integrate_w(size_t i, size_t j) const;       // Интеграл от бф
@@ -89,9 +69,12 @@ class tetrahedron_pml : public tetrahedron_base
 public:
     void init_pml(cvector3(* get_s)(const point &, const tetrahedron_pml *, const phys_pml_area *), const phys_pml_area * phys_pml);
 
-    cmatrix12 G() const;   // Локальная матрица жескости
-    cmatrix12 M() const;   // Локальная матрица массы
-    carray12 rp(cvector3(*func)(const point & , const phys_area &)) const; // Локальная правая часть (в PML)
+    // Локальная матрица жескости
+    matrix_t<complex<double>, basis::tet_bf_num, basis::tet_bf_num> G() const;
+    // Локальная матрица массы
+    matrix_t<complex<double>, basis::tet_bf_num, basis::tet_bf_num> M() const;
+    // Локальная правая часть
+    array_t<complex<double>, basis::tet_bf_num> rp(cvector3(*func)(const point & , const phys_area &)) const;
 
     cpoint * nodes_pml[4];   // Узлы (в PML)
     const cpoint & get_node_pml(size_t i) const;
@@ -100,7 +83,7 @@ protected:
     cvector3(* get_s)(const point &, const tetrahedron_pml *, const phys_pml_area *);
     const phys_pml_area * phys_pml;
 
-    cmatrix4 L_pml;  // Матрица L-координат (в PML)
+    matrix_t<complex<double>, 4, 4> L_pml;  // Матрица L-координат (в PML)
     cvector3 grad_lambda_pml(size_t i) const;    // градиент L-координаты (в PML)
     complex<double> lambda_pml(size_t i, const cpoint & p) const; // L-координаты (в PML)
 

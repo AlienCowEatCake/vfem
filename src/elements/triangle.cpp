@@ -56,7 +56,7 @@ void triangle_full::init()
     local_nodes[1] = point(g1.norm(), 0.0, 0.0);
     local_nodes[2] = (transition_matrix * g2).pnt();
 
-    matrix3 D;
+    matrix_t<double, 3, 3> D;
     // Формирование L-координат
     for(size_t i = 0; i < 2; i++)
         for(size_t j = 0; j < 3; j++)
@@ -222,19 +222,23 @@ complex<double> triangle_full::integrate_fw(cvector3(*func)(const point &, const
     return result * jacobian;
 }
 
-matrix6 triangle_full::M() const
+matrix_t<double, basis::tr_bf_num, basis::tr_bf_num>
+triangle_full::M() const
 {
-    matrix6 matr;
-    for(size_t i = 0; i < 6; i++)
+    using namespace basis;
+    matrix_t<double, tr_bf_num, tr_bf_num> matr;
+    for(size_t i = 0; i < tr_bf_num; i++)
         for(size_t j = 0; j <= i; j++)
             matr[j][i] = matr[i][j] = integrate_w(i, j);
     return matr;
 }
 
-carray6 triangle_full::rp(cvector3(*func)(const point &, const triangle_full *)) const
+array_t<complex<double>, basis::tr_bf_num>
+triangle_full::rp(cvector3(*func)(const point &, const triangle_full *)) const
 {
-    carray6 arr;
-    for(size_t i = 0; i < 6; i++)
+    using namespace basis;
+    array_t<complex<double>, tr_bf_num> arr;
+    for(size_t i = 0; i < tr_bf_num; i++)
         arr[i] = integrate_fw(func, i);
     return arr;
 }

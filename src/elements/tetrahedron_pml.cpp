@@ -13,7 +13,7 @@ void tetrahedron_pml::init_pml(cvector3(* get_s)(const point &, const tetrahedro
     this->get_s = get_s;
     this->phys_pml = phys_pml;
 
-    cmatrix4 D;
+    matrix_t<complex<double>, 4, 4> D;
     for(size_t i = 0; i < 3; i++)
         for(size_t j = 0; j < 4; j++)
             D[i][j] = get_node_pml(j)[i];
@@ -220,32 +220,34 @@ complex<double> tetrahedron_pml::integrate_fw(cvector3(*func)(const point &, con
     return result * jacobian_pml;
 }
 
-cmatrix12 tetrahedron_pml::G() const
+matrix_t<complex<double>, basis::tet_bf_num, basis::tet_bf_num>
+tetrahedron_pml::G() const
 {
-    cmatrix12 matr;
-    for(size_t i = 0; i < 12; i++)
-        for(size_t j = 0; j < 12; j++)
-            matr[i][j] = 0.0;
-
-    for(size_t i = 0; i < 6; i++)
+    using namespace basis;
+    matrix_t<complex<double>, tet_bf_num, tet_bf_num> matr;
+    for(size_t i = 0; i < tet_bf_num; i++)
         for(size_t j = 0; j <= i; j++)
             matr[j][i] = matr[i][j] = integrate_rotw(i, j);
     return matr;
 }
 
-cmatrix12 tetrahedron_pml::M() const
+matrix_t<complex<double>, basis::tet_bf_num, basis::tet_bf_num>
+tetrahedron_pml::M() const
 {
-    cmatrix12 matr;
-    for(size_t i = 0; i < 12; i++)
+    using namespace basis;
+    matrix_t<complex<double>, tet_bf_num, tet_bf_num> matr;
+    for(size_t i = 0; i < tet_bf_num; i++)
         for(size_t j = 0; j <= i; j++)
             matr[j][i] = matr[i][j] = integrate_w(i, j);
     return matr;
 }
 
-carray12 tetrahedron_pml::rp(cvector3(*func)(const point &, const phys_area &)) const
+array_t<complex<double>, basis::tet_bf_num>
+tetrahedron_pml::rp(cvector3(*func)(const point &, const phys_area &)) const
 {
-    carray12 arr;
-    for(size_t i = 0; i < 12; i++)
+    using namespace basis;
+    array_t<complex<double>, tet_bf_num> arr;
+    for(size_t i = 0; i < tet_bf_num; i++)
         arr[i] = integrate_fw(func, i);
     return arr;
 }
