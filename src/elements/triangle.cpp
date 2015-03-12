@@ -144,84 +144,60 @@ double triangle_full::lambda(size_t i, const point & p) const
     return result;
 }
 
+vector3 triangle_full::grad_lambda(size_t i) const
+{
+    vector3 grad(L[i][0], L[i][1], 0.0);
+    return to_global(grad);
+}
+
 vector3 triangle_full::w(size_t i, const point & p) const
 {
+    using namespace tr_basis_indexes;
+    assert(i < basis::tr_bf_num);
+
     point p_loc = to_local(p);
-    double l_coef[2];
-    vector3 grads[2];
-    vector3 grads_x[2];
 
-    switch(i + 1)
-    {
-    case 1:
-        l_coef[0] = lambda(0, p_loc);
-        l_coef[1] = lambda(1, p_loc);
-        for(size_t j = 0; j < 2; j++)
-        {
-            grads[0][j] = L[1][j];
-            grads[1][j] = L[0][j];
-        }
-        break;
-    case 2:
-        l_coef[0] = lambda(0, p_loc);
-        l_coef[1] = lambda(2, p_loc);
-        for(size_t j = 0; j < 2; j++)
-        {
-            grads[0][j] = L[2][j];
-            grads[1][j] = L[0][j];
-        }
-        break;
-    case 3:
-        l_coef[0] = lambda(1, p_loc);
-        l_coef[1] = lambda(2, p_loc);
-        for(size_t j = 0; j < 2; j++)
-        {
-            grads[0][j] = L[2][j];
-            grads[1][j] = L[1][j];
-        }
-        break;
-    case 4:
-        l_coef[0] = lambda(0, p_loc);
-        l_coef[1] = lambda(1, p_loc);
-        for(size_t j = 0; j < 2; j++)
-        {
-            grads[0][j] = L[1][j];
-            grads[1][j] = L[0][j];
-        }
-        break;
-    case 5:
-        l_coef[0] = lambda(0, p_loc);
-        l_coef[1] = lambda(2, p_loc);
-        for(size_t j = 0; j < 2; j++)
-        {
-            grads[0][j] = L[2][j];
-            grads[1][j] = L[0][j];
-        }
-        break;
-    case 6:
-        l_coef[0] = lambda(1, p_loc);
-        l_coef[1] = lambda(2, p_loc);
-        for(size_t j = 0; j < 2; j++)
-        {
-            grads[0][j] = L[2][j];
-            grads[1][j] = L[1][j];
-        }
-        break;
-    default:
-        cerr << "Error: Incorrect basis function number!" << endl;
-        throw(ADDRESSING_ERROR);
-    }
-    grads[0][2] = grads[1][2] = 0.0;
-
-    for(size_t j = 0; j < 2; j++)
-        grads_x[j] = to_global(grads[j]);
-
-    vector3 result;
+    // Первый неполный
     if(i < 3)
-        result = l_coef[0] * grads_x[0] - l_coef[1] * grads_x[1];
-    else
-        result = l_coef[0] * grads_x[0] + l_coef[1] * grads_x[1];
-    return result;
+    {
+        return lambda(ind_e[i][0], p_loc) * grad_lambda(ind_e[i][1]) -
+               lambda(ind_e[i][1], p_loc) * grad_lambda(ind_e[i][0]);
+    }
+    // Первый полный
+    else if(i < 6)
+    {
+        size_t ii = i - 3;
+        return lambda(ind_e[ii][0], p_loc) * grad_lambda(ind_e[ii][1]) +
+               lambda(ind_e[ii][1], p_loc) * grad_lambda(ind_e[ii][0]);
+    }
+    // Второй неполный
+    else if(i < 7)
+    {
+        return lambda(1, p_loc) * lambda(2, p_loc) * grad_lambda(0) +
+               lambda(0, p_loc) * lambda(2, p_loc) * grad_lambda(1) -
+               2.0 * lambda(0, p_loc) * lambda(1, p_loc) * grad_lambda(2);
+    }
+    else if(i < 8)
+    {
+        return lambda(1, p_loc) * lambda(2, p_loc) * grad_lambda(0) -
+               2.0 * lambda(0, p_loc) * lambda(2, p_loc) * grad_lambda(1) +
+               lambda(0, p_loc) * lambda(1, p_loc) * grad_lambda(2);
+    }
+    // Второй полный
+    else if(i < 9)
+    {
+        return lambda(1, p_loc) * lambda(2, p_loc) * grad_lambda(0) +
+               lambda(0, p_loc) * lambda(2, p_loc) * grad_lambda(1) +
+               lambda(1, p_loc) * lambda(1, p_loc) * grad_lambda(2);
+    }
+    else if(i < 12)
+    {
+        size_t ii = i - 9;
+        return lambda(ind_e[ii][1], p_loc) * (2.0 * lambda(ind_e[ii][0], p_loc) - lambda(ind_e[ii][1], p_loc)) * grad_lambda(ind_e[ii][0]) -
+               lambda(ind_e[ii][0], p_loc) * (2.0 * lambda(ind_e[ii][1], p_loc) - lambda(ind_e[ii][0], p_loc)) * grad_lambda(ind_e[ii][1]);
+    }
+
+    return vector3();
 }
 
 double triangle_full::integrate_w(size_t i, size_t j) const

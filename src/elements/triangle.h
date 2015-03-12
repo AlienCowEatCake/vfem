@@ -9,6 +9,18 @@
 #include "../vfem/phys.h"
 #include "../elements/basis_config.h"
 
+// Индексы для построения базисных функций на треугольниках
+namespace tr_basis_indexes
+{
+    // Edges (Ребра) // k, l : k < l
+    static const size_t ind_e[3][2] =
+    {
+        { 0, 1 },
+        { 0, 2 },
+        { 1, 2 }
+    };
+}
+
 // Класс треугольник (обычный)
 class triangle_base
 {
@@ -37,6 +49,7 @@ public:
 protected:
     matrix3 L;  // Матрица L-координат
     double lambda(size_t i, const point & p) const; // L-координаты
+    vector3 grad_lambda(size_t i) const;    // Градиент L-координат в глобальных координатах
 
     vector3 w(size_t i, const point & p) const;     // Базисные функции
 
