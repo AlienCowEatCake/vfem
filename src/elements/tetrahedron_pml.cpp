@@ -38,11 +38,13 @@ void tetrahedron_pml::init_pml(cvector3(* get_s)(const point &, const tetrahedro
 
 complex<double> tetrahedron_pml::lambda_pml(size_t i, const cpoint & p) const
 {
+    assert(i < 4); // Если i = 4, то явно где-то косяк
     return L_pml[i][3] + L_pml[i][0] * p.x + L_pml[i][1] * p.y + L_pml[i][2] * p.z;
 }
 
 cvector3 tetrahedron_pml::grad_lambda_pml(size_t i) const
 {
+    assert(i < 4); // Если i = 4, то явно где-то косяк
     return cvector3(L_pml[i][0], L_pml[i][1], L_pml[i][2]);
 }
 
@@ -67,14 +69,14 @@ cvector3 tetrahedron_pml::w_pml(size_t i, const cpoint & p) const
     // Второй неполный
     else if(i < 16)
     {
-        size_t ii = i - 13;
+        size_t ii = i - 12;
         return lambda_pml(ind_f[ii][1], p) * lambda_pml(ind_f[ii][2], p) * grad_lambda_pml(ind_f[ii][0]) +
                lambda_pml(ind_f[ii][0], p) * lambda_pml(ind_f[ii][2], p) * grad_lambda_pml(ind_f[ii][1]) -
                2.0 * lambda_pml(ind_f[ii][0], p) * lambda_pml(ind_f[ii][1], p) * grad_lambda_pml(ind_f[ii][2]);
     }
     else if(i < 20)
     {
-        size_t ii = i - 17;
+        size_t ii = i - 16;
         return lambda_pml(ind_f[ii][1], p) * lambda_pml(ind_f[ii][2], p) * grad_lambda_pml(ind_f[ii][0]) -
                2.0 * lambda_pml(ind_f[ii][0], p) * lambda_pml(ind_f[ii][2], p) * grad_lambda_pml(ind_f[ii][1]) +
                lambda_pml(ind_f[ii][0], p) * lambda_pml(ind_f[ii][1], p) * grad_lambda_pml(ind_f[ii][2]);
@@ -82,14 +84,14 @@ cvector3 tetrahedron_pml::w_pml(size_t i, const cpoint & p) const
     // Второй полный
     else if(i < 24)
     {
-        size_t ii = i - 21;
+        size_t ii = i - 20;
         return lambda_pml(ind_f[ii][1], p) * lambda_pml(ind_f[ii][2], p) * grad_lambda_pml(ind_f[ii][0]) +
                lambda_pml(ind_f[ii][0], p) * lambda_pml(ind_f[ii][2], p) * grad_lambda_pml(ind_f[ii][1]) +
                lambda_pml(ind_f[ii][1], p) * lambda_pml(ind_f[ii][1], p) * grad_lambda_pml(ind_f[ii][2]);
     }
     else if(i < 30)
     {
-        size_t ii = i - 25;
+        size_t ii = i - 24;
         return lambda_pml(ind_e[ii][1], p) * (2.0 * lambda_pml(ind_e[ii][0], p) - lambda_pml(ind_e[ii][1], p)) * grad_lambda_pml(ind_e[ii][0]) -
                lambda_pml(ind_e[ii][0], p) * (2.0 * lambda_pml(ind_e[ii][1], p) - lambda_pml(ind_e[ii][0], p)) * grad_lambda_pml(ind_e[ii][1]);
     }
@@ -125,7 +127,7 @@ cvector3 tetrahedron_pml::rotw_pml(size_t i, const cpoint & p, const point & p_n
     // Второй неполный
     else if(i < 16)
     {
-        size_t ii = i - 13;
+        size_t ii = i - 12;
         complex<double> lambda_j = lambda_pml(ind_f[ii][0], p);
         complex<double> lambda_k = lambda_pml(ind_f[ii][1], p);
         complex<double> lambda_l = lambda_pml(ind_f[ii][2], p);
@@ -147,7 +149,7 @@ cvector3 tetrahedron_pml::rotw_pml(size_t i, const cpoint & p, const point & p_n
     }
     else if(i < 20)
     {
-        size_t ii = i - 17;
+        size_t ii = i - 16;
         complex<double> lambda_j = lambda_pml(ind_f[ii][0], p);
         complex<double> lambda_k = lambda_pml(ind_f[ii][1], p);
         complex<double> lambda_l = lambda_pml(ind_f[ii][2], p);

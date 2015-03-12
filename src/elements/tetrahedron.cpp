@@ -31,11 +31,13 @@ const phys_area & tetrahedron_base::get_phys_area() const
 
 double tetrahedron_base::lambda(size_t i, const point & p) const
 {
+    assert(i < 4); // Если i == 4, то явно где-то косяк
     return L[i][3] + L[i][0] * p.x + L[i][1] * p.y + L[i][2] * p.z;
 }
 
 vector3 tetrahedron_base::grad_lambda(size_t i) const
 {
+    assert(i < 4); // Если i == 4, то явно где-то косяк
     return vector3(L[i][0], L[i][1], L[i][2]);
 }
 
@@ -60,14 +62,14 @@ vector3 tetrahedron_base::w(size_t i, const point & p) const
     // Второй неполный
     else if(i < 16)
     {
-        size_t ii = i - 13;
+        size_t ii = i - 12;
         return lambda(ind_f[ii][1], p) * lambda(ind_f[ii][2], p) * grad_lambda(ind_f[ii][0]) +
                lambda(ind_f[ii][0], p) * lambda(ind_f[ii][2], p) * grad_lambda(ind_f[ii][1]) -
                2.0 * lambda(ind_f[ii][0], p) * lambda(ind_f[ii][1], p) * grad_lambda(ind_f[ii][2]);
     }
     else if(i < 20)
     {
-        size_t ii = i - 17;
+        size_t ii = i - 16;
         return lambda(ind_f[ii][1], p) * lambda(ind_f[ii][2], p) * grad_lambda(ind_f[ii][0]) -
                2.0 * lambda(ind_f[ii][0], p) * lambda(ind_f[ii][2], p) * grad_lambda(ind_f[ii][1]) +
                lambda(ind_f[ii][0], p) * lambda(ind_f[ii][1], p) * grad_lambda(ind_f[ii][2]);
@@ -75,14 +77,14 @@ vector3 tetrahedron_base::w(size_t i, const point & p) const
     // Второй полный
     else if(i < 24)
     {
-        size_t ii = i - 21;
+        size_t ii = i - 20;
         return lambda(ind_f[ii][1], p) * lambda(ind_f[ii][2], p) * grad_lambda(ind_f[ii][0]) +
                lambda(ind_f[ii][0], p) * lambda(ind_f[ii][2], p) * grad_lambda(ind_f[ii][1]) +
                lambda(ind_f[ii][1], p) * lambda(ind_f[ii][1], p) * grad_lambda(ind_f[ii][2]);
     }
     else if(i < 30)
     {
-        size_t ii = i - 25;
+        size_t ii = i - 24;
         return lambda(ind_e[ii][1], p) * (2.0 * lambda(ind_e[ii][0], p) - lambda(ind_e[ii][1], p)) * grad_lambda(ind_e[ii][0]) -
                lambda(ind_e[ii][0], p) * (2.0 * lambda(ind_e[ii][1], p) - lambda(ind_e[ii][0], p)) * grad_lambda(ind_e[ii][1]);
     }
@@ -109,7 +111,7 @@ vector3 tetrahedron_base::rotw(size_t i, const point & p) const
     // Второй неполный
     else if(i < 16)
     {
-        size_t ii = i - 13;
+        size_t ii = i - 12;
         double lambda_j = lambda(ind_f[ii][0], p);
         double lambda_k = lambda(ind_f[ii][1], p);
         double lambda_l = lambda(ind_f[ii][2], p);
@@ -122,7 +124,7 @@ vector3 tetrahedron_base::rotw(size_t i, const point & p) const
     }
     else if(i < 20)
     {
-        size_t ii = i - 17;
+        size_t ii = i - 16;
         double lambda_j = lambda(ind_f[ii][0], p);
         double lambda_k = lambda(ind_f[ii][1], p);
         double lambda_l = lambda(ind_f[ii][2], p);
