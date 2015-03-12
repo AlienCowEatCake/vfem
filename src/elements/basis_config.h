@@ -197,7 +197,7 @@ namespace tr_integration_5
     static const double gauss_f = 9.0 / 80.0;
     static const double gauss_g = (155.0 + sqrt(15.0)) / 2400.0;
     static const double gauss_h = (155.0 - sqrt(15.0)) / 2400.0;
-    static const double gauss_points_master[gauss_num] =
+    static const double gauss_weights[gauss_num] =
     {
         gauss_f,
         gauss_g,
@@ -212,7 +212,7 @@ namespace tr_integration_5
     static const double gauss_c = (9.0 + 2.0 * sqrt(15.0)) / 21.0;
     static const double gauss_d = (9.0 - 2.0 * sqrt(15.0)) / 21.0;
     static const double gauss_e = 1.0 / 3.0;
-    static const double gauss_points[gauss_num][3] =
+    static const double gauss_points_master[gauss_num][3] =
     {
         { 1.0 - 2.0 * gauss_e,     gauss_e, gauss_e },
         { 1.0 - gauss_a - gauss_d, gauss_a, gauss_d },
