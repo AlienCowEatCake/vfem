@@ -58,38 +58,38 @@ cvector3 tetrahedron_pml::w_pml(size_t i, const cpoint & p) const
     // Первый полный
     else if(i < 12)
     {
-        size_t j = i - 6;
-        return lambda_pml(ind_e[j][0], p) * grad_lambda_pml(ind_e[j][1]) +
-               lambda_pml(ind_e[j][1], p) * grad_lambda_pml(ind_e[j][0]);
+        size_t ii = i - 6;
+        return lambda_pml(ind_e[ii][0], p) * grad_lambda_pml(ind_e[ii][1]) +
+               lambda_pml(ind_e[ii][1], p) * grad_lambda_pml(ind_e[ii][0]);
     }
     // Второй неполный
     else if(i < 16)
     {
-        size_t j = i - 13;
-        return lambda_pml(ind_f[j][1], p) * lambda_pml(ind_f[j][2], p) * grad_lambda_pml(ind_f[j][0]) +
-               lambda_pml(ind_f[j][0], p) * lambda_pml(ind_f[j][2], p) * grad_lambda_pml(ind_f[j][1]) -
-               2.0 * lambda_pml(ind_f[j][0], p) * lambda_pml(ind_f[j][1], p) * grad_lambda_pml(ind_f[j][2]);
+        size_t ii = i - 13;
+        return lambda_pml(ind_f[ii][1], p) * lambda_pml(ind_f[ii][2], p) * grad_lambda_pml(ind_f[ii][0]) +
+               lambda_pml(ind_f[ii][0], p) * lambda_pml(ind_f[ii][2], p) * grad_lambda_pml(ind_f[ii][1]) -
+               2.0 * lambda_pml(ind_f[ii][0], p) * lambda_pml(ind_f[ii][1], p) * grad_lambda_pml(ind_f[ii][2]);
     }
     else if(i < 20)
     {
-        size_t j = i - 17;
-        return lambda_pml(ind_f[j][1], p) * lambda_pml(ind_f[j][2], p) * grad_lambda_pml(ind_f[j][0]) -
-               2.0 * lambda_pml(ind_f[j][0], p) * lambda_pml(ind_f[j][2], p) * grad_lambda_pml(ind_f[j][1]) +
-               lambda_pml(ind_f[j][0], p) * lambda_pml(ind_f[j][1], p) * grad_lambda_pml(ind_f[j][2]);
+        size_t ii = i - 17;
+        return lambda_pml(ind_f[ii][1], p) * lambda_pml(ind_f[ii][2], p) * grad_lambda_pml(ind_f[ii][0]) -
+               2.0 * lambda_pml(ind_f[ii][0], p) * lambda_pml(ind_f[ii][2], p) * grad_lambda_pml(ind_f[ii][1]) +
+               lambda_pml(ind_f[ii][0], p) * lambda_pml(ind_f[ii][1], p) * grad_lambda_pml(ind_f[ii][2]);
     }
     // Второй полный
     else if(i < 24)
     {
-        size_t j = i - 21;
-        return lambda_pml(ind_f[j][1], p) * lambda_pml(ind_f[j][2], p) * grad_lambda_pml(ind_f[j][0]) +
-               lambda_pml(ind_f[j][0], p) * lambda_pml(ind_f[j][2], p) * grad_lambda_pml(ind_f[j][1]) +
-               lambda_pml(ind_f[j][1], p) * lambda_pml(ind_f[j][1], p) * grad_lambda_pml(ind_f[j][2]);
+        size_t ii = i - 21;
+        return lambda_pml(ind_f[ii][1], p) * lambda_pml(ind_f[ii][2], p) * grad_lambda_pml(ind_f[ii][0]) +
+               lambda_pml(ind_f[ii][0], p) * lambda_pml(ind_f[ii][2], p) * grad_lambda_pml(ind_f[ii][1]) +
+               lambda_pml(ind_f[ii][1], p) * lambda_pml(ind_f[ii][1], p) * grad_lambda_pml(ind_f[ii][2]);
     }
     else if(i < 30)
     {
-        size_t j = i - 25;
-        return lambda_pml(ind_e[j][1], p) * (2.0 * lambda_pml(ind_e[j][0], p) - lambda_pml(ind_e[j][1], p)) * grad_lambda_pml(ind_e[j][0]) -
-               lambda_pml(ind_e[j][0], p) * (2.0 * lambda_pml(ind_e[j][1], p) - lambda_pml(ind_e[j][0], p)) * grad_lambda_pml(ind_e[j][1]);
+        size_t ii = i - 25;
+        return lambda_pml(ind_e[ii][1], p) * (2.0 * lambda_pml(ind_e[ii][0], p) - lambda_pml(ind_e[ii][1], p)) * grad_lambda_pml(ind_e[ii][0]) -
+               lambda_pml(ind_e[ii][0], p) * (2.0 * lambda_pml(ind_e[ii][1], p) - lambda_pml(ind_e[ii][0], p)) * grad_lambda_pml(ind_e[ii][1]);
     }
 
     return cvector3();
@@ -104,8 +104,8 @@ cvector3 tetrahedron_pml::rotw_pml(size_t i, const cpoint & p, const point & p_n
     // Первый неполный
     if(i < 6)
     {
-        cvector3 grad1 = grad_lambda(ind_e[i][0]);
-        cvector3 grad2 = grad_lambda(ind_e[i][1]);
+        cvector3 grad1 = grad_lambda_pml(ind_e[i][0]);
+        cvector3 grad2 = grad_lambda_pml(ind_e[i][1]);
 
         cvector3 s = get_s(p_non_PML, this, phys_pml);
         for(size_t k = 0; k < 3; k++)
@@ -117,6 +117,38 @@ cvector3 tetrahedron_pml::rotw_pml(size_t i, const cpoint & p, const point & p_n
     }
     // Первый полный
     else if(i < 12)
+    {
+        return cvector3(0.0, 0.0, 0.0);
+    }
+    // Второй неполный
+    else if(i < 16)
+    {
+        size_t ii = i - 13;
+        complex<double> lambda_j = lambda_pml(ind_f[ii][0], p);
+        complex<double> lambda_k = lambda_pml(ind_f[ii][1], p);
+        complex<double> lambda_l = lambda_pml(ind_f[ii][2], p);
+        cvector3 grad_lambda_j = grad_lambda_pml(ind_f[ii][0]);
+        cvector3 grad_lambda_k = grad_lambda_pml(ind_f[ii][1]);
+        cvector3 grad_lambda_l = grad_lambda_pml(ind_f[ii][2]);
+        return (lambda_l * grad_lambda_k + lambda_k * grad_lambda_l).cross(grad_lambda_j) +
+               (lambda_l * grad_lambda_j + lambda_j * grad_lambda_l).cross(grad_lambda_k) -
+               2.0 * (lambda_k * grad_lambda_j + lambda_j * grad_lambda_k).cross(grad_lambda_l);
+    }
+    else if(i < 20)
+    {
+        size_t ii = i - 17;
+        complex<double> lambda_j = lambda_pml(ind_f[ii][0], p);
+        complex<double> lambda_k = lambda_pml(ind_f[ii][1], p);
+        complex<double> lambda_l = lambda_pml(ind_f[ii][2], p);
+        cvector3 grad_lambda_j = grad_lambda_pml(ind_f[ii][0]);
+        cvector3 grad_lambda_k = grad_lambda_pml(ind_f[ii][1]);
+        cvector3 grad_lambda_l = grad_lambda_pml(ind_f[ii][2]);
+        return (lambda_l * grad_lambda_k + lambda_k * grad_lambda_l).cross(grad_lambda_j) -
+               2.0 * (lambda_l * grad_lambda_j + lambda_j * grad_lambda_l).cross(grad_lambda_k) +
+               (lambda_k * grad_lambda_j + lambda_j * grad_lambda_k).cross(grad_lambda_l);
+    }
+    // Второй полный
+    else if(i < 30)
     {
         return cvector3(0.0, 0.0, 0.0);
     }

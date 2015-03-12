@@ -53,38 +53,38 @@ vector3 tetrahedron_base::w(size_t i, const point & p) const
     // Первый полный
     else if(i < 12)
     {
-        size_t j = i - 6;
-        return lambda(ind_e[j][0], p) * grad_lambda(ind_e[j][1]) +
-               lambda(ind_e[j][1], p) * grad_lambda(ind_e[j][0]);
+        size_t ii = i - 6;
+        return lambda(ind_e[ii][0], p) * grad_lambda(ind_e[ii][1]) +
+               lambda(ind_e[ii][1], p) * grad_lambda(ind_e[ii][0]);
     }
     // Второй неполный
     else if(i < 16)
     {
-        size_t j = i - 13;
-        return lambda(ind_f[j][1], p) * lambda(ind_f[j][2], p) * grad_lambda(ind_f[j][0]) +
-               lambda(ind_f[j][0], p) * lambda(ind_f[j][2], p) * grad_lambda(ind_f[j][1]) -
-               2.0 * lambda(ind_f[j][0], p) * lambda(ind_f[j][1], p) * grad_lambda(ind_f[j][2]);
+        size_t ii = i - 13;
+        return lambda(ind_f[ii][1], p) * lambda(ind_f[ii][2], p) * grad_lambda(ind_f[ii][0]) +
+               lambda(ind_f[ii][0], p) * lambda(ind_f[ii][2], p) * grad_lambda(ind_f[ii][1]) -
+               2.0 * lambda(ind_f[ii][0], p) * lambda(ind_f[ii][1], p) * grad_lambda(ind_f[ii][2]);
     }
     else if(i < 20)
     {
-        size_t j = i - 17;
-        return lambda(ind_f[j][1], p) * lambda(ind_f[j][2], p) * grad_lambda(ind_f[j][0]) -
-               2.0 * lambda(ind_f[j][0], p) * lambda(ind_f[j][2], p) * grad_lambda(ind_f[j][1]) +
-               lambda(ind_f[j][0], p) * lambda(ind_f[j][1], p) * grad_lambda(ind_f[j][2]);
+        size_t ii = i - 17;
+        return lambda(ind_f[ii][1], p) * lambda(ind_f[ii][2], p) * grad_lambda(ind_f[ii][0]) -
+               2.0 * lambda(ind_f[ii][0], p) * lambda(ind_f[ii][2], p) * grad_lambda(ind_f[ii][1]) +
+               lambda(ind_f[ii][0], p) * lambda(ind_f[ii][1], p) * grad_lambda(ind_f[ii][2]);
     }
     // Второй полный
     else if(i < 24)
     {
-        size_t j = i - 21;
-        return lambda(ind_f[j][1], p) * lambda(ind_f[j][2], p) * grad_lambda(ind_f[j][0]) +
-               lambda(ind_f[j][0], p) * lambda(ind_f[j][2], p) * grad_lambda(ind_f[j][1]) +
-               lambda(ind_f[j][1], p) * lambda(ind_f[j][1], p) * grad_lambda(ind_f[j][2]);
+        size_t ii = i - 21;
+        return lambda(ind_f[ii][1], p) * lambda(ind_f[ii][2], p) * grad_lambda(ind_f[ii][0]) +
+               lambda(ind_f[ii][0], p) * lambda(ind_f[ii][2], p) * grad_lambda(ind_f[ii][1]) +
+               lambda(ind_f[ii][1], p) * lambda(ind_f[ii][1], p) * grad_lambda(ind_f[ii][2]);
     }
     else if(i < 30)
     {
-        size_t j = i - 25;
-        return lambda(ind_e[j][1], p) * (2.0 * lambda(ind_e[j][0], p) - lambda(ind_e[j][1], p)) * grad_lambda(ind_e[j][0]) -
-               lambda(ind_e[j][0], p) * (2.0 * lambda(ind_e[j][1], p) - lambda(ind_e[j][0], p)) * grad_lambda(ind_e[j][1]);
+        size_t ii = i - 25;
+        return lambda(ind_e[ii][1], p) * (2.0 * lambda(ind_e[ii][0], p) - lambda(ind_e[ii][1], p)) * grad_lambda(ind_e[ii][0]) -
+               lambda(ind_e[ii][0], p) * (2.0 * lambda(ind_e[ii][1], p) - lambda(ind_e[ii][0], p)) * grad_lambda(ind_e[ii][1]);
     }
 
     return vector3();
@@ -103,6 +103,38 @@ vector3 tetrahedron_base::rotw(size_t i, const point & p) const
     }
     // Первый полный
     else if(i < 12)
+    {
+        return vector3(0.0, 0.0, 0.0);
+    }
+    // Второй неполный
+    else if(i < 16)
+    {
+        size_t ii = i - 13;
+        double lambda_j = lambda(ind_f[ii][0], p);
+        double lambda_k = lambda(ind_f[ii][1], p);
+        double lambda_l = lambda(ind_f[ii][2], p);
+        vector3 grad_lambda_j = grad_lambda(ind_f[ii][0]);
+        vector3 grad_lambda_k = grad_lambda(ind_f[ii][1]);
+        vector3 grad_lambda_l = grad_lambda(ind_f[ii][2]);
+        return (lambda_l * grad_lambda_k + lambda_k * grad_lambda_l).cross(grad_lambda_j) +
+               (lambda_l * grad_lambda_j + lambda_j * grad_lambda_l).cross(grad_lambda_k) -
+               2.0 * (lambda_k * grad_lambda_j + lambda_j * grad_lambda_k).cross(grad_lambda_l);
+    }
+    else if(i < 20)
+    {
+        size_t ii = i - 17;
+        double lambda_j = lambda(ind_f[ii][0], p);
+        double lambda_k = lambda(ind_f[ii][1], p);
+        double lambda_l = lambda(ind_f[ii][2], p);
+        vector3 grad_lambda_j = grad_lambda(ind_f[ii][0]);
+        vector3 grad_lambda_k = grad_lambda(ind_f[ii][1]);
+        vector3 grad_lambda_l = grad_lambda(ind_f[ii][2]);
+        return (lambda_l * grad_lambda_k + lambda_k * grad_lambda_l).cross(grad_lambda_j) -
+               2.0 * (lambda_l * grad_lambda_j + lambda_j * grad_lambda_l).cross(grad_lambda_k) +
+               (lambda_k * grad_lambda_j + lambda_j * grad_lambda_k).cross(grad_lambda_l);
+    }
+    // Второй полный
+    else if(i < 30)
     {
         return vector3(0.0, 0.0, 0.0);
     }
