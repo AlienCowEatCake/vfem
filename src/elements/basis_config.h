@@ -30,13 +30,21 @@ namespace basis
 // ====== Базис второго неполного порядка =====================================
 
 #if BASIS_ORDER == 2 && BASIS_FULL == 0
-
+namespace basis
+{
+    static const size_t tet_bf_num = 20;
+    static const size_t tr_bf_num = 8;
+}
 #endif
 
 // ====== Базис второго полного порядка =======================================
 
 #if BASIS_ORDER == 2 && BASIS_FULL == 1
-
+namespace basis
+{
+    static const size_t tet_bf_num = 30;
+    static const size_t tr_bf_num = 12;
+}
 #endif
 
 // ============================================================================
@@ -68,7 +76,7 @@ namespace tet_integration_2
     };
     static const double gauss_a = (5.0 - sqrt(5.0)) / 20.0;
     static const double gauss_b = (5.0 + 3.0 * sqrt(5.0)) / 20.0;
-    static const double gauss_points[gauss_num][4] =
+    static const double gauss_points_master[gauss_num][4] =
     {
         { 1.0 - gauss_b - 2.0 * gauss_a, gauss_b, gauss_a, gauss_a },
         { 1.0 - gauss_b - 2.0 * gauss_a, gauss_a, gauss_b, gauss_a },
@@ -91,7 +99,7 @@ namespace tet_integration_3
     static const double gauss_a = 1.0 / 4.0;
     static const double gauss_b = 1.0 / 2.0;
     static const double gauss_c = 1.0 / 6.0;
-    static const double gauss_points[gauss_num][4] =
+    static const double gauss_points_master[gauss_num][4] =
     {
         { 1.0 - 3.0 * gauss_a,           gauss_a, gauss_a, gauss_a },
         { 1.0 - gauss_b - 2.0 * gauss_c, gauss_b, gauss_c, gauss_c },
@@ -123,7 +131,7 @@ namespace tet_integration_4
     static const double gauss_c = 5.0 / 70.0;
     static const double gauss_d = (1.0 + sqrt(5.0 / 14.0)) / 4.0;
     static const double gauss_e = (1.0 - sqrt(5.0 / 14.0)) / 4.0;
-    static const double gauss_points[gauss_num][4] =
+    static const double gauss_points_master[gauss_num][4] =
     {
         { 1.0 - 3.0 * gauss_a,           gauss_a, gauss_a, gauss_a },
         { 1.0 - gauss_b - 2.0 * gauss_c, gauss_b, gauss_c, gauss_c },
@@ -153,7 +161,7 @@ namespace tr_integration_2
         1.0 / 6.0,
         1.0 / 6.0
     };
-    static const double gauss_points[gauss_num][3] =
+    static const double gauss_points_master[gauss_num][3] =
     {
         { 1.0 / 2.0, 1.0 / 2.0, 0.0       },
         { 0.0,       1.0 / 2.0, 1.0 / 2.0 },
@@ -174,7 +182,7 @@ namespace tr_integration_3
     static const double gauss_a = 1.0 / 3.0;
     static const double gauss_b = 3.0 / 5.0;
     static const double gauss_c = 1.0 / 5.0;
-    static const double gauss_points[gauss_num][3] =
+    static const double gauss_points_master[gauss_num][3] =
     {
         { 1.0 - 2.0 * gauss_a,     gauss_a, gauss_a },
         { 1.0 - gauss_b - gauss_c, gauss_b, gauss_c },
@@ -189,7 +197,7 @@ namespace tr_integration_5
     static const double gauss_f = 9.0 / 80.0;
     static const double gauss_g = (155.0 + sqrt(15.0)) / 2400.0;
     static const double gauss_h = (155.0 - sqrt(15.0)) / 2400.0;
-    static const double gauss_weights[gauss_num] =
+    static const double gauss_points_master[gauss_num] =
     {
         gauss_f,
         gauss_g,

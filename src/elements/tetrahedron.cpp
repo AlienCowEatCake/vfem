@@ -41,8 +41,8 @@ vector3 tetrahedron_base::grad_lambda(size_t i) const
 
 vector3 tetrahedron_base::w(size_t i, const point & p) const
 {
-    assert(i < basis::tet_bf_num);
     using namespace tet_basis_indexes;
+    assert(i < basis::tet_bf_num);
 
     // Первый неполный
     if(i < 6)
@@ -92,9 +92,9 @@ vector3 tetrahedron_base::w(size_t i, const point & p) const
 
 vector3 tetrahedron_base::rotw(size_t i, const point & p) const
 {
+    using namespace tet_basis_indexes;
     assert(i < basis::tet_bf_num);
     MAYBE_UNUSED(p);
-    using namespace tet_basis_indexes;
 
     // Первый неполный
     if(i < 6)
@@ -144,6 +144,8 @@ vector3 tetrahedron_base::rotw(size_t i, const point & p) const
 
 void tetrahedron_base::init()
 {
+    using namespace tet_integration;
+
     matrix4 D;
     for(size_t i = 0; i < 3; i++)
         for(size_t j = 0; j < 4; j++)
@@ -158,11 +160,11 @@ void tetrahedron_base::init()
     // Перевод точек Гаусса с мастер-элемента на текущий тетраэдр
     for(size_t i = 0; i < 3; i++)
     {
-        for(size_t j = 0 ; j < tet_integration::gauss_num; j++)
+        for(size_t j = 0 ; j < gauss_num; j++)
         {
             gauss_points[j][i] = 0;
             for(size_t k = 0; k < 4; k++)
-                gauss_points[j][i] += D[i][k] * tet_integration::gauss_points[j][k];
+                gauss_points[j][i] += D[i][k] * gauss_points_master[j][k];
         }
     }
 
@@ -259,8 +261,9 @@ bool tetrahedron_base::inside_tree(double x0, double x1, double y0, double y1, d
 
 double tetrahedron_base::diff_normL2(const carray12 & q, cvector3(*func)(const point &)) const
 {
+    using namespace tet_integration;
     complex<double> result = 0.0;
-    for(size_t k = 0; k < tet_integration::gauss_num; k++)
+    for(size_t k = 0; k < gauss_num; k++)
     {
         cvector3 val(0.0, 0.0, 0.0);
         for(size_t i = 0; i < 12; i++)
@@ -269,7 +272,7 @@ double tetrahedron_base::diff_normL2(const carray12 & q, cvector3(*func)(const p
         cvector3 func_d_conj = func_d;
         for(size_t i = 0; i < 3; i++)
             func_d_conj[i] = conj(func_d_conj[i]);
-        result += tet_integration::gauss_weights[k] * (func_d * func_d_conj);
+        result += gauss_weights[k] * (func_d * func_d_conj);
     }
     result *= jacobian;
     return result.real();
@@ -277,14 +280,15 @@ double tetrahedron_base::diff_normL2(const carray12 & q, cvector3(*func)(const p
 
 double tetrahedron_base::normL2(cvector3(*func)(const point &)) const
 {
+    using namespace tet_integration;
     complex<double> result = 0.0;
-    for(size_t k = 0; k < tet_integration::gauss_num; k++)
+    for(size_t k = 0; k < gauss_num; k++)
     {
         cvector3 func_d = func(gauss_points[k]);
         cvector3 func_d_conj = func_d;
         for(size_t i = 0; i < 3; i++)
             func_d_conj[i] = conj(func_d_conj[i]);
-        result += tet_integration::gauss_weights[k] * (func_d * func_d_conj);
+        result += gauss_weights[k] * (func_d * func_d_conj);
     }
     result *= jacobian;
     return result.real();
@@ -294,9 +298,10 @@ double tetrahedron_base::normL2(cvector3(*func)(const point &)) const
 
 double tetrahedron::integrate_w(size_t i, size_t j) const
 {
+    using namespace tet_integration;
     double result = 0.0;
-    for(size_t k = 0; k < tet_integration::gauss_num; k++)
-        result += tet_integration::gauss_weights[k] *
+    for(size_t k = 0; k < gauss_num; k++)
+        result += gauss_weights[k] *
                   w(i, gauss_points[k]) *
                   w(j, gauss_points[k]);
     return result * jacobian;
@@ -304,9 +309,10 @@ double tetrahedron::integrate_w(size_t i, size_t j) const
 
 double tetrahedron::integrate_rotw(size_t i, size_t j) const
 {
+    using namespace tet_integration;
     double result = 0.0;
-    for(size_t k = 0; k < tet_integration::gauss_num; k++)
-        result += tet_integration::gauss_weights[k] *
+    for(size_t k = 0; k < gauss_num; k++)
+        result += gauss_weights[k] *
                   rotw(i, gauss_points[k]) *
                   rotw(j, gauss_points[k]);
     return result * jacobian;
@@ -314,9 +320,10 @@ double tetrahedron::integrate_rotw(size_t i, size_t j) const
 
 complex<double> tetrahedron::integrate_fw(cvector3(*func)(const point &, const phys_area &), size_t i) const
 {
+    using namespace tet_integration;
     complex<double> result = 0.0;
-    for(size_t k = 0; k < tet_integration::gauss_num; k++)
-        result += tet_integration::gauss_weights[k] *
+    for(size_t k = 0; k < gauss_num; k++)
+        result += gauss_weights[k] *
                   func(gauss_points[k], get_phys_area()) *
                   w(i, gauss_points[k]);
     return result * jacobian;
