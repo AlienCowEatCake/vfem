@@ -56,7 +56,7 @@ public:
     friend vector3_t<R> operator * (const U & a, const vector3_t<V> & vec);
     // Умножение матрицы на вектор
     template<typename U, typename V>
-    friend vector3_t<U> operator * (const matrix_t<V, 3> & matr, const vector3_t<U> & vec);
+    friend vector3_t<U> operator * (const matrix_t<V, 3, 3> & matr, const vector3_t<U> & vec);
     // Вывод
     template<typename U>
     friend ostream & operator << (ostream & os, const vector3_t<U> & a);
@@ -198,7 +198,7 @@ vector3_t<U> operator * (const U & a, const vector3_t<U> & vec)
 
 // Умножение матрицы на вектор
 template<typename U, typename V>
-vector3_t<U> operator * (const matrix_t<V, 3> & matr, const vector3_t<U> & vec)
+vector3_t<U> operator * (const matrix_t<V, 3, 3> & matr, const vector3_t<U> & vec)
 {
     vector3_t<U> result(static_cast<U>(0), static_cast<U>(0), static_cast<U>(0));
     for(size_t i = 0; i < 3; i++)
