@@ -2,6 +2,7 @@
 
 const cpoint & tetrahedron_pml::get_node_pml(size_t i) const
 {
+    assert(i < 4);
     assert(nodes_pml[i] != NULL);
     return (* nodes_pml[i]);
 }

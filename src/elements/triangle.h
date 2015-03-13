@@ -6,6 +6,7 @@
 #include "../geometry/point.h"
 #include "../geometry/vector3.h"
 #include "../elements/edge.h"
+#include "../elements/face.h"
 #include "../vfem/phys.h"
 #include "../elements/basis_config.h"
 
@@ -19,9 +20,15 @@ public:
     edge * edges[3];    // Ребра
     const point & get_node(size_t i) const;
     const edge & get_edge(size_t i) const;
+#if BASIS_ORDER >= 2
+    face * faces;    // Грани
+    const face & get_face() const;
+#endif
 
     phys_area * phys;   // Физическая область
     const phys_area & get_phys_area() const;
+
+    size_t dof[basis::tr_bf_num];
 };
 
 // Класс треугольник (полный, для работы с первыми неоднородными краевыми)
@@ -34,7 +41,7 @@ public:
     // Локальная правая часть
     array_t<complex<double>, basis::tr_bf_num> rp(cvector3(*func)(const point &, const triangle_full *)) const;
 
-    size_t edges_surf[3];   // Номера ребер в массиве по границе
+    size_t dof_surf[basis::tr_bf_num];  // Номера степеней свободы по границе
 
 protected:
     matrix_t<double, 3, 3> L;   // Матрица L-координат

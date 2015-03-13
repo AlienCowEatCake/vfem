@@ -8,6 +8,7 @@ SOURCES += \
     src/geometry/point.cpp \
     src/geometry/vector3.cpp \
     src/elements/edge.cpp \
+    src/elements/face.cpp \
     src/elements/triangle.cpp \
     src/elements/tetrahedron.cpp \
     src/elements/tetrahedron_pml.cpp \
@@ -34,6 +35,7 @@ HEADERS += \
     src/geometry/point.h \
     src/geometry/vector3.h \
     src/elements/edge.h \
+    src/elements/face.h \
     src/elements/triangle.h \
     src/elements/tetrahedron.h \
     src/elements/basis_config.h \

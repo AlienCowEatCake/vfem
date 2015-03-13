@@ -56,6 +56,8 @@ void SLAE::dealloc_all()
 
 void SLAE::add(size_t i, size_t j, const complex<double> & elem)
 {
+    assert(i < n);
+    assert(j < n);
     if(j > i)
         swap(i, j);
     size_t ind = 0;
@@ -68,6 +70,7 @@ void SLAE::add(size_t i, size_t j, const complex<double> & elem)
             flag = true;
         }
     }
+    assert(flag != false);
     gg[ind] += elem;
 }
 

@@ -6,6 +6,7 @@
 #include "../geometry/point.h"
 #include "../geometry/vector3.h"
 #include "../elements/edge.h"
+#include "../elements/face.h"
 #include "../vfem/phys.h"
 #include "../elements/basis_config.h"
 
@@ -22,9 +23,15 @@ public:
     edge * edges[6];    // Ребра
     const point & get_node(size_t i) const;
     const edge & get_edge(size_t i) const;
+#if BASIS_ORDER >= 2
+    face * faces[4];    // Грани
+    const face & get_face(size_t i) const;
+#endif
 
     phys_area * phys;    // Физическая область
     const phys_area & get_phys_area() const;    // Получение физической области
+
+    size_t dof[basis::tet_bf_num];
 
     vector3 w(size_t i, const point & p) const;     // Базисные функции
     vector3 rotw(size_t i, const point & p) const;  // Роторы базисных функций
@@ -32,9 +39,8 @@ public:
     point barycenter;
 
     bool inside_tree(double x0, double x1, double y0, double y1, double z0, double z1) const;
-    double edges_a[6][3], edges_b[6][3];
 
-    double diff_normL2(const carray12 & q, cvector3(*func)(const point &)) const;
+    double diff_normL2(const array_t<complex<double>, basis::tet_bf_num> & q, cvector3(*func)(const point &)) const;
     double normL2(cvector3(*func)(const point &)) const;
 
 protected:
@@ -44,6 +50,8 @@ protected:
 
     point gauss_points[tet_integration::gauss_num]; // Точки Гаусса
     double jacobian;            // Якобиан
+
+    double edges_a[6][3], edges_b[6][3];    // Параметры прямых для дерева
 };
 
 // Класс тетраэдр (обычный)

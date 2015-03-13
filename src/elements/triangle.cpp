@@ -8,6 +8,9 @@ triangle_base::triangle_base()
         nodes[i] = NULL;
     for(size_t i = 0; i < 3; i++)
         edges[i] = NULL;
+#if BASIS_ORDER >= 2
+    faces = NULL;
+#endif
     phys = NULL;
 }
 
@@ -22,6 +25,14 @@ const edge & triangle_base::get_edge(size_t i) const
     assert(edges[i] != NULL);
     return (* edges[i]);
 }
+
+#if BASIS_ORDER >= 2
+const face & triangle_base::get_face() const
+{
+    assert(faces != NULL);
+    return * faces;
+}
+#endif
 
 const phys_area & triangle_base::get_phys_area() const
 {

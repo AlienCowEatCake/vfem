@@ -8,20 +8,35 @@ tetrahedron_base::tetrahedron_base()
         nodes[i] = NULL;
     for(size_t i = 0; i < 6; i++)
         edges[i] = NULL;
+#if BASIS_ORDER >= 2
+    for(size_t i = 0; i < 4; i++)
+        faces[i] = NULL;
+#endif
     phys = NULL;
 }
 
 const point & tetrahedron_base::get_node(size_t i) const
 {
+    assert(i < 4);
     assert(nodes[i] != NULL);
     return (* nodes[i]);
 }
 
 const edge & tetrahedron_base::get_edge(size_t i) const
 {
+    assert(i < 6);
     assert(edges[i] != NULL);
     return (* edges[i]);
 }
+
+#if BASIS_ORDER >= 2
+const face & tetrahedron_base::get_face(size_t i) const
+{
+    assert(i < 4);
+    assert(faces[i] != NULL);
+    return (* faces[i]);
+}
+#endif
 
 const phys_area & tetrahedron_base::get_phys_area() const
 {
@@ -261,14 +276,15 @@ bool tetrahedron_base::inside_tree(double x0, double x1, double y0, double y1, d
     return false;
 }
 
-double tetrahedron_base::diff_normL2(const carray12 & q, cvector3(*func)(const point &)) const
+double tetrahedron_base::diff_normL2(const array_t<complex<double>, basis::tet_bf_num> & q, cvector3(*func)(const point &)) const
 {
     using namespace tet_integration;
+    using namespace basis;
     complex<double> result = 0.0;
     for(size_t k = 0; k < gauss_num; k++)
     {
         cvector3 val(0.0, 0.0, 0.0);
-        for(size_t i = 0; i < 12; i++)
+        for(size_t i = 0; i < tet_bf_num; i++)
             val = val + q[i] * cvector3(w(i, gauss_points[k]));
         cvector3 func_d = func(gauss_points[k]) - val;
         cvector3 func_d_conj = func_d;

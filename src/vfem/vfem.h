@@ -6,7 +6,9 @@
 #include "../geometry/point.h"
 #include "../geometry/vector3.h"
 #include "../elements/octal_tree.h"
+#include "../elements/basis_config.h"
 #include "../elements/edge.h"
+#include "../elements/face.h"
 #include "../elements/triangle.h"
 #include "../elements/tetrahedron.h"
 #include "../vfem/phys.h"
@@ -18,10 +20,10 @@
 
 #if defined VFEM_USE_PML
 typedef tetrahedron_pml finite_element;
-typedef cmatrix12 l_matrix12;
+typedef matrix_t<complex<double>, basis::tet_bf_num, basis::tet_bf_num> l_matrix;
 #else
 typedef tetrahedron finite_element;
-typedef matrix12 l_matrix12;
+typedef matrix_t<double, basis::tet_bf_num, basis::tet_bf_num> l_matrix;
 #endif
 
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
@@ -93,11 +95,15 @@ public:
 protected:
     size_t add_edge(edge ed, set<edge> & edges_set);    // Добавление ребра в множество ребер
 
-    size_t nodes_num;   // Число узлов
-    point * nodes;      // Узлы
+    vector<point> nodes;    // Узлы
 
     size_t edges_num;   // Число ребер
     edge * edges;       // Ребра
+
+#if BASIS_ORDER >= 2
+    size_t faces_num;   // Число граней
+    face * faces;       // Грани
+#endif
 
     size_t edges_src_num;   // Число ребер с источниками
     edge_src * edges_src;   // Ребра с источниками
@@ -108,10 +114,10 @@ protected:
     triangle * trs;     // Треугольники
 
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
-    size_t edges_surf_num;      // Число треугольников с первыми неоднородными краевыми
-    map<size_t, size_t> global_to_local;    // Соответствие глобальных номеров и по границе
+    size_t dof_surf_num;        // Число степеней свободы с первыми неоднородными краевыми
+    map<size_t, size_t> global_to_local;    // Соответствие глобальных степеней свободы и по границе
 #else
-    set<size_t> edges_first;    // Ребра с первыми краевыми
+    set<size_t> dof_first;      // Степени свободы с первыми краевыми
 #endif
     size_t bound1_num;          // Число треугольников с первыми краевыми
     size_t bound2_num;          // Число треугольников со вторыми краевыми

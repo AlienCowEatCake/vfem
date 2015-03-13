@@ -4,7 +4,7 @@
 #include <cstring>
 #include <cmath>
 
-#define BASIS_ORDER 1
+#define BASIS_ORDER 2
 #define BASIS_FULL  1
 
 // ====== Базис первого неполного порядка =====================================

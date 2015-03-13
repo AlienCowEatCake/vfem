@@ -155,8 +155,9 @@ void VFEM::input_mesh(const string & gmsh_filename)
     }
 
     // Чтение узлов
+    size_t nodes_num;
     gmsh_file >> nodes_num;
-    nodes = new point [nodes_num];
+    nodes.resize(nodes_num);
     double max_coord[3] = {DBL_MIN, DBL_MIN, DBL_MIN};
     double min_coord[3] = {DBL_MAX, DBL_MAX, DBL_MAX};
 
@@ -287,11 +288,11 @@ void VFEM::input_mesh(const string & gmsh_filename)
             {
                 size_t e_num;
                 e_num = add_edge(edge(fake_triangle.nodes[0], fake_triangle.nodes[1]), edges_surf_temp2);
-                fake_triangle.edges_surf[0] = e_num;
+                fake_triangle.dof_surf[0] = e_num;
                 e_num = add_edge(edge(fake_triangle.nodes[0], fake_triangle.nodes[2]), edges_surf_temp2);
-                fake_triangle.edges_surf[1] = e_num;
+                fake_triangle.dof_surf[1] = e_num;
                 e_num = add_edge(edge(fake_triangle.nodes[1], fake_triangle.nodes[2]), edges_surf_temp2);
-                fake_triangle.edges_surf[2] = e_num;
+                fake_triangle.dof_surf[2] = e_num;
             }
 #endif
             trs_temp.push_back(fake_triangle);
@@ -350,12 +351,12 @@ void VFEM::input_mesh(const string & gmsh_filename)
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
     if(bound1_num > 0)
     {
-        edges_surf_num = edges_surf_temp2.size();
+        dof_surf_num = edges_surf_temp2.size();
         for(set<edge>::iterator i = edges_surf_temp2.begin(); i != edges_surf_temp2.end(); ++i)
         {
             set<edge>::iterator j = edges_temp2.find(*i);
             global_to_local[j->num] = i->num;
-            global_to_local[j->num + edges_num] = i->num + edges_surf_num;
+            global_to_local[j->num + edges_num] = i->num + dof_surf_num;
         }
         edges_surf_temp2.clear();
     }
@@ -408,8 +409,8 @@ void VFEM::input_mesh(const string & gmsh_filename)
             if(trs[i].get_phys_area().type_of_bounds == 1)
                 for(size_t j = 0; j < 3; j++)
                 {
-                    edges_first.insert(trs[i].get_edge(j).num);
-                    edges_first.insert(trs[i].get_edge(j).num + edges_num);
+                    dof_first.insert(trs[i].get_edge(j).num);
+                    dof_first.insert(trs[i].get_edge(j).num + edges_num);
                 }
 #endif
         }

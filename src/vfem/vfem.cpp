@@ -2,10 +2,12 @@
 
 VFEM::VFEM()
 {
-    nodes_num = 0;
-    nodes = NULL;
     edges_num = 0;
     edges = NULL;
+#if BASIS_ORDER >= 2
+    faces_num = 0;
+    faces = NULL;
+#endif
     fes_num = 0;
     fes = NULL;
     trs_num = 0;
@@ -13,7 +15,7 @@ VFEM::VFEM()
     bound1_num = 0;
     bound2_num = 0;
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
-    edges_surf_num = 0;
+    dof_surf_num = 0;
 #endif
     pss = NULL;
     pss_num = 0;
@@ -26,8 +28,10 @@ VFEM::VFEM()
 
 VFEM::~VFEM()
 {
-    delete [] nodes;
     delete [] edges;
+#if BASIS_ORDER >= 2
+    delete [] faces;
+#endif
     delete [] fes;
     delete [] trs;
     delete [] pss;
@@ -41,19 +45,30 @@ void VFEM::generate_portrait()
 {
     cout << "Generating portrait ..." << endl;
 
+#if BASIS_ORDER == 1 && BASIS_FULL == 0
+    size_t n_size = edges_num;
+#endif
+#if BASIS_ORDER == 1 && BASIS_FULL == 1
     size_t n_size = 2 * edges_num;
+#endif
+#if BASIS_ORDER == 2 && BASIS_FULL == 0
+    size_t n_size = 2 * edges_num + 2 * faces_num;
+#endif
+#if BASIS_ORDER == 2 && BASIS_FULL == 1
+    size_t n_size = 3 * edges_num + 3 * faces_num;
+#endif
 
     set<size_t> * portrait = new set<size_t> [n_size];
     for(size_t k = 0; k < fes_num; k++)
     {
         show_progress("step 1", k, fes_num);
 
-        for(size_t i = 0; i < 6; i++)
+        for(size_t i = 0; i < basis::tet_bf_num; i++)
         {
-            size_t a = fes[k].get_edge(i).num;
+            size_t a = fes[k].dof[i];
             for(size_t j = 0; j < i; j++)
             {
-                size_t b = fes[k].get_edge(j).num;
+                size_t b = fes[k].dof[j];
                 if(b > a)
                     portrait[b].insert(a);
                 else
@@ -63,24 +78,7 @@ void VFEM::generate_portrait()
     }
 
     size_t gg_size = 0;
-
-    for(size_t i = 0; i < edges_num; i++)
-    {
-        show_progress("step 2", i, edges_num);
-
-        size_t ien = i + edges_num;
-        portrait[ien].insert(i);
-        for(set<size_t>::iterator j = portrait[i].begin(); j != portrait[i].end(); ++j)
-        {
-            size_t jen = *j + edges_num;
-            portrait[ien].insert(*j);
-            portrait[jen].insert(i);
-            portrait[ien].insert(jen);
-        }
-        gg_size += portrait[i].size();
-    }
-
-    for(size_t i = edges_num; i < n_size; i++)
+    for(size_t i = 0; i < n_size; i++)
         gg_size += portrait[i].size();
 
     slae.alloc_all(n_size, gg_size);
@@ -90,7 +88,7 @@ void VFEM::generate_portrait()
     size_t tmp = 0;
     for(size_t i = 0; i < n_size; i++)
     {
-        show_progress("step 3", i, n_size);
+        show_progress("step 2", i, n_size);
 
         for(set<size_t>::iterator j = portrait[i].begin(); j != portrait[i].end(); ++j)
         {
@@ -110,21 +108,19 @@ void VFEM::generate_surf_portrait()
 {
     cout << "Generaing surface portrait ..." << endl;
 
-    size_t n_size = 2 * edges_surf_num;
-
-    set<size_t> * portrait = new set<size_t> [n_size];
+    set<size_t> * portrait = new set<size_t> [dof_surf_num];
     for(size_t k = 0; k < trs_num; k++)
     {
         show_progress("step 1", k, trs_num);
 
         if(trs[k].get_phys_area().type_of_bounds == 1)
         {
-            for(size_t i = 0; i < 3; i++)
+            for(size_t i = 0; i < basis::tr_bf_num; i++)
             {
-                size_t a = trs[k].edges_surf[i];
+                size_t a = trs[k].dof_surf[i];
                 for(size_t j = 0; j < i; j++)
                 {
-                    size_t b = trs[k].edges_surf[j];
+                    size_t b = trs[k].dof_surf[j];
                     if(b > a)
                         portrait[b].insert(a);
                     else
@@ -135,34 +131,17 @@ void VFEM::generate_surf_portrait()
     }
 
     size_t gg_size = 0;
-
-    for(size_t i = 0; i < edges_surf_num; i++)
-    {
-        show_progress("step 2", i, edges_surf_num);
-
-        size_t ien = i + edges_surf_num;
-        portrait[ien].insert(i);
-        for(set<size_t>::iterator j = portrait[i].begin(); j != portrait[i].end(); ++j)
-        {
-            size_t jen = *j + edges_surf_num;
-            portrait[ien].insert(*j);
-            portrait[jen].insert(i);
-            portrait[ien].insert(jen);
-        }
-        gg_size += portrait[i].size();
-    }
-
-    for(size_t i = edges_surf_num; i < n_size; i++)
+    for(size_t i = 0; i < dof_surf_num; i++)
         gg_size += portrait[i].size();
 
-    surf_slae.alloc_all(n_size, gg_size);
+    surf_slae.alloc_all(dof_surf_num, gg_size);
 
     surf_slae.ig[0] = 0;
     surf_slae.ig[1] = 0;
     size_t tmp = 0;
-    for(size_t i = 0; i < n_size; i++)
+    for(size_t i = 0; i < dof_surf_num; i++)
     {
-        show_progress("step 3", i, n_size);
+        show_progress("step 2", i, dof_surf_num);
 
         for(set<size_t>::iterator j = portrait[i].begin(); j != portrait[i].end(); ++j)
         {
@@ -188,23 +167,19 @@ void VFEM::assemble_matrix()
     {
         show_progress("", k, fes_num);
 
-        l_matrix12 matrix_G = fes[k].G();
-        l_matrix12 matrix_M = fes[k].M();
+        l_matrix matrix_G = fes[k].G();
+        l_matrix matrix_M = fes[k].M();
         phys_area ph = fes[k].get_phys_area();
-        carray12 array_rp = fes[k].rp(func_rp);
+        array_t<complex<double>, basis::tet_bf_num> array_rp = fes[k].rp(func_rp);
         complex<double> k2(- ph.epsilon * ph.omega * ph.omega, ph.omega * ph.sigma);
 
-        for(size_t i = 0; i < 12; i++)
+        for(size_t i = 0; i < basis::tet_bf_num; i++)
         {
             complex<double> add;
-            size_t i_num;
-            if(i < 6)   i_num = fes[k].get_edge(i).num;
-            else        i_num = fes[k].get_edge(i - 6).num + edges_num;
+            size_t i_num = fes[k].dof[i];
             for(size_t j = 0; j < i; j++)
             {
-                size_t j_num;
-                if(j < 6)   j_num = fes[k].get_edge(j).num;
-                else        j_num = fes[k].get_edge(j - 6).num + edges_num;
+                size_t j_num = fes[k].dof[j];
                 add = matrix_G[i][j] / ph.mu + matrix_M[i][j] * k2;
                 slae.add(i_num, j_num, add);
             }
@@ -229,22 +204,15 @@ void VFEM::applying_bound()
 
             if(trs[k].get_phys_area().type_of_bounds == 1)
             {
-                matrix6 M_surf = trs[k].M();
-                carray6 b_surf = trs[k].rp(func_b1);
-                size_t pos[6];
-
-                for(size_t i = 0; i < 3; i++)
-                {
-                    pos[i] = trs[k].edges_surf[i];
-                    pos[i + 3] = trs[k].edges_surf[i] + edges_surf_num;
-                }
+                matrix_t<double, basis::tr_bf_num, basis::tr_bf_num> M_surf = trs[k].M();
+                array_t<complex<double>, basis::tr_bf_num> b_surf = trs[k].rp(func_b1);
 
                 for(size_t i = 0; i < 6; i++)
                 {
                     for(size_t j = 0; j < i; j++)
-                        surf_slae.add(pos[i], pos[j], M_surf[i][j]);
-                    surf_slae.di[pos[i]] += M_surf[i][i];
-                    surf_slae.rp[pos[i]] += b_surf[i];
+                        surf_slae.add(trs[k].dof_surf[i], trs[k].dof_surf[j], M_surf[i][j]);
+                    surf_slae.di[trs[k].dof_surf[i]] += M_surf[i][i];
+                    surf_slae.rp[trs[k].dof_surf[i]] += b_surf[i];
                 }
             }
         }
@@ -291,7 +259,7 @@ void VFEM::applying_bound()
     {
         show_progress("", k, slae.n);
 
-        if(edges_first.find(k) != edges_first.end())
+        if(dof_first.find(k) != dof_first.end())
         {
             slae.rp[k] = 0.0;
             slae.di[k] = 1.0;
@@ -303,7 +271,7 @@ void VFEM::applying_bound()
         {
             for(size_t i = slae.ig[k]; i < slae.ig[k + 1]; i++)
             {
-                if(edges_first.find(slae.jg[i]) != edges_first.end())
+                if(dof_first.find(slae.jg[i]) != dof_first.end())
                     slae.gg[i] = 0.0;
             }
         }
@@ -313,19 +281,13 @@ void VFEM::applying_bound()
 
 void VFEM::apply_point_sources()
 {
-    // Учет точечного источника
     cout << " > Applying point sources ..." << endl;
     for(size_t k = 0; k < pss_num; k++)
     {
         show_progress("", k, pss_num);
         finite_element * fe = get_fe(pss[k].first);
-        for(size_t i = 0; i < 12; i++)
-        {
-            size_t pos;
-            if(i < 6)   pos = fe->get_edge(i).num;
-            else        pos = fe->get_edge(i - 6).num + edges_num;
-            slae.rp[pos] += complex<double>(0.0, -1.0) * fe->get_phys_area().omega * pss[k].second * fe->w(i, pss[k].first);
-        }
+        for(size_t i = 0; i < basis::tet_bf_num; i++)
+            slae.rp[fes->dof[i]] += complex<double>(0.0, -1.0) * fe->get_phys_area().omega * pss[k].second * fe->w(i, pss[k].first);
     }
 }
 
@@ -335,7 +297,7 @@ void VFEM::apply_edges_sources()
     for(size_t k = 0; k < edges_src_num; k++)
     {
         show_progress("", k, edges_src_num);
-        size_t pos = edges_src[k].num;
+        size_t pos = edges_src[k].num; // Заносим только в роторные функции!
         slae.rp[pos] += complex<double>(0.0, -1.0) * edges_src[k].phys->J0 * edges_src[k].phys->omega * edges_src[k].direction;
     }
 }
@@ -359,17 +321,8 @@ cvector3 VFEM::solution(const point & p, const finite_element * fe) const
     cvector3 result;
     if(fe)
     {
-        size_t pos[12];
-        for(size_t i = 0; i < 6; i++)
-        {
-            pos[i] = fe->get_edge(i).num;
-            pos[i + 6] = fe->get_edge(i).num + edges_num;
-        }
-        for(size_t i = 0; i < 12; i++)
-        {
-            cvector3 bfunc(fe->w(i, p));
-            result = result + slae.x[pos[i]] * bfunc;
-        }
+        for(size_t i = 0; i < basis::tet_bf_num; i++)
+            result = result + slae.x[fe->dof[i]] * fe->w(i, p);
     }
     return result;
 }
@@ -384,17 +337,8 @@ cvector3 VFEM::rotor(const point & p, const finite_element * fe) const
     cvector3 result;
     if(fe)
     {
-        size_t pos[12];
-        for(size_t i = 0; i < 6; i++)
-        {
-            pos[i] = fe->get_edge(i).num;
-            pos[i + 6] = fe->get_edge(i).num + edges_num;
-        }
-        for(size_t i = 0; i < 12; i++)
-        {
-            cvector3 bfunc(fe->rotw(i, p));
-            result = result + slae.x[pos[i]] * bfunc;
-        }
+        for(size_t i = 0; i < basis::tet_bf_num; i++)
+            result = result + slae.x[fe->dof[i]] * fe->rotw(i, p);
     }
     return result;
 }
@@ -420,15 +364,9 @@ void VFEM::calculate_diff() const
     double diff = 0.0;
     for(size_t k = 0; k < fes_num; k++)
     {
-        size_t pos[12];
-        for(size_t i = 0; i < 6; i++)
-        {
-            pos[i] = fes[k].get_edge(i).num;
-            pos[i+6] = fes[k].get_edge(i).num + edges_num;
-        }
-        carray12 q_loc;
-        for(int i = 0; i < 12; i++)
-            q_loc[i] = slae.x[pos[i]];
+        array_t<complex<double>, basis::tet_bf_num> q_loc;
+        for(size_t i = 0; i < basis::tet_bf_num; i++)
+            q_loc[i] = slae.x[fes[k].dof[i]];
 
         diff += fes[k].diff_normL2(q_loc, func_true);
     }

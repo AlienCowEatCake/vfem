@@ -4,18 +4,16 @@
 
 bool edge::operator < (const edge & t) const
 {
-    if(nodes[0] && nodes[1])
-        return nodes[0]->num < t.nodes[0]->num || (!(t.nodes[0]->num < nodes[0]->num) && nodes[1]->num < t.nodes[1]->num);
-    else
-        return false;
+    assert(nodes[0] && nodes[1]);
+    assert(t.nodes[0] && t.nodes[1]);
+    return nodes[0]->num < t.nodes[0]->num || (!(t.nodes[0]->num < nodes[0]->num) && nodes[1]->num < t.nodes[1]->num);
 }
 
 bool edge::operator == (const edge & t) const
 {
-    if(nodes[0] && nodes[1])
-        return nodes[0]->num == t.nodes[0]->num && nodes[1]->num == t.nodes[1]->num;
-    else
-        return false;
+    assert(nodes[0] && nodes[1]);
+    assert(t.nodes[0] && t.nodes[1]);
+    return nodes[0]->num == t.nodes[0]->num && nodes[1]->num == t.nodes[1]->num;
 }
 
 edge::edge()
@@ -61,30 +59,14 @@ edge::edge(point & beg_, point & end_, size_t num_)
 
 point & edge::operator [] (size_t i)
 {
-    switch(i)
-    {
-    case 0:
-        return * nodes[0];
-    case 1:
-        return * nodes[1];
-    default:
-        cerr << "Error: Unknown index " << i << " at edge " << * this << endl;
-        throw ADDRESSING_ERROR;
-    }
+    assert(i < 2);
+    return * nodes[i];
 }
 
 point edge::operator [] (size_t i) const
 {
-    switch(i)
-    {
-    case 0:
-        return * nodes[0];
-    case 1:
-        return * nodes[1];
-    default:
-        cerr << "Error: Unknown index " << i << " at edge " << * this << endl;
-        throw ADDRESSING_ERROR;
-    }
+    assert(i < 2);
+    return * nodes[i];
 }
 
 edge & edge::operator = (const edge & other)
@@ -132,11 +114,7 @@ edge_src::edge_src(const edge_src & f) : edge(f.nodes[0], f.nodes[1], f.num)
 
 const phys_area & edge_src::get_phys_area() const
 {
-    if(!phys)
-    {
-        cerr << "Error: Null pointer at get_phys_area()" << endl;
-        throw NULL_PTR_ERROR;
-    }
+    assert(phys != NULL);
     return * phys;
 }
 

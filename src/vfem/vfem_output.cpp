@@ -22,6 +22,7 @@ void VFEM::output(const string & tecplot_filename)
     tecplot_file.precision(17);
     tecplot_file.setf(ios::fixed);
 
+    size_t nodes_num = nodes.size();
     tecplot_file << "TITLE     = \"" << "Title" << "\" \n  VARIABLES = \"x\" \n \"y\" \n \"z\" \n \"ExR\" \n \"EyR\" \n \"EzR\" \n \"ExI\" \n \"EyI\" \n \"EzI\" \n \"abs(E)\"\n ";
     tecplot_file << "ZONE T=\"ZONE1\" \n N = " << nodes_num << " E = " << fes_num << " , F=FEBLOCK ET=Tetrahedron \nVARLOCATION = (NODAL NODAL NODAL CELLCENTERED CELLCENTERED CELLCENTERED CELLCENTERED CELLCENTERED CELLCENTERED CELLCENTERED)\n";
 
