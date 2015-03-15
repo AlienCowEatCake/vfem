@@ -443,6 +443,100 @@ void VFEM::input_mesh(const string & gmsh_filename)
 }
 
 #if defined VFEM_USE_PML
+cpoint VFEM::convert_point_to_pml(const point * p, const finite_element * fefe) const
+{
+    static const double pml_gauss_points_local[5] =
+    {
+        0.0,
+        sqrt(5.0 - 2.0 * sqrt(10.0 / 7.0)) / 3.0,
+        -sqrt(5.0 - 2.0 * sqrt(10.0 / 7.0)) / 3.0,
+        sqrt(5.0 + 2.0 * sqrt(10.0 / 7.0)) / 3.0,
+        -sqrt(5.0 + 2.0 * sqrt(10.0 / 7.0)) / 3.0,
+    };
+    static const double pml_gauss_weights[5] =
+    {
+        128.0 / 225.0,
+        (322.0 + 13.0 * sqrt(70.0)) / 900.0,
+        (322.0 + 13.0 * sqrt(70.0)) / 900.0,
+        (322.0 - 13.0 * sqrt(70.0)) / 900.0,
+        (322.0 - 13.0 * sqrt(70.0)) / 900.0
+    };
+
+    double h[3] = {0, 0, 0}, beg[3] = {0, 0, 0};
+    bool flag[3] = {false, false, false};
+
+    if(p->x > phys_pml.x1)
+    {
+        flag[0] = true;
+        h[0] = p->x - phys_pml.x1;
+        beg[0] = phys_pml.x1;
+    }
+    if(p->x < phys_pml.x0)
+    {
+        flag[0] = true;
+        h[0] = p->x - phys_pml.x0;
+        beg[0] = phys_pml.x0;
+    }
+
+    if(p->y > phys_pml.y1)
+    {
+        flag[1] = true;
+        h[1] = p->y - phys_pml.y1;
+        beg[1] = phys_pml.y1;
+    }
+    if(p->y < phys_pml.y0)
+    {
+        flag[1] = true;
+        h[1] = p->y - phys_pml.y0;
+        beg[1] = phys_pml.y0;
+    }
+
+    if(p->z > phys_pml.z1)
+    {
+        flag[2] = true;
+        h[2] = p->z - phys_pml.z1;
+        beg[2] = phys_pml.z1;
+    }
+    if(p->z < phys_pml.z0)
+    {
+        flag[2] = true;
+        h[2] = p->z - phys_pml.z0;
+        beg[2] = phys_pml.z0;
+    }
+
+    complex<double> new_point[3] = {0, 0, 0};
+
+    size_t num_steps = 10;
+    point h_small;
+    for(size_t k = 0; k < 3; k++)
+        h_small[k] = h[k] / (double)num_steps;
+
+    for(size_t m = 0; m < num_steps; m++)
+    {
+        for(size_t k = 0; k < 5; k++)
+        {
+            point gauss_point_global((pml_gauss_points_local[k] + 1.0) / 2.0 * (h_small[0] * (double)m) + beg[0],
+                                     (pml_gauss_points_local[k] + 1.0) / 2.0 * (h_small[1] * (double)m) + beg[1],
+                                     (pml_gauss_points_local[k] + 1.0) / 2.0 * (h_small[2] * (double)m) + beg[2]);
+            cvector3 s = get_s(gauss_point_global, fefe, & phys_pml);
+
+            for(size_t j = 0; j < 3; j++)
+            {
+                if(flag[j])
+                    new_point[j] += s[j] * pml_gauss_weights[k];
+            }
+        }
+    }
+
+    cpoint cp(* p);
+    for(size_t j = 0; j < 3; j++)
+    {
+        if(flag[j])
+            cp[j] = new_point[j] * h_small[j] / 2.0 + beg[j];
+    }
+    return cp;
+}
+
 void VFEM::input_pml()
 {
     cout << " > Building PML-bound coordinates ..." << endl;
@@ -453,7 +547,7 @@ void VFEM::input_pml()
     phys_pml.y1 = -DBL_MAX;
     phys_pml.z0 = DBL_MAX;
     phys_pml.z1 = -DBL_MAX;
-    map<point *, pair<cpoint *, finite_element *> > pml_nodes_tmp;
+    map<point *, pair<cpoint, finite_element *> > pml_nodes_cache;
 
     for(size_t i = 0; i < fes_num; i++)
     {
@@ -461,7 +555,7 @@ void VFEM::input_pml()
         if(is_pml(fes[i].barycenter, fes + i))
         {
             for(size_t j = 0; j < 4; j++)
-                pml_nodes_tmp[fes[i].nodes[j]] = make_pair((cpoint *)NULL, fes + i);
+                pml_nodes_cache[fes[i].nodes[j]] = make_pair(cpoint(), fes + i);
         }
         else
         {
@@ -478,116 +572,32 @@ void VFEM::input_pml()
     }
     cout << "  non-PML dimension: (" << phys_pml.x0 << "," << phys_pml.x1 << ")x(" << phys_pml.y0 << "," << phys_pml.y1 << ")x(" << phys_pml.z0 << "," << phys_pml.z1 << ")" << endl;
 
-    // По умолчанию все координаты равны не-PML
-    nodes_pml = new cpoint[nodes_num];
-    for(size_t i = 0; i < nodes_num; i++)
-        nodes_pml[i] = nodes[i];
-
-    double pml_gauss_points_local[5] =
-    {
-        0.0,
-        sqrt(5.0 - 2.0 * sqrt(10.0 / 7.0)) / 3.0,
-        -sqrt(5.0 - 2.0 * sqrt(10.0 / 7.0)) / 3.0,
-        sqrt(5.0 + 2.0 * sqrt(10.0 / 7.0)) / 3.0,
-        -sqrt(5.0 + 2.0 * sqrt(10.0 / 7.0)) / 3.0,
-    };
-    double pml_gauss_weights[5] =
-    {
-        128.0 / 225.0,
-        (322.0 + 13.0 * sqrt(70.0)) / 900.0,
-        (322.0 + 13.0 * sqrt(70.0)) / 900.0,
-        (322.0 - 13.0 * sqrt(70.0)) / 900.0,
-        (322.0 - 13.0 * sqrt(70.0)) / 900.0
-    };
-
     size_t i = 0;
-    for(map<point *, pair<cpoint *, finite_element *> >::iterator it = pml_nodes_tmp.begin(); it != pml_nodes_tmp.end(); ++it)
+    for(map<point *, pair<cpoint, finite_element *> >::iterator it = pml_nodes_cache.begin(); it != pml_nodes_cache.end(); ++it)
     {
-        show_progress("replaced points", i++, pml_nodes_tmp.size());
+        show_progress("replaced points", i++, pml_nodes_cache.size());
 
         point * p = it->first;
-        cpoint * cp = nodes_pml + (size_t)(p - nodes);
         finite_element * fefe = it->second.second;
-        it->second.first = cp;
-        double h[3] = {0, 0, 0}, beg[3] = {0, 0, 0};
-        bool flag[3] = {false, false, false};
-
-        if(p->x > phys_pml.x1)
-        {
-            flag[0] = true;
-            h[0] = p->x - phys_pml.x1;
-            beg[0] = phys_pml.x1;
-        }
-        if(p->x < phys_pml.x0)
-        {
-            flag[0] = true;
-            h[0] = p->x - phys_pml.x0;
-            beg[0] = phys_pml.x0;
-        }
-
-        if(p->y > phys_pml.y1)
-        {
-            flag[1] = true;
-            h[1] = p->y - phys_pml.y1;
-            beg[1] = phys_pml.y1;
-        }
-        if(p->y < phys_pml.y0)
-        {
-            flag[1] = true;
-            h[1] = p->y - phys_pml.y0;
-            beg[1] = phys_pml.y0;
-        }
-
-        if(p->z > phys_pml.z1)
-        {
-            flag[2] = true;
-            h[2] = p->z - phys_pml.z1;
-            beg[2] = phys_pml.z1;
-        }
-        if(p->z < phys_pml.z0)
-        {
-            flag[2] = true;
-            h[2] = p->z - phys_pml.z0;
-            beg[2] = phys_pml.z0;
-        }
-
-        complex<double> new_point[3] = {0, 0, 0};
-
-        size_t num_steps = 10;
-        point h_small;
-        for(size_t k = 0; k < 3; k++)
-            h_small[k] = h[k] / (double)num_steps;
-
-        for(size_t m = 0; m < num_steps; m++)
-        {
-            for(size_t k = 0; k < 5; k++)
-            {
-                point gauss_point_global((pml_gauss_points_local[k] + 1.0) / 2.0 * (h_small[0] * (double)m) + beg[0],
-                                         (pml_gauss_points_local[k] + 1.0) / 2.0 * (h_small[1] * (double)m) + beg[1],
-                                         (pml_gauss_points_local[k] + 1.0) / 2.0 * (h_small[2] * (double)m) + beg[2]);
-                cvector3 s = get_s(gauss_point_global, fefe, & phys_pml);
-
-                for(size_t j = 0; j < 3; j++)
-                {
-                    if(flag[j])
-                        new_point[j] += s[j] * pml_gauss_weights[k];
-                }
-            }
-        }
-
-        for(size_t j = 0; j < 3; j++)
-        {
-            if(flag[j])
-                (*cp)[j] = new_point[j] * h_small[j] / 2.0 + beg[j];
-        }
+        it->second.first = convert_point_to_pml(p, fefe);
     }
 
     for(size_t i = 0; i < fes_num; i++)
     {
         show_progress("re-init tetrahedrons", i, fes_num);
+        cpoint cp[4];
+        size_t ph_curr = fes[i].phys->gmsh_num;
         for(size_t j = 0; j < 4; j++)
-            fes[i].nodes_pml[j] = nodes_pml + (size_t)(fes[i].nodes[j] - nodes);
-        fes[i].init_pml(get_s, & phys_pml);
+        {
+            map<point *, pair<cpoint, finite_element *> >::iterator it = pml_nodes_cache.find(fes[i].nodes[j]);
+            // Если есть в кэше, то возьмем из него
+            if(it->second.second->phys->gmsh_num == ph_curr)
+                cp[j] = it->second.first;
+            // А иначе рассчитаем
+            else
+                cp[j] = convert_point_to_pml(fes[i].nodes[j], fes + i);
+        }
+        fes[i].init_pml(get_s, & phys_pml, cp);
     }
 }
 #endif

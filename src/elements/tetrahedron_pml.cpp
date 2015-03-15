@@ -1,16 +1,6 @@
 #include "tetrahedron.h"
 
-const cpoint & tetrahedron_pml::get_node_pml(size_t i) const
-{
-    if(!nodes_pml[i])
-    {
-        cerr << "Error: Null pointer at get_node_pml(" << i << ")" << endl;
-        throw NULL_PTR_ERROR;
-    }
-    return (* nodes_pml[i]);
-}
-
-void tetrahedron_pml::init_pml(cvector3(* get_s)(const point &, const tetrahedron_pml *, const phys_pml_area *), const phys_pml_area * phys_pml)
+void tetrahedron_pml::init_pml(cvector3(* get_s)(const point &, const tetrahedron_pml *, const phys_pml_area *), const phys_pml_area * phys_pml, const cpoint * nodes_pml)
 {
     this->get_s = get_s;
     this->phys_pml = phys_pml;
@@ -18,7 +8,7 @@ void tetrahedron_pml::init_pml(cvector3(* get_s)(const point &, const tetrahedro
     cmatrix4 D;
     for(size_t i = 0; i < 3; i++)
         for(size_t j = 0; j < 4; j++)
-            D[i][j] = get_node_pml(j)[i];
+            D[i][j] = nodes_pml[j][i];
     for(size_t j = 0; j < 4; j++)
         D[3][j] = 1.0;
     complex<double> D_det;

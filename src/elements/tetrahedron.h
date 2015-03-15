@@ -64,14 +64,11 @@ protected:
 class tetrahedron_pml : public tetrahedron_base
 {
 public:
-    void init_pml(cvector3(* get_s)(const point &, const tetrahedron_pml *, const phys_pml_area *), const phys_pml_area * phys_pml);
+    void init_pml(cvector3(* get_s)(const point &, const tetrahedron_pml *, const phys_pml_area *), const phys_pml_area * phys_pml, const cpoint * nodes_pml);
 
     cmatrix12 G() const;   // Локальная матрица жескости
     cmatrix12 M() const;   // Локальная матрица массы
     carray12 rp(cvector3(*func)(const point & , const phys_area &)) const; // Локальная правая часть (в PML)
-
-    cpoint * nodes_pml[4];   // Узлы (в PML)
-    const cpoint & get_node_pml(size_t i) const;
 
 protected:
     cvector3(* get_s)(const point &, const tetrahedron_pml *, const phys_pml_area *);
