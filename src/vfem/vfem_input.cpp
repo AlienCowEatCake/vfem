@@ -589,13 +589,20 @@ void VFEM::input_pml()
         size_t ph_curr = fes[i].phys->gmsh_num;
         for(size_t j = 0; j < 4; j++)
         {
-            map<point *, pair<cpoint, finite_element *> >::iterator it = pml_nodes_cache.find(fes[i].nodes[j]);
-            // Если есть в кэше, то возьмем из него
-            if(it->second.second->phys->gmsh_num == ph_curr)
-                cp[j] = it->second.first;
-            // А иначе рассчитаем
+            if(is_pml(fes[i].barycenter, fes + i))
+            {
+                map<point *, pair<cpoint, finite_element *> >::iterator it = pml_nodes_cache.find(fes[i].nodes[j]);
+                // Если есть в кэше, то возьмем из него
+                if(it->second.second->phys->gmsh_num == ph_curr)
+                    cp[j] = it->second.first;
+                // А иначе рассчитаем
+                else
+                    cp[j] = convert_point_to_pml(fes[i].nodes[j], fes + i);
+            }
             else
-                cp[j] = convert_point_to_pml(fes[i].nodes[j], fes + i);
+            {
+                cp[j] = cpoint(* (fes[i].nodes[j]));
+            }
         }
         fes[i].init_pml(get_s, & phys_pml, cp);
     }
