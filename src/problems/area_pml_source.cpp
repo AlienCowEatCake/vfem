@@ -1,7 +1,7 @@
 #include "problems.h"
 
 #if defined AREA_PML_SOURCE
-#if defined VFEM_USE_NONHOMOGENEOUS_FIRST || (!defined VFEM_USE_PML && defined VFEM_USE_ANALYTICAL)
+#if defined VFEM_USE_NONHOMOGENEOUS_FIRST || defined VFEM_USE_ANALYTICAL
 #error "Please, reconfigure!"
 #endif
 
@@ -139,20 +139,13 @@ string tecplot_filename = "area_pml_source.plt";
 
 string phys_filename_pml = "data/area_pml_source/3-1.txt";
 string phys_filename_nonpml = "data/area_pml_source/3-2.txt";
-string mesh_filename = "data/area_pml_source/3.msh";
+string mesh_filename = "data/area_pml_source/5.msh";
 #if defined VFEM_USE_PML
 string phys_filename = phys_filename_pml;
 #else
 string phys_filename = phys_filename_nonpml;
 #endif
 string slae_dump_filename = "area_pml_source_slae.txt";
-
-#if defined VFEM_USE_ANALYTICAL
-cvector3 func_true(const point & p)
-{
-    throw 42;
-}
-#endif
 
 void postprocessing(VFEM & v, char * timebuf)
 {
@@ -170,11 +163,11 @@ void postprocessing(VFEM & v, char * timebuf)
 //                   'Y', 80.0, 'X', -700, 700, 20.0, 'Z', -700, 700, 20.0);
 #if !defined VFEM_USE_PML
     v.slae.dump_x(slae_dump_filename);
-#elif defined VFEM_USE_ANALYTICAL
+#else
     complex<double> * anal = new complex<double> [v.slae.n];
     ifstream a;
-    a.open(slae_dump_filename, ios::in);
-    for(size_t i < 0; i < v.slae.n; i++)
+    a.open(slae_dump_filename.c_str(), ios::in);
+    for(size_t i = 0; i < v.slae.n; i++)
         a >> anal[i];
     a.close();
 
