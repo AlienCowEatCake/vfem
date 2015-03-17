@@ -34,7 +34,9 @@ public:
     double edges_a[6][3], edges_b[6][3];
 
     double diff_normL2(const carray12 & q, cvector3(*func)(const point &)) const;
+    double diff_normL2(const carray12 & q, const carray12 & q_true) const;
     double normL2(cvector3(*func)(const point &)) const;
+    double normL2(const carray12 & q_true) const;
 
 protected:
     matrix4 L;  // Матрица L-координат
