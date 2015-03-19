@@ -136,10 +136,9 @@ protected:
     pair<point, cvector3> * pss;    // Точечные источники
 
 #if defined VFEM_USE_PML
+    cpoint convert_point_to_pml(const point * p, const finite_element * fefe) const;
     void input_pml();
-
     phys_pml_area phys_pml;         // Параметры PML
-    cpoint * nodes_pml;      // Узлы PML
 #endif
 };
 

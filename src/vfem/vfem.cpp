@@ -21,9 +21,6 @@ VFEM::VFEM()
     pss_num = 0;
     edges_src_num = 0;
     edges_src = NULL;
-#if defined VFEM_USE_PML
-    nodes_pml = NULL;
-#endif
 }
 
 VFEM::~VFEM()
@@ -36,9 +33,6 @@ VFEM::~VFEM()
     delete [] trs;
     delete [] pss;
     delete [] edges_src;
-#if defined VFEM_USE_PML
-    delete [] nodes_pml;
-#endif
 }
 
 void VFEM::generate_portrait()

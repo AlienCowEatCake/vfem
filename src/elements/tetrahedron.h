@@ -40,8 +40,10 @@ public:
 
     bool inside_tree(double x0, double x1, double y0, double y1, double z0, double z1) const;
 
-    double diff_normL2(const array_t<complex<double>, basis::tet_bf_num> & q, cvector3(*func)(const point &)) const;
+    double diff_normL2(const carray12 & q, cvector3(*func)(const point &)) const;
+    double diff_normL2(const carray12 & q, const carray12 & q_true) const;
     double normL2(cvector3(*func)(const point &)) const;
+    double normL2(const carray12 & q_true) const;
 
 protected:
     matrix_t<double, 4, 4> L;   // Матрица L-координат
@@ -75,7 +77,7 @@ protected:
 class tetrahedron_pml : public tetrahedron_base
 {
 public:
-    void init_pml(cvector3(* get_s)(const point &, const tetrahedron_pml *, const phys_pml_area *), const phys_pml_area * phys_pml);
+    void init_pml(cvector3(* get_s)(const point &, const tetrahedron_pml *, const phys_pml_area *), const phys_pml_area * phys_pml, const cpoint * nodes_pml);
 
     // Локальная матрица жескости
     matrix_t<complex<double>, basis::tet_bf_num, basis::tet_bf_num> G() const;
@@ -83,9 +85,6 @@ public:
     matrix_t<complex<double>, basis::tet_bf_num, basis::tet_bf_num> M() const;
     // Локальная правая часть
     array_t<complex<double>, basis::tet_bf_num> rp(cvector3(*func)(const point & , const phys_area &)) const;
-
-    cpoint * nodes_pml[4];   // Узлы (в PML)
-    const cpoint & get_node_pml(size_t i) const;
 
 protected:
     cvector3(* get_s)(const point &, const tetrahedron_pml *, const phys_pml_area *);

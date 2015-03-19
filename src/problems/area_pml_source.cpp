@@ -1,7 +1,7 @@
 #include "problems.h"
 
 #if defined AREA_PML_SOURCE
-#if defined VFEM_USE_NONHOMOGENEOUS_FIRST || (!defined VFEM_USE_PML && defined VFEM_USE_ANALYTICAL)
+#if defined VFEM_USE_NONHOMOGENEOUS_FIRST || defined VFEM_USE_ANALYTICAL
 #error "Please, reconfigure!"
 #endif
 
@@ -28,24 +28,55 @@ cvector3 get_s(const point & p, const finite_element * fe, const phys_pml_area *
         return cvector3(1.0, 1.0, 1.0);
 
     double m = 3;
-//    complex<double> chi(4, 3);
+    complex<double> chi(4, 3);
 
-    static complex<double> chi(-1, -1);
-    if(chi.real() < 0)
+    // Воздух
+    if(fe->phys->gmsh_num == 21 || fe->phys->gmsh_num == 31)
     {
-        ifstream chi_st;
-        char chi_name[] = "chi.txt";
-        chi_st.open(chi_name, ios::in);
-        if(!chi_st.good())
+        double m_air = 3;
+        static complex<double> chi_air(-1, -1);
+        if(chi_air.real() < 0)
         {
-            cerr << "Error in " << __FILE__ << ":" << __LINE__
-                 << " while reading file " << chi_name << endl;
-            throw IO_FILE_ERROR;
+            ifstream chi_st;
+            char chi_name[] = "chi_air.txt";
+            chi_st.open(chi_name, ios::in);
+            if(!chi_st.good())
+            {
+                cerr << "Error in " << __FILE__ << ":" << __LINE__
+                     << " while reading file " << chi_name << endl;
+                throw IO_FILE_ERROR;
+            }
+            double chi_re, chi_im;
+            chi_st >> chi_re >> chi_im;
+            chi_air = complex<double>(chi_re, chi_im);
+            chi_st.close();
         }
-        double chi_re, chi_im;
-        chi_st >> chi_re >> chi_im;
-        chi = complex<double>(chi_re, chi_im);
-        chi_st.close();
+        m = m_air;
+        chi = chi_air;
+    }
+    // Вода
+    if(fe->phys->gmsh_num == 22 || fe->phys->gmsh_num == 32)
+    {
+        double m_water = 3;
+        static complex<double> chi_water(-1, -1);
+        if(chi_water.real() < 0)
+        {
+            ifstream chi_st;
+            char chi_name[] = "chi_water.txt";
+            chi_st.open(chi_name, ios::in);
+            if(!chi_st.good())
+            {
+                cerr << "Error in " << __FILE__ << ":" << __LINE__
+                     << " while reading file " << chi_name << endl;
+                throw IO_FILE_ERROR;
+            }
+            double chi_re, chi_im;
+            chi_st >> chi_re >> chi_im;
+            chi_water = complex<double>(chi_re, chi_im);
+            chi_st.close();
+        }
+        m = m_water;
+        chi = chi_water;
     }
 
     double pml_thickness_x = 100.0;
@@ -108,27 +139,13 @@ string tecplot_filename = "area_pml_source.plt";
 
 string phys_filename_pml = "data/area_pml_source/3-1.txt";
 string phys_filename_nonpml = "data/area_pml_source/3-2.txt";
-string mesh_filename = "data/area_pml_source/3.msh";
+string mesh_filename = "data/area_pml_source/5.msh";
 #if defined VFEM_USE_PML
 string phys_filename = phys_filename_pml;
 #else
 string phys_filename = phys_filename_nonpml;
 #endif
 string slae_dump_filename = "area_pml_source_slae.txt";
-
-#if defined VFEM_USE_ANALYTICAL
-cvector3 func_true(const point & p)
-{
-    static VFEM vfem_anal;
-    if(vfem_anal.fes_num == 0)
-    {
-        vfem_anal.input_phys(phys_filename_nonpml);
-        vfem_anal.input_mesh(mesh_filename);
-        vfem_anal.slae.restore(slae_dump_filename);
-    }
-    return vfem_anal.solution(p);
-}
-#endif
 
 void postprocessing(VFEM & v, char * timebuf)
 {
@@ -145,8 +162,15 @@ void postprocessing(VFEM & v, char * timebuf)
 //    v.output_slice(string("area_pml_source_xz2") + "_" + string(timebuf) + ".dat",
 //                   'Y', 80.0, 'X', -700, 700, 20.0, 'Z', -700, 700, 20.0);
 #if !defined VFEM_USE_PML
-    v.slae.dump(slae_dump_filename);
-#elif defined VFEM_USE_ANALYTICAL
+    v.slae.dump_x(slae_dump_filename);
+#else
+    complex<double> * anal = new complex<double> [v.slae.n];
+    ifstream a;
+    a.open(slae_dump_filename.c_str(), ios::in);
+    for(size_t i = 0; i < v.slae.n; i++)
+        a >> anal[i];
+    a.close();
+
     double diff = 0.0, norm = 0.0;
     for(size_t k = 0; k < v.fes_num; k++)
     {
@@ -160,15 +184,19 @@ void postprocessing(VFEM & v, char * timebuf)
                 pos[i] = v.fes[k].get_edge(i).num;
                 pos[i+6] = v.fes[k].get_edge(i).num + v.slae.n / 2;
             }
-            carray12 q_loc;
+            carray12 q_loc, q_loc_true;
             for(int i = 0; i < 12; i++)
+            {
                 q_loc[i] = v.slae.x[pos[i]];
+                q_loc_true[i] = anal[pos[i]];
+            }
 
-            diff += v.fes[k].diff_normL2(q_loc, func_true);
-            norm += v.fes[k].normL2(func_true);
+            diff += v.fes[k].diff_normL2(q_loc, q_loc_true);
+            norm += v.fes[k].normL2(q_loc_true);
         }
     }
     cout << "Diff (L2): \t" << sqrt(diff / norm) << endl;
+    delete [] anal;
 #endif
 }
 
