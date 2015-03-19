@@ -127,16 +127,12 @@ void postprocessing(VFEM & v, char * timebuf)
            fabs(v.fes[k].barycenter.y) <= 600 && fabs(v.fes[k].barycenter.y) >= 10 &&
            fabs(v.fes[k].barycenter.z) <= 600 && fabs(v.fes[k].barycenter.z) >= 10)
         {
-            size_t pos[12];
-            for(size_t i = 0; i < 6; i++)
+            array_t<complex<double>, basis::tet_bf_num> q_loc;
+            for(size_t i = 0; i < basis::tet_bf_num; i++)
             {
-                pos[i] = v.fes[k].get_edge(i).num;
-                pos[i+6] = v.fes[k].get_edge(i).num + v.slae.n / 2;// + v.edges_num;
+                size_t dof = v.fes[k].dof[i];
+                q_loc[i] = v.slae.x[dof];
             }
-            carray12 q_loc;
-            for(int i = 0; i < 12; i++)
-                q_loc[i] = v.slae.x[pos[i]];
-
             diff += v.fes[k].diff_normL2(q_loc, func_true);
             norm += v.fes[k].normL2(func_true);
         }

@@ -40,10 +40,10 @@ public:
 
     bool inside_tree(double x0, double x1, double y0, double y1, double z0, double z1) const;
 
-    double diff_normL2(const carray12 & q, cvector3(*func)(const point &)) const;
-    double diff_normL2(const carray12 & q, const carray12 & q_true) const;
+    double diff_normL2(const array_t<complex<double>, basis::tet_bf_num> & q, cvector3(*func)(const point &)) const;
+    double diff_normL2(const array_t<complex<double>, basis::tet_bf_num> & q, const array_t<complex<double>, basis::tet_bf_num> & q_true) const;
     double normL2(cvector3(*func)(const point &)) const;
-    double normL2(const carray12 & q_true) const;
+    double normL2(const array_t<complex<double>, basis::tet_bf_num> & q_true) const;
 
 protected:
     matrix_t<double, 4, 4> L;   // Матрица L-координат

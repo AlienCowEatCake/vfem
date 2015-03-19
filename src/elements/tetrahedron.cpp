@@ -287,27 +287,27 @@ double tetrahedron_base::diff_normL2(const array_t<complex<double>, basis::tet_b
         for(size_t i = 0; i < tet_bf_num; i++)
             val = val + q[i] * cvector3(w(i, gauss_points[k]));
         cvector3 func_d = func(gauss_points[k]) - val;
-        cvector3 func_d_conj = func_d.cj();
-        result += gauss_weights[k] * (func_d * func_d_conj);
+        result += gauss_weights[k] * (func_d * func_d.cj());
     }
     result *= jacobian;
     return result.real();
 }
 
-double tetrahedron_base::diff_normL2(const carray12 & q, const carray12 & q_true) const
+double tetrahedron_base::diff_normL2(const array_t<complex<double>, basis::tet_bf_num> & q, const array_t<complex<double>, basis::tet_bf_num> & q_true) const
 {
+    using namespace tet_integration;
+    using namespace basis;
     complex<double> result = 0.0;
-    for(size_t k = 0; k < 4; k++)
+    for(size_t k = 0; k < gauss_num; k++)
     {
         cvector3 val(0.0, 0.0, 0.0), val_true(0.0, 0.0, 0.0);
-        for(size_t i = 0; i < 12; i++)
+        for(size_t i = 0; i < tet_bf_num; i++)
         {
             val = val + q[i] * cvector3(w(i, gauss_points[k]));
             val_true = val_true + q_true[i] * cvector3(w(i, gauss_points[k]));
         }
         cvector3 func_d = val_true - val;
-        cvector3 func_d_conj = func_d.cj();
-        result += gauss_weights[k] * (func_d * func_d_conj);
+        result += gauss_weights[k] * (func_d * func_d.cj());
     }
     result *= jacobian;
     return result.real();
@@ -320,23 +320,23 @@ double tetrahedron_base::normL2(cvector3(*func)(const point &)) const
     for(size_t k = 0; k < gauss_num; k++)
     {
         cvector3 func_d = func(gauss_points[k]);
-        cvector3 func_d_conj = func_d.cj();
-        result += gauss_weights[k] * (func_d * func_d_conj);
+        result += gauss_weights[k] * (func_d * func_d.cj());
     }
     result *= jacobian;
     return result.real();
 }
 
-double tetrahedron_base::normL2(const carray12 & q_true) const
+double tetrahedron_base::normL2(const array_t<complex<double>, basis::tet_bf_num> & q_true) const
 {
+    using namespace tet_integration;
+    using namespace basis;
     complex<double> result = 0.0;
-    for(size_t k = 0; k < 4; k++)
+    for(size_t k = 0; k < gauss_num; k++)
     {
         cvector3 func_d;
-        for(size_t i = 0; i < 12; i++)
+        for(size_t i = 0; i < tet_bf_num; i++)
             func_d = func_d + q_true[i] * cvector3(w(i, gauss_points[k]));
-        cvector3 func_d_conj = func_d.cj();
-        result += gauss_weights[k] * (func_d * func_d_conj);
+        result += gauss_weights[k] * (func_d * func_d.cj());
     }
     result *= jacobian;
     return result.real();

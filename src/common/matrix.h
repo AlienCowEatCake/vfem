@@ -3,20 +3,6 @@
 
 #include "../common/common.h"
 
-// # DELETEME
-// Немного typedef'ов
-template<typename type, size_t dimension> class array_t;
-template<typename type, size_t dimension_row, size_t dimension_col> class matrix_t;
-typedef matrix_t<double,  6,  6> matrix6;
-typedef matrix_t<double, 12, 12> matrix12;
-typedef array_t<double,  6> array6;
-typedef array_t<double, 12> array12;
-typedef matrix_t<complex<double>,  6, 6> cmatrix6;
-typedef matrix_t<complex<double>, 12, 12> cmatrix12;
-typedef array_t<complex<double>,  6> carray6;
-typedef array_t<complex<double>, 12> carray12;
-// # EODELETEME
-
 // Класс "статический массив"
 template<typename type, size_t dimension>
 class array_t
