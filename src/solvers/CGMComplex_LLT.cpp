@@ -122,7 +122,7 @@ void CGMComplex_LLT::solve_L(const complex<double> * f, complex<double> * x) con
     }
 }
 
-void CGMComplex_LLT::solve_LT(const complex<double> * f, complex<double> * x) const
+void CGMComplex_LLT::solve_LT(complex<double> * f, complex<double> * x) const
 {
     for(size_t k = n, k1 = n-1; k > 0; k--, k1--)
     {
@@ -130,7 +130,7 @@ void CGMComplex_LLT::solve_LT(const complex<double> * f, complex<double> * x) co
         complex<double> v_el = x[k1];
 
         for(size_t i = gi[k1]; i < gi[k]; i++)
-            x[gj[i]] -= L_gg[i] * v_el;
+            f[gj[i]] -= L_gg[i] * v_el;
     }
 }
 

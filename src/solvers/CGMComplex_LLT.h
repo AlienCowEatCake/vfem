@@ -20,7 +20,7 @@ private:
     void make_LLT_decomposition();
     void mul_matrix(const complex<double> * f, complex<double> * x) const;
     void solve_L(const complex<double> * f, complex<double> * x) const;
-    void solve_LT(const complex<double> * f, complex<double> * x) const;
+    void solve_LT(complex<double> * f, complex<double> * x) const;
     void solve_LLT(const complex<double> * f, complex<double> * x) const;
     complex<double> dot_prod_nocj(const complex<double> * a, const complex<double> * b) const;
     double dot_prod_self(const complex<double> * a) const;
