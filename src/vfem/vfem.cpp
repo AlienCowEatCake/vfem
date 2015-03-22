@@ -2,8 +2,6 @@
 
 VFEM::VFEM()
 {
-    edges_num = 0;
-    edges = NULL;
 #if BASIS_ORDER >= 2
     faces_num = 0;
     faces = NULL;
@@ -17,7 +15,6 @@ VFEM::VFEM()
 
 VFEM::~VFEM()
 {
-    delete [] edges;
 #if BASIS_ORDER >= 2
     delete [] faces;
 #endif
@@ -28,16 +25,16 @@ void VFEM::generate_portrait()
     cout << "Generating portrait ..." << endl;
 
 #if BASIS_ORDER == 1 && BASIS_FULL == 0
-    size_t n_size = edges_num;
+    size_t n_size = edges.size();
 #endif
 #if BASIS_ORDER == 1 && BASIS_FULL == 1
-    size_t n_size = 2 * edges_num;
+    size_t n_size = 2 * edges.size();
 #endif
 #if BASIS_ORDER == 2 && BASIS_FULL == 0
-    size_t n_size = 2 * edges_num + 2 * faces_num;
+    size_t n_size = 2 * edges.size() + 2 * faces_num;
 #endif
 #if BASIS_ORDER == 2 && BASIS_FULL == 1
-    size_t n_size = 3 * edges_num + 3 * faces_num;
+    size_t n_size = 3 * edges.size() + 3 * faces_num;
 #endif
 
     set<size_t> * portrait = new set<size_t> [n_size];

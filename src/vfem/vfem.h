@@ -95,9 +95,7 @@ protected:
     size_t add_edge(edge ed, set<edge> & edges_set);    // Добавление ребра в множество ребер
 
     vector<point> nodes;    // Узлы
-
-    size_t edges_num;   // Число ребер
-    edge * edges;       // Ребра
+    set<edge> edges;        // Ребра
 
 #if BASIS_ORDER >= 2
     size_t faces_num;   // Число граней

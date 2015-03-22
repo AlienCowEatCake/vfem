@@ -191,7 +191,6 @@ void VFEM::input_mesh(const string & gmsh_filename)
         throw IO_FILE_ERROR;
     }
 
-    set<edge> edges_temp2;
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
     set<edge> edges_surf_temp2;
 #endif
@@ -241,12 +240,12 @@ void VFEM::input_mesh(const string & gmsh_filename)
             for(size_t j = 0; j < 4; j++)
                 fake_element.nodes[j] = & nodes[local_nodes_tet[j] - 1];
 
-            fake_element.edges[0] = (edge *) add_edge(edge(fake_element.nodes[0], fake_element.nodes[1]), edges_temp2);
-            fake_element.edges[1] = (edge *) add_edge(edge(fake_element.nodes[0], fake_element.nodes[2]), edges_temp2);
-            fake_element.edges[2] = (edge *) add_edge(edge(fake_element.nodes[0], fake_element.nodes[3]), edges_temp2);
-            fake_element.edges[3] = (edge *) add_edge(edge(fake_element.nodes[1], fake_element.nodes[2]), edges_temp2);
-            fake_element.edges[4] = (edge *) add_edge(edge(fake_element.nodes[1], fake_element.nodes[3]), edges_temp2);
-            fake_element.edges[5] = (edge *) add_edge(edge(fake_element.nodes[2], fake_element.nodes[3]), edges_temp2);
+            fake_element.edges[0] = (edge *) add_edge(edge(fake_element.nodes[0], fake_element.nodes[1]), edges);
+            fake_element.edges[1] = (edge *) add_edge(edge(fake_element.nodes[0], fake_element.nodes[2]), edges);
+            fake_element.edges[2] = (edge *) add_edge(edge(fake_element.nodes[0], fake_element.nodes[3]), edges);
+            fake_element.edges[3] = (edge *) add_edge(edge(fake_element.nodes[1], fake_element.nodes[2]), edges);
+            fake_element.edges[4] = (edge *) add_edge(edge(fake_element.nodes[1], fake_element.nodes[3]), edges);
+            fake_element.edges[5] = (edge *) add_edge(edge(fake_element.nodes[2], fake_element.nodes[3]), edges);
 
             fes.push_back(fake_element);
         }
@@ -278,9 +277,9 @@ void VFEM::input_mesh(const string & gmsh_filename)
             for(size_t j = 0; j < 3; j++)
                 fake_triangle.nodes[j] = & nodes[local_nodes_tr[j] - 1];
 
-            fake_triangle.edges[0] = (edge *) add_edge(edge(fake_triangle.nodes[0], fake_triangle.nodes[1]), edges_temp2);
-            fake_triangle.edges[1] = (edge *) add_edge(edge(fake_triangle.nodes[0], fake_triangle.nodes[2]), edges_temp2);
-            fake_triangle.edges[2] = (edge *) add_edge(edge(fake_triangle.nodes[1], fake_triangle.nodes[2]), edges_temp2);
+            fake_triangle.edges[0] = (edge *) add_edge(edge(fake_triangle.nodes[0], fake_triangle.nodes[1]), edges);
+            fake_triangle.edges[1] = (edge *) add_edge(edge(fake_triangle.nodes[0], fake_triangle.nodes[2]), edges);
+            fake_triangle.edges[2] = (edge *) add_edge(edge(fake_triangle.nodes[1], fake_triangle.nodes[2]), edges);
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
             if(bound_type == 1)
             {
@@ -323,7 +322,7 @@ void VFEM::input_mesh(const string & gmsh_filename)
             for(size_t j = 0; j < 2; j++)
                 fake_edge_src.nodes[j] = & nodes[nd[j] - 1];
 
-            fake_edge_src.num = add_edge(edge(fake_edge_src.nodes[0], fake_edge_src.nodes[1]), edges_temp2);
+            fake_edge_src.num = add_edge(edge(fake_edge_src.nodes[0], fake_edge_src.nodes[1]), edges);
             fake_edge_src.edge_main = NULL;
             edges_src.push_back(fake_edge_src);
         }
@@ -337,13 +336,14 @@ void VFEM::input_mesh(const string & gmsh_filename)
 
     cout << " > Converting data ..." << endl;
 
-    edges_num = edges_temp2.size();
-    edges = new edge [edges_num];
+    vector<edge *> edges_ind;
+    edges_ind.resize(edges.size());
     size_t ied = 0;
-    for(set<edge>::iterator i = edges_temp2.begin(); i != edges_temp2.end(); ++i)
+    for(set<edge>::iterator i = edges.begin(); i != edges.end(); ++i)
     {
-        edges[i->num] = *i;
-        show_progress("edges", ied++, edges_num);
+        /// WARNING: const_cast для элемента set'а!
+        edges_ind[i->num] = const_cast<edge *>(&(*i));
+        show_progress("edges", ied++, edges.size());
     }
 
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
@@ -352,14 +352,13 @@ void VFEM::input_mesh(const string & gmsh_filename)
         dof_surf_num = edges_surf_temp2.size();
         for(set<edge>::iterator i = edges_surf_temp2.begin(); i != edges_surf_temp2.end(); ++i)
         {
-            set<edge>::iterator j = edges_temp2.find(*i);
+            set<edge>::iterator j = edges.find(*i);
             global_to_local[j->num] = i->num;
-            global_to_local[j->num + edges_num] = i->num + dof_surf_num;
+            global_to_local[j->num + edges.size()] = i->num + dof_surf_num;
         }
         edges_surf_temp2.clear();
     }
 #endif
-    edges_temp2.clear();
 
     if(fes.size() > 0)
     {
@@ -367,7 +366,7 @@ void VFEM::input_mesh(const string & gmsh_filename)
         {
             show_progress("tetrahedrons", i, fes.size());
             for(size_t j = 0; j < 6; j++)
-                fes[i].edges[j] = & edges[(size_t)fes[i].edges[j]];
+                fes[i].edges[j] = edges_ind[(size_t)fes[i].edges[j]];
             fes[i].init();
         }
     }
@@ -380,7 +379,7 @@ void VFEM::input_mesh(const string & gmsh_filename)
     for(size_t i = 0; i < edges_src.size(); i++)
     {
         show_progress("edges with source", i, edges_src.size());
-        edges_src[i].edge_main = & edges[edges_src[i].num];
+        edges_src[i].edge_main = edges_ind[edges_src[i].num];
     }
 
     if(trs.size() > 0)
@@ -389,7 +388,7 @@ void VFEM::input_mesh(const string & gmsh_filename)
         {
             show_progress("triangles", i, trs.size());
             for(size_t j = 0; j < 3; j++)
-                trs[i].edges[j] = & edges[(size_t)trs[i].edges[j]];
+                trs[i].edges[j] = edges_ind[(size_t)trs[i].edges[j]];
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
             trs[i].init();
 #else
@@ -421,6 +420,7 @@ void VFEM::input_mesh(const string & gmsh_filename)
         max_coord[i] += diff_coord[i];
         min_coord[i] -= diff_coord[i];
     }
+    /// WARNING: &(fes[0]) для вектора!
     tree.make(min_coord[0], max_coord[0], min_coord[1], max_coord[1],
               min_coord[2], max_coord[2], &(fes[0]), fes.size());
 
