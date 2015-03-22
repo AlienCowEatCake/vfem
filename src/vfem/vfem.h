@@ -81,8 +81,7 @@ public:
     cvector3 solution(const point & p, const finite_element * fe) const;
     cvector3 rotor(const point & p, const finite_element * fe) const;
 
-    size_t fes_num;         // Число конечных элементов (тетраэдров)
-    finite_element * fes;   // Конечные элементы (тетраэдры)
+    vector<finite_element> fes; // Конечные элементы (тетраэдры)
 
 #if defined VFEM_USE_ANALYTICAL
     void calculate_diff() const;

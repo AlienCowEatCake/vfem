@@ -191,13 +191,13 @@ void VFEM::input_mesh(const string & gmsh_filename)
         throw IO_FILE_ERROR;
     }
 
-    vector<finite_element> fes_temp;
     set<edge> edges_temp2;
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
     set<edge> edges_surf_temp2;
 #endif
 
     // Чтение конечных элементов
+    size_t fes_num;
     gmsh_file >> fes_num;
     size_t type_of_elem = 0;
     finite_element fake_element;
@@ -248,7 +248,7 @@ void VFEM::input_mesh(const string & gmsh_filename)
             fake_element.edges[4] = (edge *) add_edge(edge(fake_element.nodes[1], fake_element.nodes[3]), edges_temp2);
             fake_element.edges[5] = (edge *) add_edge(edge(fake_element.nodes[2], fake_element.nodes[3]), edges_temp2);
 
-            fes_temp.push_back(fake_element);
+            fes.push_back(fake_element);
         }
         else if(type_of_elem == 2)
         {
@@ -361,19 +361,15 @@ void VFEM::input_mesh(const string & gmsh_filename)
 #endif
     edges_temp2.clear();
 
-    fes_num = fes_temp.size();
-    if(fes_num > 0)
+    if(fes.size() > 0)
     {
-        fes = new finite_element [fes_num];
-        for(size_t i = 0; i < fes_num; i++)
+        for(size_t i = 0; i < fes.size(); i++)
         {
-            show_progress("tetrahedrons", i, fes_num);
-            fes[i] = fes_temp[i];
+            show_progress("tetrahedrons", i, fes.size());
             for(size_t j = 0; j < 6; j++)
                 fes[i].edges[j] = & edges[(size_t)fes[i].edges[j]];
             fes[i].init();
         }
-        fes_temp.clear();
     }
     else
     {
@@ -426,7 +422,7 @@ void VFEM::input_mesh(const string & gmsh_filename)
         min_coord[i] -= diff_coord[i];
     }
     tree.make(min_coord[0], max_coord[0], min_coord[1], max_coord[1],
-              min_coord[2], max_coord[2], fes, fes_num);
+              min_coord[2], max_coord[2], &(fes[0]), fes.size());
 
 #if defined VFEM_USE_PML
     input_pml();
@@ -540,13 +536,13 @@ void VFEM::input_pml()
     phys_pml.z1 = -DBL_MAX;
     map<point *, pair<cpoint, finite_element *> > pml_nodes_cache;
 
-    for(size_t i = 0; i < fes_num; i++)
+    for(size_t i = 0; i < fes.size(); i++)
     {
-        show_progress("scanned tetrahedrons", i, fes_num);
-        if(is_pml(fes[i].barycenter, fes + i))
+        show_progress("scanned tetrahedrons", i, fes.size());
+        if(is_pml(fes[i].barycenter, &(fes[i])))
         {
             for(size_t j = 0; j < 4; j++)
-                pml_nodes_cache[fes[i].nodes[j]] = make_pair(cpoint(), fes + i);
+                pml_nodes_cache[fes[i].nodes[j]] = make_pair(cpoint(), &(fes[i]));
         }
         else
         {
@@ -573,14 +569,14 @@ void VFEM::input_pml()
         it->second.first = convert_point_to_pml(p, fefe);
     }
 
-    for(size_t i = 0; i < fes_num; i++)
+    for(size_t i = 0; i < fes.size(); i++)
     {
-        show_progress("re-init tetrahedrons", i, fes_num);
+        show_progress("re-init tetrahedrons", i, fes.size());
         cpoint cp[4];
         size_t ph_curr = fes[i].phys->gmsh_num;
         for(size_t j = 0; j < 4; j++)
         {
-            if(is_pml(fes[i].barycenter, fes + i))
+            if(is_pml(fes[i].barycenter, &(fes[i])))
             {
                 map<point *, pair<cpoint, finite_element *> >::iterator it = pml_nodes_cache.find(fes[i].nodes[j]);
                 // Если есть в кэше, то возьмем из него
@@ -588,7 +584,7 @@ void VFEM::input_pml()
                     cp[j] = it->second.first;
                 // А иначе рассчитаем
                 else
-                    cp[j] = convert_point_to_pml(fes[i].nodes[j], fes + i);
+                    cp[j] = convert_point_to_pml(fes[i].nodes[j], &(fes[i]));
             }
             else
             {

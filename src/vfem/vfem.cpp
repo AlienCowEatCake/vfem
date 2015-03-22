@@ -8,8 +8,6 @@ VFEM::VFEM()
     faces_num = 0;
     faces = NULL;
 #endif
-    fes_num = 0;
-    fes = NULL;
     bound1_num = 0;
     bound2_num = 0;
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
@@ -25,7 +23,6 @@ VFEM::~VFEM()
 #if BASIS_ORDER >= 2
     delete [] faces;
 #endif
-    delete [] fes;
     delete [] pss;
 }
 
@@ -47,9 +44,9 @@ void VFEM::generate_portrait()
 #endif
 
     set<size_t> * portrait = new set<size_t> [n_size];
-    for(size_t k = 0; k < fes_num; k++)
+    for(size_t k = 0; k < fes.size(); k++)
     {
-        show_progress("step 1", k, fes_num);
+        show_progress("step 1", k, fes.size());
 
         for(size_t i = 0; i < basis::tet_bf_num; i++)
         {
@@ -151,9 +148,9 @@ void VFEM::assemble_matrix()
 
     cout << " > Assembling matrix ..." << endl;
     // Cборка основной матрицы
-    for(size_t k = 0; k < fes_num; k++)
+    for(size_t k = 0; k < fes.size(); k++)
     {
-        show_progress("", k, fes_num);
+        show_progress("", k, fes.size());
 
         l_matrix matrix_G = fes[k].G();
         l_matrix matrix_M = fes[k].M();
@@ -275,7 +272,7 @@ void VFEM::apply_point_sources()
         show_progress("", k, pss_num);
         finite_element * fe = get_fe(pss[k].first);
         for(size_t i = 0; i < basis::tet_bf_num; i++)
-            slae.rp[fes->dof[i]] += complex<double>(0.0, -1.0) * fe->get_phys_area().omega * pss[k].second * fe->w(i, pss[k].first);
+            slae.rp[fe->dof[i]] += complex<double>(0.0, -1.0) * fe->get_phys_area().omega * pss[k].second * fe->w(i, pss[k].first);
     }
 }
 
@@ -350,7 +347,7 @@ void VFEM::solve()
 void VFEM::calculate_diff() const
 {
     double diff = 0.0;
-    for(size_t k = 0; k < fes_num; k++)
+    for(size_t k = 0; k < fes.size(); k++)
     {
         array_t<complex<double>, basis::tet_bf_num> q_loc;
         for(size_t i = 0; i < basis::tet_bf_num; i++)
