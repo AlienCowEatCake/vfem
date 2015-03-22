@@ -92,6 +92,9 @@ public:
 #endif
 protected:
     size_t add_edge(edge ed, set<edge> & edges_set);    // Добавление ребра в множество ребер
+#if BASIS_ORDER >= 2
+    size_t add_face(face fc, set<face> & faces_set);    // Добавление грани в множество граней
+#endif
 
     vector<point> nodes;        // Узлы
     set<edge> edges;            // Ребра
@@ -104,7 +107,6 @@ protected:
     map<phys_id, phys_area> phys;   // Физические области
 
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
-    size_t dof_surf_num;        // Число степеней свободы с первыми неоднородными краевыми
     map<size_t, size_t> global_to_local;    // Соответствие глобальных степеней свободы и по границе
 #else
     set<size_t> dof_first;      // Степени свободы с первыми краевыми

@@ -4,9 +4,6 @@ VFEM::VFEM()
 {
     bound1_num = 0;
     bound2_num = 0;
-#if defined VFEM_USE_NONHOMOGENEOUS_FIRST
-    dof_surf_num = 0;
-#endif
 }
 
 void VFEM::generate_portrait()
@@ -76,6 +73,7 @@ void VFEM::generate_surf_portrait()
 {
     cout << "Generaing surface portrait ..." << endl;
 
+    size_t dof_surf_num = global_to_local.size();
     set<size_t> * portrait = new set<size_t> [dof_surf_num];
     for(size_t k = 0; k < trs.size(); k++)
     {
@@ -175,7 +173,7 @@ void VFEM::applying_bound()
                 matrix_t<double, basis::tr_bf_num, basis::tr_bf_num> M_surf = trs[k].M();
                 array_t<complex<double>, basis::tr_bf_num> b_surf = trs[k].rp(func_b1);
 
-                for(size_t i = 0; i < 6; i++)
+                for(size_t i = 0; i < basis::tr_bf_num; i++)
                 {
                     for(size_t j = 0; j < i; j++)
                         surf_slae.add(trs[k].dof_surf[i], trs[k].dof_surf[j], M_surf[i][j]);

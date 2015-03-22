@@ -10,6 +10,18 @@ size_t VFEM::add_edge(edge ed, set<edge> & edges_set)
     return ed.num;
 }
 
+#if BASIS_ORDER >= 2
+size_t VFEM::add_face(face fc, set<face> & faces_set)
+{
+    set<face>::iterator r = faces_set.find(fc);
+    if(r != faces_set.end())
+        return r->num;
+    fc.num = faces_set.size();
+    faces_set.insert(fc);
+    return fc.num;
+}
+#endif
+
 void VFEM::input_phys(const string & phys_filename)
 {
     cout << "Reading physical parameters ..." << endl;
@@ -192,7 +204,10 @@ void VFEM::input_mesh(const string & gmsh_filename)
     }
 
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
-    set<edge> edges_surf_temp2;
+    set<edge> edges_surf_temp;
+#if BASIS_ORDER >= 2
+    set<face> faces_surf_temp;
+#endif
 #endif
 
     // Чтение конечных элементов
@@ -247,6 +262,13 @@ void VFEM::input_mesh(const string & gmsh_filename)
             fake_element.edges[4] = (edge *) add_edge(edge(fake_element.nodes[1], fake_element.nodes[3]), edges);
             fake_element.edges[5] = (edge *) add_edge(edge(fake_element.nodes[2], fake_element.nodes[3]), edges);
 
+#if BASIS_ORDER >= 2
+            fake_element.faces[0] = (face *) add_face(face(fake_element.nodes[0], fake_element.nodes[1], fake_element.nodes[2]), faces);
+            fake_element.faces[1] = (face *) add_face(face(fake_element.nodes[0], fake_element.nodes[1], fake_element.nodes[3]), faces);
+            fake_element.faces[2] = (face *) add_face(face(fake_element.nodes[0], fake_element.nodes[2], fake_element.nodes[3]), faces);
+            fake_element.faces[3] = (face *) add_face(face(fake_element.nodes[1], fake_element.nodes[2], fake_element.nodes[3]), faces);
+#endif
+
             fes.push_back(fake_element);
         }
         else if(type_of_elem == 2)
@@ -280,16 +302,18 @@ void VFEM::input_mesh(const string & gmsh_filename)
             fake_triangle.edges[0] = (edge *) add_edge(edge(fake_triangle.nodes[0], fake_triangle.nodes[1]), edges);
             fake_triangle.edges[1] = (edge *) add_edge(edge(fake_triangle.nodes[0], fake_triangle.nodes[2]), edges);
             fake_triangle.edges[2] = (edge *) add_edge(edge(fake_triangle.nodes[1], fake_triangle.nodes[2]), edges);
+#if BASIS_ORDER >= 2
+            fake_triangle.faces = (face *) add_face(face(fake_triangle.nodes[0], fake_triangle.nodes[1], fake_triangle.nodes[2]), faces);
+#endif
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
             if(bound_type == 1)
             {
-                size_t e_num;
-                e_num = add_edge(edge(fake_triangle.nodes[0], fake_triangle.nodes[1]), edges_surf_temp2);
-                fake_triangle.dof_surf[0] = e_num;
-                e_num = add_edge(edge(fake_triangle.nodes[0], fake_triangle.nodes[2]), edges_surf_temp2);
-                fake_triangle.dof_surf[1] = e_num;
-                e_num = add_edge(edge(fake_triangle.nodes[1], fake_triangle.nodes[2]), edges_surf_temp2);
-                fake_triangle.dof_surf[2] = e_num;
+                add_edge(edge(fake_triangle.nodes[0], fake_triangle.nodes[1]), edges_surf_temp);
+                add_edge(edge(fake_triangle.nodes[0], fake_triangle.nodes[2]), edges_surf_temp);
+                add_edge(edge(fake_triangle.nodes[1], fake_triangle.nodes[2]), edges_surf_temp);
+#if BASIS_ORDER >= 2
+                add_face(face(fake_triangle.nodes[0], fake_triangle.nodes[1], fake_triangle.nodes[2]), faces_surf_temp);
+#endif
             }
 #endif
             trs.push_back(fake_triangle);
@@ -336,75 +360,140 @@ void VFEM::input_mesh(const string & gmsh_filename)
 
     cout << " > Converting data ..." << endl;
 
+    // Индексируем ребра
     vector<edge *> edges_ind;
     edges_ind.resize(edges.size());
-    size_t ied = 0;
+    /// WARNING: const_cast для элемента set'а!
     for(set<edge>::iterator i = edges.begin(); i != edges.end(); ++i)
-    {
-        /// WARNING: const_cast для элемента set'а!
         edges_ind[i->num] = const_cast<edge *>(&(*i));
-        show_progress("edges", ied++, edges.size());
-    }
 
-#if defined VFEM_USE_NONHOMOGENEOUS_FIRST
-    if(bound1_num > 0)
-    {
-        dof_surf_num = edges_surf_temp2.size();
-        for(set<edge>::iterator i = edges_surf_temp2.begin(); i != edges_surf_temp2.end(); ++i)
-        {
-            set<edge>::iterator j = edges.find(*i);
-            global_to_local[j->num] = i->num;
-            global_to_local[j->num + edges.size()] = i->num + dof_surf_num;
-        }
-        edges_surf_temp2.clear();
-    }
+#if BASIS_ORDER >= 2
+    // Индексируем грани
+    vector<face *> faces_ind;
+    faces_ind.resize(faces.size());
+    /// WARNING: const_cast для элемента set'а!
+    for(set<face>::iterator i = faces.begin(); i != faces.end(); ++i)
+        faces_ind[i->num] = const_cast<face *>(&(*i));
 #endif
 
-    if(fes.size() > 0)
-    {
-        for(size_t i = 0; i < fes.size(); i++)
-        {
-            show_progress("tetrahedrons", i, fes.size());
-            for(size_t j = 0; j < 6; j++)
-                fes[i].edges[j] = edges_ind[(size_t)fes[i].edges[j]];
-            fes[i].init();
-        }
-    }
-    else
-    {
-        cerr << "Error: 0 tetrahedrons detected, breaking..." << endl;
-        throw IO_FILE_ERROR;
-    }
-
+    // Разбираемся с ребрами с источниками
     for(size_t i = 0; i < edges_src.size(); i++)
     {
         show_progress("edges with source", i, edges_src.size());
         edges_src[i].edge_main = edges_ind[edges_src[i].num];
     }
 
-    if(trs.size() > 0)
+    // Разбираемся с тетраэдрами
+    if(fes.size() == 0)
     {
-        for(size_t i = 0; i < trs.size(); i++)
-        {
-            show_progress("triangles", i, trs.size());
-            for(size_t j = 0; j < 3; j++)
-                trs[i].edges[j] = edges_ind[(size_t)trs[i].edges[j]];
-#if defined VFEM_USE_NONHOMOGENEOUS_FIRST
-            trs[i].init();
-#else
-            if(trs_temp[i].get_phys_area().type_of_bounds == 1)
-                for(size_t j = 0; j < 3; j++)
-                {
-                    dof_first.insert(trs_temp[i].get_edge(j).num);
-                    dof_first.insert(trs_temp[i].get_edge(j).num + edges_num);
-                }
-#endif
-        }
+        cerr << "Error: 0 tetrahedrons detected, breaking..." << endl;
+        throw IO_FILE_ERROR;
     }
-    else
+    for(size_t i = 0; i < fes.size(); i++)
+    {
+        show_progress("tetrahedrons", i, fes.size());
+        // Переносим ребра и грани
+        for(size_t j = 0; j < 6; j++)
+            fes[i].edges[j] = edges_ind[(size_t)fes[i].edges[j]];
+#if BASIS_ORDER >= 2
+        for(size_t j = 0; j < 4; j++)
+            fes[i].faces[j] = faces_ind[(size_t)fes[i].faces[j]];
+#endif
+        // Заполняем степени свободы
+        for(size_t j = 0; j < 6; j++)
+            fes[i].dof[j] = fes[i].edges[j]->num;
+#if BASIS_ORDER >= 2 || BASIS_FULL == 1
+        for(size_t j = 0; j < 6; j++)
+            fes[i].dof[j + 6] = fes[i].edges[j]->num + edges.size();
+#endif
+#if BASIS_ORDER >= 2
+        for(size_t j = 0; j < 4; j++)
+            fes[i].dof[j + 12] = fes[i].faces[j]->num + 2 * edges.size();
+        for(size_t j = 0; j < 4; j++)
+            fes[i].dof[j + 16] = fes[i].faces[j]->num + 2 * edges.size() + faces.size();
+#endif
+#if BASIS_ORDER > 2 || (BASIS_FULL == 1 && BASIS_ORDER == 2)
+        for(size_t j = 0; j < 4; j++)
+            fes[i].dof[j + 20] = fes[i].faces[j]->num + 2 * edges.size() + 2 * faces.size();
+        for(size_t j = 0; j < 6; j++)
+            fes[i].dof[j + 24] = fes[i].edges[j]->num + 2 * edges.size() + 3 * faces.size();
+#endif
+        // Инициализируем
+        fes[i].init();
+    }
+
+    // Разбираемся с треугольниками
+    if(trs.size() == 0)
     {
         cerr << "Error: 0 triangles detected, breaking..." << endl;
         throw IO_FILE_ERROR;
+    }
+    for(size_t i = 0; i < trs.size(); i++)
+    {
+        show_progress("triangles", i, trs.size());
+        for(size_t j = 0; j < 3; j++)
+            trs[i].edges[j] = edges_ind[(size_t)trs[i].edges[j]];
+#if BASIS_ORDER >= 2
+        trs[i].faces = faces_ind[(size_t)trs[i].faces];
+#endif
+
+        // Заполняем степени свободы
+        // Первый неполный
+        for(size_t j = 0; j < 3; j++)
+            trs[i].dof[j] = trs[i].edges[j]->num;
+#if defined VFEM_USE_NONHOMOGENEOUS_FIRST
+        if(trs[i].get_phys_area().type_of_bounds == 1)
+            for(size_t j = 0; j < 3; j++)
+                trs[i].dof_surf[j] = edges_surf_temp.find(* trs[i].edges[j])->num;
+#endif
+        // Первый полный
+#if BASIS_ORDER >= 2 || BASIS_FULL == 1
+        for(size_t j = 0; j < 3; j++)
+            trs[i].dof[j + 3] = trs[i].edges[j]->num + edges.size();
+#if defined VFEM_USE_NONHOMOGENEOUS_FIRST
+        if(trs[i].get_phys_area().type_of_bounds == 1)
+            for(size_t j = 0; j < 3; j++)
+                trs[i].dof_surf[j + 3] = edges_surf_temp.find(* trs[i].edges[j])->num + edges_surf_temp.size();
+#endif
+#endif
+        // Второй неполный
+#if BASIS_ORDER >= 2
+        trs[i].dof[6] = trs[i].faces->num + 2 * edges.size();
+        trs[i].dof[7] = trs[i].faces->num + 2 * edges.size() + faces.size();
+#if defined VFEM_USE_NONHOMOGENEOUS_FIRST
+        if(trs[i].get_phys_area().type_of_bounds == 1)
+        {
+            trs[i].dof_surf[6] = faces_surf_temp.find(* trs[i].faces)->num + 2 * edges_surf_temp.size();
+            trs[i].dof_surf[7] = faces_surf_temp.find(* trs[i].faces)->num + 2 * edges_surf_temp.size() + faces_surf_temp.size();
+        }
+#endif
+#endif
+        // Второй полный
+#if BASIS_ORDER > 2 || (BASIS_FULL == 1 && BASIS_ORDER == 2)
+        trs[i].dof[8] = trs[i].faces->num + 2 * edges.size() + 2 * faces.size();
+        for(size_t j = 0; j < 3; j++)
+            trs[i].dof[j + 9] = trs[i].edges[j]->num + 2 * edges.size() + 3 * faces.size();
+#if defined VFEM_USE_NONHOMOGENEOUS_FIRST
+        if(trs[i].get_phys_area().type_of_bounds == 1)
+        {
+            trs[i].dof_surf[8] = faces_surf_temp.find(* trs[i].faces)->num + 2 * edges_surf_temp.size() + 2 * faces_surf_temp.size();
+            for(size_t j = 0; j < 3; j++)
+                trs[i].dof_surf[j + 9] = edges_surf_temp.find(* trs[i].edges[j])->num + 2 * edges_surf_temp.size() + 3 * faces_surf_temp.size();
+        }
+#endif
+#endif
+
+        // Инициализируем
+#if defined VFEM_USE_NONHOMOGENEOUS_FIRST
+        if(trs[i].get_phys_area().type_of_bounds == 1)
+            for(size_t j = 0; j < basis::tr_bf_num; j++)
+                global_to_local[trs[i].dof[j]] = trs[i].dof_surf[j];
+        trs[i].init();
+#else
+        if(trs[i].get_phys_area().type_of_bounds == 1)
+            for(size_t j = 0; j < basis::tr_bf_num; j++)
+                dof_first.insert(trs[i].dof[j]);
+#endif
     }
 
     cout << " > Building tree ..." << endl;
