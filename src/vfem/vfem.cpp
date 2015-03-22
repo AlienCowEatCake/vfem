@@ -2,21 +2,10 @@
 
 VFEM::VFEM()
 {
-#if BASIS_ORDER >= 2
-    faces_num = 0;
-    faces = NULL;
-#endif
     bound1_num = 0;
     bound2_num = 0;
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
     dof_surf_num = 0;
-#endif
-}
-
-VFEM::~VFEM()
-{
-#if BASIS_ORDER >= 2
-    delete [] faces;
 #endif
 }
 
@@ -31,10 +20,10 @@ void VFEM::generate_portrait()
     size_t n_size = 2 * edges.size();
 #endif
 #if BASIS_ORDER == 2 && BASIS_FULL == 0
-    size_t n_size = 2 * edges.size() + 2 * faces_num;
+    size_t n_size = 2 * edges.size() + 2 * faces.size();
 #endif
 #if BASIS_ORDER == 2 && BASIS_FULL == 1
-    size_t n_size = 3 * edges.size() + 3 * faces_num;
+    size_t n_size = 3 * edges.size() + 3 * faces.size();
 #endif
 
     set<size_t> * portrait = new set<size_t> [n_size];

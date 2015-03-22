@@ -60,7 +60,6 @@ class VFEM
 {
 public:
     VFEM();
-    ~VFEM();
 
     // Ввод данных
     void input_phys(const string & phys_filename);
@@ -94,19 +93,15 @@ public:
 protected:
     size_t add_edge(edge ed, set<edge> & edges_set);    // Добавление ребра в множество ребер
 
-    vector<point> nodes;    // Узлы
-    set<edge> edges;        // Ребра
-
+    vector<point> nodes;        // Узлы
+    set<edge> edges;            // Ребра
 #if BASIS_ORDER >= 2
-    size_t faces_num;   // Число граней
-    face * faces;       // Грани
+    set<face> faces;            // Грани
 #endif
-
     vector<edge_src> edges_src; // Ребра с источниками
+    vector<triangle> trs;       // Треугольники
 
     map<phys_id, phys_area> phys;   // Физические области
-
-    vector<triangle> trs;   // Треугольники
 
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
     size_t dof_surf_num;        // Число степеней свободы с первыми неоднородными краевыми
