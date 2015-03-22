@@ -129,8 +129,7 @@ protected:
 #endif
     void apply_edges_sources();     // Применение источников на ребрах
     void apply_point_sources();     // Применение точечных источников
-    size_t pss_num;                 // Число точечных источников
-    pair<point, cvector3> * pss;    // Точечные источники
+    vector<pair<point, cvector3> > pss; // Точечные источники
 
 #if defined VFEM_USE_PML
     cpoint convert_point_to_pml(const point * p, const finite_element * fefe) const;

@@ -113,10 +113,10 @@ void VFEM::input_phys(const string & phys_filename)
              << " while reading file " << phys_filename << endl;
         throw IO_FILE_ERROR;
     }
-    pss_num = 0;
+    size_t pss_num = 0;
     phys_param >> pss_num;
     if(pss_num)
-        pss = new pair<point, cvector3> [pss_num];
+        pss.resize(pss_num);
     for(size_t i = 0; i < pss_num; i++)
     {
         for(size_t j = 0; j < 3; j++)

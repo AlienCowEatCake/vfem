@@ -13,8 +13,6 @@ VFEM::VFEM()
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
     dof_surf_num = 0;
 #endif
-    pss = NULL;
-    pss_num = 0;
 }
 
 VFEM::~VFEM()
@@ -23,7 +21,6 @@ VFEM::~VFEM()
 #if BASIS_ORDER >= 2
     delete [] faces;
 #endif
-    delete [] pss;
 }
 
 void VFEM::generate_portrait()
@@ -267,9 +264,9 @@ void VFEM::applying_bound()
 void VFEM::apply_point_sources()
 {
     cout << " > Applying point sources ..." << endl;
-    for(size_t k = 0; k < pss_num; k++)
+    for(size_t k = 0; k < pss.size(); k++)
     {
-        show_progress("", k, pss_num);
+        show_progress("", k, pss.size());
         finite_element * fe = get_fe(pss[k].first);
         for(size_t i = 0; i < basis::tet_bf_num; i++)
             slae.rp[fe->dof[i]] += complex<double>(0.0, -1.0) * fe->get_phys_area().omega * pss[k].second * fe->w(i, pss[k].first);
