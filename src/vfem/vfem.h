@@ -105,13 +105,11 @@ protected:
     face * faces;       // Грани
 #endif
 
-    size_t edges_src_num;   // Число ребер с источниками
-    edge_src * edges_src;   // Ребра с источниками
+    vector<edge_src> edges_src; // Ребра с источниками
 
     map<phys_id, phys_area> phys;   // Физические области
 
-    size_t trs_num;     // Число треугольников
-    triangle * trs;     // Треугольники
+    vector<triangle> trs;   // Треугольники
 
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
     size_t dof_surf_num;        // Число степеней свободы с первыми неоднородными краевыми

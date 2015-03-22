@@ -192,12 +192,10 @@ void VFEM::input_mesh(const string & gmsh_filename)
     }
 
     vector<finite_element> fes_temp;
-    vector<triangle> trs_temp;
     set<edge> edges_temp2;
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
     set<edge> edges_surf_temp2;
 #endif
-    vector<edge_src> edges_src_temp;
 
     // Чтение конечных элементов
     gmsh_file >> fes_num;
@@ -295,7 +293,7 @@ void VFEM::input_mesh(const string & gmsh_filename)
                 fake_triangle.dof_surf[2] = e_num;
             }
 #endif
-            trs_temp.push_back(fake_triangle);
+            trs.push_back(fake_triangle);
         }
         else if(type_of_elem == 1)
         {
@@ -327,7 +325,7 @@ void VFEM::input_mesh(const string & gmsh_filename)
 
             fake_edge_src.num = add_edge(edge(fake_edge_src.nodes[0], fake_edge_src.nodes[1]), edges_temp2);
             fake_edge_src.edge_main = NULL;
-            edges_src_temp.push_back(fake_edge_src);
+            edges_src.push_back(fake_edge_src);
         }
         else
         {
@@ -383,38 +381,30 @@ void VFEM::input_mesh(const string & gmsh_filename)
         throw IO_FILE_ERROR;
     }
 
-    edges_src_num = edges_src_temp.size();
-    edges_src = new edge_src [edges_src_num];
-    for(size_t i = 0; i < edges_src_num; i++)
+    for(size_t i = 0; i < edges_src.size(); i++)
     {
-        show_progress("edges with source", i, edges_src_num);
-        edges_src[i] = edges_src_temp[i];
+        show_progress("edges with source", i, edges_src.size());
         edges_src[i].edge_main = & edges[edges_src[i].num];
     }
-    edges_src_temp.clear();
 
-    trs_num = trs_temp.size();
-    if(trs_num > 0)
+    if(trs.size() > 0)
     {
-        trs = new triangle [trs_num];
-        for(size_t i = 0; i < trs_num; i++)
+        for(size_t i = 0; i < trs.size(); i++)
         {
-            show_progress("triangles", i, trs_num);
-            trs[i] = trs_temp[i];
+            show_progress("triangles", i, trs.size());
             for(size_t j = 0; j < 3; j++)
                 trs[i].edges[j] = & edges[(size_t)trs[i].edges[j]];
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
             trs[i].init();
 #else
-            if(trs[i].get_phys_area().type_of_bounds == 1)
+            if(trs_temp[i].get_phys_area().type_of_bounds == 1)
                 for(size_t j = 0; j < 3; j++)
                 {
-                    dof_first.insert(trs[i].get_edge(j).num);
-                    dof_first.insert(trs[i].get_edge(j).num + edges_num);
+                    dof_first.insert(trs_temp[i].get_edge(j).num);
+                    dof_first.insert(trs_temp[i].get_edge(j).num + edges_num);
                 }
 #endif
         }
-        trs_temp.clear();
     }
     else
     {

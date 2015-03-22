@@ -10,8 +10,6 @@ VFEM::VFEM()
 #endif
     fes_num = 0;
     fes = NULL;
-    trs_num = 0;
-    trs = NULL;
     bound1_num = 0;
     bound2_num = 0;
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
@@ -19,8 +17,6 @@ VFEM::VFEM()
 #endif
     pss = NULL;
     pss_num = 0;
-    edges_src_num = 0;
-    edges_src = NULL;
 }
 
 VFEM::~VFEM()
@@ -30,9 +26,7 @@ VFEM::~VFEM()
     delete [] faces;
 #endif
     delete [] fes;
-    delete [] trs;
     delete [] pss;
-    delete [] edges_src;
 }
 
 void VFEM::generate_portrait()
@@ -103,9 +97,9 @@ void VFEM::generate_surf_portrait()
     cout << "Generaing surface portrait ..." << endl;
 
     set<size_t> * portrait = new set<size_t> [dof_surf_num];
-    for(size_t k = 0; k < trs_num; k++)
+    for(size_t k = 0; k < trs.size(); k++)
     {
-        show_progress("step 1", k, trs_num);
+        show_progress("step 1", k, trs.size());
 
         if(trs[k].get_phys_area().type_of_bounds == 1)
         {
@@ -192,9 +186,9 @@ void VFEM::applying_bound()
     // Решение СЛАУ по границе
     if(bound1_num > 0)
     {
-        for(size_t k = 0; k < trs_num; k++)
+        for(size_t k = 0; k < trs.size(); k++)
         {
-            show_progress("building matrix", k, trs_num);
+            show_progress("building matrix", k, trs.size());
 
             if(trs[k].get_phys_area().type_of_bounds == 1)
             {
@@ -288,9 +282,9 @@ void VFEM::apply_point_sources()
 void VFEM::apply_edges_sources()
 {
     cout << " > Applying edges sources ..." << endl;
-    for(size_t k = 0; k < edges_src_num; k++)
+    for(size_t k = 0; k < edges_src.size(); k++)
     {
-        show_progress("", k, edges_src_num);
+        show_progress("", k, edges_src.size());
         size_t pos = edges_src[k].num; // Заносим только в роторные функции!
         slae.rp[pos] += complex<double>(0.0, -1.0) * edges_src[k].phys->J0 * edges_src[k].phys->omega * edges_src[k].direction;
     }
