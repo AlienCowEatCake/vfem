@@ -21,7 +21,7 @@ public:
     const point & get_node(size_t i) const;
     const edge & get_edge(size_t i) const;
 #if BASIS_ORDER >= 2
-    face * faces;    // Грани
+    face * faces;       // Грани
     const face & get_face() const;
 #endif
 
@@ -41,22 +41,30 @@ public:
     // Локальная правая часть
     array_t<complex<double>, basis::tr_bf_num> rp(cvector3(*func)(const point &, const triangle_full *)) const;
 
-    size_t dof_surf[basis::tr_bf_num];  // Номера степеней свободы по границе
+    // Номера степеней свободы по границе
+    size_t dof_surf[basis::tr_bf_num];
 
 protected:
-    matrix_t<double, 3, 3> L;   // Матрица L-координат
-    double lambda(size_t i, const point & p) const; // L-координаты
-    vector3 grad_lambda(size_t i) const;    // Градиент L-координат в глобальных координатах
+    // Матрица L-координат
+    matrix_t<double, 3, 3> L;
+    // L-координаты
+    double lambda(size_t i, const point & p) const;
+    // Градиент L-координат в глобальных координатах
+    vector3 grad_lambda(size_t i) const;
 
-    vector3 w(size_t i, const point & p) const;     // Базисные функции
+    // Базисные функции
+    vector3 w(size_t i, const point & p) const;
 
-    matrix_t<double, 3, 3> transition_matrix;   // Матрица перехода между локальной и глобальной с.к.
+    // Матрица перехода между локальной и глобальной с.к.
+    matrix_t<double, 3, 3> transition_matrix;
     point to_local(const point & p) const;
     point to_global(const point & p) const;
     vector3 to_global(const vector3 & v) const;
 
-    point gauss_points[tr_integration::gauss_num];  // Точки Гаусса
-    double jacobian;            // Якобиан
+    // Точки Гаусса
+    point gauss_points[tr_integration::gauss_num];
+    // Якобиан
+    double jacobian;
 
     double integrate_w(size_t i, size_t j) const;
     complex<double> integrate_fw(cvector3(*func)(const point &, const triangle_full *), size_t i) const;

@@ -54,7 +54,7 @@ void VFEM::output(const string & tecplot_filename)
     for(size_t i = 0; i < fes_num; i++)
     {
         for(size_t j = 0; j < 4; j++)
-            tecplot_file << fes[i].get_node(j).num + 1 << " ";
+            tecplot_file << fes[i].nodes[j]->num + 1 << " ";
         tecplot_file << "\n";
     }
 

@@ -73,7 +73,7 @@ void VFEM::generate_surf_portrait()
     {
         show_progress("step 1", k, trs.size());
 
-        if(trs[k].get_phys_area().type_of_bounds == 1)
+        if(trs[k].phys->type_of_bounds == 1)
         {
             for(size_t i = 0; i < basis::tr_bf_num; i++)
             {
@@ -162,7 +162,7 @@ void VFEM::applying_bound()
         {
             show_progress("building matrix", k, trs.size());
 
-            if(trs[k].get_phys_area().type_of_bounds == 1)
+            if(trs[k].phys->type_of_bounds == 1)
             {
                 matrix_t<double, basis::tr_bf_num, basis::tr_bf_num> M_surf = trs[k].M();
                 array_t<complex<double>, basis::tr_bf_num> b_surf = trs[k].rp(func_b1);
@@ -247,7 +247,7 @@ void VFEM::apply_point_sources()
         show_progress("", k, pss.size());
         finite_element * fe = get_fe(pss[k].first);
         for(size_t i = 0; i < basis::tet_bf_num; i++)
-            slae.rp[fe->dof[i]] += complex<double>(0.0, -1.0) * fe->get_phys_area().omega * pss[k].second * fe->w(i, pss[k].first);
+            slae.rp[fe->dof[i]] += complex<double>(0.0, -1.0) * fe->phys->omega * pss[k].second * fe->w(i, pss[k].first);
     }
 }
 

@@ -282,7 +282,7 @@ void VFEM::input_mesh(const string & gmsh_filename)
                 throw IO_FILE_ERROR;
             }
 
-            size_t bound_type = fake_triangle.get_phys_area().type_of_bounds;
+            size_t bound_type = fake_triangle.phys->type_of_bounds;
             if(bound_type != 1 && bound_type != 2)
             {
                 cerr << "Error: unaccounted bound, breaking..." << endl;
@@ -438,7 +438,7 @@ void VFEM::input_mesh(const string & gmsh_filename)
         for(size_t j = 0; j < 3; j++)
             trs[i].dof[j] = trs[i].edges[j]->num;
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
-        if(trs[i].get_phys_area().type_of_bounds == 1)
+        if(trs[i].phys->type_of_bounds == 1)
             for(size_t j = 0; j < 3; j++)
                 trs[i].dof_surf[j] = edges_surf_temp.find(* trs[i].edges[j])->num;
 #endif
@@ -447,7 +447,7 @@ void VFEM::input_mesh(const string & gmsh_filename)
         for(size_t j = 0; j < 3; j++)
             trs[i].dof[j + 3] = trs[i].edges[j]->num + edges.size();
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
-        if(trs[i].get_phys_area().type_of_bounds == 1)
+        if(trs[i].phys->type_of_bounds == 1)
             for(size_t j = 0; j < 3; j++)
                 trs[i].dof_surf[j + 3] = edges_surf_temp.find(* trs[i].edges[j])->num + edges_surf_temp.size();
 #endif
@@ -457,7 +457,7 @@ void VFEM::input_mesh(const string & gmsh_filename)
         trs[i].dof[6] = trs[i].faces->num + 2 * edges.size();
         trs[i].dof[7] = trs[i].faces->num + 2 * edges.size() + faces.size();
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
-        if(trs[i].get_phys_area().type_of_bounds == 1)
+        if(trs[i].phys->type_of_bounds == 1)
         {
             trs[i].dof_surf[6] = faces_surf_temp.find(* trs[i].faces)->num + 2 * edges_surf_temp.size();
             trs[i].dof_surf[7] = faces_surf_temp.find(* trs[i].faces)->num + 2 * edges_surf_temp.size() + faces_surf_temp.size();
@@ -470,7 +470,7 @@ void VFEM::input_mesh(const string & gmsh_filename)
         for(size_t j = 0; j < 3; j++)
             trs[i].dof[j + 9] = trs[i].edges[j]->num + 2 * edges.size() + 3 * faces.size();
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
-        if(trs[i].get_phys_area().type_of_bounds == 1)
+        if(trs[i].phys->type_of_bounds == 1)
         {
             trs[i].dof_surf[8] = faces_surf_temp.find(* trs[i].faces)->num + 2 * edges_surf_temp.size() + 2 * faces_surf_temp.size();
             for(size_t j = 0; j < 3; j++)
@@ -481,12 +481,12 @@ void VFEM::input_mesh(const string & gmsh_filename)
 
         // Инициализируем
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
-        if(trs[i].get_phys_area().type_of_bounds == 1)
+        if(trs[i].phys->type_of_bounds == 1)
             for(size_t j = 0; j < basis::tr_bf_num; j++)
                 global_to_local[trs[i].dof[j]] = trs[i].dof_surf[j];
         trs[i].init();
 #else
-        if(trs[i].get_phys_area().type_of_bounds == 1)
+        if(trs[i].phys->type_of_bounds == 1)
             for(size_t j = 0; j < basis::tr_bf_num; j++)
                 dof_first.insert(trs[i].dof[j]);
 #endif

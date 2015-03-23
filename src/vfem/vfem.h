@@ -71,61 +71,84 @@ public:
                       char var1, double min_var1, double max_var1, double step_var1,
                       char var2, double min_var2, double max_var2, double step_var2);
 
-    finite_element * get_fe(const point & p) const; // Поиск конечного элемента по точке
+    // Поиск конечного элемента по точке
+    finite_element * get_fe(const point & p) const;
 
-    cvector3 solution(const point & p) const;   // Решение в точке
-    cvector3 rotor(const point & p) const;      // Ротор решения в точке
+    // Решение в точке
+    cvector3 solution(const point & p) const;
     cvector3 solution(const point & p, const finite_element * fe) const;
+    // Ротор решения в точке
+    cvector3 rotor(const point & p) const;
     cvector3 rotor(const point & p, const finite_element * fe) const;
 
-    vector<finite_element> fes; // Конечные элементы (тетраэдры)
+    // Конечные элементы (тетраэдры)
+    vector<finite_element> fes;
 
 #if defined VFEM_USE_ANALYTICAL
     void calculate_diff() const;
 #endif
 
-    SLAE slae;              // Основная СЛАУ
+    // Основная СЛАУ
+    SLAE slae;
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
-    SLAE surf_slae;         // СЛАУ по границе
+    // СЛАУ по границе
+    SLAE surf_slae;
 #endif
 protected:
-    size_t add_edge(edge ed, set<edge> & edges_set);    // Добавление ребра в множество ребер
+    // Добавление ребра в множество ребер
+    size_t add_edge(edge ed, set<edge> & edges_set);
 #if BASIS_ORDER >= 2
-    size_t add_face(face fc, set<face> & faces_set);    // Добавление грани в множество граней
+    // Добавление грани в множество граней
+    size_t add_face(face fc, set<face> & faces_set);
 #endif
 
-    vector<point> nodes;        // Узлы
-    set<edge> edges;            // Ребра
+    // Узлы
+    vector<point> nodes;
+    // Ребра
+    set<edge> edges;
 #if BASIS_ORDER >= 2
-    set<face> faces;            // Грани
+    // Грани
+    set<face> faces;
 #endif
-    vector<edge_src> edges_src; // Ребра с источниками
-    vector<triangle> trs;       // Треугольники
-
-    map<phys_id, phys_area> phys;   // Физические области
+    // Ребра с источниками
+    vector<edge_src> edges_src;
+    // Треугольники
+    vector<triangle> trs;
+    // Точечные источники
+    vector<pair<point, cvector3> > pss;
+    // Физические области
+    map<phys_id, phys_area> phys;
 
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
-    map<size_t, size_t> global_to_local;    // Соответствие глобальных степеней свободы и по границе
+    // Соответствие глобальных степеней свободы и по границе
+    map<size_t, size_t> global_to_local;
 #else
-    set<size_t> dof_first;      // Степени свободы с первыми краевыми
+    // Степени свободы с первыми краевыми
+    set<size_t> dof_first;
 #endif
+    // Восьмиричное дерево поиска
+    octal_tree<finite_element> tree;
 
-    octal_tree<finite_element> tree;    // Восьмиричное дерево поиска
-
-    void generate_portrait();       // Генерация портрета глобальной матрицы
-    void assemble_matrix();         // Сборка глобальной матрицы
-    void applying_bound();          // Применение краевых условий
+    // Генерация портрета глобальной матрицы
+    void generate_portrait();
+    // Сборка глобальной матрицы
+    void assemble_matrix();
+    // Применение краевых условий
+    void applying_bound();
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
-    void generate_surf_portrait();  // Генерация портрета по границе
+    // Генерация портрета по границе
+    void generate_surf_portrait();
 #endif
-    void apply_edges_sources();     // Применение источников на ребрах
-    void apply_point_sources();     // Применение точечных источников
-    vector<pair<point, cvector3> > pss; // Точечные источники
+    // Применение источников на ребрах
+    void apply_edges_sources();
+    // Применение точечных источников
+    void apply_point_sources();
 
 #if defined VFEM_USE_PML
     cpoint convert_point_to_pml(const point * p, const finite_element * fefe) const;
     void input_pml();
-    phys_pml_area phys_pml;         // Параметры PML
+    // Параметры PML
+    phys_pml_area phys_pml;
 #endif
 };
 

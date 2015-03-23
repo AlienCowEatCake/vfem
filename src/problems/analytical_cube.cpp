@@ -38,7 +38,7 @@ cvector3 func_b1(const point & p, const triangle * tr)
     MAYBE_UNUSED(tr);
 
     cvector3 t = func_true(p);
-    size_t phys_num = tr->get_phys_area().gmsh_num;
+    size_t phys_num = tr->phys->gmsh_num;
     switch(phys_num)
     {
     case 30:

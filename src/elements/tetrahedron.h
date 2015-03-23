@@ -28,13 +28,15 @@ public:
     const face & get_face(size_t i) const;
 #endif
 
-    phys_area * phys;    // Физическая область
-    const phys_area & get_phys_area() const;    // Получение физической области
+    phys_area * phys;   // Физическая область
+    const phys_area & get_phys_area() const;
 
     size_t dof[basis::tet_bf_num];
 
-    vector3 w(size_t i, const point & p) const;     // Базисные функции
-    vector3 rotw(size_t i, const point & p) const;  // Роторы базисных функций
+    // Базисные функции
+    vector3 w(size_t i, const point & p) const;
+    // Роторы базисных функций
+    vector3 rotw(size_t i, const point & p) const;
 
     point barycenter;
 
@@ -46,14 +48,20 @@ public:
     double normL2(const array_t<complex<double>, basis::tet_bf_num> & q_true) const;
 
 protected:
-    matrix_t<double, 4, 4> L;   // Матрица L-координат
-    vector3 grad_lambda(size_t i) const;    // градиент L-координаты
-    double lambda(size_t i, const point & p) const; // L-координаты
+    // Матрица L-координат
+    matrix_t<double, 4, 4> L;
+    // Градиент L-координаты
+    vector3 grad_lambda(size_t i) const;
+    // L-координаты
+    double lambda(size_t i, const point & p) const;
 
-    point gauss_points[tet_integration::gauss_num]; // Точки Гаусса
-    double jacobian;            // Якобиан
+    // Точки Гаусса
+    point gauss_points[tet_integration::gauss_num];
+    // Якобиан
+    double jacobian;
 
-    double edges_a[6][3], edges_b[6][3];    // Параметры прямых для дерева
+    // Параметры прямых для дерева
+    double edges_a[6][3], edges_b[6][3];
 };
 
 // Класс тетраэдр (обычный)
@@ -68,8 +76,10 @@ public:
     array_t<complex<double>, basis::tet_bf_num> rp(cvector3(*func)(const point & , const phys_area &)) const;
 
 protected:
-    double integrate_w(size_t i, size_t j) const;       // Интеграл от бф
-    double integrate_rotw(size_t i, size_t j) const;    // Интеграл от ротора бф
+    // Интеграл от бф
+    double integrate_w(size_t i, size_t j) const;
+    // Интеграл от ротора бф
+    double integrate_rotw(size_t i, size_t j) const;
     complex<double> integrate_fw(cvector3(*func)(const point & , const phys_area &), size_t i) const;
 };
 
@@ -90,18 +100,27 @@ protected:
     cvector3(* get_s)(const point &, const tetrahedron_pml *, const phys_pml_area *);
     const phys_pml_area * phys_pml;
 
-    matrix_t<complex<double>, 4, 4> L_pml;  // Матрица L-координат (в PML)
-    cvector3 grad_lambda_pml(size_t i) const;    // градиент L-координаты (в PML)
-    complex<double> lambda_pml(size_t i, const cpoint & p) const; // L-координаты (в PML)
+    // Матрица L-координат (в PML)
+    matrix_t<complex<double>, 4, 4> L_pml;
+    // Градиент L-координаты (в PML)
+    cvector3 grad_lambda_pml(size_t i) const;
+    // L-координаты (в PML)
+    complex<double> lambda_pml(size_t i, const cpoint & p) const;
 
-    cpoint gauss_points_pml[tet_integration::gauss_num];    // Точки Гаусса (в PML)
-    complex<double> jacobian_pml;   // Якобиан (в PML)
+    // Точки Гаусса (в PML)
+    cpoint gauss_points_pml[tet_integration::gauss_num];
+    // Якобиан (в PML)
+    complex<double> jacobian_pml;
 
-    cvector3 w_pml(size_t i, const cpoint & p) const;     // Базисные функции (в PML)
-    cvector3 rotw_pml(size_t i, const cpoint & p, const point & p_non_PML) const;  // Роторы базисных функций (в PML)
+    // Базисные функции (в PML)
+    cvector3 w_pml(size_t i, const cpoint & p) const;
+    // Роторы базисных функций (в PML)
+    cvector3 rotw_pml(size_t i, const cpoint & p, const point & p_non_PML) const;
 
-    complex<double> integrate_w(size_t i, size_t j) const;       // Интеграл от бф
-    complex<double> integrate_rotw(size_t i, size_t j) const;    // Интеграл от ротора бф
+    // Интеграл от бф
+    complex<double> integrate_w(size_t i, size_t j) const;
+    // Интеграл от ротора бф
+    complex<double> integrate_rotw(size_t i, size_t j) const;
     complex<double> integrate_fw(cvector3(*func)(const point & , const phys_area &), size_t i) const;
 };
 
