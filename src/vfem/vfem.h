@@ -119,6 +119,8 @@ protected:
     // Физические области
     map<phys_id, phys_area> phys;
 
+    // Число степеней свободы
+    size_t dof_num;
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
     // Соответствие глобальных степеней свободы и по границе
     map<size_t, size_t> global_to_local;

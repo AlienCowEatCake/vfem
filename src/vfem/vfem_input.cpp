@@ -512,6 +512,29 @@ void VFEM::input_mesh(const string & gmsh_filename)
 #if defined VFEM_USE_PML
     input_pml();
 #endif
+
+#if BASIS_ORDER == 1 && BASIS_FULL == 0
+    dof_num = edges.size();
+#endif
+#if BASIS_ORDER == 1 && BASIS_FULL == 1
+    dof_num = 2 * edges.size();
+#endif
+#if BASIS_ORDER == 2 && BASIS_FULL == 0
+    dof_num = 2 * edges.size() + 2 * faces.size();
+#endif
+#if BASIS_ORDER == 2 && BASIS_FULL == 1
+    dof_num = 3 * edges.size() + 3 * faces.size();
+#endif
+
+    cout << " # Tetrehedrons: " << fes.size() << endl;
+    cout << " # Edges:        " << edges.size() << endl;
+#if BASIS_ORDER >= 2
+    cout << " # Faces:        " << faces.size() << endl;
+#endif
+    cout << " # SLAE size:    " << dof_num << endl;
+#if defined VFEM_USE_NONHOMOGENEOUS_FIRST
+    cout << " # SLAE surf:    " << global_to_local.size() << endl;
+#endif
 }
 
 #if defined VFEM_USE_PML

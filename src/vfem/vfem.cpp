@@ -4,20 +4,7 @@ void VFEM::generate_portrait()
 {
     cout << "Generating portrait ..." << endl;
 
-#if BASIS_ORDER == 1 && BASIS_FULL == 0
-    size_t n_size = edges.size();
-#endif
-#if BASIS_ORDER == 1 && BASIS_FULL == 1
-    size_t n_size = 2 * edges.size();
-#endif
-#if BASIS_ORDER == 2 && BASIS_FULL == 0
-    size_t n_size = 2 * edges.size() + 2 * faces.size();
-#endif
-#if BASIS_ORDER == 2 && BASIS_FULL == 1
-    size_t n_size = 3 * edges.size() + 3 * faces.size();
-#endif
-
-    set<size_t> * portrait = new set<size_t> [n_size];
+    set<size_t> * portrait = new set<size_t> [dof_num];
     for(size_t k = 0; k < fes.size(); k++)
     {
         show_progress("step 1", k, fes.size());
@@ -37,17 +24,17 @@ void VFEM::generate_portrait()
     }
 
     size_t gg_size = 0;
-    for(size_t i = 0; i < n_size; i++)
+    for(size_t i = 0; i < dof_num; i++)
         gg_size += portrait[i].size();
 
-    slae.alloc_all(n_size, gg_size);
+    slae.alloc_all(dof_num, gg_size);
 
     slae.ig[0] = 0;
     slae.ig[1] = 0;
     size_t tmp = 0;
-    for(size_t i = 0; i < n_size; i++)
+    for(size_t i = 0; i < dof_num; i++)
     {
-        show_progress("step 2", i, n_size);
+        show_progress("step 2", i, dof_num);
 
         for(set<size_t>::iterator j = portrait[i].begin(); j != portrait[i].end(); ++j)
         {
