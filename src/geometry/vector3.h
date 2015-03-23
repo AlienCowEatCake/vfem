@@ -131,6 +131,7 @@ vector3_t<T> vector3_t<T>::cross(const vector3_t<T> & other) const
 template<typename T>
 T & vector3_t<T>::operator [] (size_t i)
 {
+    assert(i < 3);
     switch(i)
     {
     case 0:
@@ -139,15 +140,14 @@ T & vector3_t<T>::operator [] (size_t i)
         return y;
     case 2:
         return z;
-    default:
-        cerr << "Error: Unknown index " << i << " at vector " << * this << endl;
-        throw ADDRESSING_ERROR;
     }
+    return x;
 }
 
 template<typename T>
 T vector3_t<T>::operator [] (size_t i) const
 {
+    assert(i < 3);
     switch(i)
     {
     case 0:
@@ -156,10 +156,8 @@ T vector3_t<T>::operator [] (size_t i) const
         return y;
     case 2:
         return z;
-    default:
-        cerr << "Error: Unknown index " << i << " at vector " << * this << endl;
-        throw ADDRESSING_ERROR;
     }
+    return 0;
 }
 
 // Скалярное произведение

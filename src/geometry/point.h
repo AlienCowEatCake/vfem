@@ -93,6 +93,7 @@ point_t<T>::point_t(const point_t<U> & p)
 template<typename T>
 T & point_t<T>::operator [] (size_t i)
 {
+    assert(i < 3);
     switch(i)
     {
     case 0:
@@ -101,15 +102,14 @@ T & point_t<T>::operator [] (size_t i)
         return y;
     case 2:
         return z;
-    default:
-        cerr << "Error: Unknown index " << i << " at point " << * this << endl;
-        throw ADDRESSING_ERROR;
     }
+    return x;
 }
 
 template<typename T>
 T point_t<T>::operator [] (size_t i) const
 {
+    assert(i < 3);
     switch(i)
     {
     case 0:
@@ -118,10 +118,8 @@ T point_t<T>::operator [] (size_t i) const
         return y;
     case 2:
         return z;
-    default:
-        cerr << "Error: Unknown index " << i << " at point " << * this << endl;
-        throw ADDRESSING_ERROR;
     }
+    return 0;
 }
 
 // Оператор меньше (по номеру)

@@ -35,9 +35,7 @@
 
 using namespace std;
 
-static const int ADDRESSING_ERROR   = 0xfa;
 static const int IO_FILE_ERROR      = 0xfb;
-static const int NULL_PTR_ERROR     = 0xfc;
 
 #define MAYBE_UNUSED(a) (void)(a)
 
