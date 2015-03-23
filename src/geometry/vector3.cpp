@@ -18,6 +18,7 @@ double vector3_t<double>::norm2() const
 template<>
 double vector3_t< complex<double> >::norm() const
 {
+    //return sqrt((conj(x) * x + conj(y) * y + conj(z) * z).real());
     return sqrt(norm2());
 }
 

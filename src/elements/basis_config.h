@@ -4,6 +4,11 @@
 #include <cstring>
 #include <cmath>
 
+//                                  BASIS_ORDER BASIS_TYPE
+// Первый порядок I типа (неполный)      1           1
+// Первый порядок II типа (полный)       1           2
+// Второй порядок I типа (неполный)      2           1
+// Второй порядок II типа (полный)       2           2
 #define BASIS_ORDER 2
 #define BASIS_TYPE  2
 
