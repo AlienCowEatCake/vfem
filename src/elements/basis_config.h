@@ -5,11 +5,11 @@
 #include <cmath>
 
 #define BASIS_ORDER 2
-#define BASIS_FULL  1
+#define BASIS_TYPE  2
 
 // ====== Базис первого неполного порядка =====================================
 
-#if BASIS_ORDER == 1 && BASIS_FULL == 0
+#if BASIS_ORDER == 1 && BASIS_TYPE == 1
 namespace basis
 {
     static const size_t tet_bf_num = 6;
@@ -19,7 +19,7 @@ namespace basis
 
 // ====== Базис первого полного порядка =======================================
 
-#if BASIS_ORDER == 1 && BASIS_FULL == 1
+#if BASIS_ORDER == 1 && BASIS_TYPE == 2
 namespace basis
 {
     static const size_t tet_bf_num = 12;
@@ -29,7 +29,7 @@ namespace basis
 
 // ====== Базис второго неполного порядка =====================================
 
-#if BASIS_ORDER == 2 && BASIS_FULL == 0
+#if BASIS_ORDER == 2 && BASIS_TYPE == 1
 namespace basis
 {
     static const size_t tet_bf_num = 20;
@@ -39,7 +39,7 @@ namespace basis
 
 // ====== Базис второго полного порядка =======================================
 
-#if BASIS_ORDER == 2 && BASIS_FULL == 1
+#if BASIS_ORDER == 2 && BASIS_TYPE == 2
 namespace basis
 {
     static const size_t tet_bf_num = 30;

@@ -398,7 +398,7 @@ void VFEM::input_mesh(const string & gmsh_filename)
         // Заполняем степени свободы
         for(size_t j = 0; j < 6; j++)
             fes[i].dof[j] = fes[i].edges[j]->num;
-#if BASIS_ORDER >= 2 || BASIS_FULL == 1
+#if BASIS_ORDER >= 2 || BASIS_TYPE == 2
         for(size_t j = 0; j < 6; j++)
             fes[i].dof[j + 6] = fes[i].edges[j]->num + edges.size();
 #endif
@@ -408,7 +408,7 @@ void VFEM::input_mesh(const string & gmsh_filename)
         for(size_t j = 0; j < 4; j++)
             fes[i].dof[j + 16] = fes[i].faces[j]->num + 2 * edges.size() + faces.size();
 #endif
-#if BASIS_ORDER > 2 || (BASIS_FULL == 1 && BASIS_ORDER == 2)
+#if BASIS_ORDER > 2 || (BASIS_TYPE == 2 && BASIS_ORDER == 2)
         for(size_t j = 0; j < 4; j++)
             fes[i].dof[j + 20] = fes[i].faces[j]->num + 2 * edges.size() + 2 * faces.size();
         for(size_t j = 0; j < 6; j++)
@@ -443,7 +443,7 @@ void VFEM::input_mesh(const string & gmsh_filename)
                 trs[i].dof_surf[j] = edges_surf_temp.find(* trs[i].edges[j])->num;
 #endif
         // Первый полный
-#if BASIS_ORDER >= 2 || BASIS_FULL == 1
+#if BASIS_ORDER >= 2 || BASIS_TYPE == 2
         for(size_t j = 0; j < 3; j++)
             trs[i].dof[j + 3] = trs[i].edges[j]->num + edges.size();
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
@@ -465,7 +465,7 @@ void VFEM::input_mesh(const string & gmsh_filename)
 #endif
 #endif
         // Второй полный
-#if BASIS_ORDER > 2 || (BASIS_FULL == 1 && BASIS_ORDER == 2)
+#if BASIS_ORDER > 2 || (BASIS_TYPE == 2 && BASIS_ORDER == 2)
         trs[i].dof[8] = trs[i].faces->num + 2 * edges.size() + 2 * faces.size();
         for(size_t j = 0; j < 3; j++)
             trs[i].dof[j + 9] = trs[i].edges[j]->num + 2 * edges.size() + 3 * faces.size();
@@ -513,16 +513,16 @@ void VFEM::input_mesh(const string & gmsh_filename)
     input_pml();
 #endif
 
-#if BASIS_ORDER == 1 && BASIS_FULL == 0
+#if BASIS_ORDER == 1 && BASIS_TYPE == 1
     dof_num = edges.size();
 #endif
-#if BASIS_ORDER == 1 && BASIS_FULL == 1
+#if BASIS_ORDER == 1 && BASIS_TYPE == 2
     dof_num = 2 * edges.size();
 #endif
-#if BASIS_ORDER == 2 && BASIS_FULL == 0
+#if BASIS_ORDER == 2 && BASIS_TYPE == 1
     dof_num = 2 * edges.size() + 2 * faces.size();
 #endif
-#if BASIS_ORDER == 2 && BASIS_FULL == 1
+#if BASIS_ORDER == 2 && BASIS_TYPE == 2
     dof_num = 3 * edges.size() + 3 * faces.size();
 #endif
 
