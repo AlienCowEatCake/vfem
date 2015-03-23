@@ -59,8 +59,6 @@ bool is_pml(const point & p, const finite_element * fe);
 class VFEM
 {
 public:
-    VFEM();
-
     // Ввод данных
     void input_phys(const string & phys_filename);
     void input_mesh(const string & gmsh_filename);
@@ -111,8 +109,6 @@ protected:
 #else
     set<size_t> dof_first;      // Степени свободы с первыми краевыми
 #endif
-    size_t bound1_num;          // Число треугольников с первыми краевыми
-    size_t bound2_num;          // Число треугольников со вторыми краевыми
 
     octal_tree<finite_element> tree;    // Восьмиричное дерево поиска
 

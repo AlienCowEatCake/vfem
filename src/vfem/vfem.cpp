@@ -1,11 +1,5 @@
 #include "vfem.h"
 
-VFEM::VFEM()
-{
-    bound1_num = 0;
-    bound2_num = 0;
-}
-
 void VFEM::generate_portrait()
 {
     cout << "Generating portrait ..." << endl;
@@ -162,7 +156,7 @@ void VFEM::applying_bound()
     cout << " > Applying first bound ..." << endl;
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
     // Решение СЛАУ по границе
-    if(bound1_num > 0)
+    if(global_to_local.size() > 0)
     {
         for(size_t k = 0; k < trs.size(); k++)
         {
@@ -312,7 +306,7 @@ cvector3 VFEM::rotor(const point & p, const finite_element * fe) const
 void VFEM::solve()
 {
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
-    if(bound1_num > 0)
+    if(global_to_local.size() > 0)
         generate_surf_portrait();
 #endif
     generate_portrait();

@@ -283,11 +283,7 @@ void VFEM::input_mesh(const string & gmsh_filename)
             }
 
             size_t bound_type = fake_triangle.get_phys_area().type_of_bounds;
-            if(bound_type == 1)
-                bound1_num++;
-            else if(bound_type == 2)
-                bound2_num++;
-            else
+            if(bound_type != 1 && bound_type != 2)
             {
                 cerr << "Error: unaccounted bound, breaking..." << endl;
                 throw IO_FILE_ERROR;
