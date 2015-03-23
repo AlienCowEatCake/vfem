@@ -95,7 +95,7 @@ vector3 tetrahedron_base::w(size_t i, const point & p) const
         size_t ii = i - 20;
         return lambda(ind_f[ii][1], p) * lambda(ind_f[ii][2], p) * grad_lambda(ind_f[ii][0]) +
                lambda(ind_f[ii][0], p) * lambda(ind_f[ii][2], p) * grad_lambda(ind_f[ii][1]) +
-               lambda(ind_f[ii][1], p) * lambda(ind_f[ii][1], p) * grad_lambda(ind_f[ii][2]);
+               lambda(ind_f[ii][0], p) * lambda(ind_f[ii][1], p) * grad_lambda(ind_f[ii][2]);
     }
     else if(i < 30)
     {

@@ -199,7 +199,7 @@ vector3 triangle_full::w(size_t i, const point & p) const
     {
         return lambda(1, p_loc) * lambda(2, p_loc) * grad_lambda(0) +
                lambda(0, p_loc) * lambda(2, p_loc) * grad_lambda(1) +
-               lambda(1, p_loc) * lambda(1, p_loc) * grad_lambda(2);
+               lambda(0, p_loc) * lambda(1, p_loc) * grad_lambda(2);
     }
     else if(i < 12)
     {

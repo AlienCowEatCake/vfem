@@ -81,7 +81,7 @@ cvector3 tetrahedron_pml::w_pml(size_t i, const cpoint & p) const
         size_t ii = i - 20;
         return lambda_pml(ind_f[ii][1], p) * lambda_pml(ind_f[ii][2], p) * grad_lambda_pml(ind_f[ii][0]) +
                lambda_pml(ind_f[ii][0], p) * lambda_pml(ind_f[ii][2], p) * grad_lambda_pml(ind_f[ii][1]) +
-               lambda_pml(ind_f[ii][1], p) * lambda_pml(ind_f[ii][1], p) * grad_lambda_pml(ind_f[ii][2]);
+               lambda_pml(ind_f[ii][0], p) * lambda_pml(ind_f[ii][1], p) * grad_lambda_pml(ind_f[ii][2]);
     }
     else if(i < 30)
     {
