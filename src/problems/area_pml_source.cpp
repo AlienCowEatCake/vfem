@@ -172,7 +172,7 @@ void postprocessing(VFEM & v, char * timebuf)
     a.close();
 
     double diff = 0.0, norm = 0.0;
-    for(size_t k = 0; k < v.fes_num; k++)
+    for(size_t k = 0; k < v.fes.size(); k++)
     {
         if(fabs(v.fes[k].barycenter.x) <= 600 && fabs(v.fes[k].barycenter.x) >= 180 &&
            fabs(v.fes[k].barycenter.y) <= 600 && fabs(v.fes[k].barycenter.y) >= 180 &&
