@@ -35,6 +35,8 @@ public:
     point_t<T> pnt() const;
     // Норма вектора
     double norm() const;
+    // Квадрат нормы вектора
+    double norm2() const;
     // Векторное произведение
     vector3_t<T> cross(const vector3_t<T> & other) const;
     // Операторы типа "скобка"
@@ -217,9 +219,17 @@ ostream & operator << (ostream & os, const vector3_t<U> & a)
 template<>
 double vector3_t<double>::norm() const;
 
+// Квадрат нормы вектора (действительной)
+template<>
+double vector3_t<double>::norm2() const;
+
 // Норма вектора (комплексная)
 template<>
 double vector3_t< complex<double> >::norm() const;
+
+// Квадрат нормы вектора (комплексной)
+template<>
+double vector3_t< complex<double> >::norm2() const;
 
 // Скалярное произведение
 template<> template<>
