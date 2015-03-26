@@ -1,6 +1,6 @@
 CXX ?= g++
 CXXFLAGS_EXTRA ?= -Wall -Wextra -ansi -pedantic
-CXXFLAGS_OPTIMIZE ?= -O3 -march=native -mtune=native
+CXXFLAGS_OPTIMIZE ?= -O3 -march=native -mtune=native -DNDEBUG
 LDFLAGS_EXTRA ?= -s
 EXECUTABLE = vfem
 
@@ -13,6 +13,7 @@ SOURCES = \
 	src/geometry/point.cpp \
 	src/geometry/vector3.cpp \
 	src/elements/edge.cpp \
+	src/elements/face.cpp \
 	src/elements/triangle.cpp \
 	src/elements/tetrahedron.cpp \
 	src/elements/tetrahedron_pml.cpp \

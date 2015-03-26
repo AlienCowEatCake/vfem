@@ -8,129 +8,162 @@ tetrahedron_base::tetrahedron_base()
         nodes[i] = NULL;
     for(size_t i = 0; i < 6; i++)
         edges[i] = NULL;
+#if BASIS_ORDER >= 2
+    for(size_t i = 0; i < 4; i++)
+        faces[i] = NULL;
+#endif
     phys = NULL;
 }
 
 const point & tetrahedron_base::get_node(size_t i) const
 {
-    if(!nodes[i])
-    {
-        cerr << "Error: Null pointer at get_node(" << i << ")" << endl;
-        throw NULL_PTR_ERROR;
-    }
+    assert(i < 4);
+    assert(nodes[i] != NULL);
     return (* nodes[i]);
 }
 
 const edge & tetrahedron_base::get_edge(size_t i) const
 {
-    if(!edges[i])
-    {
-        cerr << "Error: Null pointer at get_edge(" << i << ")" << endl;
-        throw NULL_PTR_ERROR;
-    }
+    assert(i < 6);
+    assert(edges[i] != NULL);
     return (* edges[i]);
 }
 
+#if BASIS_ORDER >= 2
+const face & tetrahedron_base::get_face(size_t i) const
+{
+    assert(i < 4);
+    assert(faces[i] != NULL);
+    return (* faces[i]);
+}
+#endif
+
 const phys_area & tetrahedron_base::get_phys_area() const
 {
-    if(!phys)
-    {
-        cerr << "Error: Null pointer at get_phys_area()" << endl;
-        throw NULL_PTR_ERROR;
-    }
+    assert(phys != NULL);
     return * phys;
 }
 
 double tetrahedron_base::lambda(size_t i, const point & p) const
 {
+    assert(i < 4); // Если i == 4, то явно где-то косяк
     return L[i][3] + L[i][0] * p.x + L[i][1] * p.y + L[i][2] * p.z;
 }
 
 vector3 tetrahedron_base::grad_lambda(size_t i) const
 {
+    assert(i < 4); // Если i == 4, то явно где-то косяк
     return vector3(L[i][0], L[i][1], L[i][2]);
 }
 
 vector3 tetrahedron_base::w(size_t i, const point & p) const
 {
-    switch(i + 1)
+    using namespace tet_basis_indexes;
+    assert(i < basis::tet_bf_num);
+
+    // Первый неполный
+    if(i < 6)
     {
-    case 1:
-        return lambda(0, p) * grad_lambda(1) - lambda(1, p) * grad_lambda(0);
-    case 2:
-        return lambda(0, p) * grad_lambda(2) - lambda(2, p) * grad_lambda(0);
-    case 3:
-        return lambda(0, p) * grad_lambda(3) - lambda(3, p) * grad_lambda(0);
-    case 4:
-        return lambda(1, p) * grad_lambda(2) - lambda(2, p) * grad_lambda(1);
-    case 5:
-        return lambda(1, p) * grad_lambda(3) - lambda(3, p) * grad_lambda(1);
-    case 6:
-        return lambda(2, p) * grad_lambda(3) - lambda(3, p) * grad_lambda(2);
-    case 7:
-        return lambda(0, p) * grad_lambda(1) + lambda(1, p) * grad_lambda(0);
-    case 8:
-        return lambda(0, p) * grad_lambda(2) + lambda(2, p) * grad_lambda(0);
-    case 9:
-        return lambda(0, p) * grad_lambda(3) + lambda(3, p) * grad_lambda(0);
-    case 10:
-        return lambda(1, p) * grad_lambda(2) + lambda(2, p) * grad_lambda(1);
-    case 11:
-        return lambda(1, p) * grad_lambda(3) + lambda(3, p) * grad_lambda(1);
-    case 12:
-        return lambda(2, p) * grad_lambda(3) + lambda(3, p) * grad_lambda(2);
+        return lambda(ind_e[i][0], p) * grad_lambda(ind_e[i][1]) -
+               lambda(ind_e[i][1], p) * grad_lambda(ind_e[i][0]);
     }
-    cerr << "Error: Incorrect basis function number!" << endl;
-    throw(ADDRESSING_ERROR);
+    // Первый полный
+    else if(i < 12)
+    {
+        size_t ii = i - 6;
+        return lambda(ind_e[ii][0], p) * grad_lambda(ind_e[ii][1]) +
+               lambda(ind_e[ii][1], p) * grad_lambda(ind_e[ii][0]);
+    }
+    // Второй неполный
+    else if(i < 16)
+    {
+        size_t ii = i - 12;
+        return lambda(ind_f[ii][1], p) * lambda(ind_f[ii][2], p) * grad_lambda(ind_f[ii][0]) +
+               lambda(ind_f[ii][0], p) * lambda(ind_f[ii][2], p) * grad_lambda(ind_f[ii][1]) -
+               2.0 * lambda(ind_f[ii][0], p) * lambda(ind_f[ii][1], p) * grad_lambda(ind_f[ii][2]);
+    }
+    else if(i < 20)
+    {
+        size_t ii = i - 16;
+        return lambda(ind_f[ii][1], p) * lambda(ind_f[ii][2], p) * grad_lambda(ind_f[ii][0]) -
+               2.0 * lambda(ind_f[ii][0], p) * lambda(ind_f[ii][2], p) * grad_lambda(ind_f[ii][1]) +
+               lambda(ind_f[ii][0], p) * lambda(ind_f[ii][1], p) * grad_lambda(ind_f[ii][2]);
+    }
+    // Второй полный
+    else if(i < 24)
+    {
+        size_t ii = i - 20;
+        return lambda(ind_f[ii][1], p) * lambda(ind_f[ii][2], p) * grad_lambda(ind_f[ii][0]) +
+               lambda(ind_f[ii][0], p) * lambda(ind_f[ii][2], p) * grad_lambda(ind_f[ii][1]) +
+               lambda(ind_f[ii][0], p) * lambda(ind_f[ii][1], p) * grad_lambda(ind_f[ii][2]);
+    }
+    else if(i < 30)
+    {
+        size_t ii = i - 24;
+        return lambda(ind_e[ii][1], p) * (2.0 * lambda(ind_e[ii][0], p) - lambda(ind_e[ii][1], p)) * grad_lambda(ind_e[ii][0]) -
+               lambda(ind_e[ii][0], p) * (2.0 * lambda(ind_e[ii][1], p) - lambda(ind_e[ii][0], p)) * grad_lambda(ind_e[ii][1]);
+    }
+
+    return vector3();
 }
 
 vector3 tetrahedron_base::rotw(size_t i, const point & p) const
 {
+    using namespace tet_basis_indexes;
+    assert(i < basis::tet_bf_num);
     MAYBE_UNUSED(p);
-    vector3 grad1, grad2;
-    switch(i + 1)
+
+    // Первый неполный
+    if(i < 6)
     {
-    case 1:
-        grad1 = grad_lambda(0);
-        grad2 = grad_lambda(1);
-        break;
-    case 2:
-        grad1 = grad_lambda(0);
-        grad2 = grad_lambda(2);
-        break;
-    case 3:
-        grad1 = grad_lambda(0);
-        grad2 = grad_lambda(3);
-        break;
-    case 4:
-        grad1 = grad_lambda(1);
-        grad2 = grad_lambda(2);
-        break;
-    case 5:
-        grad1 = grad_lambda(1);
-        grad2 = grad_lambda(3);
-        break;
-    case 6:
-        grad1 = grad_lambda(2);
-        grad2 = grad_lambda(3);
-        break;
-    case 7:
-    case 8:
-    case 9:
-    case 10:
-    case 11:
-    case 12:
-        return vector3(0.0, 0.0, 0.0);
-    default:
-        cerr << "Error: Incorrect rot basis function number!" << endl;
-        throw(ADDRESSING_ERROR);
+        return 2.0 * grad_lambda(ind_e[i][0]).cross(grad_lambda(ind_e[i][1]));
     }
-    return 2.0 * grad1.cross(grad2);
+    // Первый полный
+    else if(i < 12)
+    {
+        return vector3(0.0, 0.0, 0.0);
+    }
+    // Второй неполный
+    else if(i < 16)
+    {
+        size_t ii = i - 12;
+        double lambda_j = lambda(ind_f[ii][0], p);
+        double lambda_k = lambda(ind_f[ii][1], p);
+        double lambda_l = lambda(ind_f[ii][2], p);
+        vector3 grad_lambda_j = grad_lambda(ind_f[ii][0]);
+        vector3 grad_lambda_k = grad_lambda(ind_f[ii][1]);
+        vector3 grad_lambda_l = grad_lambda(ind_f[ii][2]);
+        return (lambda_l * grad_lambda_k + lambda_k * grad_lambda_l).cross(grad_lambda_j) +
+               (lambda_l * grad_lambda_j + lambda_j * grad_lambda_l).cross(grad_lambda_k) -
+               2.0 * (lambda_k * grad_lambda_j + lambda_j * grad_lambda_k).cross(grad_lambda_l);
+    }
+    else if(i < 20)
+    {
+        size_t ii = i - 16;
+        double lambda_j = lambda(ind_f[ii][0], p);
+        double lambda_k = lambda(ind_f[ii][1], p);
+        double lambda_l = lambda(ind_f[ii][2], p);
+        vector3 grad_lambda_j = grad_lambda(ind_f[ii][0]);
+        vector3 grad_lambda_k = grad_lambda(ind_f[ii][1]);
+        vector3 grad_lambda_l = grad_lambda(ind_f[ii][2]);
+        return (lambda_l * grad_lambda_k + lambda_k * grad_lambda_l).cross(grad_lambda_j) -
+               2.0 * (lambda_l * grad_lambda_j + lambda_j * grad_lambda_l).cross(grad_lambda_k) +
+               (lambda_k * grad_lambda_j + lambda_j * grad_lambda_k).cross(grad_lambda_l);
+    }
+    // Второй полный
+    else if(i < 30)
+    {
+        return vector3(0.0, 0.0, 0.0);
+    }
+
+    return vector3();
 }
 
 void tetrahedron_base::init()
 {
-    matrix4 D;
+    using namespace tet_integration;
+
+    matrix_t<double, 4, 4> D;
     for(size_t i = 0; i < 3; i++)
         for(size_t j = 0; j < 4; j++)
             D[i][j] = get_node(j)[i];
@@ -141,39 +174,16 @@ void tetrahedron_base::init()
 
     jacobian = fabs(D_det);
 
-    // Точки Гаусса на мастер-элементе
-    static const double gauss_a = (5.0 - sqrt(5.0)) / 20.0;
-    static const double gauss_b = (5.0 + 3.0 * sqrt(5.0)) / 20.0;
-    double Gauss_cord[4][4];
-    double Gauss_cord_gl[4][4];
-    // Заполнение матрицы в локальных координатах
-    Gauss_cord[0][0] = 1.0 - gauss_b - 2.0 * gauss_a;
-    Gauss_cord[1][0] = gauss_b;
-    Gauss_cord[2][0] = Gauss_cord[3][0] = gauss_a;
-    Gauss_cord[0][1] = 1.0 - gauss_b - 2.0 * gauss_a;
-    Gauss_cord[1][1] = Gauss_cord[3][1] = gauss_a;
-    Gauss_cord[2][1] = gauss_b;
-    Gauss_cord[0][2] = 1.0 - gauss_b - 2.0 * gauss_a;
-    Gauss_cord[1][2] = Gauss_cord[2][2] = gauss_a;
-    Gauss_cord[3][2] = gauss_b;
-    Gauss_cord[0][3] = 1.0 - 3.0 * gauss_a;
-    Gauss_cord[1][3] = Gauss_cord[2][3] = Gauss_cord[3][3] = gauss_a;
-
-    // Перевод на текущий тетраэдр
-    for(size_t i = 0; i < 4; i++)
+    // Перевод точек Гаусса с мастер-элемента на текущий тетраэдр
+    for(size_t i = 0; i < 3; i++)
     {
-        for(size_t j = 0 ; j < 4; j++)
+        for(size_t j = 0 ; j < gauss_num; j++)
         {
-            Gauss_cord_gl[i][j] = 0;
+            gauss_points[j][i] = 0;
             for(size_t k = 0; k < 4; k++)
-                Gauss_cord_gl[i][j] += D[i][k] * Gauss_cord[k][j];
+                gauss_points[j][i] += D[i][k] * gauss_points_master[j][k];
         }
     }
-    for(size_t i = 0; i < 4; i++)
-        for(size_t j = 0; j < 3; j++)
-            gauss_points[i][j] = Gauss_cord_gl[j][i];
-    for(size_t i = 0; i < 4; i++)
-        gauss_weights[i] = 1.0 / 24.0;
 
     // Расчет барицентра
     for(size_t i = 0; i < 3; i++)
@@ -234,8 +244,8 @@ bool tetrahedron_base::inside_tree(double x0, double x1, double y0, double y1, d
         return true;
 
     // Пересечение куба и тетраэдра, не обработанное выше
-    double t[6][6];     //параметры прямых для всех прямых (6) и всех плоскостей (6)
-    double cords_t[6][6][3];    //прямая, плоскость, координата
+    double t[6][6];     // Параметры прямых для всех прямых (6) и всех плоскостей (6)
+    double cords_t[6][6][3];    // Прямая, плоскость, координата
     for(size_t i = 0; i < 6; i++)
     {
         t[i][0] = (x0 - edges_b[i][0]) / edges_a[i][0]; // x = x0
@@ -251,7 +261,7 @@ bool tetrahedron_base::inside_tree(double x0, double x1, double y0, double y1, d
             for(size_t k = 0; k < 3; k++)
                 cords_t[i][j][k] = edges_a[i][k] * t[i][j] + edges_b[i][k];
 
-    for(size_t i = 0; i < 6; i++)   // берём прямоую и проверяем, что пересечение с плоскостью попадает в раcсматриваемый отрезок прямой и в рассатриваемую часть плоскости
+    for(size_t i = 0; i < 6; i++)   // Берем прямую и проверяем, что пересечение с плоскостью попадает в раcсматриваемый отрезок прямой и в рассатриваемую часть плоскости
     {
         if(
             (t[i][0] >= 0.0 && t[i][0] <= 1.0 && cords_t[i][0][1] >= y0 && cords_t[i][0][1] >= y1 && cords_t[i][0][2] >= z0 && cords_t[i][0][2] <= z1) || // x = x0
@@ -266,36 +276,40 @@ bool tetrahedron_base::inside_tree(double x0, double x1, double y0, double y1, d
     return false;
 }
 
-double tetrahedron_base::diff_normL2(const carray12 & q, cvector3(*func)(const point &)) const
+double tetrahedron_base::diff_normL2(const array_t<complex<double>, basis::tet_bf_num> & q, cvector3(*func)(const point &)) const
 {
+    using namespace tet_integration;
+    using namespace basis;
     complex<double> result = 0.0;
-    for(size_t k = 0; k < 4; k++)
+    for(size_t k = 0; k < gauss_num; k++)
     {
         cvector3 val(0.0, 0.0, 0.0);
-        for(size_t i = 0; i < 12; i++)
+        for(size_t i = 0; i < tet_bf_num; i++)
             val = val + q[i] * cvector3(w(i, gauss_points[k]));
         cvector3 func_d = func(gauss_points[k]) - val;
-        cvector3 func_d_conj = func_d.cj();
-        result += gauss_weights[k] * (func_d * func_d_conj);
+        //result += gauss_weights[k] * (func_d * func_d.cj());
+        result += gauss_weights[k] * func_d.norm2();
     }
     result *= jacobian;
     return result.real();
 }
 
-double tetrahedron_base::diff_normL2(const carray12 & q, const carray12 & q_true) const
+double tetrahedron_base::diff_normL2(const array_t<complex<double>, basis::tet_bf_num> & q, const array_t<complex<double>, basis::tet_bf_num> & q_true) const
 {
+    using namespace tet_integration;
+    using namespace basis;
     complex<double> result = 0.0;
-    for(size_t k = 0; k < 4; k++)
+    for(size_t k = 0; k < gauss_num; k++)
     {
         cvector3 val(0.0, 0.0, 0.0), val_true(0.0, 0.0, 0.0);
-        for(size_t i = 0; i < 12; i++)
+        for(size_t i = 0; i < tet_bf_num; i++)
         {
             val = val + q[i] * cvector3(w(i, gauss_points[k]));
             val_true = val_true + q_true[i] * cvector3(w(i, gauss_points[k]));
         }
         cvector3 func_d = val_true - val;
-        cvector3 func_d_conj = func_d.cj();
-        result += gauss_weights[k] * (func_d * func_d_conj);
+        //result += gauss_weights[k] * (func_d * func_d.cj());
+        result += gauss_weights[k] * func_d.norm2();
     }
     result *= jacobian;
     return result.real();
@@ -303,27 +317,30 @@ double tetrahedron_base::diff_normL2(const carray12 & q, const carray12 & q_true
 
 double tetrahedron_base::normL2(cvector3(*func)(const point &)) const
 {
+    using namespace tet_integration;
     complex<double> result = 0.0;
-    for(size_t k = 0; k < 4; k++)
+    for(size_t k = 0; k < gauss_num; k++)
     {
         cvector3 func_d = func(gauss_points[k]);
-        cvector3 func_d_conj = func_d.cj();
-        result += gauss_weights[k] * (func_d * func_d_conj);
+        //result += gauss_weights[k] * (func_d * func_d.cj());
+        result += gauss_weights[k] * func_d.norm2();
     }
     result *= jacobian;
     return result.real();
 }
 
-double tetrahedron_base::normL2(const carray12 & q_true) const
+double tetrahedron_base::normL2(const array_t<complex<double>, basis::tet_bf_num> & q_true) const
 {
+    using namespace tet_integration;
+    using namespace basis;
     complex<double> result = 0.0;
-    for(size_t k = 0; k < 4; k++)
+    for(size_t k = 0; k < gauss_num; k++)
     {
         cvector3 func_d;
-        for(size_t i = 0; i < 12; i++)
+        for(size_t i = 0; i < tet_bf_num; i++)
             func_d = func_d + q_true[i] * cvector3(w(i, gauss_points[k]));
-        cvector3 func_d_conj = func_d.cj();
-        result += gauss_weights[k] * (func_d * func_d_conj);
+        //result += gauss_weights[k] * (func_d * func_d.cj());
+        result += gauss_weights[k] * func_d.norm2();
     }
     result *= jacobian;
     return result.real();
@@ -333,8 +350,9 @@ double tetrahedron_base::normL2(const carray12 & q_true) const
 
 double tetrahedron::integrate_w(size_t i, size_t j) const
 {
+    using namespace tet_integration;
     double result = 0.0;
-    for(size_t k = 0; k < 4; k++)
+    for(size_t k = 0; k < gauss_num; k++)
         result += gauss_weights[k] *
                   w(i, gauss_points[k]) *
                   w(j, gauss_points[k]);
@@ -343,8 +361,9 @@ double tetrahedron::integrate_w(size_t i, size_t j) const
 
 double tetrahedron::integrate_rotw(size_t i, size_t j) const
 {
+    using namespace tet_integration;
     double result = 0.0;
-    for(size_t k = 0; k < 4; k++)
+    for(size_t k = 0; k < gauss_num; k++)
         result += gauss_weights[k] *
                   rotw(i, gauss_points[k]) *
                   rotw(j, gauss_points[k]);
@@ -353,40 +372,43 @@ double tetrahedron::integrate_rotw(size_t i, size_t j) const
 
 complex<double> tetrahedron::integrate_fw(cvector3(*func)(const point &, const phys_area &), size_t i) const
 {
+    using namespace tet_integration;
     complex<double> result = 0.0;
-    for(size_t k = 0; k < 4; k++)
+    for(size_t k = 0; k < gauss_num; k++)
         result += gauss_weights[k] *
                   func(gauss_points[k], get_phys_area()) *
                   w(i, gauss_points[k]);
     return result * jacobian;
 }
 
-matrix12 tetrahedron::G() const
+matrix_t<double, basis::tet_bf_num, basis::tet_bf_num>
+tetrahedron::G() const
 {
-    matrix12 matr;
-    for(size_t i = 0; i < 12; i++)
-        for(size_t j = 0; j < 12; j++)
-            matr[i][j] = 0.0;
-
-    for(size_t i = 0; i < 6; i++)
+    using namespace basis;
+    matrix_t<double, tet_bf_num, tet_bf_num> matr;
+    for(size_t i = 0; i < tet_bf_num; i++)
         for(size_t j = 0; j <= i; j++)
             matr[j][i] = matr[i][j] = integrate_rotw(i, j);
     return matr;
 }
 
-matrix12 tetrahedron::M() const
+matrix_t<double, basis::tet_bf_num, basis::tet_bf_num>
+tetrahedron::M() const
 {
-    matrix12 matr;
-    for(size_t i = 0; i < 12; i++)
+    using namespace basis;
+    matrix_t<double, tet_bf_num, tet_bf_num> matr;
+    for(size_t i = 0; i < tet_bf_num; i++)
         for(size_t j = 0; j <= i; j++)
             matr[j][i] = matr[i][j] = integrate_w(i, j);
     return matr;
 }
 
-carray12 tetrahedron::rp(cvector3(*func)(const point &, const phys_area &)) const
+array_t<complex<double>, basis::tet_bf_num>
+tetrahedron::rp(cvector3(*func)(const point &, const phys_area &)) const
 {
-    carray12 arr;
-    for(size_t i = 0; i < 12; i++)
+    using namespace basis;
+    array_t<complex<double>, tet_bf_num> arr;
+    for(size_t i = 0; i < tet_bf_num; i++)
         arr[i] = integrate_fw(func, i);
     return arr;
 }

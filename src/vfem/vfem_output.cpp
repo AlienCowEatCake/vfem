@@ -4,7 +4,9 @@ void VFEM::output(const string & tecplot_filename)
 {
     cout << "Writing to Tecplot ..." << endl;
 
-    cvector3 * E_vals = new cvector3 [fes_num];
+    size_t fes_num = fes.size();
+    vector<cvector3> E_vals;
+    E_vals.resize(fes_num);
     for(size_t k = 0; k < fes_num; k++)
         E_vals[k] = solution(fes[k].barycenter, &fes[k]);
 
@@ -13,7 +15,6 @@ void VFEM::output(const string & tecplot_filename)
 
     if(!tecplot_file.good())
     {
-        delete [] E_vals;
         cerr << "Error in " << __FILE__ << ":" << __LINE__
              << " while writing file " << tecplot_filename << endl;
         throw IO_FILE_ERROR;
@@ -22,6 +23,7 @@ void VFEM::output(const string & tecplot_filename)
     tecplot_file.precision(17);
     tecplot_file.setf(ios::fixed);
 
+    size_t nodes_num = nodes.size();
     tecplot_file << "TITLE     = \"" << "Title" << "\" \n  VARIABLES = \"x\" \n \"y\" \n \"z\" \n \"ExR\" \n \"EyR\" \n \"EzR\" \n \"ExI\" \n \"EyI\" \n \"EzI\" \n \"abs(E)\"\n ";
     tecplot_file << "ZONE T=\"ZONE1\" \n N = " << nodes_num << " E = " << fes_num << " , F=FEBLOCK ET=Tetrahedron \nVARLOCATION = (NODAL NODAL NODAL CELLCENTERED CELLCENTERED CELLCENTERED CELLCENTERED CELLCENTERED CELLCENTERED CELLCENTERED)\n";
 
@@ -52,15 +54,13 @@ void VFEM::output(const string & tecplot_filename)
     for(size_t i = 0; i < fes_num; i++)
     {
         for(size_t j = 0; j < 4; j++)
-            tecplot_file << fes[i].get_node(j).num + 1 << " ";
+            tecplot_file << fes[i].nodes[j]->num + 1 << " ";
         tecplot_file << "\n";
     }
 
     tecplot_file << "\n";
     tecplot_file.flush();
     tecplot_file.close();
-
-    delete [] E_vals;
 }
 
 void VFEM::output_slice(const string & tecplot_filename, char slice_var, double slice_val,

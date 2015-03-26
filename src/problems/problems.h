@@ -3,14 +3,14 @@
 
 #include "../vfem/vfem.h"
 
-//#define ANALYTICAL_CUBE
+#define ANALYTICAL_CUBE
 //#define FIELD_CUBE
 //#define AREA_POINT_SOURCE
 //#define AREA_SOURCE
 //#define CUBE_PML
 //#define AREA_PML
 //#define SOURCE_PML
-#define AREA_PML_SOURCE
+//#define AREA_PML_SOURCE
 
 extern string mesh_filename;
 extern string phys_filename;

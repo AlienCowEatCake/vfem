@@ -35,6 +35,8 @@ public:
     point_t<T> pnt() const;
     // Норма вектора
     double norm() const;
+    // Квадрат нормы вектора
+    double norm2() const;
     // Векторное произведение
     vector3_t<T> cross(const vector3_t<T> & other) const;
     // Операторы типа "скобка"
@@ -56,7 +58,7 @@ public:
     friend vector3_t<R> operator * (const U & a, const vector3_t<V> & vec);
     // Умножение матрицы на вектор
     template<typename U, typename V>
-    friend vector3_t<U> operator * (const matrix_t<V, 3> & matr, const vector3_t<U> & vec);
+    friend vector3_t<U> operator * (const matrix_t<V, 3, 3> & matr, const vector3_t<U> & vec);
     // Вывод
     template<typename U>
     friend ostream & operator << (ostream & os, const vector3_t<U> & a);
@@ -131,6 +133,7 @@ vector3_t<T> vector3_t<T>::cross(const vector3_t<T> & other) const
 template<typename T>
 T & vector3_t<T>::operator [] (size_t i)
 {
+    assert(i < 3);
     switch(i)
     {
     case 0:
@@ -139,15 +142,14 @@ T & vector3_t<T>::operator [] (size_t i)
         return y;
     case 2:
         return z;
-    default:
-        cerr << "Error: Unknown index " << i << " at vector " << * this << endl;
-        throw ADDRESSING_ERROR;
     }
+    return x;
 }
 
 template<typename T>
 T vector3_t<T>::operator [] (size_t i) const
 {
+    assert(i < 3);
     switch(i)
     {
     case 0:
@@ -156,10 +158,8 @@ T vector3_t<T>::operator [] (size_t i) const
         return y;
     case 2:
         return z;
-    default:
-        cerr << "Error: Unknown index " << i << " at vector " << * this << endl;
-        throw ADDRESSING_ERROR;
     }
+    return 0;
 }
 
 // Скалярное произведение
@@ -198,7 +198,7 @@ vector3_t<U> operator * (const U & a, const vector3_t<U> & vec)
 
 // Умножение матрицы на вектор
 template<typename U, typename V>
-vector3_t<U> operator * (const matrix_t<V, 3> & matr, const vector3_t<U> & vec)
+vector3_t<U> operator * (const matrix_t<V, 3, 3> & matr, const vector3_t<U> & vec)
 {
     vector3_t<U> result(static_cast<U>(0), static_cast<U>(0), static_cast<U>(0));
     for(size_t i = 0; i < 3; i++)
@@ -219,9 +219,17 @@ ostream & operator << (ostream & os, const vector3_t<U> & a)
 template<>
 double vector3_t<double>::norm() const;
 
+// Квадрат нормы вектора (действительной)
+template<>
+double vector3_t<double>::norm2() const;
+
 // Норма вектора (комплексная)
 template<>
 double vector3_t< complex<double> >::norm() const;
+
+// Квадрат нормы вектора (комплексной)
+template<>
+double vector3_t< complex<double> >::norm2() const;
 
 // Скалярное произведение
 template<> template<>

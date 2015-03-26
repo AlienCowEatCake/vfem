@@ -4,14 +4,34 @@
 template<>
 double vector3_t<double>::norm() const
 {
-    return sqrt(x * x + y * y + z * z);
+    return sqrt(norm2());
+}
+
+// Квадрат нормы вектора (действительной)
+template<>
+double vector3_t<double>::norm2() const
+{
+    return x * x + y * y + z * z;
 }
 
 // Норма вектора (комплексная)
 template<>
 double vector3_t< complex<double> >::norm() const
 {
-    return sqrt((conj(x) * x + conj(y) * y + conj(z) * z).real());
+    //return sqrt((conj(x) * x + conj(y) * y + conj(z) * z).real());
+    return sqrt(norm2());
+}
+
+// Квадрат нормы вектора (комплексной)
+template<>
+double vector3_t< complex<double> >::norm2() const
+{
+    double x_re = x.real(), x_im = x.imag();
+    double y_re = y.real(), y_im = y.imag();
+    double z_re = z.real(), z_im = z.imag();
+    return x_re * x_re + x_im * x_im +
+           y_re * y_re + y_im * y_im +
+           z_re * z_re + z_im * z_im;
 }
 
 // Скалярное произведение

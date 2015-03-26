@@ -47,14 +47,8 @@ int main()
     {
         switch(errn)
         {
-        case ADDRESSING_ERROR:
-            cerr << "Throw ADDRESSING_ERROR" << endl;
-            break;
         case IO_FILE_ERROR:
             cerr << "Throw IO_FILE_ERROR" << endl;
-            break;
-        case NULL_PTR_ERROR:
-            cerr << "Throw NULL_PTR_ERROR" << endl;
             break;
         default:
             cerr << "Throw " << errn << " (unknown)" << endl;

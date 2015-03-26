@@ -3,22 +3,6 @@
 
 #include "../common/common.h"
 
-// Немного typedef'ов
-template<typename type, size_t dimension> class array_t;
-template<typename type, size_t dimension> class matrix_t;
-typedef matrix_t<double,  3> matrix3;
-typedef matrix_t<double,  4> matrix4;
-typedef matrix_t<double,  6> matrix6;
-typedef matrix_t<double, 12> matrix12;
-typedef array_t<double,  6> array6;
-typedef array_t<double, 12> array12;
-typedef matrix_t<complex<double>,  3> cmatrix3;
-typedef matrix_t<complex<double>,  4> cmatrix4;
-typedef matrix_t<complex<double>,  6> cmatrix6;
-typedef matrix_t<complex<double>, 12> cmatrix12;
-typedef array_t<complex<double>,  6> carray6;
-typedef array_t<complex<double>, 12> carray12;
-
 // Класс "статический массив"
 template<typename type, size_t dimension>
 class array_t
@@ -37,7 +21,7 @@ protected:
 };
 
 // Класс "статическая матрица"
-template<typename type, size_t dimension>
+template<typename type, size_t dimension_row, size_t dimension_col>
 class matrix_t
 {
 public:
@@ -50,12 +34,12 @@ public:
         return a[i];
     }
 protected:
-    type a[dimension][dimension];
+    type a[dimension_row][dimension_col];
 };
 
 // Определитель матрицы 3x3
 template<typename type>
-type determenant(const matrix_t<type, 3> & A)
+type determenant(const matrix_t<type, 3, 3> & A)
 {
     return A[0][0] * A[1][1] * A[2][2] +
            A[1][0] * A[2][1] * A[0][2] +
@@ -67,7 +51,7 @@ type determenant(const matrix_t<type, 3> & A)
 
 // Определитель матрицы 4x4
 template<typename type>
-type determenant(const matrix_t<type, 4> & A)
+type determenant(const matrix_t<type, 4, 4> & A)
 {
     return A[2][3] * (A[3][1] * (A[0][0] * A[1][2] - A[0][2] * A[1][0]) +
                       A[0][1] * (A[1][0] * A[3][2] - A[1][2] * A[3][0])) +
@@ -85,9 +69,9 @@ type determenant(const matrix_t<type, 4> & A)
 
 // Обращение матрицы 3x3
 template<typename type>
-matrix_t<type, 3> inverse(const matrix_t<type, 3> & A, type & detA)
+matrix_t<type, 3, 3> inverse(const matrix_t<type, 3, 3> & A, type & detA)
 {
-    matrix_t<type, 3> Inv_A;
+    matrix_t<type, 3, 3> Inv_A;
     detA = determenant(A);
 
     Inv_A[0][0] = (A[1][1] * A[2][2] - A[2][1] * A[1][2]) / detA;
@@ -107,9 +91,9 @@ matrix_t<type, 3> inverse(const matrix_t<type, 3> & A, type & detA)
 
 // Обращение матрицы 4x4
 template<typename type>
-matrix_t<type, 4> inverse(const matrix_t<type, 4> & A, type & detA)
+matrix_t<type, 4, 4> inverse(const matrix_t<type, 4, 4> & A, type & detA)
 {
-    matrix_t<type, 4> Inv_A;
+    matrix_t<type, 4, 4> Inv_A;
     detA = determenant(A);
 
     Inv_A[0][0] = (A[3][1] * (A[1][2] * A[2][3] - A[1][3] * A[2][2]) +
