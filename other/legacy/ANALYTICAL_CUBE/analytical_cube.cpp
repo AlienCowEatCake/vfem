@@ -58,8 +58,10 @@ cvector3 func_b1(const point & p, const triangle * tr)
     return cvector3(0.0, 0.0, 0.0);
 }
 
-string mesh_filename = "data/approx/cube_x1.msh";
-string phys_filename = "data/approx/phys.txt";
+//string mesh_filename = "data/cube/cube.msh";
+//string phys_filename = "data/cube/phys_analyt.txt";
+string mesh_filename = "data/approx/0.0250/cube.msh";
+string phys_filename = "data/approx/phys_param.txt";
 string tecplot_filename = "analytical_cube.plt";
 
 void postprocessing(VFEM & v, char * timebuf)

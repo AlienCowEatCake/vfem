@@ -1,5 +1,5 @@
 CXX ?= g++
-CXXFLAGS_EXTRA ?= -Wall -Wextra -ansi -pedantic
+CXXFLAGS_EXTRA ?= -Wall -Wextra -ansi -pedantic -pipe
 CXXFLAGS_OPTIMIZE ?= -O3 -march=native -mtune=native -DNDEBUG
 LDFLAGS_EXTRA ?= -s
 EXECUTABLE = vfem
@@ -22,11 +22,6 @@ SOURCES = \
 	src/vfem/vfem_input.cpp \
 	src/vfem/vfem_output.cpp \
 	src/problems/analytical_cube.cpp \
-	src/problems/field_cube.cpp \
-	src/problems/area_point_source.cpp \
-	src/problems/area_source.cpp \
-	src/problems/cube_pml.cpp \
-	src/problems/area_pml.cpp \
 	src/problems/area_pml_source.cpp \
 	src/problems/source_pml.cpp \
 	src/solvers/BiCGComplex_VC.cpp \
