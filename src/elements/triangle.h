@@ -3,12 +3,12 @@
 
 #include "../common/common.h"
 #include "../common/matrix.h"
+#include "../common/basis_config.h"
 #include "../geometry/point.h"
 #include "../geometry/vector3.h"
 #include "../elements/edge.h"
 #include "../elements/face.h"
 #include "../vfem/phys.h"
-#include "../elements/basis_config.h"
 
 // Класс треугольник (обычный)
 class triangle_base

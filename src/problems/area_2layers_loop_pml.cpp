@@ -1,6 +1,6 @@
 #include "problems.h"
 
-#if defined AREA_PML_SOURCE
+#if defined AREA_2LAYERS_LOOP_PML
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST || defined VFEM_USE_ANALYTICAL
 #error "Please, reconfigure!"
 #endif
@@ -133,33 +133,33 @@ cvector3 get_s(const point & p, const finite_element * fe, const phys_pml_area *
     return cvector3(1.0 + chi * power * cx, 1.0 + chi * power * cy, 1.0 + chi * power * cz);
 }
 
-//string mesh_filename = "data/area_pml_source/2.msh";
-//string phys_filename = "data/area_pml_source/1.txt";
-string tecplot_filename = "area_pml_source.plt";
+//string mesh_filename = "data/area_2layers_loop_pml/2.msh";
+//string phys_filename = "data/area_2layers_loop_pml/1.txt";
+string tecplot_filename = "area_2layers_loop_pml.plt";
 
-string phys_filename_pml = "data/area_pml_source/3-1.txt";
-string phys_filename_nonpml = "data/area_pml_source/3-2.txt";
-string mesh_filename = "data/area_pml_source/5.msh";
+string phys_filename_pml = "data/area_2layers_loop_pml/3-1.txt";
+string phys_filename_nonpml = "data/area_2layers_loop_pml/3-2.txt";
+string mesh_filename = "data/area_2layers_loop_pml/5.msh";
 #if defined VFEM_USE_PML
 string phys_filename = phys_filename_pml;
 #else
 string phys_filename = phys_filename_nonpml;
 #endif
-string slae_dump_filename = "area_pml_source_slae.txt";
+string slae_dump_filename = "area_2layers_loop_pml_slae.txt";
 
 void postprocessing(VFEM & v, char * timebuf)
 {
     MAYBE_UNUSED(v);
     MAYBE_UNUSED(timebuf);
-    v.output_slice(string("area_pml_source") + "_" + string(timebuf) + ".dat",
+    v.output_slice(string("area_2layers_loop_pml") + "_" + string(timebuf) + ".dat",
                    'Y', 0.0, 'X', -700, 700, 20.0, 'Z', -700, 700, 20.0);
-//    v.output_slice(string("area_pml_source_xy") + "_" + string(timebuf) + ".dat",
+//    v.output_slice(string("area_2layers_loop_pml_xy") + "_" + string(timebuf) + ".dat",
 //                   'Z', 0.0, 'X', -700, 700, 20.0, 'Y', -700, 700, 20.0);
-//    v.output_slice(string("area_pml_source_xz") + "_" + string(timebuf) + ".dat",
+//    v.output_slice(string("area_2layers_loop_pml_xz") + "_" + string(timebuf) + ".dat",
 //                   'Y', 0.0, 'X', -700, 700, 20.0, 'Z', -700, 700, 20.0);
-//    v.output_slice(string("area_pml_source_xz1") + "_" + string(timebuf) + ".dat",
+//    v.output_slice(string("area_2layers_loop_pml_xz1") + "_" + string(timebuf) + ".dat",
 //                   'Y', 10.0, 'X', -700, 700, 20.0, 'Z', -700, 700, 20.0);
-//    v.output_slice(string("area_pml_source_xz2") + "_" + string(timebuf) + ".dat",
+//    v.output_slice(string("area_2layers_loop_pml_xz2") + "_" + string(timebuf) + ".dat",
 //                   'Y', 80.0, 'X', -700, 700, 20.0, 'Z', -700, 700, 20.0);
 #if !defined VFEM_USE_PML
     v.slae.dump_x(slae_dump_filename);
@@ -194,4 +194,4 @@ void postprocessing(VFEM & v, char * timebuf)
 #endif
 }
 
-#endif
+#endif // AREA_2LAYERS_LOOP_PML

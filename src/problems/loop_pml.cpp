@@ -1,6 +1,6 @@
 #include "problems.h"
 
-#if defined SOURCE_PML
+#if defined LOOP_PML
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST || (!defined VFEM_USE_PML && defined VFEM_USE_ANALYTICAL)
 #error "Please, reconfigure!"
 #endif
@@ -102,19 +102,19 @@ cvector3 get_s(const point & p, const finite_element * fe, const phys_pml_area *
     return cvector3(1.0 + chi * power * cx, 1.0 + chi * power * cy, 1.0 + chi * power * cz);
 }
 
-//string phys_filename = "data/source_pml/1.txt";
-//string mesh_filename = "data/source_pml/1.msh";
-string tecplot_filename = "source_pml.plt";
+//string phys_filename = "data/loop_pml/1.txt";
+//string mesh_filename = "data/loop_pml/1.msh";
+string tecplot_filename = "loop_pml.plt";
 
-string phys_filename_pml = "data/source_pml/2-1.txt";
-string phys_filename_nonpml = "data/source_pml/2-2.txt";
-string mesh_filename = "data/source_pml/2.msh";
+string phys_filename_pml = "data/loop_pml/2-1.txt";
+string phys_filename_nonpml = "data/loop_pml/2-2.txt";
+string mesh_filename = "data/loop_pml/2.msh";
 #if defined VFEM_USE_PML
 string phys_filename = phys_filename_pml;
 #else
 string phys_filename = phys_filename_nonpml;
 #endif
-string slae_dump_filename = "source_pml_slae.txt";
+string slae_dump_filename = "loop_pml_slae.txt";
 
 #if defined VFEM_USE_ANALYTICAL
 cvector3 func_true(const point & p)
@@ -134,7 +134,7 @@ void postprocessing(VFEM & v, char * timebuf)
 {
     MAYBE_UNUSED(v);
     MAYBE_UNUSED(timebuf);
-    v.output_slice(string("source_pml_slice") + "_" + string(timebuf) + ".dat",
+    v.output_slice(string("loop_pml_slice") + "_" + string(timebuf) + ".dat",
                    'Z', 0.0, 'X', -700, 700, 20.0, 'Y', -700, 700, 20.0);
 #if !defined VFEM_USE_PML
     v.slae.dump(slae_dump_filename);
@@ -160,4 +160,4 @@ void postprocessing(VFEM & v, char * timebuf)
 #endif
 }
 
-#endif // SOURCE_PML
+#endif // LOOP_PML
