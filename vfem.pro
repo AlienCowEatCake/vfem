@@ -17,7 +17,6 @@ SOURCES += \
     src/vfem/vfem_input.cpp \
     src/vfem/vfem_output.cpp \
     src/problems/analytical_cube.cpp \
-    src/problems/metamaterial.cpp \
     src/problems/loop_pml.cpp \
     src/problems/area_2layers_loop_pml.cpp \
     src/solvers/BiCGComplex_VC.cpp \
