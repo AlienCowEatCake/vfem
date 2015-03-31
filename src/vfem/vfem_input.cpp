@@ -526,6 +526,7 @@ void VFEM::input_mesh(const string & gmsh_filename)
     dof_num = 3 * edges.size() + 3 * faces.size();
 #endif
 
+    cout << "Statistics:" << endl;
     cout << " # Tetrehedrons: " << fes.size() << endl;
     cout << " # Edges:        " << edges.size() << endl;
 #if BASIS_ORDER >= 2

@@ -2,10 +2,11 @@
 #define SLAE_H_INCLUDED
 
 #include "../common/common.h"
-#include "../solvers/BiCGComplex_VC.h"
-#include "../solvers/BiCGStabComplex_VC.h"
-#include "../solvers/CGMComplex_VC.h"
-#include "../solvers/CGMComplex_LLT.h"
+//#include "../solvers/BiCGComplex_VC.h"
+//#include "../solvers/BiCGStabComplex_VC.h"
+//#include "../solvers/CGMComplex_VC.h"
+//#include "../solvers/CGMComplex_LLT.h"
+#include "../solvers/COCG_LLT_Smooth.h"
 
 // Класс СЛАУ
 class SLAE
@@ -28,7 +29,8 @@ private:
     //BiCGComplex_VC solver;
     //BiCGStabComplex_VC solver;
     //CGMComplex_VC solver;
-    CGMComplex_LLT solver;
+    //CGMComplex_LLT solver;
+    COCG_LLT_Smooth solver;
 };
 
 #endif // SLAE_H_INCLUDED

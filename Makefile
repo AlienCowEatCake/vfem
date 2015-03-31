@@ -24,10 +24,7 @@ SOURCES = \
 	src/problems/analytical_cube.cpp \
 	src/problems/loop_pml.cpp \
 	src/problems/area_2layers_loop_pml.cpp \
-	src/solvers/BiCGComplex_VC.cpp \
-	src/solvers/BiCGStabComplex_VC.cpp \
-	src/solvers/CGMComplex_LLT.cpp \
-	src/solvers/CGMComplex_VC.cpp
+	src/solvers/COCG_LLT_Smooth.cpp
 OBJECTS = $(SOURCES:.cpp=.o)
 
 all: $(SOURCES) $(EXECUTABLE)

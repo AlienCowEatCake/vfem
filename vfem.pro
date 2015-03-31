@@ -19,10 +19,11 @@ SOURCES += \
     src/problems/analytical_cube.cpp \
     src/problems/loop_pml.cpp \
     src/problems/area_2layers_loop_pml.cpp \
-    src/solvers/BiCGComplex_VC.cpp \
-    src/solvers/BiCGStabComplex_VC.cpp \
-    src/solvers/CGMComplex_LLT.cpp \
-    src/solvers/CGMComplex_VC.cpp
+#    src/solvers/BiCGComplex_VC.cpp \
+#    src/solvers/BiCGStabComplex_VC.cpp \
+#    src/solvers/CGMComplex_LLT.cpp \
+#    src/solvers/CGMComplex_VC.cpp \
+    src/solvers/COCG_LLT_Smooth.cpp
 
 HEADERS += \
     src/common/matrix.h \
@@ -39,10 +40,11 @@ HEADERS += \
     src/vfem/slae.h \
     src/vfem/vfem.h \
     src/problems/problems.h \
-    src/solvers/BiCGComplex_VC.h \
-    src/solvers/BiCGStabComplex_VC.h \
-    src/solvers/CGMComplex_LLT.h \
-    src/solvers/CGMComplex_VC.h
+#    src/solvers/BiCGComplex_VC.h \
+#    src/solvers/BiCGStabComplex_VC.h \
+#    src/solvers/CGMComplex_LLT.h \
+#    src/solvers/CGMComplex_VC.h \
+    src/solvers/COCG_LLT_Smooth.h
 
 CONFIG += warn_on
 
