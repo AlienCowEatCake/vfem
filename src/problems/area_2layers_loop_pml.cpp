@@ -27,6 +27,10 @@ cvector3 get_s(const point & p, const finite_element * fe, const phys_pml_area *
     if(!is_pml(p, fe))
         return cvector3(1.0, 1.0, 1.0);
 
+    /// Нефиг пост-PML растягивать!
+    if(fabs(p.x) > 701.0 || fabs(p.y) > 701.0 || fabs(p.z) > 701.0)
+        return cvector3(1.0, 1.0, 1.0);
+
     double m = 3;
     complex<double> chi(4, 3);
 
@@ -137,9 +141,11 @@ cvector3 get_s(const point & p, const finite_element * fe, const phys_pml_area *
 //string phys_filename = "data/area_2layers_loop_pml/1.txt";
 string tecplot_filename = "area_2layers_loop_pml.plt";
 
-string phys_filename_pml = "data/area_2layers_loop_pml/3-1.txt";
-string phys_filename_nonpml = "data/area_2layers_loop_pml/3-2.txt";
-string mesh_filename = "data/area_2layers_loop_pml/5.msh";
+//string phys_filename_pml = "data/area_2layers_loop_pml/3-1.txt";
+//string phys_filename_nonpml = "data/area_2layers_loop_pml/3-2.txt";
+string phys_filename_pml = "data/area_2layers_loop_pml/std-1.txt";
+string phys_filename_nonpml = "data/area_2layers_loop_pml/std-2.txt";
+string mesh_filename = "data/area_2layers_loop_pml/smallmesh_z=5.msh";
 #if defined VFEM_USE_PML
 string phys_filename = phys_filename_pml;
 #else
