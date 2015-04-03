@@ -215,19 +215,18 @@ ostream & operator << (ostream & os, const vector3_t<U> & a)
     return os;
 }
 
-// Норма вектора (действительная)
-template<>
-double vector3_t<double>::norm() const;
+// Норма вектора
+template<typename T>
+double vector3_t<T>::norm() const
+{
+    return sqrt(norm2());
+}
 
-// Квадрат нормы вектора (действительной)
+// Квадрат нормы вектора (действительного)
 template<>
 double vector3_t<double>::norm2() const;
 
-// Норма вектора (комплексная)
-template<>
-double vector3_t< complex<double> >::norm() const;
-
-// Квадрат нормы вектора (комплексной)
+// Квадрат нормы вектора (комплексного)
 template<>
 double vector3_t< complex<double> >::norm2() const;
 

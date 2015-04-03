@@ -1,28 +1,13 @@
 #include "vector3.h"
 
-// Норма вектора (действительная)
-template<>
-double vector3_t<double>::norm() const
-{
-    return sqrt(norm2());
-}
-
-// Квадрат нормы вектора (действительной)
+// Квадрат нормы вектора (действительного)
 template<>
 double vector3_t<double>::norm2() const
 {
     return x * x + y * y + z * z;
 }
 
-// Норма вектора (комплексная)
-template<>
-double vector3_t< complex<double> >::norm() const
-{
-    //return sqrt((conj(x) * x + conj(y) * y + conj(z) * z).real());
-    return sqrt(norm2());
-}
-
-// Квадрат нормы вектора (комплексной)
+// Квадрат нормы вектора (комплексного)
 template<>
 double vector3_t< complex<double> >::norm2() const
 {
