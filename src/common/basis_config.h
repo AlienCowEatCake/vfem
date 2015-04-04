@@ -54,15 +54,15 @@ namespace basis
 
 // ============================================================================
 
-#if BASIS_ORDER == 1
-#define tet_integration_2 tet_integration
-#define tr_integration_2 tr_integration
-#endif
+//#if BASIS_ORDER == 1
+//#define tet_integration_2 tet_integration
+//#define tr_integration_2 tr_integration
+//#endif
 
-#if BASIS_ORDER == 2
+//#if BASIS_ORDER == 2
 #define tet_integration_4 tet_integration
 #define tr_integration_5 tr_integration
-#endif
+//#endif
 
 // ============================================================================
 
