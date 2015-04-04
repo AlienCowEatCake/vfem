@@ -354,6 +354,12 @@ void VFEM::input_mesh(const string & gmsh_filename)
 
     gmsh_file.close();
 
+#if __cplusplus >= 201103L
+    /// WARNING: C++11
+    fes.shrink_to_fit();
+    trs.shrink_to_fit();
+#endif
+
     cout << " > Converting data ..." << endl;
 
     // Индексируем ребра
@@ -505,9 +511,15 @@ void VFEM::input_mesh(const string & gmsh_filename)
         max_coord[i] += diff_coord[i];
         min_coord[i] -= diff_coord[i];
     }
+#if __cplusplus >= 201103L
+    /// WARNING: C++11
+    tree.make(min_coord[0], max_coord[0], min_coord[1], max_coord[1],
+              min_coord[2], max_coord[2], fes.data(), fes.size());
+#else
     /// WARNING: &(fes[0]) для вектора!
     tree.make(min_coord[0], max_coord[0], min_coord[1], max_coord[1],
               min_coord[2], max_coord[2], &(fes[0]), fes.size());
+#endif
 
 #if defined VFEM_USE_PML
     input_pml();
