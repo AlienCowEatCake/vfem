@@ -97,7 +97,7 @@ Line Loop(85) = {74, -77, -24, -78};
 Plane Surface(86) = {85};
 Line Loop(87) = {21, -80, -71, -77};
 Plane Surface(88) = {87};
-Surface Loop(89) = {86, 76, 82, 84, 88, 26};
+Surface Loop(89) = {88, 82, 76, 84, 86, 26, 6};
 Volume(90) = {89};
 
 // Куб начала PML в воздухе
