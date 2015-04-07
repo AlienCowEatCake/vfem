@@ -1,15 +1,15 @@
 ================================================================================
 
-# Погрешность
+# РџРѕРіСЂРµС€РЅРѕСЃС‚СЊ
 grep -R L2 *.txt | sed 's/.txt:Diff (L2): \t/ /g ; s/_/ /g'
 
-# Число итераций
-for i in `ls *_*.txt | grep -v slae`; do echo -n "$i" | sed 's/_/ /g ; s/.txt//g' ; cat "$i" | grep "LLT" | sed 's/\r/\n/g' | tail -1 | sed 's/CCGM_LLT Residual:\t/ /g ; s/\t.*//g'; done
+# Р§РёСЃР»Рѕ РёС‚РµСЂР°С†РёР№
+for i in `ls *_*.txt | grep -v slae`; do echo -n "$i" | sed 's/_/ /g ; s/.txt//g' ; cat "$i" | grep "LLT" | sed 's/\r/\n/g' | tail -1 | sed 's/COCG_LLT_Smooth Residual:\t/ /g ; s/\t.*//g'; done
 
 ================================================================================
 
-# Погрешность
+# РџРѕРіСЂРµС€РЅРѕСЃС‚СЊ
 grep -R L2 *.txt | sed 's/.txt:Diff (L2): \t/ /g ; s/_/ /g ; s/[AW] //g'
 
-# Число итераций
-for i in `ls *_*.txt | grep -v slae`; do echo -n "$i" | sed 's/_/ /g ; s/.txt//g ; s/[AW] //g ' ; cat "$i" | grep "LLT" | sed 's/\r/\n/g' | tail -1 | sed 's/CCGM_LLT Residual:\t/ /g ; s/\t.*//g'; done
+# Р§РёСЃР»Рѕ РёС‚РµСЂР°С†РёР№
+for i in `ls *_*.txt | grep -v slae`; do echo -n "$i" | sed 's/_/ /g ; s/.txt//g ; s/[AW] //g ' ; cat "$i" | grep "LLT" | sed 's/\r/\n/g' | tail -1 | sed 's/COCG_LLT_Smooth Residual:\t/ /g ; s/\t.*//g'; done

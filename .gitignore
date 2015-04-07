@@ -68,7 +68,8 @@ ui_*.h
 
 # Gmsh meshes
 *.msh
-!/data/approx/**/*.msh
+#!/data/approx/**/*.msh
+!/other/legacy/ANALYTICAL_CUBE/approx/**/*.msh
 
 # Tecplot results
 *.plt
