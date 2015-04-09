@@ -76,6 +76,10 @@ void COCG_LLT_Smooth::make_LLT_decomposition()
         }
         L_di[k] = sqrt(L_di[k] - sum_d);
     }
+
+     // Warning: L_di инвертировано!
+    for(size_t i = 0; i < n; i++)
+        L_di[i] = 1.0 / L_di[i];
 }
 
 complex<double> COCG_LLT_Smooth::dot_prod_nocj(const complex<double> * a, const complex<double> * b) const
@@ -130,7 +134,7 @@ void COCG_LLT_Smooth::solve_L(const complex<double> * f, complex<double> * x) co
         for(size_t i = gi[k1]; i < gi[k]; i++)
             sum += L_gg[i] * x[gj[i]];
 
-        x[k1] = (f[k1] - sum) / L_di[k1];
+        x[k1] = (f[k1] - sum) * L_di[k1]; // Warning: L_di инвертировано!
     }
 }
 
@@ -138,7 +142,7 @@ void COCG_LLT_Smooth::solve_LT(complex<double> * f, complex<double> * x) const
 {
     for(size_t k = n, k1 = n-1; k > 0; k--, k1--)
     {
-        x[k1] = f[k1] / L_di[k1];
+        x[k1] = f[k1] * L_di[k1]; // Warning: L_di инвертировано!
         complex<double> v_el = x[k1];
 
         for(size_t i = gi[k1]; i < gi[k]; i++)
@@ -160,18 +164,15 @@ bool COCG_LLT_Smooth::is_fpu_error(double x) const
 
 void COCG_LLT_Smooth::solve(complex<double> * solution, complex<double> * rp_s, double eps)
 {
-#if defined SLAE_DEBUG
-    FILE * slae_fp = fopen("COCG_LLT_Smooth_slae_dbg.txt", "w");
-#endif
-
     // Параметры решателя
     size_t max_iter = 15000;
+    eps *= eps;
 
     rp = rp_s;
 
-    x0 = new complex<double> [n];
+    x0 = solution;
     for(size_t i = 0; i < n; i++)
-        xs[i] = x0[i] = solution[i];
+        xs[i] = x0[i];
 
     mul_matrix(x0, r);
     make_LLT_decomposition();
@@ -186,13 +187,10 @@ void COCG_LLT_Smooth::solve(complex<double> * solution, complex<double> * rp_s, 
     complex<double> alpha, beta, prod_1, prod_2;
     double discr, rp_norm, eta;
 
-    rp_norm = sqrt(dot_prod_self(rp));
+    rp_norm = dot_prod_self(rp);
     if(is_fpu_error(rp_norm))
     {
         fprintf(stderr, "Error: FPU error detected in right part!\n");
-        for(size_t i = 0; i < n; i++)
-            solution[i] = x0[i];
-        delete [] x0;
         return;
     }
 
@@ -203,25 +201,21 @@ void COCG_LLT_Smooth::solve(complex<double> * solution, complex<double> * rp_s, 
     size_t iter;
     for(iter = 0; iter <= max_iter && !finished; iter++)
     {
-        discr = sqrt(dot_prod_self(rs));
+        discr = dot_prod_self(rs);
         if(is_fpu_error(discr))
         {
             fprintf(stderr, "Error: FPU error detected in (r, r)!\n");
             for(size_t i = 0; i < n; i++)
                 solution[i] = xs[i];
-            delete [] x0;
             return;
         }
 
         double residual = discr / rp_norm;
         if(iter%10 == 0)
         {
-            printf("COCG_LLT_Smooth Residual:\t%5lu\t%.3e\r", (unsigned long)iter, residual);
+            printf("COCG_LLT_Smooth Residual:\t%5lu\t%.3e\r", (unsigned long)iter, sqrt(residual));
             fflush(stdout);
         }
-#if defined SLAE_DEBUG
-        fprintf(slae_fp, "%lu %.5e\n", (unsigned long)iter, residual);
-#endif
 
         if(residual > eps)
         {
@@ -263,19 +257,14 @@ void COCG_LLT_Smooth::solve(complex<double> * solution, complex<double> * rp_s, 
     mul_matrix(xs, r);
     for(size_t i = 0; i < n; i++)
         r[i] = rp[i] - r[i];
-    discr = sqrt(dot_prod_self(r));
-    printf("COCG_LLT_Smooth Residual:\t%5lu\t%.3e\n", (unsigned long)iter - 1, discr / rp_norm);
+    discr = dot_prod_self(r);
+    printf("COCG_LLT_Smooth Residual:\t%5lu\t%.3e\n", (unsigned long)iter - 1, sqrt(discr / rp_norm));
 
     if(iter >= max_iter)
         printf("Soulution can`t found, iteration limit exceeded!\n");
 
     for(size_t i = 0; i < n; i++)
         solution[i] = xs[i];
-    delete [] x0;
-
-#if defined SLAE_DEBUG
-    fclose(slae_fp);
-#endif
 }
 
 COCG_LLT_Smooth::COCG_LLT_Smooth()
