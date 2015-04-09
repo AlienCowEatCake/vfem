@@ -70,16 +70,12 @@ void COCG_LLT_Smooth::make_LLT_decomposition()
                     }
                 }
             }
-            L_gg[i] = (L_gg[i] -  sum_l) / L_di[gj[i]];
+            L_gg[i] = (L_gg[i] -  sum_l) * L_di[gj[i]]; // Warning: L_di инвертировано!
 
             sum_d += L_gg[i] * L_gg[i];
         }
-        L_di[k] = sqrt(L_di[k] - sum_d);
+        L_di[k] = 1.0 / sqrt(L_di[k] - sum_d); // Warning: L_di инвертировано!
     }
-
-     // Warning: L_di инвертировано!
-    for(size_t i = 0; i < n; i++)
-        L_di[i] = 1.0 / L_di[i];
 }
 
 complex<double> COCG_LLT_Smooth::dot_prod_nocj(const complex<double> * a, const complex<double> * b) const
