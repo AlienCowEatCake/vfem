@@ -1,6 +1,6 @@
 #include "problems.h"
 
-#if defined AREA_2LAYERS_LOOP_PML
+#if defined AREA_3LAYERS_INC_LOOP_PML
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST || defined VFEM_USE_ANALYTICAL
 #error "Please, reconfigure!"
 #endif
@@ -17,7 +17,8 @@ cvector3 func_rp(const point & p, const phys_area & phys)
 bool is_pml(const point & p, const finite_element * fe)
 {
     MAYBE_UNUSED(p);
-    if(fe->phys->gmsh_num == 21 || fe->phys->gmsh_num == 22 || fe->phys->gmsh_num == 31 || fe->phys->gmsh_num == 32)
+    if(fe->phys->gmsh_num == 21 || fe->phys->gmsh_num == 22 || fe->phys->gmsh_num == 23 ||
+       fe->phys->gmsh_num == 31 || fe->phys->gmsh_num == 32 || fe->phys->gmsh_num == 33)
         return true;
     return false;
 }
@@ -82,6 +83,30 @@ cvector3 get_s(const point & p, const finite_element * fe, const phys_pml_area *
         m = m_water;
         chi = chi_water;
     }
+    // Грунт
+    if(fe->phys->gmsh_num == 23 || fe->phys->gmsh_num == 33)
+    {
+        double m_ground = 3;
+        static complex<double> chi_ground(-1, -1);
+        if(chi_ground.real() < 0)
+        {
+            ifstream chi_st;
+            char chi_name[] = "chi_ground.txt";
+            chi_st.open(chi_name, ios::in);
+            if(!chi_st.good())
+            {
+                cerr << "Error in " << __FILE__ << ":" << __LINE__
+                     << " while reading file " << chi_name << endl;
+                throw IO_FILE_ERROR;
+            }
+            double chi_re, chi_im;
+            chi_st >> chi_re >> chi_im;
+            chi_ground = complex<double>(chi_re, chi_im);
+            chi_st.close();
+        }
+        m = m_ground;
+        chi = chi_ground;
+    }
 
     double pml_thickness_x = 100.0;
     double pml_thickness_y = 100.0;
@@ -137,36 +162,23 @@ cvector3 get_s(const point & p, const finite_element * fe, const phys_pml_area *
     return cvector3(1.0 + chi * power * cx, 1.0 + chi * power * cy, 1.0 + chi * power * cz);
 }
 
-//string mesh_filename = "data/area_2layers_loop_pml/2.msh";
-//string phys_filename = "data/area_2layers_loop_pml/1.txt";
-string tecplot_filename = "area_2layers_loop_pml.plt";
-
-//string phys_filename_pml = "data/area_2layers_loop_pml/3-1.txt";
-//string phys_filename_nonpml = "data/area_2layers_loop_pml/3-2.txt";
-string phys_filename_pml = "data/area_2layers_loop_pml/std-1.txt";
-string phys_filename_nonpml = "data/area_2layers_loop_pml/std-2.txt";
-string mesh_filename = "data/area_2layers_loop_pml/smallmesh_z=5.msh";
+string tecplot_filename = "area_3layers_inc_loop_pml.plt";
+string phys_filename_pml = "data/area_3layers_inc_loop_pml/1.txt";
+string phys_filename_nonpml = "data/area_3layers_inc_loop_pml/2.txt";
+string mesh_filename = "data/area_3layers_inc_loop_pml/mesh3_inc_z=5.msh";
 #if defined VFEM_USE_PML
 string phys_filename = phys_filename_pml;
 #else
 string phys_filename = phys_filename_nonpml;
 #endif
-string slae_dump_filename = "area_2layers_loop_pml_slae.txt";
+string slae_dump_filename = "area_3layers_inc_loop_pml_slae.txt";
 
 void postprocessing(VFEM & v, char * timebuf)
 {
     MAYBE_UNUSED(v);
     MAYBE_UNUSED(timebuf);
-    v.output_slice(string("area_2layers_loop_pml") + "_" + string(timebuf) + ".dat",
+    v.output_slice(string("area_3layers_inc_loop_pml") + "_" + string(timebuf) + ".dat",
                    'Y', 0.0, 'X', -700, 700, 20.0, 'Z', -700, 700, 20.0);
-//    v.output_slice(string("area_2layers_loop_pml_xy") + "_" + string(timebuf) + ".dat",
-//                   'Z', 0.0, 'X', -700, 700, 20.0, 'Y', -700, 700, 20.0);
-//    v.output_slice(string("area_2layers_loop_pml_xz") + "_" + string(timebuf) + ".dat",
-//                   'Y', 0.0, 'X', -700, 700, 20.0, 'Z', -700, 700, 20.0);
-//    v.output_slice(string("area_2layers_loop_pml_xz1") + "_" + string(timebuf) + ".dat",
-//                   'Y', 10.0, 'X', -700, 700, 20.0, 'Z', -700, 700, 20.0);
-//    v.output_slice(string("area_2layers_loop_pml_xz2") + "_" + string(timebuf) + ".dat",
-//                   'Y', 80.0, 'X', -700, 700, 20.0, 'Z', -700, 700, 20.0);
 #if !defined VFEM_USE_PML
     v.slae.dump_x(slae_dump_filename);
 #else
@@ -200,4 +212,4 @@ void postprocessing(VFEM & v, char * timebuf)
 #endif
 }
 
-#endif // AREA_2LAYERS_LOOP_PML
+#endif // AREA_3LAYERS_INC_LOOP_PML

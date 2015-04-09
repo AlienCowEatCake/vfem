@@ -19,6 +19,7 @@ SOURCES += \
     src/problems/analytical_cube.cpp \
     src/problems/loop_pml.cpp \
     src/problems/area_2layers_loop_pml.cpp \
+    src/problems/area_3layers_inc_loop_pml.cpp \
 #    src/solvers/BiCGComplex_VC.cpp \
 #    src/solvers/BiCGStabComplex_VC.cpp \
 #    src/solvers/CGMComplex_LLT.cpp \
