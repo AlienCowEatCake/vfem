@@ -25,6 +25,26 @@ void print_time(size_t seconds, const string & descr)
 
 int main()
 {
+    /**/
+    cout << "Configuration:" << endl;
+    cout << " # BASIS_ORDER: " << BASIS_ORDER << endl;
+    cout << " # BASIS_TYPE:  " << BASIS_TYPE << endl;
+#if defined VFEM_USE_PML
+    cout << " # VFEM_USE_PML" << endl;
+#endif
+#if defined VFEM_USE_NONHOMOGENEOUS_FIRST
+    cout << " # VFEM_USE_NONHOMOGENEOUS_FIRST" << endl;
+#endif
+#if defined VFEM_USE_ANALYTICAL
+    cout << " # VFEM_USE_ANALYTICAL" << endl;
+#endif
+#if defined USE_CXX11
+    cout << " # USE_CXX11" << endl;
+#endif
+    cout << " # Mesh file: " << mesh_filename << endl;
+    cout << " # Phys file: " << phys_filename << endl;
+    /**/
+
     string new_tecplot_name = tecplot_filename.substr(0, tecplot_filename.find_last_of("."));
     time_t seconds = time(NULL);
     char timebuf[24];

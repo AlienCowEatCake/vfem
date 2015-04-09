@@ -51,7 +51,7 @@ CONFIG += warn_on
 
 *g++*|*clang* {
 #    QMAKE_CXXFLAGS *= -ansi
-    QMAKE_CXXFLAGS += -std=c++11
+    QMAKE_CXXFLAGS += -std=c++0x
     QMAKE_CXXFLAGS *= -pedantic
     QMAKE_CXXFLAGS_WARN_ON *= -Wextra
     QMAKE_CXXFLAGS_RELEASE -= -O2
