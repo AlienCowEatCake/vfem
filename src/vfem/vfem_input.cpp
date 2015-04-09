@@ -354,7 +354,7 @@ void VFEM::input_mesh(const string & gmsh_filename)
 
     gmsh_file.close();
 
-#if __cplusplus >= 201103L
+#if  defined USE_CXX11
     /// WARNING: C++11
     fes.shrink_to_fit();
     trs.shrink_to_fit();
@@ -511,7 +511,7 @@ void VFEM::input_mesh(const string & gmsh_filename)
         max_coord[i] += diff_coord[i];
         min_coord[i] -= diff_coord[i];
     }
-#if __cplusplus >= 201103L
+#if defined USE_CXX11
     /// WARNING: C++11
     tree.make(min_coord[0], max_coord[0], min_coord[1], max_coord[1],
               min_coord[2], max_coord[2], fes.data(), fes.size());

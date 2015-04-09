@@ -18,6 +18,10 @@
 #define M_PI 3.14159265358979323846
 #endif
 
+#if __cplusplus >= 201103L || defined __GXX_EXPERIMENTAL_CXX0X__ || (defined _MSC_VER && _MSC_VER >= 1700)
+#define USE_CXX11
+#endif
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
