@@ -1,8 +1,8 @@
 #!/bin/bash
 
-for real_air in `LANG=C seq 0 1 1`
+for real_air in `LANG=C seq 3 1 4`
 do
-  for imag_air in `LANG=C seq 3 1 4`
+  for imag_air in `LANG=C seq 0 1 1`
   do
     echo -e "${real_air} ${imag_air}\n" > chi_air.txt
     for real_water in `LANG=C seq 0 1 1`
