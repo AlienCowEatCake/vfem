@@ -70,11 +70,11 @@ void COCG_LLT_Smooth::make_LLT_decomposition()
                     }
                 }
             }
-            L_gg[i] = (L_gg[i] -  sum_l) * L_di[gj[i]]; // Warning: L_di инвертировано!
+            L_gg[i] = (L_gg[i] -  sum_l) / L_di[gj[i]];
 
             sum_d += L_gg[i] * L_gg[i];
         }
-        L_di[k] = 1.0 / sqrt(L_di[k] - sum_d); // Warning: L_di инвертировано!
+        L_di[k] = sqrt(L_di[k] - sum_d);
     }
 }
 
@@ -130,7 +130,7 @@ void COCG_LLT_Smooth::solve_L(const complex<double> * f, complex<double> * x) co
         for(size_t i = gi[k1]; i < gi[k]; i++)
             sum += L_gg[i] * x[gj[i]];
 
-        x[k1] = (f[k1] - sum) * L_di[k1]; // Warning: L_di инвертировано!
+        x[k1] = (f[k1] - sum) / L_di[k1];
     }
 }
 
@@ -138,7 +138,7 @@ void COCG_LLT_Smooth::solve_LT(complex<double> * f, complex<double> * x) const
 {
     for(size_t k = n, k1 = n-1; k > 0; k--, k1--)
     {
-        x[k1] = f[k1] * L_di[k1]; // Warning: L_di инвертировано!
+        x[k1] = f[k1] / L_di[k1];
         complex<double> v_el = x[k1];
 
         for(size_t i = gi[k1]; i < gi[k]; i++)
