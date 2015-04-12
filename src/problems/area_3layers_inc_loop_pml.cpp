@@ -39,6 +39,8 @@ cvector3 get_s(const point & p, const finite_element * fe, const phys_pml_area *
     if(fe->phys->gmsh_num == 21 || fe->phys->gmsh_num == 31)
     {
         double m_air = 3;
+        complex<double> chi_air(4, 0);
+/*
         static complex<double> chi_air(-1, -1);
         if(chi_air.real() < 0)
         {
@@ -56,6 +58,7 @@ cvector3 get_s(const point & p, const finite_element * fe, const phys_pml_area *
             chi_air = complex<double>(chi_re, chi_im);
             chi_st.close();
         }
+*/
         m = m_air;
         chi = chi_air;
     }
@@ -63,6 +66,8 @@ cvector3 get_s(const point & p, const finite_element * fe, const phys_pml_area *
     if(fe->phys->gmsh_num == 22 || fe->phys->gmsh_num == 32)
     {
         double m_water = 3;
+        complex<double> chi_water(1, 7);
+/*
         static complex<double> chi_water(-1, -1);
         if(chi_water.real() < 0)
         {
@@ -80,6 +85,7 @@ cvector3 get_s(const point & p, const finite_element * fe, const phys_pml_area *
             chi_water = complex<double>(chi_re, chi_im);
             chi_st.close();
         }
+*/
         m = m_water;
         chi = chi_water;
     }
@@ -87,6 +93,8 @@ cvector3 get_s(const point & p, const finite_element * fe, const phys_pml_area *
     if(fe->phys->gmsh_num == 23 || fe->phys->gmsh_num == 33)
     {
         double m_ground = 3;
+        complex<double> chi_ground(2, 2);
+/*
         static complex<double> chi_ground(-1, -1);
         if(chi_ground.real() < 0)
         {
@@ -104,6 +112,7 @@ cvector3 get_s(const point & p, const finite_element * fe, const phys_pml_area *
             chi_ground = complex<double>(chi_re, chi_im);
             chi_st.close();
         }
+*/
         m = m_ground;
         chi = chi_ground;
     }
@@ -177,8 +186,10 @@ void postprocessing(VFEM & v, char * timebuf)
 {
     MAYBE_UNUSED(v);
     MAYBE_UNUSED(timebuf);
-    v.output_slice(string("area_3layers_inc_loop_pml") + "_" + string(timebuf) + ".dat",
+    v.output_slice(string("area_3layers_inc_loop_pml_y=0") + "_" + string(timebuf) + ".dat",
                    'Y', 0.0, 'X', -700, 700, 20.0, 'Z', -700, 700, 20.0);
+    v.output_slice(string("area_3layers_inc_loop_pml_z=0") + "_" + string(timebuf) + ".dat",
+                   'Z', 0.0, 'X', -700, 700, 20.0, 'Y', -700, 700, 20.0);
 #if !defined VFEM_USE_PML
     v.slae.dump_x(slae_dump_filename);
 #else

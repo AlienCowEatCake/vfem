@@ -108,7 +108,7 @@ string tecplot_filename = "loop_pml.plt";
 
 string phys_filename_pml = "data/loop_pml/2-1.txt";
 string phys_filename_nonpml = "data/loop_pml/2-2.txt";
-string mesh_filename = "data/loop_pml/2.msh";
+string mesh_filename = "data/loop_pml/3.msh";
 #if defined VFEM_USE_PML
 string phys_filename = phys_filename_pml;
 #else
