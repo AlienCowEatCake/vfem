@@ -38,6 +38,8 @@ cvector3 get_s(const point & p, const finite_element * fe, const phys_pml_area *
     if(fe->phys->gmsh_num == 21 || fe->phys->gmsh_num == 31)
     {
         double m_air = 3;
+        complex<double> chi_air(5, 0);
+/*
         static complex<double> chi_air(-1, -1);
         if(chi_air.real() < 0)
         {
@@ -55,6 +57,7 @@ cvector3 get_s(const point & p, const finite_element * fe, const phys_pml_area *
             chi_air = complex<double>(chi_re, chi_im);
             chi_st.close();
         }
+*/
         m = m_air;
         chi = chi_air;
     }
@@ -62,6 +65,8 @@ cvector3 get_s(const point & p, const finite_element * fe, const phys_pml_area *
     if(fe->phys->gmsh_num == 22 || fe->phys->gmsh_num == 32)
     {
         double m_water = 3;
+        complex<double> chi_water(0, 7);
+/*
         static complex<double> chi_water(-1, -1);
         if(chi_water.real() < 0)
         {
@@ -79,6 +84,7 @@ cvector3 get_s(const point & p, const finite_element * fe, const phys_pml_area *
             chi_water = complex<double>(chi_re, chi_im);
             chi_st.close();
         }
+*/
         m = m_water;
         chi = chi_water;
     }
@@ -159,6 +165,25 @@ void postprocessing(VFEM & v, char * timebuf)
     MAYBE_UNUSED(timebuf);
     v.output_slice(string("area_2layers_loop_pml") + "_" + string(timebuf) + ".dat",
                    'Y', 0.0, 'X', -700, 700, 20.0, 'Z', -700, 700, 20.0);
+
+    double x = 100.0, y = 0;
+    size_t n = 65000;
+    double z0 = -600.0, z1 = 600.0;
+    double hz = (z1 - z0) / (double)n;
+#if defined VFEM_USE_PML
+    ofstream ff("z_pml.txt");
+#else
+    ofstream ff("z_std.txt");
+#endif
+    for(size_t i = 0; i <= n; i++)
+    {
+        double z = z0 + (double)i * hz;
+        cvector3 sol = v.solution(point(x, y, z));
+        ff << z << " " << sol.x.real() << " " << sol.x.imag() << " " << sol.y.real() << " " << sol.y.imag()
+           << " " << sol.z.real() << " " << sol.z.imag() << endl;
+    }
+    ff.close();
+
 //    v.output_slice(string("area_2layers_loop_pml_xy") + "_" + string(timebuf) + ".dat",
 //                   'Z', 0.0, 'X', -700, 700, 20.0, 'Y', -700, 700, 20.0);
 //    v.output_slice(string("area_2layers_loop_pml_xz") + "_" + string(timebuf) + ".dat",
