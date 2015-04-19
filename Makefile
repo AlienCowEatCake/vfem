@@ -24,6 +24,7 @@ SOURCES = \
 	src/problems/analytical_cube.cpp \
 	src/problems/loop_pml.cpp \
 	src/problems/area_2layers_loop_pml.cpp \
+	src/problems/area_2layers_loop_many_pml.cpp \
 	src/problems/area_3layers_inc_loop_pml.cpp \
 	src/solvers/COCG_LLT_Smooth.cpp
 OBJECTS = $(SOURCES:.cpp=.o)
