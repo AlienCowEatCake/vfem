@@ -15,3 +15,10 @@ do
 	./vfem_classic | tee "classic_${i}.txt"
 	./vfem_pml | tee "pml_${i}.txt"
 done
+
+for i in `ls pml_*.txt | grep -v width`
+do
+	echo -n ${i} | sed 's/.*_//g ; s/\..*//g'
+	echo -n " "
+	cat ${i} | grep Diff | sed 's/.* //g'
+done | sort --human-numeric-sort | tee width.txt
