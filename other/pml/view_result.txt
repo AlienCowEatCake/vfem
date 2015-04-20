@@ -21,3 +21,9 @@ grep -R L2 *.txt | sed 's/.txt:Diff (L2): \t/ /g ; s/_/ /g ; s/[AWG] //g'
 
 # Число итераций
 for i in `ls *_*.txt | grep -v slae | grep -v chi_`; do echo -n "$i" | sed 's/_/ /g ; s/.txt//g ; s/[AWG] //g ' ; cat "$i" | grep "LLT" | sed 's/\r/\n/g' | tail -1 | sed 's/COCG_LLT_Smooth Residual:\t/ /g ; s/\t.*//g'; done
+
+================================================================================
+
+# Вывод исследования положений
+for i in `find . -name *00.txt`; do echo -n ${i} | sed 's/.*\///g ; s/\..*//g' ; echo -n " " ; cat ${i} | grep Diff | sed 's/.* //g'; done | sort --human-numeric-sort
+for i in `find . -name *00_new.txt`; do echo -n ${i} | sed 's/.*\///g ; s/_.*//g' ; echo -n " " ; cat ${i} | grep Diff | sed 's/.* //g'; done | sort --human-numeric-sort
