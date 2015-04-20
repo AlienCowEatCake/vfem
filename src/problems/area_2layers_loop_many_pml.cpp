@@ -5,6 +5,9 @@
 #error "Please, reconfigure!"
 #endif
 
+//#define PML_LENGTH
+#define PML_WIDTH
+
 double SLAE_MAIN_EPSILON = 1e-11;
 
 cvector3 func_rp(const point & p, const phys_area & phys)
@@ -33,6 +36,22 @@ cvector3 get_s(const point & p, const finite_element * fe, const phys_pml_area *
     double pml_thickness_x = 100.0;
     double pml_thickness_y = 100.0;
     double pml_thickness_z = 100.0;
+#if defined PML_WIDTH
+    static double pml_thickness = -1;
+    if(pml_thickness < 0)
+    {
+        string pml_width_name = "pml_width.txt";
+        ifstream ifs(pml_width_name.c_str());
+        ifs >> pml_thickness;
+        if(!ifs.good())
+        {
+            cerr << "Error in " << __FILE__ << ":" << __LINE__
+                 << " while reading file " << pml_width_name << endl;
+            throw IO_FILE_ERROR;
+        }
+    }
+    pml_thickness_x = pml_thickness_y = pml_thickness_z = pml_thickness;
+#endif
 
     double pml_distance_x = 0;
     double pml_distance_y = 0;
@@ -84,6 +103,7 @@ cvector3 get_s(const point & p, const finite_element * fe, const phys_pml_area *
     return cvector3(1.0 + chi * power * cx, 1.0 + chi * power * cy, 1.0 + chi * power * cz);
 }
 
+#if defined PML_LENGTH
 string tecplot_filename = "area_2layers_loop_many_pml.plt";
 string mesh_filename = "data/area_2layers_loop_many_pml/fallback_z=5.msh";
 string slae_dump_filename = "area_2layers_loop_many_pml_slae.txt";
@@ -92,6 +112,18 @@ string phys_filename = "data/area_2layers_loop_many_pml/1.txt";
 #else
 string phys_filename = "data/area_2layers_loop_many_pml/2.txt";
 #endif
+#endif // PML_LENGTH
+
+#if defined PML_WIDTH
+string tecplot_filename = "area_2layers_loop_many_pml.plt";
+string mesh_filename = "data/area_2layers_loop_many_pml/autogen.msh";
+string slae_dump_filename = "area_2layers_loop_many_pml_slae.txt";
+#if defined VFEM_USE_PML
+string phys_filename = "data/area_2layers_loop_pml/std-1.txt";
+#else
+string phys_filename = "data/area_2layers_loop_pml/std-2.txt";
+#endif
+#endif // PML_WIDTH
 
 void postprocessing(VFEM & v, char * timebuf)
 {
