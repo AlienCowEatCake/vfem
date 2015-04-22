@@ -1,20 +1,20 @@
 x0 = 50;
 x1 = 280;
 x2 = (REPLACEME);
-x3 = (REPLACEME + 100);
+x3 = (REPLACEME + 120);
 x4 = 1500;
 
 zw0 = 0;
 zw1 = -280;
 zw2 = -(REPLACEME);
-zw3 = -(REPLACEME + 100);
+zw3 = -(REPLACEME + 120);
 zw4 = -1500;
 
 za0 = 0;
 za1 = 5;
 za2 = 280;
 za3 = (REPLACEME);
-za4 = (REPLACEME + 100);
+za4 = (REPLACEME + 120);
 za5 = 1500;
 
 c0 = 4;
@@ -27,7 +27,7 @@ k = 700 * (x - 600) / 900 + 200 * (1500 - x) / 900
 c5 = 200;
 c6 = 700;
 */
-c5 = k = 650 * (REPLACEME - 600) / 900 + 180 * (1500 - REPLACEME) / 900;
+c5 = 650 * (REPLACEME - 600) / 900 + 180 * (1500 - REPLACEME) / 900;
 c6 = 650;
 
 // Петля
