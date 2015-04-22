@@ -144,6 +144,29 @@ void postprocessing(VFEM & v, char * timebuf)
     v.output_slice(string("area_2layers_loop_many_pml") + "_" + string(timebuf) + ".dat",
                    'Y', 0.0, 'X', -700, 700, 20.0, 'Z', -700, 700, 20.0);
 
+    double y = 0, z0 = 10, z1 = -10;
+    size_t n = 65000;
+    double x0 = -500.0, x1 = 500.0;
+    double hx = (x1 - x0) / (double)n;
+#if defined VFEM_USE_PML
+    ofstream ff("line_pml.txt");
+#else
+    ofstream ff("line_std.txt");
+#endif
+    for(size_t i = 0; i <= n; i++)
+    {
+        double x = x0 + (double)i * hx;
+        cvector3 sol0 = v.solution(point(x, y, z0));
+        cvector3 sol1 = v.solution(point(x, y, z1));
+        ff << x << " " << sol0.x.real() << " " << sol0.x.imag()
+                << " " << sol0.y.real() << " " << sol0.y.imag()
+                << " " << sol0.z.real() << " " << sol0.z.imag()
+                << " " << sol1.x.real() << " " << sol1.x.imag()
+                << " " << sol1.y.real() << " " << sol1.y.imag()
+                << " " << sol1.z.real() << " " << sol1.z.imag() << endl;
+    }
+    ff.close();
+
 #if !defined VFEM_USE_PML
     v.slae.dump_x(slae_dump_filename);
 #else
