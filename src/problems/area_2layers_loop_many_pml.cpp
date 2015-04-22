@@ -6,7 +6,8 @@
 #endif
 
 //#define PML_LENGTH
-#define PML_WIDTH
+#define PML_LENGTH2
+//#define PML_WIDTH
 
 double SLAE_MAIN_EPSILON = 1e-11;
 
@@ -113,6 +114,17 @@ string phys_filename = "data/area_2layers_loop_many_pml/1.txt";
 string phys_filename = "data/area_2layers_loop_many_pml/2.txt";
 #endif
 #endif // PML_LENGTH
+
+#if defined PML_LENGTH2
+string tecplot_filename = "area_2layers_loop_many_pml.plt";
+string mesh_filename = "data/area_2layers_loop_many_pml/autogen2.msh";
+string slae_dump_filename = "area_2layers_loop_many_pml_slae.txt";
+#if defined VFEM_USE_PML
+string phys_filename = "data/area_2layers_loop_pml/std-1.txt";
+#else
+string phys_filename = "data/area_2layers_loop_pml/std-2.txt";
+#endif
+#endif // PML_LENGTH2
 
 #if defined PML_WIDTH
 string tecplot_filename = "area_2layers_loop_many_pml.plt";
