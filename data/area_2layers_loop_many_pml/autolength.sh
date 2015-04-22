@@ -1,12 +1,19 @@
 #!/bin/bash
 
+out_geofile="autogen2.geo"
 for i in `LANG=C seq 500 100 1400`
 do
 	echo "==============================================================================="
 	cd "data/area_2layers_loop_many_pml"
-	cat "autogen2_template.geo" | sed "s/REPLACEME/${i}/g" > "autogen2.geo"
+	cat "autogen2_template.geo" | sed "s/REPLACEME/${i}/g" > "${out_geofile}"
 	rm -f "autogen2.msh" "area_2layers_loop_many_pml_slae.txt" 2> /dev/null
-	gmsh -3 -optimize -optimize_netgen "autogen2.geo"
+	gmsh -3 -optimize -optimize_netgen "${out_geofile}"
+	if [[ $? -ne 0 ]] ; then
+		gmsh -3 -optimize "${out_geofile}"
+		if [[ $? -ne 0 ]] ; then
+			gmsh -3 "${out_geofile}"
+		fi
+	fi
 	cd ../..
 	echo "==============================================================================="
 	echo "Testing with length = ${i}"
