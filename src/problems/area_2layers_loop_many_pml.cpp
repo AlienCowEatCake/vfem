@@ -180,9 +180,9 @@ void postprocessing(VFEM & v, char * timebuf)
     double diff = 0.0, norm = 0.0;
     for(size_t k = 0; k < v.fes.size(); k++)
     {
-        if(fabs(v.fes[k].barycenter.x) <= 600 && fabs(v.fes[k].barycenter.x) >= 180 &&
-           fabs(v.fes[k].barycenter.y) <= 600 && fabs(v.fes[k].barycenter.y) >= 180 &&
-           fabs(v.fes[k].barycenter.z) <= 600 && fabs(v.fes[k].barycenter.z) >= 180)
+        if(fabs(v.fes[k].barycenter.x) <= 500 && fabs(v.fes[k].barycenter.x) >= 180 &&
+           fabs(v.fes[k].barycenter.y) <= 500 && fabs(v.fes[k].barycenter.y) >= 180 &&
+           fabs(v.fes[k].barycenter.z) <= 500 && fabs(v.fes[k].barycenter.z) >= 180)
         {
             array_t<complex<double>, basis::tet_bf_num> q_loc, q_loc_true;
             for(size_t i = 0; i < basis::tet_bf_num; i++)

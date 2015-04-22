@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for i in `LANG=C seq 500 10 1400`
+for i in `LANG=C seq 500 100 1400`
 do
 	echo "==============================================================================="
 	cd "data/area_2layers_loop_many_pml"
