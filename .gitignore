@@ -91,3 +91,7 @@ ui_*.h
 # Temp directories
 /#*
 
+# Gnuplot scripts
+!/data/**/*.plt
+!/other/**/*.plt
+
