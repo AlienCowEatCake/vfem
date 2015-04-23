@@ -540,6 +540,7 @@ void VFEM::input_mesh(const string & gmsh_filename)
 
     cout << "Statistics:" << endl;
     cout << " # Tetrehedrons: " << fes.size() << endl;
+    cout << " # Nodes:        " << nodes.size() << endl;
     cout << " # Edges:        " << edges.size() << endl;
 #if BASIS_ORDER >= 2
     cout << " # Faces:        " << faces.size() << endl;

@@ -41,7 +41,7 @@ public:
     vector3_t<T> cross(const vector3_t<T> & other) const;
     // Операторы типа "скобка"
     T & operator [] (size_t i);
-    T operator [] (size_t i) const;
+    const T & operator [] (size_t i) const;
     // Скалярное произведение
     T operator * (const vector3_t<T> & other) const;
     template<typename U, typename V>
@@ -49,6 +49,8 @@ public:
     // Сложение и вычитание векторов
     vector3_t<T> operator + (const vector3_t<T> & other) const;
     vector3_t<T> operator - (const vector3_t<T> & other) const;
+    vector3_t<T> & operator += (const vector3_t<T> & other);
+    vector3_t<T> & operator -= (const vector3_t<T> & other);
     // Деление вектора на число
     vector3_t<T> operator / (const T & a) const;
     // Умножение числа на вектор
@@ -147,7 +149,7 @@ T & vector3_t<T>::operator [] (size_t i)
 }
 
 template<typename T>
-T vector3_t<T>::operator [] (size_t i) const
+const T & vector3_t<T>::operator [] (size_t i) const
 {
     assert(i < 3);
     switch(i)
@@ -159,7 +161,7 @@ T vector3_t<T>::operator [] (size_t i) const
     case 2:
         return z;
     }
-    return 0;
+    return x;
 }
 
 // Скалярное произведение
@@ -180,6 +182,24 @@ template<typename T>
 vector3_t<T> vector3_t<T>::operator - (const vector3_t<T> & other) const
 {
     return vector3_t<T>(x - other.x, y - other.y, z - other.z);
+}
+
+template<typename T>
+vector3_t<T> & vector3_t<T>::operator += (const vector3_t<T> & other)
+{
+    x += other.x;
+    y += other.y;
+    z += other.z;
+    return * this;
+}
+
+template<typename T>
+vector3_t<T> & vector3_t<T>::operator -= (const vector3_t<T> & other)
+{
+    x -= other.x;
+    y -= other.y;
+    z -= other.z;
+    return * this;
 }
 
 // Деление вектора на число

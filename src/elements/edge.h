@@ -18,7 +18,7 @@ public:
     edge(point * beg_, point * end_, size_t num_);
     edge(point & beg_, point & end_, size_t num_);
     point & operator [] (size_t i);
-    point operator [] (size_t i) const;
+    const point & operator [] (size_t i) const;
     bool operator < (const edge & t) const;
     bool operator == (const edge & t) const;
     edge & operator = (const edge & other);

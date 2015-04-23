@@ -144,6 +144,11 @@ void postprocessing(VFEM & v, char * timebuf)
     v.output_slice(string("area_2layers_loop_many_pml") + "_" + string(timebuf) + ".dat",
                    'Y', 0.0, 'X', -700, 700, 20.0, 'Z', -700, 700, 20.0);
 
+//    v.output_slice(string("area_2layers_loop_many_pml_z=10") + "_" + string(timebuf) + ".dat",
+//                   'Z', 10.0, 'X', -500, 500, 10.0, 'Y', -500, 500, 10.0);
+//    v.output_slice(string("area_2layers_loop_many_pml_z=-10") + "_" + string(timebuf) + ".dat",
+//                   'Z', -10.0, 'X', -500, 500, 10.0, 'Y', -500, 500, 10.0);
+
     double y = 0, z0 = 10, z1 = -10;
     size_t n = 65000;
     double x0 = -500.0, x1 = 500.0;

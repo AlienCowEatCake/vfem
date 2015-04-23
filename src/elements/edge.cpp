@@ -63,7 +63,7 @@ point & edge::operator [] (size_t i)
     return * nodes[i];
 }
 
-point edge::operator [] (size_t i) const
+const point & edge::operator [] (size_t i) const
 {
     assert(i < 2);
     return * nodes[i];

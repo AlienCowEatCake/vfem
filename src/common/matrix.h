@@ -12,7 +12,7 @@ public:
     {
         return a[i];
     }
-    type operator [] (size_t i) const
+    const type & operator [] (size_t i) const
     {
         return a[i];
     }

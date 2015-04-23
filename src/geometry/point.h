@@ -30,7 +30,7 @@ public:
     point_t(const point_t<U> & p);
     // Операторы типа "скобка"
     T & operator [] (size_t i);
-    T operator [] (size_t i) const;
+    const T & operator [] (size_t i) const;
     // Оператор меньше (по номеру)
     template<typename U>
     bool operator < (const point_t<U> & t) const;
@@ -107,7 +107,7 @@ T & point_t<T>::operator [] (size_t i)
 }
 
 template<typename T>
-T point_t<T>::operator [] (size_t i) const
+const T & point_t<T>::operator [] (size_t i) const
 {
     assert(i < 3);
     switch(i)
@@ -119,7 +119,7 @@ T point_t<T>::operator [] (size_t i) const
     case 2:
         return z;
     }
-    return 0;
+    return x;
 }
 
 // Оператор меньше (по номеру)

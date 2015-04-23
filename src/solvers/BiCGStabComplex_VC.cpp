@@ -1,7 +1,7 @@
-#include "BiCGStabComplex_VC.h"
 #if defined _MSC_VER && !defined _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
 #endif
+#include "BiCGStabComplex_VC.h"
 #include <cstdio>
 #include <cmath>
 

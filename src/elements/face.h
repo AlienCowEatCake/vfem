@@ -17,7 +17,7 @@ public:
     face(point * p1, point * p2, point * p3, size_t num_);
     face(point & p1, point & p2, point & p3, size_t num_);
     point & operator [] (size_t i);
-    point operator [] (size_t i) const;
+    const point & operator [] (size_t i) const;
     bool operator < (const face & t) const;
     bool operator == (const face & t) const;
     face & operator = (const face & other);

@@ -1,6 +1,7 @@
 #! /usr/bin/gnuplot -persist
 #set terminal png size 480, 360 enhanced font ',8'
-set terminal png size 600, 400 enhanced font ',8'
+#set terminal png size 600, 400 enhanced font ',8'
+set terminal png size 800, 500 enhanced
 set grid
 set key top right
 #set logscale y
@@ -33,8 +34,7 @@ set style line 10 lt 10 pt 0 lw 2
 
 set ylabel "EyR, z=10, y=0"
 set output "EyR_10.png"
-plot "line_std_600.txt" using 1:4 title "Большой бак" with linespoints linestyle 1, \
-     "line_pml_500.txt" using 1:4 title "PML в 500м от центра" with linespoints linestyle 2, \
+plot "line_pml_500.txt" using 1:4 title "PML в 500м от центра" with linespoints linestyle 2, \
      "line_pml_600.txt" using 1:4 title "PML в 600м от центра" with linespoints linestyle 3, \
      "line_pml_700.txt" using 1:4 title "PML в 700м от центра" with linespoints linestyle 4, \
      "line_pml_800.txt" using 1:4 title "PML в 800м от центра" with linespoints linestyle 5, \
@@ -43,12 +43,12 @@ plot "line_std_600.txt" using 1:4 title "Большой бак" with linespoints
      "line_pml_1100.txt" using 1:4 title "PML в 1100м от центра" with linespoints linestyle 8, \
      "line_pml_1200.txt" using 1:4 title "PML в 1200м от центра" with linespoints linestyle 9, \
      "line_pml_1300.txt" using 1:4 title "PML в 1300м от центра" with linespoints linestyle 10, \
+     "line_std_600.txt" using 1:4 title "Большой бак" with linespoints linestyle 1, \
 
 
 set ylabel "EyI, z=10, y=0"
 set output "EyI_10.png"
-plot "line_std_600.txt" using 1:5 title "Большой бак" with linespoints linestyle 1, \
-     "line_pml_500.txt" using 1:5 title "PML в 500м от центра" with linespoints linestyle 2, \
+plot "line_pml_500.txt" using 1:5 title "PML в 500м от центра" with linespoints linestyle 2, \
      "line_pml_600.txt" using 1:5 title "PML в 600м от центра" with linespoints linestyle 3, \
      "line_pml_700.txt" using 1:5 title "PML в 700м от центра" with linespoints linestyle 4, \
      "line_pml_800.txt" using 1:5 title "PML в 800м от центра" with linespoints linestyle 5, \
@@ -57,12 +57,12 @@ plot "line_std_600.txt" using 1:5 title "Большой бак" with linespoints
      "line_pml_1100.txt" using 1:5 title "PML в 1100м от центра" with linespoints linestyle 8, \
      "line_pml_1200.txt" using 1:5 title "PML в 1200м от центра" with linespoints linestyle 9, \
      "line_pml_1300.txt" using 1:5 title "PML в 1300м от центра" with linespoints linestyle 10, \
+     "line_std_600.txt" using 1:5 title "Большой бак" with linespoints linestyle 1, \
 
 
 set ylabel "EyR, z=-10, y=0"
 set output "EyR_-10.png"
-plot "line_std_600.txt" using 1:10 title "Большой бак" with linespoints linestyle 1, \
-     "line_pml_500.txt" using 1:10 title "PML в 500м от центра" with linespoints linestyle 2, \
+plot "line_pml_500.txt" using 1:10 title "PML в 500м от центра" with linespoints linestyle 2, \
      "line_pml_600.txt" using 1:10 title "PML в 600м от центра" with linespoints linestyle 3, \
      "line_pml_700.txt" using 1:10 title "PML в 700м от центра" with linespoints linestyle 4, \
      "line_pml_800.txt" using 1:10 title "PML в 800м от центра" with linespoints linestyle 5, \
@@ -71,12 +71,12 @@ plot "line_std_600.txt" using 1:10 title "Большой бак" with linespoint
      "line_pml_1100.txt" using 1:10 title "PML в 1100м от центра" with linespoints linestyle 8, \
      "line_pml_1200.txt" using 1:10 title "PML в 1200м от центра" with linespoints linestyle 9, \
      "line_pml_1300.txt" using 1:10 title "PML в 1300м от центра" with linespoints linestyle 10, \
+     "line_std_600.txt" using 1:10 title "Большой бак" with linespoints linestyle 1, \
 
 
 set ylabel "EyI, z=-10, y=0"
 set output "EyI_-10.png"
-plot "line_std_600.txt" using 1:11 title "Большой бак" with linespoints linestyle 1, \
-     "line_pml_500.txt" using 1:11 title "PML в 500м от центра" with linespoints linestyle 2, \
+plot "line_pml_500.txt" using 1:11 title "PML в 500м от центра" with linespoints linestyle 2, \
      "line_pml_600.txt" using 1:11 title "PML в 600м от центра" with linespoints linestyle 3, \
      "line_pml_700.txt" using 1:11 title "PML в 700м от центра" with linespoints linestyle 4, \
      "line_pml_800.txt" using 1:11 title "PML в 800м от центра" with linespoints linestyle 5, \
@@ -85,4 +85,5 @@ plot "line_std_600.txt" using 1:11 title "Большой бак" with linespoint
      "line_pml_1100.txt" using 1:11 title "PML в 1100м от центра" with linespoints linestyle 8, \
      "line_pml_1200.txt" using 1:11 title "PML в 1200м от центра" with linespoints linestyle 9, \
      "line_pml_1300.txt" using 1:11 title "PML в 1300м от центра" with linespoints linestyle 10, \
+     "line_std_600.txt" using 1:11 title "Большой бак" with linespoints linestyle 1, \
 

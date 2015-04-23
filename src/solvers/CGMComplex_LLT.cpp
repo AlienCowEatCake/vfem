@@ -1,7 +1,7 @@
-#include "CGMComplex_LLT.h"
 #if defined _MSC_VER && !defined _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
 #endif
+#include "CGMComplex_LLT.h"
 #include <cstdio>
 #include <cmath>
 

@@ -73,7 +73,7 @@ point & face::operator [] (size_t i)
     return * nodes[i];
 }
 
-point face::operator [] (size_t i) const
+const point & face::operator [] (size_t i) const
 {
     assert(i < 3);
     return * nodes[i];
