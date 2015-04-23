@@ -1,6 +1,15 @@
 #include "problems/problems.h"
 #include <ctime>
 
+#if !defined _WIN32
+#include <signal.h>
+
+void sighup_handler(int)
+{
+    cerr << "Received SIGHUP, ignoring." << endl;
+}
+#endif
+
 void print_time(size_t seconds, const string & descr)
 {
     if(seconds > 3600)
@@ -25,6 +34,15 @@ void print_time(size_t seconds, const string & descr)
 
 int main()
 {
+#if !defined _WIN32
+    // Устанавливаем обработчик SIGHUP
+    struct sigaction sigact;
+    memset(& sigact, 0, sizeof(struct sigaction));
+    sigemptyset(& sigact.sa_mask);
+    sigact.sa_handler = sighup_handler;
+    sigaction(SIGHUP, & sigact, 0);
+#endif
+
     /**/
     cout << "Configuration:" << endl;
     cout << " # BASIS_ORDER: " << BASIS_ORDER << endl;

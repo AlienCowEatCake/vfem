@@ -59,6 +59,7 @@ CONFIG += warn_on
     QMAKE_CXXFLAGS_RELEASE *= -O3
     QMAKE_CXXFLAGS_RELEASE *= -march=native
     QMAKE_CXXFLAGS_RELEASE *= -mtune=native
+    QMAKE_CXXFLAGS_RELEASE *= -DNDEBUG
 }
 
 *msvc* {
