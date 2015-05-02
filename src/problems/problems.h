@@ -3,7 +3,8 @@
 
 #include "../vfem/vfem.h"
 
-#define ANALYTICAL_CUBE
+//#define ANALYTICAL_CUBE
+#define FIELD_CUBE
 //#define LOOP_PML
 //#define AREA_2LAYERS_LOOP_PML
 //#define AREA_2LAYERS_LOOP_MANY_PML

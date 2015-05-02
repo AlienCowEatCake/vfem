@@ -29,7 +29,7 @@ cvector3 func_rp(const point & p, const phys_area & phys)
 
     complex<double> k2(- phys.omega * phys.omega * phys.epsilon, phys.omega * phys.sigma);
     //return k2 * cvector3(1.0, 0.0, 0.0);
-    //return k2 * cvector3(- p.y - p.z, - p.x - p.z, - p.x - p.y);
+    //return k2 * cvector3(p.y + p.z, p.x + p.z, p.x + p.y);
     //return cvector3(
     //           -2.0 * exp(p.y + p.z) / phys.mu + k2 * exp(p.y + p.z),
     //           -2.0 * exp(p.x + p.z) / phys.mu + k2 * exp(p.x + p.z),
