@@ -60,9 +60,11 @@ namespace basis
 //#endif
 
 //#if BASIS_ORDER == 2
-#define tet_integration_4 tet_integration
-#define tr_integration_5 tr_integration
+#define tet_integration_14 tet_integration
+#define tr_integration_21 tr_integration
 //#endif
+
+#include "integration.h"
 
 // ============================================================================
 
@@ -235,6 +237,33 @@ namespace tr_integration_3
     };
 }
 
+namespace tr_integration_3_2
+{
+    static const size_t gauss_num = 7;
+    static const double gauss_weights[gauss_num] =
+    {
+        9.0 / 40.0,
+        1.0 / 15.0,
+        1.0 / 15.0,
+        1.0 / 15.0,
+        1.0 / 40.0,
+        1.0 / 40.0,
+        1.0 / 40.0
+    };
+    static const double gauss_a = 1.0 / 3.0;
+    static const double gauss_b = 1.0 / 2.0;
+    static const double gauss_points_master[gauss_num][3] =
+    {
+        { 1.0 - 2.0 * gauss_a, gauss_a, gauss_a },
+        { 1.0 - gauss_b,       gauss_b, 0.0     },
+        { 1.0 - 2.0 * gauss_b, gauss_b, gauss_b },
+        { 1.0 - gauss_b,       0.0,     gauss_b },
+        { 0.0,                 1.0,     0.0 },
+        { 0.0,                 0.0,     1.0 },
+        { 1.0,                 0.0,     0.0 }
+    };
+}
+
 namespace tr_integration_5
 {
     static const size_t gauss_num = 7;
@@ -282,6 +311,10 @@ namespace tr_integration_5
 #undef tet_integration_4
 #endif
 
+#if defined tet_integration_14
+#undef tet_integration_14
+#endif
+
 #if defined tr_integration_2
 #undef tr_integration_2
 #endif
@@ -290,8 +323,16 @@ namespace tr_integration_5
 #undef tr_integration_3
 #endif
 
+#if defined tr_integration_3_2
+#undef tr_integration_3_2
+#endif
+
 #if defined tr_integration_5
 #undef tr_integration_5
+#endif
+
+#if defined tr_integration_21
+#undef tr_integration_21
 #endif
 
 #endif // BASIS_H_INCLUDED

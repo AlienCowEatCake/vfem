@@ -37,6 +37,7 @@ HEADERS += \
     src/elements/triangle.h \
     src/elements/tetrahedron.h \
     src/common/basis_config.h \
+    src/common/integration.h \
     src/elements/octal_tree.h \
     src/vfem/phys.h \
     src/vfem/slae.h \

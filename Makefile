@@ -1,5 +1,5 @@
 CXX ?= g++
-CXXFLAGS_EXTRA ?= -Wall -Wextra -std=c++0x -pedantic -pipe
+CXXFLAGS_EXTRA ?= -Wall -Wextra -std=c++0x -pedantic -pipe -DUSE_NOSIGHUP
 CXXFLAGS_OPTIMIZE ?= -O3 -march=native -mtune=native -DNDEBUG
 LDFLAGS_EXTRA ?= -s
 EXECUTABLE = vfem
