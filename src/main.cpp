@@ -1,7 +1,7 @@
 #include "problems/problems.h"
 #include <ctime>
 
-#if !defined _WIN32
+#if !defined _WIN32 && defined USE_NOSIGHUP
 #include <signal.h>
 
 // Обработчик SIGHUP
@@ -47,7 +47,7 @@ void print_time(size_t seconds, const string & descr)
 
 int main()
 {
-#if !defined _WIN32
+#if !defined _WIN32 && defined USE_NOSIGHUP
     // Устанавливаем обработчик SIGHUP
     struct sigaction sigact;
     memset(& sigact, 0, sizeof(struct sigaction));
@@ -71,6 +71,9 @@ int main()
 #endif
 #if defined USE_CXX11
     cout << " # USE_CXX11" << endl;
+#endif
+#if defined USE_NOSIGHUP
+    cout << " # USE_NOSIGHUP" << endl;
 #endif
     cout << " # Mesh file: " << mesh_filename << endl;
     cout << " # Phys file: " << phys_filename << endl;

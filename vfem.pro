@@ -2,6 +2,7 @@ TEMPLATE = app
 CONFIG += console
 CONFIG -= app_bundle
 CONFIG -= qt
+CONFIG += warn_on
 
 SOURCES += \
     src/main.cpp \
@@ -47,8 +48,6 @@ HEADERS += \
 #    src/solvers/CGMComplex_LLT.h \
 #    src/solvers/CGMComplex_VC.h \
     src/solvers/COCG_LLT_Smooth.h
-
-CONFIG += warn_on
 
 *g++*|*clang* {
 #    QMAKE_CXXFLAGS *= -ansi
