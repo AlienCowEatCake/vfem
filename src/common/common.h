@@ -74,17 +74,29 @@ inline void show_progress(const char * message, size_t index, size_t num_all)
 
 inline bool is_nan(double x)
 {
+#if defined USE_CXX11
+    return isnan(x);
+#else
     return x != x;
+#endif
 }
 
 inline bool is_inf(double x)
 {
+#if defined USE_CXX11
+    return isinf(x);
+#else
     return !is_nan(x) && is_nan(x - x);
+#endif
 }
 
 inline bool is_fpu_error(double x)
 {
+#if defined USE_CXX11
+    return !isfinite(x);
+#else
     return is_nan(x) || is_nan(x - x);
+#endif
 }
 
 #endif // COMMON_H_INCLUDED

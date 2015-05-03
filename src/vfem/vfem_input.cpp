@@ -661,21 +661,23 @@ void VFEM::input_pml()
     for(size_t i = 0; i < fes.size(); i++)
     {
         show_progress("scanned tetrahedrons", i, fes.size());
-        if(is_pml(fes[i].barycenter, &(fes[i])))
+        finite_element * fes_i = &(fes[i]);
+        if(is_pml(fes_i->barycenter, fes_i))
         {
             for(size_t j = 0; j < 4; j++)
-                pml_nodes_cache[fes[i].nodes[j]] = make_pair(cpoint(), &(fes[i]));
+                pml_nodes_cache[fes_i->nodes[j]] = make_pair(cpoint(), fes_i);
         }
         else
         {
             for(size_t j = 0; j < 4; j++)
             {
-                if(fes[i].nodes[j]->x > phys_pml.x1) phys_pml.x1 = fes[i].nodes[j]->x;
-                if(fes[i].nodes[j]->y > phys_pml.y1) phys_pml.y1 = fes[i].nodes[j]->y;
-                if(fes[i].nodes[j]->z > phys_pml.z1) phys_pml.z1 = fes[i].nodes[j]->z;
-                if(fes[i].nodes[j]->x < phys_pml.x0) phys_pml.x0 = fes[i].nodes[j]->x;
-                if(fes[i].nodes[j]->y < phys_pml.y0) phys_pml.y0 = fes[i].nodes[j]->y;
-                if(fes[i].nodes[j]->z < phys_pml.z0) phys_pml.z0 = fes[i].nodes[j]->z;
+                point * nodes_j = fes_i->nodes[j];
+                if(nodes_j->x > phys_pml.x1) phys_pml.x1 = nodes_j->x;
+                if(nodes_j->y > phys_pml.y1) phys_pml.y1 = nodes_j->y;
+                if(nodes_j->z > phys_pml.z1) phys_pml.z1 = nodes_j->z;
+                if(nodes_j->x < phys_pml.x0) phys_pml.x0 = nodes_j->x;
+                if(nodes_j->y < phys_pml.y0) phys_pml.y0 = nodes_j->y;
+                if(nodes_j->z < phys_pml.z0) phys_pml.z0 = nodes_j->z;
             }
         }
     }
