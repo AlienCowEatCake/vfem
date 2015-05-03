@@ -14,7 +14,12 @@ cvector3 func_true(const point & p)
 
     //return cvector3(1.0, 0.0, 0.0);
     //return cvector3(p.y + p.z, p.x + p.z, p.x + p.y);
-    return cvector3(exp(p.y + p.z), exp(p.x + p.z), exp(p.x + p.y));
+    //return cvector3(exp(p.y + p.z), exp(p.x + p.z), exp(p.x + p.y));
+
+    complex<double> x(exp(- (0.5 - p.y) * (0.5 - p.y) - (0.5 - p.z) * (0.5 - p.z)));
+    complex<double> y(exp(- (0.5 - p.x) * (0.5 - p.x) - (0.5 - p.z) * (0.5 - p.z)));
+    complex<double> z(exp(- (0.5 - p.x) * (0.5 - p.x) - (0.5 - p.y) * (0.5 - p.y)));
+    return cvector3(x, y, z);
 }
 
 cvector3 func_rp(const point & p, const phys_area & phys)
@@ -24,12 +29,19 @@ cvector3 func_rp(const point & p, const phys_area & phys)
 
     complex<double> k2(- phys.omega * phys.omega * phys.epsilon, phys.omega * phys.sigma);
     //return k2 * cvector3(1.0, 0.0, 0.0);
-    //return k2 * cvector3(- p.y - p.z, - p.x - p.z, - p.x - p.y);
+    //return k2 * cvector3(p.y + p.z, p.x + p.z, p.x + p.y);
+    //return cvector3(
+    //           -2.0 * exp(p.y + p.z) / phys.mu + k2 * exp(p.y + p.z),
+    //           -2.0 * exp(p.x + p.z) / phys.mu + k2 * exp(p.x + p.z),
+    //           -2.0 * exp(p.x + p.y) / phys.mu + k2 * exp(p.x + p.y)
+    //       );
+
+    // http://www.wolframalpha.com/input/?i=curl%28curl%28%7Bexp%28-%280.5-y%29%5E2-%280.5-z%29%5E2%29%2Cexp%28-%280.5-x%29%5E2-%280.5-z%29%5E2%29%2Cexp%28-%280.5-x%29%5E2+-%280.5-y%29%5E2%29%7D%29+%29
     return cvector3(
-               -2.0 * exp(p.y + p.z) / phys.mu + k2 * exp(p.y + p.z),
-               -2.0 * exp(p.x + p.z) / phys.mu + k2 * exp(p.x + p.z),
-               -2.0 * exp(p.x + p.y) / phys.mu + k2 * exp(p.x + p.y)
-           );
+                exp(-0.5 + p.y - p.y * p.y + p.z - p.z * p.z) * (2.0 + 4.0 * p.y - 4.0 * p.y * p.y + 4.0 * p.z - 4.0 * p.z * p.z) / phys.mu + k2 * exp(- (0.5 - p.y) * (0.5 - p.y) - (0.5 - p.z) * (0.5 - p.z)),
+                exp(-0.5 + p.x - p.x * p.x + p.z - p.z * p.z) * (2.0 + 4.0 * p.x - 4.0 * p.x * p.x + 4.0 * p.z - 4.0 * p.z * p.z) / phys.mu + k2 * exp(- (0.5 - p.x) * (0.5 - p.x) - (0.5 - p.z) * (0.5 - p.z)),
+                exp(-0.5 + p.x - p.x * p.x + p.y - p.y * p.y) * (2.0 + 4.0 * p.x - 4.0 * p.x * p.x + 4.0 * p.y - 4.0 * p.y * p.y) / phys.mu + k2 * exp(- (0.5 - p.x) * (0.5 - p.x) - (0.5 - p.y) * (0.5 - p.y))
+                );
 }
 
 cvector3 func_b1(const point & p, const triangle * tr)
@@ -68,6 +80,10 @@ void postprocessing(VFEM & v, char * timebuf)
     MAYBE_UNUSED(timebuf);
 
     v.output_slice(string("analytical_cube_slice") + "_" + string(timebuf) + ".dat",
+                   'Y', 0.5, 'X', 0.0, 1.0 + 1e-10, 0.01, 'Z', 0.0, 1.0 + 1e-10, 0.01);
+    v.calculate_diff();
+/*
+    v.output_slice(string("analytical_cube_slice") + "_" + string(timebuf) + ".dat",
                    'Y', 0.05, 'X', 0.0, 0.1, 0.005, 'Z', 0.0, 0.1, 0.005);
 
     cout << v.solution(point(0.01,0.01,0.01)) << endl;
@@ -98,6 +114,7 @@ void postprocessing(VFEM & v, char * timebuf)
     }
     v.calculate_diff();
     cout << "Diff (C3): \t" << sqrt(diff_ab / diff_a) << endl;
+*/
 }
 
 #endif // ANALYTICAL_CUBE
