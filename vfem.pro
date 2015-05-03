@@ -6,6 +6,7 @@ CONFIG += warn_on
 
 SOURCES += \
     src/main.cpp \
+    src/common/basis_config.cpp \
     src/geometry/point.cpp \
     src/geometry/vector3.cpp \
     src/elements/edge.cpp \
@@ -31,13 +32,13 @@ SOURCES += \
 HEADERS += \
     src/common/matrix.h \
     src/common/common.h \
+    src/common/basis_config.h \
     src/geometry/point.h \
     src/geometry/vector3.h \
     src/elements/edge.h \
     src/elements/face.h \
     src/elements/triangle.h \
     src/elements/tetrahedron.h \
-    src/common/basis_config.h \
     src/elements/octal_tree.h \
     src/vfem/phys.h \
     src/vfem/slae.h \
