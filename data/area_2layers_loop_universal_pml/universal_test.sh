@@ -20,18 +20,18 @@ cd "${MESH_DIR}"
 rm -f "${OUT_FILE_1}" "${OUT_FILE_2}" 2>/dev/null
 
 cat "${INP_FILE}" | sed "s/PML_BEGIN/${PML_BEGIN}/g ; s/PML_WIDTH/${PML_WIDTH}/g" |
-sed "s/FIRST_PHASE_HERE/Mesh.Optimize = 1;\nMesh.OptimizeNetgen = 1;\nMesh 3;\nSave Sprintf(\"${OUT_FILE_1}\", 1);\n/g" |
-sed "s/SECOND_PHASE_HERE/Mesh.Optimize = 1;\nMesh.OptimizeNetgen = 1;\nMesh 3;\nSave Sprintf(\"${OUT_FILE_2}\", 1);\n/g" > "${OUT_FILE}"
+sed "s/FIRST_PHASE_HERE/Mesh.Optimize = 1;\nMesh.OptimizeNetgen = 1;\nMesh 3;\nSave \"${OUT_FILE_1}\";\n/g" |
+sed "s/SECOND_PHASE_HERE/Mesh.Optimize = 1;\nMesh.OptimizeNetgen = 1;\nMesh 3;\nSave \"${OUT_FILE_2}\";\n/g" > "${OUT_FILE}"
 "${GMSH}" - "${OUT_FILE}"
 if [[ $? -ne 0 ]] ; then
 	cat "${INP_FILE}" | sed "s/PML_BEGIN/${PML_BEGIN}/g ; s/PML_WIDTH/${PML_WIDTH}/g" |
-	sed "s/FIRST_PHASE_HERE/Mesh.Optimize = 1;\nMesh.OptimizeNetgen = 0;\nMesh 3;\nSave Sprintf(\"${OUT_FILE_1}\", 1);\n/g" |
-	sed "s/SECOND_PHASE_HERE/Mesh.Optimize = 1;\nMesh.OptimizeNetgen = 0;\nMesh 3;\nSave Sprintf(\"${OUT_FILE_2}\", 1);\n/g" > "${OUT_FILE}"
+	sed "s/FIRST_PHASE_HERE/Mesh.Optimize = 1;\nMesh.OptimizeNetgen = 0;\nMesh 3;\nSave \"${OUT_FILE_1}\";\n/g" |
+	sed "s/SECOND_PHASE_HERE/Mesh.Optimize = 1;\nMesh.OptimizeNetgen = 0;\nMesh 3;\nSave \"${OUT_FILE_2}\";\n/g" > "${OUT_FILE}"
 	"${GMSH}" - "${OUT_FILE}"
 	if [[ $? -ne 0 ]] ; then
 		cat "${INP_FILE}" | sed "s/PML_BEGIN/${PML_BEGIN}/g ; s/PML_WIDTH/${PML_WIDTH}/g" |
-		sed "s/FIRST_PHASE_HERE/Mesh.Optimize = 0;\nMesh.OptimizeNetgen = 0;\nMesh 3;\nSave Sprintf(\"${OUT_FILE_1}\", 1);\n/g" |
-		sed "s/SECOND_PHASE_HERE/Mesh.Optimize = 0;\nMesh.OptimizeNetgen = 0;\nMesh 3;\nSave Sprintf(\"${OUT_FILE_2}\", 1);\n/g" > "${OUT_FILE}"
+		sed "s/FIRST_PHASE_HERE/Mesh.Optimize = 0;\nMesh.OptimizeNetgen = 0;\nMesh 3;\nSave \"${OUT_FILE_1}\";\n/g" |
+		sed "s/SECOND_PHASE_HERE/Mesh.Optimize = 0;\nMesh.OptimizeNetgen = 0;\nMesh 3;\nSave \"${OUT_FILE_2}\";\n/g" > "${OUT_FILE}"
 		"${GMSH}" - "${OUT_FILE}"
 	fi
 fi

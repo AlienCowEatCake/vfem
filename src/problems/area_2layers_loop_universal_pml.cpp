@@ -5,6 +5,8 @@
 #error "Please, reconfigure!"
 #endif
 
+//#define SMALL_MESH
+
 double SLAE_MAIN_EPSILON = 1e-10;
 
 cvector3 func_rp(const point & p, const phys_area & phys)
@@ -174,7 +176,11 @@ string tecplot_filename = "area_2layers_loop_universal_pml.plt";
 
 string phys_filename_pml = "data/area_2layers_loop_pml/std-1.txt";
 string phys_filename_nonpml = "data/area_2layers_loop_pml/std-2.txt";
+#if !defined SMALL_MESH
 string mesh_filename = "data/area_2layers_loop_universal_pml/universal_full.msh";
+#else
+string mesh_filename = "data/area_2layers_loop_universal_pml/universal_small.msh";
+#endif
 #if defined VFEM_USE_PML
 string phys_filename = phys_filename_pml;
 #else
@@ -214,7 +220,7 @@ void postprocessing(VFEM & v, char * timebuf)
 
 #if !defined VFEM_USE_PML
     v.slae.dump_x(slae_dump_filename);
-#else
+#elif !defined SMALL_MESH
     complex<double> * anal = new complex<double> [v.slae.n];
     ifstream a;
     a.open(slae_dump_filename.c_str(), ios::in);
