@@ -192,6 +192,7 @@ void postprocessing(VFEM & v, char * timebuf)
 {
     MAYBE_UNUSED(v);
     MAYBE_UNUSED(timebuf);
+#if !defined SMALL_MESH
     v.output_slice(string("area_2layers_loop_universal_pml") + "_" + string(timebuf) + ".dat",
                    'Y', 0.0, 'X', -700, 700, 20.0, 'Z', -700, 700, 20.0);
 
@@ -220,7 +221,7 @@ void postprocessing(VFEM & v, char * timebuf)
 
 #if !defined VFEM_USE_PML
     v.slae.dump_x(slae_dump_filename);
-#elif !defined SMALL_MESH
+#else
     complex<double> * anal = new complex<double> [v.slae.n];
     ifstream a;
     a.open(slae_dump_filename.c_str(), ios::in);
@@ -248,6 +249,7 @@ void postprocessing(VFEM & v, char * timebuf)
     }
     cout << "Diff (L2): \t" << sqrt(diff / norm) << endl;
     delete [] anal;
+#endif
 #endif
 }
 
