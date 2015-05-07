@@ -1,10 +1,5 @@
 #!/bin/bash
 
-PML_BEGIN=600
-PML_WIDTH=100
-PML_CHI_RE=4
-PML_CHI_IM=1
-PML_M=3
 INP_FILE="autogen2_template.geo"
 OUT_FILE="autogen2.geo"
 OUT_FILE_1="universal_small.msh"
@@ -12,9 +7,8 @@ OUT_FILE_2="universal_full.msh"
 MESH_DIR="data/area_2layers_loop_universal_pml"
 CURR_DIR=`pwd`
 GMSH="gmsh"
-RESULT_DIR="test_begin=${PML_BEGIN}_width=${PML_WIDTH}_chi=(${PML_CHI_RE},${PML_CHI_IM})_m=${PML_M}"
 
-#set -x
+function calc {
 
 cd "${MESH_DIR}"
 rm -f "${OUT_FILE_1}" "${OUT_FILE_2}" 2>/dev/null
@@ -47,5 +41,17 @@ echo -e "${PML_M}\n\n" > "pml_m.txt"
 "${CURR_DIR}/vfem_classic" | tee "out_classic.txt"
 "${CURR_DIR}/vfem_pml" | tee "out_pml.txt"
 "${CURR_DIR}/vfem_pml_small" | tee "out_pml_small.txt"
+
+cd "${CURR_DIR}"
+
+}
+
+PML_BEGIN=600
+PML_WIDTH=100
+PML_CHI_RE=4
+PML_CHI_IM=1
+PML_M=3
+RESULT_DIR="test_begin=${PML_BEGIN}_width=${PML_WIDTH}_chi=(${PML_CHI_RE},${PML_CHI_IM})_m=${PML_M}"
+calc
 
 exit 0

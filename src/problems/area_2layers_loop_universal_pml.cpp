@@ -112,7 +112,7 @@ cvector3 get_s(const point & p, const finite_element * fe, const phys_pml_area *
         return cvector3(1.0, 1.0, 1.0);
 
     /// Нефиг пост-PML растягивать!
-    if(fabs(p.x) > config.begin + 1.0 || fabs(p.y) > config.begin + 1.0 || fabs(p.z) > config.begin + 1.0)
+    if(fabs(p.x) > config.begin + config.width + 1.0 || fabs(p.y) > config.begin + config.width + 1.0 || fabs(p.z) > config.begin + config.width + 1.0)
         return cvector3(1.0, 1.0, 1.0);
 
     double m = config.m;
@@ -196,6 +196,11 @@ void postprocessing(VFEM & v, char * timebuf)
     v.output_slice(string("area_2layers_loop_universal_pml") + "_" + string(timebuf) + ".dat",
                    'Y', 0.0, 'X', -700, 700, 20.0, 'Z', -700, 700, 20.0);
 
+    v.output_slice(string("area_2layers_loop_universal_pml_z=10") + "_" + string(timebuf) + ".dat",
+                   'Z', 10.0, 'X', -500, 500, 10.0, 'Y', -500, 500, 10.0);
+    v.output_slice(string("area_2layers_loop_universal_pml_z=-10") + "_" + string(timebuf) + ".dat",
+                   'Z', -10.0, 'X', -500, 500, 10.0, 'Y', -500, 500, 10.0);
+
     double y = 0, z0 = 10, z1 = -10;
     size_t n = 65000;
     double x0 = -500.0, x1 = 500.0;
@@ -232,9 +237,9 @@ void postprocessing(VFEM & v, char * timebuf)
     double diff = 0.0, norm = 0.0;
     for(size_t k = 0; k < v.fes.size(); k++)
     {
-        if(fabs(v.fes[k].barycenter.x) <= 500 && fabs(v.fes[k].barycenter.x) >= 100 &&
-           fabs(v.fes[k].barycenter.y) <= 500 && fabs(v.fes[k].barycenter.y) >= 100 &&
-           fabs(v.fes[k].barycenter.z) <= 500 && fabs(v.fes[k].barycenter.z) >= 100)
+        if(fabs(v.fes[k].barycenter.x) <= 500 && fabs(v.fes[k].barycenter.x) >= 180 &&
+           fabs(v.fes[k].barycenter.y) <= 500 && fabs(v.fes[k].barycenter.y) >= 180 &&
+           fabs(v.fes[k].barycenter.z) <= 500 && fabs(v.fes[k].barycenter.z) >= 180)
         {
             array_t<complex<double>, basis::tet_bf_num> q_loc, q_loc_true;
             for(size_t i = 0; i < basis::tet_bf_num; i++)
