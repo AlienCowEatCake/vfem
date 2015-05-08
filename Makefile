@@ -11,6 +11,7 @@ LDFLAGS += $(LDFLAGS_EXTRA)
 SOURCES = \
 	src/main.cpp \
 	src/common/basis_config.cpp \
+	src/common/cubatures.cpp \
 	src/geometry/point.cpp \
 	src/geometry/vector3.cpp \
 	src/elements/edge.cpp \
