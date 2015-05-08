@@ -157,6 +157,16 @@ namespace tr_integration_5
 // Интегрирование особо высоких порядков
 // http://lsec.cc.ac.cn/~tcui/myinfo/paper/quad.pdf
 
+namespace tet_integration_8
+{
+    namespace tet_integration
+    {
+        static const size_t gauss_num = 46;
+        extern const double gauss_weights[gauss_num];
+        extern const double gauss_points_master[gauss_num][4];
+    }
+}
+
 namespace tet_integration_14
 {
     namespace tet_integration
@@ -164,6 +174,16 @@ namespace tet_integration_14
         static const size_t gauss_num = 236;
         extern const double gauss_weights[gauss_num];
         extern const double gauss_points_master[gauss_num][4];
+    }
+}
+
+namespace tr_integration_8
+{
+    namespace tr_integration
+    {
+        static const size_t gauss_num = 16;
+        extern const double gauss_weights[gauss_num];
+        extern const double gauss_points_master[gauss_num][3];
     }
 }
 
@@ -185,8 +205,8 @@ using namespace tr_integration_5;
 #endif
 
 #if BASIS_ORDER == 2
-using namespace tet_integration_14;
-using namespace tr_integration_21;
+using namespace tet_integration_8;
+using namespace tr_integration_8;
 #endif
 
 #endif // BASIS_H_INCLUDED
