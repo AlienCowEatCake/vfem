@@ -6,6 +6,7 @@
 #endif
 
 //#define SMALL_MESH
+#define DIFFERENT_VALUES
 
 double SLAE_MAIN_EPSILON = 1e-10;
 
@@ -29,14 +30,26 @@ class pml_config
 public:
     double begin;
     double width;
+#if defined DIFFERENT_VALUES
+    complex<double> chi_air;
+    complex<double> chi_water;
+#else
     complex<double> chi;
+#endif
     double m;
     pml_config()
     {
         begin = 600.0;
         width = 100.0;
+#if defined DIFFERENT_VALUES
+        chi_air.real(5.0);
+        chi_air.imag(0.0);
+        chi_water.real(0.0);
+        chi_water.imag(7.0);
+#else
         chi.real(4.0);
         chi.imag(1.0);
+#endif
         m = 3.0;
         load();
     }
@@ -46,6 +59,39 @@ public:
         string name;
         double tmp, tmp2;
 
+#if defined DIFFERENT_VALUES
+        name = "pml_chi_air.txt";
+        ifs.open(name.c_str(), ios::in);
+        ifs >> tmp >> tmp2;
+        if(!ifs.good())
+        {
+            cerr << "Error in " << __FILE__ << ":" << __LINE__
+                 << " while reading file " << name << endl;
+            //throw IO_FILE_ERROR;
+        }
+        else
+        {
+            chi_air.real(tmp);
+            chi_air.imag(tmp2);
+        }
+        ifs.close();
+
+        name = "pml_chi_water.txt";
+        ifs.open(name.c_str(), ios::in);
+        ifs >> tmp >> tmp2;
+        if(!ifs.good())
+        {
+            cerr << "Error in " << __FILE__ << ":" << __LINE__
+                 << " while reading file " << name << endl;
+            //throw IO_FILE_ERROR;
+        }
+        else
+        {
+            chi_water.real(tmp);
+            chi_water.imag(tmp2);
+        }
+        ifs.close();
+#else
         name = "pml_chi.txt";
         ifs.open(name.c_str(), ios::in);
         ifs >> tmp >> tmp2;
@@ -61,6 +107,7 @@ public:
             chi.imag(tmp2);
         }
         ifs.close();
+#endif
 
         name = "pml_m.txt";
         ifs.open(name.c_str(), ios::in);
@@ -116,7 +163,21 @@ cvector3 get_s(const point & p, const finite_element * fe, const phys_pml_area *
         return cvector3(1.0, 1.0, 1.0);
 
     double m = config.m;
+#if defined DIFFERENT_VALUES
+    complex<double> chi = config.chi_air;
+
+    // Воздух
+    if(fe->phys->gmsh_num % 10 == 1)
+        chi = config.chi_air;
+    // Вода
+    else if(fe->phys->gmsh_num % 10 == 2)
+        chi = config.chi_air;
+    // Где я? о_О
+    else
+        return cvector3(1.0, 1.0, 1.0);
+#else
     complex<double> chi = config.chi;
+#endif
 
     double pml_thickness_x = config.width;
     double pml_thickness_y = config.width;
