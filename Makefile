@@ -37,7 +37,7 @@ all: $(SOURCES) $(EXECUTABLE)
 .PHONY: clean install
 
 $(EXECUTABLE): $(OBJECTS) 
-	$(CXX) $(LDFLAGS) $(OBJECTS) -o $@
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJECTS) -o $@
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) -c $< -o $@
