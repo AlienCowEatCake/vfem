@@ -27,3 +27,18 @@ for i in `ls *_*.txt | grep -v slae | grep -v chi_`; do echo -n "$i" | sed 's/_/
 # Вывод исследования положений
 for i in `find . -name *00.txt`; do echo -n ${i} | sed 's/.*\///g ; s/\..*//g' ; echo -n " " ; cat ${i} | grep Diff | sed 's/.* //g'; done | sort --human-numeric-sort
 for i in `find . -name *00_new.txt`; do echo -n ${i} | sed 's/.*\///g ; s/_.*//g' ; echo -n " " ; cat ${i} | grep Diff | sed 's/.* //g'; done | sort --human-numeric-sort
+
+================================================================================
+
+# Вывод для универсального скрипта исследований
+echo "Classic:" ; \
+cat out_classic.txt | grep '# SLAE' ; \
+cat out_classic.txt | grep Residual | tail -1 ; \
+cat out_classic.txt | grep "Solve time" ; \
+echo "PML" ; \
+cat out_pml_small.txt | grep '# SLAE' ; \
+cat out_pml.txt | grep Residual | tail -1 ; \
+cat out_pml_small.txt | grep "Solve time" ; \
+cat out_pml.txt | grep Diff
+
+
