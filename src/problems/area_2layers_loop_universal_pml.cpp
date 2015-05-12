@@ -51,7 +51,9 @@ public:
         chi.imag(1.0);
 #endif
         m = 3.0;
+#if defined VFEM_USE_PML
         load();
+#endif
     }
     void load()
     {
