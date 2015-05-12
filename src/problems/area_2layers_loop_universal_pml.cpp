@@ -173,7 +173,7 @@ cvector3 get_s(const point & p, const finite_element * fe, const phys_pml_area *
         chi = config.chi_air;
     // Вода
     else if(fe->phys->gmsh_num % 10 == 2)
-        chi = config.chi_air;
+        chi = config.chi_water;
     // Где я? о_О
     else
         return cvector3(1.0, 1.0, 1.0);
