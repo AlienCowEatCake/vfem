@@ -296,8 +296,6 @@ namespace tr_integration_14
     }
 }
 
-// a 49-point rule communicated by Freddie Witherden (freddie@witherden.org)
-// 2D 49 point order 15 rule (1:4:6, 346 tries, 3288 evals), error = 4.251e-17
 namespace tr_integration_15
 {
     namespace tr_integration
@@ -318,11 +316,6 @@ namespace tr_integration_16
     }
 }
 
-// A 60-point order 17 rule found by using the number of points reported in:
-// H. Xiao and Z. Gimbutas,
-// A numerical algorithm for the construction of efficient quadrature
-// rules in two and higher dimensions,
-// Computers and Mathematics with Applications, 59 (2010), 663-676
 namespace tr_integration_17
 {
     namespace tr_integration
@@ -333,11 +326,6 @@ namespace tr_integration_17
     }
 }
 
-// A 67-point order 18 rule found by using the number of points reported in:
-// H. Xiao and Z. Gimbutas,
-// A numerical algorithm for the construction of efficient quadrature
-// rules in two and higher dimensions,
-// Computers and Mathematics with Applications, 59 (2010), 663-676
 namespace tr_integration_18
 {
     namespace tr_integration
@@ -348,10 +336,6 @@ namespace tr_integration_18
     }
 }
 
-// Note: the rule QUAD_2D_P19 was taken from the book by
-// P. Solin, K. Segeth, and I. Dolezel,
-// "Higer-order Finite Element Methods",
-// Chapman and Hall/CRC Press, 2003.
 namespace tr_integration_19
 {
     namespace tr_integration
@@ -362,8 +346,6 @@ namespace tr_integration_19
     }
 }
 
-// Rules 20-24, 26-29 are found by Simone Weikl (simone.weikl@googlemail.com),
-// Diploma Thesis, Technische Universiat Munchen, Zentrum Mathematik, 2011
 namespace tr_integration_20
 {
     namespace tr_integration
@@ -414,10 +396,6 @@ namespace tr_integration_24
     }
 }
 
-// The rule below is reported in the paper:
-// S. Wandzura and H. Xiao, Symmetric quadrature rules on a triangle,
-// Computers and Mathematics with Applications, 45 (2003), 1829ЁC1840,
-// and was communicated by Don Wilton (dwilton@mindspring.com)
 namespace tr_integration_25
 {
     namespace tr_integration
