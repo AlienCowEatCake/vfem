@@ -275,6 +275,44 @@ void postprocessing(VFEM & v, char * timebuf)
 {
     MAYBE_UNUSED(v);
     MAYBE_UNUSED(timebuf);
+
+//    v.output_slice(string("area_2layers_loop_universal_pml_z=10") + "_" + string(timebuf) + ".dat",
+//                   'Z', 10.0, 'X', 600, 700, 20.0, 'Y', -700, 700, 20.0);
+//    v.output_slice(string("area_2layers_loop_universal_pml_z=-10") + "_" + string(timebuf) + ".dat",
+//                   'Z', -10.0, 'X', 600, 700, 20.0, 'Y', -700, 700, 20.0);
+//    v.output_slice(string("area_2layers_loop_universal_pml_z=50") + "_" + string(timebuf) + ".dat",
+//                   'Z', 50.0, 'X', 600, 700, 20.0, 'Y', -700, 700, 20.0);
+//    v.output_slice(string("area_2layers_loop_universal_pml_z=-50") + "_" + string(timebuf) + ".dat",
+//                   'Z', -50.0, 'X', 600, 700, 20.0, 'Y', -700, 700, 20.0);
+
+//    v.output_slice(string("area_2layers_loop_universal_pml_z=10") + "_" + string(timebuf) + ".dat",
+//                   'Z', 10.0, 'X', -700, 700, 5.0, 'Y', -700, 700, 5.0);
+//    v.output_slice(string("area_2layers_loop_universal_pml_z=-10") + "_" + string(timebuf) + ".dat",
+//                   'Z', -10.0, 'X', -700, 700, 5.0, 'Y', -700, 700, 5.0);
+//    v.output_slice(string("area_2layers_loop_universal_pml_z=50") + "_" + string(timebuf) + ".dat",
+//                   'Z', 50.0, 'X', -700, 700, 5.0, 'Y', -700, 700, 5.0);
+//    v.output_slice(string("area_2layers_loop_universal_pml_z=-50") + "_" + string(timebuf) + ".dat",
+//                   'Z', -50.0, 'X', -700, 700, 5.0, 'Y', -700, 700, 5.0);
+
+//    {
+//        double x = 650;
+//        double y = 100;
+//        double z0 = -0.005;
+//        double z1 = 0.005;
+//        size_t n = 2000;
+//        double hz = (z1 - z0) / (double)n;
+//        ofstream ff("650_3.txt");
+//        for(size_t i = 0; i <= n; i++)
+//        {
+//            double z = z0 + (double)i * hz;
+//            cvector3 sol0 = v.solution(point(x, y, z));
+//            ff << z << " " << sol0.x.real() << " " << sol0.x.imag()
+//               << " " << sol0.y.real() << " " << sol0.y.imag()
+//               << " " << sol0.z.real() << " " << sol0.z.imag() << endl;
+//        }
+//        ff.close();
+//    }
+
 #if !defined SMALL_MESH
     v.output_slice(string("area_2layers_loop_universal_pml") + "_" + string(timebuf) + ".dat",
                    'Y', 0.0, 'X', -700, 700, 20.0, 'Z', -700, 700, 20.0);

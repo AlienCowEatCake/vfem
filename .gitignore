@@ -70,6 +70,7 @@ ui_*.h
 *.msh
 #!/data/approx/**/*.msh
 !/other/legacy/ANALYTICAL_CUBE/approx/**/*.msh
+!/other/pml/test/data/**/*.msh
 
 # Tecplot results
 *.plt
