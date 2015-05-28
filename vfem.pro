@@ -15,6 +15,7 @@ SOURCES += \
     src/elements/triangle.cpp \
     src/elements/tetrahedron.cpp \
     src/elements/tetrahedron_pml.cpp \
+    src/elements/tetrahedron_pml_tensor.cpp \
     src/vfem/slae.cpp \
     src/vfem/vfem.cpp \
     src/vfem/vfem_input.cpp \

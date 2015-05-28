@@ -1,5 +1,13 @@
 #include "problems.h"
 
+#if defined VFEM_USE_PML_TENSOR
+#if defined VFEM_USE_PML
+#error "Please, reconfigure!"
+#else
+#define VFEM_USE_PML
+#endif
+#endif
+
 #if defined AREA_2LAYERS_LOOP_UNIVERSAL_PML
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST || defined VFEM_USE_ANALYTICAL
 #error "Please, reconfigure!"
@@ -188,12 +196,24 @@ cvector3 get_s(const point & p, const finite_element * fe, const phys_pml_area *
     double pml_distance_x = 0;
     double pml_distance_y = 0;
     double pml_distance_z = 0;
-    if(p.x > phys_pml->x1) pml_distance_x = fabs(p.x - phys_pml->x1);
-    if(p.x < phys_pml->x0) pml_distance_x = fabs(p.x - phys_pml->x0);
-    if(p.y > phys_pml->y1) pml_distance_y = fabs(p.y - phys_pml->y1);
-    if(p.y < phys_pml->y0) pml_distance_y = fabs(p.y - phys_pml->y0);
-    if(p.z > phys_pml->z1) pml_distance_z = fabs(p.z - phys_pml->z1);
-    if(p.z < phys_pml->z0) pml_distance_z = fabs(p.z - phys_pml->z0);
+    if(phys_pml)
+    {
+        if(p.x > phys_pml->x1) pml_distance_x = fabs(p.x - phys_pml->x1);
+        if(p.x < phys_pml->x0) pml_distance_x = fabs(p.x - phys_pml->x0);
+        if(p.y > phys_pml->y1) pml_distance_y = fabs(p.y - phys_pml->y1);
+        if(p.y < phys_pml->y0) pml_distance_y = fabs(p.y - phys_pml->y0);
+        if(p.z > phys_pml->z1) pml_distance_z = fabs(p.z - phys_pml->z1);
+        if(p.z < phys_pml->z0) pml_distance_z = fabs(p.z - phys_pml->z0);
+    }
+    else
+    {
+        if(p.x > config.begin) pml_distance_x = fabs(p.x - config.begin);
+        if(p.x < -config.begin) pml_distance_x = fabs(p.x + config.begin);
+        if(p.y > config.begin) pml_distance_y = fabs(p.y - config.begin);
+        if(p.y < -config.begin) pml_distance_y = fabs(p.y + config.begin);
+        if(p.z > config.begin) pml_distance_z = fabs(p.z - config.begin);
+        if(p.z < -config.begin) pml_distance_z = fabs(p.z + config.begin);
+    }
 
     // Коэффициенты для проекции
     double dist = sqrt(pml_distance_x * pml_distance_x + pml_distance_y * pml_distance_y + pml_distance_z * pml_distance_z);

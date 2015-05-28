@@ -525,6 +525,11 @@ void VFEM::input_mesh(const string & gmsh_filename)
     input_pml();
 #endif
 
+#if defined VFEM_USE_PML_TENSOR
+    for(size_t i = 0; i < fes.size(); i++)
+        fes[i].init_pml(get_s);
+#endif
+
 #if BASIS_ORDER == 1 && BASIS_TYPE == 1
     dof_num = edges.size();
 #endif

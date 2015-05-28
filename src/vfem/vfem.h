@@ -14,12 +14,16 @@
 #include "../vfem/phys.h"
 #include "../vfem/slae.h"
 
-#define VFEM_USE_PML
+//#define VFEM_USE_PML
 //#define VFEM_USE_NONHOMOGENEOUS_FIRST
 //#define VFEM_USE_ANALYTICAL
+#define VFEM_USE_PML_TENSOR
 
 #if defined VFEM_USE_PML
 typedef tetrahedron_pml finite_element;
+typedef matrix_t<complex<double>, basis::tet_bf_num, basis::tet_bf_num> l_matrix;
+#elif defined VFEM_USE_PML_TENSOR
+typedef tetrahedron_pml_tensor finite_element;
 typedef matrix_t<complex<double>, basis::tet_bf_num, basis::tet_bf_num> l_matrix;
 #else
 typedef tetrahedron finite_element;
@@ -46,12 +50,12 @@ cvector3 func_true(const point & p);
 #endif
 
 // Коэффициент S для PML
-#if defined VFEM_USE_PML
-cvector3 get_s(const point & p, const tetrahedron_pml * fe, const phys_pml_area * phys_pml);
+#if defined VFEM_USE_PML || defined VFEM_USE_PML_TENSOR
+cvector3 get_s(const point & p, const finite_element * fe, const phys_pml_area * phys_pml);
 #endif
 
 // Проверка, PML или нет
-#if defined VFEM_USE_PML
+#if defined VFEM_USE_PML || defined VFEM_USE_PML_TENSOR
 bool is_pml(const point & p, const finite_element * fe);
 #endif
 

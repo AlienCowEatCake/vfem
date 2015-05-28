@@ -80,6 +80,7 @@ protected:
     double integrate_w(size_t i, size_t j) const;
     // Интеграл от ротора бф
     double integrate_rotw(size_t i, size_t j) const;
+    // Интеграл от правой части на бф
     complex<double> integrate_fw(cvector3(*func)(const point & , const phys_area &), size_t i) const;
 };
 
@@ -121,6 +122,31 @@ protected:
     complex<double> integrate_w(size_t i, size_t j) const;
     // Интеграл от ротора бф
     complex<double> integrate_rotw(size_t i, size_t j) const;
+    // Интеграл от правой части на бф
+    complex<double> integrate_fw(cvector3(*func)(const point & , const phys_area &), size_t i) const;
+};
+
+// Класс тетраэдр с тензорным PML
+class tetrahedron_pml_tensor : public tetrahedron_base
+{
+public:
+    void init_pml(cvector3(* get_s)(const point &, const tetrahedron_pml_tensor *, const phys_pml_area *));
+
+    // Локальная матрица жескости
+    matrix_t<complex<double>, basis::tet_bf_num, basis::tet_bf_num> G() const;
+    // Локальная матрица массы
+    matrix_t<complex<double>, basis::tet_bf_num, basis::tet_bf_num> M() const;
+    // Локальная правая часть
+    array_t<complex<double>, basis::tet_bf_num> rp(cvector3(*func)(const point & , const phys_area &)) const;
+
+protected:
+    cvector3(* get_s)(const point &, const tetrahedron_pml_tensor *, const phys_pml_area *);
+
+    // Интеграл от бф
+    complex<double> integrate_w(size_t i, size_t j) const;
+    // Интеграл от ротора бф
+    complex<double> integrate_rotw(size_t i, size_t j) const;
+    // Интеграл от правой части на бф
     complex<double> integrate_fw(cvector3(*func)(const point & , const phys_area &), size_t i) const;
 };
 

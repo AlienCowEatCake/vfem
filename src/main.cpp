@@ -63,6 +63,9 @@ int main()
 #if defined VFEM_USE_PML
     cout << " # VFEM_USE_PML" << endl;
 #endif
+#if defined VFEM_USE_PML_TENSOR
+    cout << " # VFEM_USE_PML_TENSOR" << endl;
+#endif
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
     cout << " # VFEM_USE_NONHOMOGENEOUS_FIRST" << endl;
 #endif
