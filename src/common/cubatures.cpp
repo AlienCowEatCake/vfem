@@ -231,11 +231,11 @@ namespace tr_integration_5
                                      tet_points_S0111((b), (a), (c), 1.0-(a)-(b)-(c)), \
                                      tet_points_S0111((c), (a), (b), 1.0-(a)-(b)-(c)), \
                                      tet_points_S0111(1.0-(a)-(b)-(c), (a), (b), (c))
-#define tet_weights_S4(w)    (w)
-#define tet_weights_S31(w)   (w), (w), (w), (w)
-#define tet_weights_S22(w)   (w), (w), (w), (w), (w), (w)
-#define tet_weights_S211(w)  (w), (w), (w), (w), (w), (w), (w), (w), (w), (w), (w), (w)
-#define tet_weights_S0111(w) (w), (w), (w), (w), (w), (w)
+#define tet_weights_S4(w)    (w) / 6.0
+#define tet_weights_S31(w)   (w) / 6.0, (w) / 6.0, (w) / 6.0, (w) / 6.0
+#define tet_weights_S22(w)   (w) / 6.0, (w) / 6.0, (w) / 6.0, (w) / 6.0, (w) / 6.0, (w) / 6.0
+#define tet_weights_S211(w)  (w) / 6.0, (w) / 6.0, (w) / 6.0, (w) / 6.0, (w) / 6.0, (w) / 6.0, (w) / 6.0, (w) / 6.0, (w) / 6.0, (w) / 6.0, (w) / 6.0, (w) / 6.0
+#define tet_weights_S0111(w) (w) / 6.0, (w) / 6.0, (w) / 6.0, (w) / 6.0, (w) / 6.0, (w) / 6.0
 #define tet_weights_S1111(w) tet_weights_S0111(w), tet_weights_S0111(w), tet_weights_S0111(w), tet_weights_S0111(w)
 
 namespace tet_integration_5
@@ -599,9 +599,9 @@ namespace tet_integration_14
 #define tr_points_S21(a)    {(a), (a), 1.0-(a)-(a)},  {(a), 1.0-(a)-(a), (a)},  {1.0-(a)-(a), (a), (a)}
 #define tr_points_S111(a,b) {(a), (b), 1.0-(a)-(b)},  {(a), 1.0-(a)-(b), (b)},  {(b), (a), 1.0-(a)-(b)}, \
                             {(b), 1.0-(a)-(b), (a)},  {1.0-(a)-(b), (a), (b)},  {1.0-(a)-(b), (b), (a)}
-#define tr_weights_S3(w)    (w)
-#define tr_weights_S21(w)   (w), (w), (w)
-#define tr_weights_S111(w)  (w), (w), (w), (w), (w), (w)
+#define tr_weights_S3(w)    (w) / 2.0
+#define tr_weights_S21(w)   (w) / 2.0, (w) / 2.0, (w) / 2.0
+#define tr_weights_S111(w)  (w) / 2.0, (w) / 2.0, (w) / 2.0, (w) / 2.0, (w) / 2.0, (w) / 2.0
 
 namespace tr_integration_6
 {
