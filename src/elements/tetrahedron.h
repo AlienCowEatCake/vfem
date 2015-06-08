@@ -83,45 +83,4 @@ protected:
     complex<double> integrate_fw(cvector3(*func)(const point & , const phys_area &), size_t i) const;
 };
 
-// Класс тетраэдр (для работы с PML-краевыми)
-class tetrahedron_pml : public tetrahedron_base
-{
-public:
-    void init_pml(cvector3(* get_s)(const point &, const tetrahedron_pml *, const phys_pml_area *), const phys_pml_area * phys_pml, const cpoint * nodes_pml);
-
-    // Локальная матрица жескости
-    matrix_t<complex<double>, basis::tet_bf_num, basis::tet_bf_num> G() const;
-    // Локальная матрица массы
-    matrix_t<complex<double>, basis::tet_bf_num, basis::tet_bf_num> M() const;
-    // Локальная правая часть
-    array_t<complex<double>, basis::tet_bf_num> rp(cvector3(*func)(const point & , const phys_area &)) const;
-
-protected:
-    cvector3(* get_s)(const point &, const tetrahedron_pml *, const phys_pml_area *);
-    const phys_pml_area * phys_pml;
-
-    // Матрица L-координат (в PML)
-    matrix_t<complex<double>, 4, 4> L_pml;
-    // Градиент L-координаты (в PML)
-    cvector3 grad_lambda_pml(size_t i) const;
-    // L-координаты (в PML)
-    complex<double> lambda_pml(size_t i, const cpoint & p) const;
-
-    // Точки Гаусса (в PML)
-    cpoint gauss_points_pml[tet_integration::gauss_num];
-    // Якобиан (в PML)
-    complex<double> jacobian_pml;
-
-    // Базисные функции (в PML)
-    cvector3 w_pml(size_t i, const cpoint & p) const;
-    // Роторы базисных функций (в PML)
-    cvector3 rotw_pml(size_t i, const cpoint & p, const point & p_non_PML) const;
-
-    // Интеграл от бф
-    complex<double> integrate_w(size_t i, size_t j) const;
-    // Интеграл от ротора бф
-    complex<double> integrate_rotw(size_t i, size_t j) const;
-    complex<double> integrate_fw(cvector3(*func)(const point & , const phys_area &), size_t i) const;
-};
-
 #endif // TETRAHEDRON_H_INCLUDED

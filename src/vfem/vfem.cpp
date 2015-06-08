@@ -49,7 +49,6 @@ void VFEM::generate_portrait()
     delete [] portrait;
 }
 
-#if defined VFEM_USE_NONHOMOGENEOUS_FIRST
 void VFEM::generate_surf_portrait()
 {
     cout << "Generaing surface portrait ..." << endl;
@@ -102,7 +101,6 @@ void VFEM::generate_surf_portrait()
 
     delete [] portrait;
 }
-#endif
 
 void VFEM::assemble_matrix()
 {
@@ -141,7 +139,6 @@ void VFEM::assemble_matrix()
 void VFEM::applying_bound()
 {
     cout << " > Applying first bound ..." << endl;
-#if defined VFEM_USE_NONHOMOGENEOUS_FIRST
     // Решение СЛАУ по границе
     if(global_to_local.size() > 0)
     {
@@ -201,52 +198,6 @@ void VFEM::applying_bound()
             }
         }
     }
-#else
-    for(size_t k = 0; k < slae.n; k++) 	  // Пробегаем по всей матрице
-    {
-        show_progress("", k, slae.n);
-
-        if(dof_first.find(k) != dof_first.end())
-        {
-            slae.rp[k] = 0.0;
-            slae.di[k] = 1.0;
-
-            for(size_t i = slae.ig[k]; i < slae.ig[k + 1]; i++)
-                slae.gg[i] = 0.0;
-        }
-        else
-        {
-            for(size_t i = slae.ig[k]; i < slae.ig[k + 1]; i++)
-            {
-                if(dof_first.find(slae.jg[i]) != dof_first.end())
-                    slae.gg[i] = 0.0;
-            }
-        }
-    }
-#endif
-}
-
-void VFEM::apply_point_sources()
-{
-    cout << " > Applying point sources ..." << endl;
-    for(size_t k = 0; k < pss.size(); k++)
-    {
-        show_progress("", k, pss.size());
-        finite_element * fe = get_fe(pss[k].first);
-        for(size_t i = 0; i < basis::tet_bf_num; i++)
-            slae.rp[fe->dof[i]] += complex<double>(0.0, -1.0) * fe->phys->omega * pss[k].second * fe->w(i, pss[k].first);
-    }
-}
-
-void VFEM::apply_edges_sources()
-{
-    cout << " > Applying edges sources ..." << endl;
-    for(size_t k = 0; k < edges_src.size(); k++)
-    {
-        show_progress("", k, edges_src.size());
-        size_t pos = edges_src[k].num; // Заносим только в роторные функции!
-        slae.rp[pos] += complex<double>(0.0, -1.0) * edges_src[k].phys->J0 * edges_src[k].phys->omega * edges_src[k].direction;
-    }
 }
 
 finite_element * VFEM::get_fe(const point & p) const
@@ -292,14 +243,10 @@ cvector3 VFEM::rotor(const point & p, const finite_element * fe) const
 
 void VFEM::solve()
 {
-#if defined VFEM_USE_NONHOMOGENEOUS_FIRST
     if(global_to_local.size() > 0)
         generate_surf_portrait();
-#endif
     generate_portrait();
     assemble_matrix();
-    apply_point_sources();
-    apply_edges_sources();
     applying_bound();
     extern double SLAE_MAIN_EPSILON;
     slae.solve(SLAE_MAIN_EPSILON);

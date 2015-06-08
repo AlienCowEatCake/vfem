@@ -6,7 +6,6 @@
 // Немного typedef'ов
 template<typename T> class point_t;
 typedef point_t<double> point;
-typedef point_t< complex<double> > cpoint;
 
 // Класс точка
 template<typename T>

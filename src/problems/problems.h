@@ -5,10 +5,6 @@
 
 //#define ANALYTICAL_CUBE
 #define FIELD_CUBE
-//#define LOOP_PML
-//#define AREA_2LAYERS_LOOP_PML
-//#define AREA_2LAYERS_LOOP_MANY_PML
-//#define AREA_3LAYERS_INC_LOOP_PML
 
 extern string mesh_filename;
 extern string phys_filename;

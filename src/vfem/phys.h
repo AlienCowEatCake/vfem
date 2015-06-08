@@ -21,10 +21,9 @@ public:
     size_t gmsh_num;        // Номер области в Gmsh
     size_t type_of_elem;    // Тип элементов
     size_t type_of_bounds;  // Тип краевого условия
-    double J0;              // Мощность источника
     phys_area()             // Конструктор по умолчанию
     {
-        omega = mu = sigma = epsilon = J0 = 0.0;
+        omega = mu = sigma = epsilon = 0.0;
         gmsh_num = type_of_elem = type_of_bounds = 0;
     }
 };
@@ -51,15 +50,6 @@ public:
         if(type_of_element > other.type_of_element) return false;
         return gmsh_num < other.gmsh_num;
     }
-};
-
-// Класс для хранения параметров PML
-class phys_pml_area
-{
-public:
-    double x0, x1;
-    double y0, y1;
-    double z0, z1;
 };
 
 #endif // PHYS_H_INCLUDED

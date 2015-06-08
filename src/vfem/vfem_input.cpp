@@ -56,7 +56,6 @@ void VFEM::input_phys(const string & phys_filename)
             ph->epsilon *= consts::epsilon0;
             ph->omega = omega_global;
             ph->type_of_bounds = 0;
-            ph->J0 = 0.0;
         }
         else if(id.type_of_element == 2)
         {
@@ -71,7 +70,6 @@ void VFEM::input_phys(const string & phys_filename)
                 ph->mu = par->mu;
                 ph->epsilon = par->epsilon;
                 ph->sigma = par->sigma;
-                ph->J0 = par->J0;
             }
             else
             {
@@ -79,35 +77,8 @@ void VFEM::input_phys(const string & phys_filename)
                 ph->mu = 0.0;
                 ph->epsilon = 0.0;
                 ph->sigma = 0.0;
-                ph->J0 = 0.0;
                 cerr << "Warning: unaccounted parent \"" << parent_phys << "\" of phys area \""
                      << ph->gmsh_num << "\" (2), skipping..." << endl;
-            }
-        }
-        else if(id.type_of_element == 1)
-        {
-            size_t parent_phys;
-            phys_param >> parent_phys;
-            phys_param >> ph->J0;
-            map<phys_id, phys_area>::const_iterator parent = phys.find(phys_id(4, parent_phys));
-            if(parent != phys.end())
-            {
-                const phys_area * par = &(parent->second);
-                ph->omega = par->omega;
-                ph->mu = par->mu;
-                ph->epsilon = par->epsilon;
-                ph->sigma = par->sigma;
-                ph->type_of_bounds = par->type_of_bounds;
-            }
-            else
-            {
-                ph->omega = omega_global;
-                ph->mu = 0.0;
-                ph->epsilon = 0.0;
-                ph->sigma = 0.0;
-                ph->type_of_bounds = 0;
-                cerr << "Warning: unaccounted parent \"" << parent_phys << "\" of phys area \""
-                     << ph->gmsh_num << "\" (1), skipping..." << endl;
             }
         }
         else
@@ -118,29 +89,6 @@ void VFEM::input_phys(const string & phys_filename)
             getline(phys_param, line);
         }
     }
-
-    if(!phys_param.good())
-    {
-        cerr << "Error in " << __FILE__ << ":" << __LINE__
-             << " while reading file " << phys_filename << endl;
-        throw IO_FILE_ERROR;
-    }
-    size_t pss_num = 0;
-    phys_param >> pss_num;
-    if(pss_num)
-        pss.resize(pss_num);
-    for(size_t i = 0; i < pss_num; i++)
-    {
-        for(size_t j = 0; j < 3; j++)
-            phys_param >> pss[i].first[j];
-        double d;
-        for(size_t j = 0; j < 3; j++)
-        {
-            phys_param >> d;
-            pss[i].second[j] = d;
-        }
-    }
-
     phys_param.close();
 }
 
@@ -203,11 +151,9 @@ void VFEM::input_mesh(const string & gmsh_filename)
         throw IO_FILE_ERROR;
     }
 
-#if defined VFEM_USE_NONHOMOGENEOUS_FIRST
     set<edge> edges_surf_temp;
 #if BASIS_ORDER >= 2
     set<face> faces_surf_temp;
-#endif
 #endif
 
     // Чтение конечных элементов
@@ -216,7 +162,6 @@ void VFEM::input_mesh(const string & gmsh_filename)
     size_t type_of_elem = 0;
     finite_element fake_element;
     triangle fake_triangle;
-    edge_src fake_edge_src;
     vector<size_t> local_nodes_tet;
     local_nodes_tet.resize(4);
     vector<size_t> local_nodes_tr;
@@ -301,7 +246,6 @@ void VFEM::input_mesh(const string & gmsh_filename)
 #if BASIS_ORDER >= 2
             fake_triangle.faces = (face *) add_face(face(fake_triangle.nodes[0], fake_triangle.nodes[1], fake_triangle.nodes[2]), faces);
 #endif
-#if defined VFEM_USE_NONHOMOGENEOUS_FIRST
             if(bound_type == 1)
             {
                 add_edge(edge(fake_triangle.nodes[0], fake_triangle.nodes[1]), edges_surf_temp);
@@ -311,54 +255,14 @@ void VFEM::input_mesh(const string & gmsh_filename)
                 add_face(face(fake_triangle.nodes[0], fake_triangle.nodes[1], fake_triangle.nodes[2]), faces_surf_temp);
 #endif
             }
-#endif
             trs.push_back(fake_triangle);
-        }
-        else if(type_of_elem == 1)
-        {
-            map<phys_id, phys_area>::iterator ph = phys.find(phys_id(1, phys_num));
-            if(ph != phys.end())
-                fake_edge_src.phys = &(ph->second);
-            else
-            {
-                cerr << "Error: can`t detect physical id " << phys_num << " in " << gmsh_filename << endl;
-                throw IO_FILE_ERROR;
-            }
-
-            size_t nd[2];
-            for(size_t j = 0; j < 2; j++)
-                gmsh_file >> nd[j];
-
-            if(nd[0] < nd[1])
-            {
-                fake_edge_src.direction = 1.0;
-            }
-            else
-            {
-                fake_edge_src.direction = -1.0;
-                swap(nd[0], nd[1]);
-            }
-
-            for(size_t j = 0; j < 2; j++)
-                fake_edge_src.nodes[j] = & nodes[nd[j] - 1];
-
-            fake_edge_src.num = add_edge(edge(fake_edge_src.nodes[0], fake_edge_src.nodes[1]), edges);
-            fake_edge_src.edge_main = NULL;
-            edges_src.push_back(fake_edge_src);
         }
         else
         {
             getline(gmsh_file, line);
         }
     }
-
     gmsh_file.close();
-
-#if  defined USE_CXX11
-    /// WARNING: C++11
-    fes.shrink_to_fit();
-    trs.shrink_to_fit();
-#endif
 
     cout << " > Converting data ..." << endl;
 
@@ -377,13 +281,6 @@ void VFEM::input_mesh(const string & gmsh_filename)
     for(set<face>::iterator i = faces.begin(); i != faces.end(); ++i)
         faces_ind[i->num] = const_cast<face *>(&(*i));
 #endif
-
-    // Разбираемся с ребрами с источниками
-    for(size_t i = 0; i < edges_src.size(); i++)
-    {
-        show_progress("edges with source", i, edges_src.size());
-        edges_src[i].edge_main = edges_ind[edges_src[i].num];
-    }
 
     // Разбираемся с тетраэдрами
     if(fes.size() == 0)
@@ -443,39 +340,32 @@ void VFEM::input_mesh(const string & gmsh_filename)
         // Первый неполный
         for(size_t j = 0; j < 3; j++)
             trs[i].dof[j] = trs[i].edges[j]->num;
-#if defined VFEM_USE_NONHOMOGENEOUS_FIRST
         if(trs[i].phys->type_of_bounds == 1)
             for(size_t j = 0; j < 3; j++)
                 trs[i].dof_surf[j] = edges_surf_temp.find(* trs[i].edges[j])->num;
-#endif
         // Первый полный
 #if BASIS_ORDER >= 2 || BASIS_TYPE == 2
         for(size_t j = 0; j < 3; j++)
             trs[i].dof[j + 3] = trs[i].edges[j]->num + edges.size();
-#if defined VFEM_USE_NONHOMOGENEOUS_FIRST
         if(trs[i].phys->type_of_bounds == 1)
             for(size_t j = 0; j < 3; j++)
                 trs[i].dof_surf[j + 3] = edges_surf_temp.find(* trs[i].edges[j])->num + edges_surf_temp.size();
-#endif
 #endif
         // Второй неполный
 #if BASIS_ORDER >= 2
         trs[i].dof[6] = trs[i].faces->num + 2 * edges.size();
         trs[i].dof[7] = trs[i].faces->num + 2 * edges.size() + faces.size();
-#if defined VFEM_USE_NONHOMOGENEOUS_FIRST
         if(trs[i].phys->type_of_bounds == 1)
         {
             trs[i].dof_surf[6] = faces_surf_temp.find(* trs[i].faces)->num + 2 * edges_surf_temp.size();
             trs[i].dof_surf[7] = faces_surf_temp.find(* trs[i].faces)->num + 2 * edges_surf_temp.size() + faces_surf_temp.size();
         }
 #endif
-#endif
         // Второй полный
 #if BASIS_ORDER > 2 || (BASIS_TYPE == 2 && BASIS_ORDER == 2)
         trs[i].dof[8] = trs[i].faces->num + 2 * edges.size() + 2 * faces.size();
         for(size_t j = 0; j < 3; j++)
             trs[i].dof[j + 9] = trs[i].edges[j]->num + 2 * edges.size() + 3 * faces.size();
-#if defined VFEM_USE_NONHOMOGENEOUS_FIRST
         if(trs[i].phys->type_of_bounds == 1)
         {
             trs[i].dof_surf[8] = faces_surf_temp.find(* trs[i].faces)->num + 2 * edges_surf_temp.size() + 2 * faces_surf_temp.size();
@@ -483,19 +373,12 @@ void VFEM::input_mesh(const string & gmsh_filename)
                 trs[i].dof_surf[j + 9] = edges_surf_temp.find(* trs[i].edges[j])->num + 2 * edges_surf_temp.size() + 3 * faces_surf_temp.size();
         }
 #endif
-#endif
 
         // Инициализируем
-#if defined VFEM_USE_NONHOMOGENEOUS_FIRST
         if(trs[i].phys->type_of_bounds == 1)
             for(size_t j = 0; j < basis::tr_bf_num; j++)
                 global_to_local[trs[i].dof[j]] = trs[i].dof_surf[j];
         trs[i].init();
-#else
-        if(trs[i].phys->type_of_bounds == 1)
-            for(size_t j = 0; j < basis::tr_bf_num; j++)
-                dof_first.insert(trs[i].dof[j]);
-#endif
     }
 
     cout << " > Building tree ..." << endl;
@@ -511,19 +394,9 @@ void VFEM::input_mesh(const string & gmsh_filename)
         max_coord[i] += diff_coord[i];
         min_coord[i] -= diff_coord[i];
     }
-#if defined USE_CXX11
-    /// WARNING: C++11
-    tree.make(min_coord[0], max_coord[0], min_coord[1], max_coord[1],
-              min_coord[2], max_coord[2], fes.data(), fes.size());
-#else
     /// WARNING: &(fes[0]) для вектора!
     tree.make(min_coord[0], max_coord[0], min_coord[1], max_coord[1],
               min_coord[2], max_coord[2], &(fes[0]), fes.size());
-#endif
-
-#if defined VFEM_USE_PML
-    input_pml();
-#endif
 
 #if BASIS_ORDER == 1 && BASIS_TYPE == 1
     dof_num = edges.size();
@@ -546,174 +419,5 @@ void VFEM::input_mesh(const string & gmsh_filename)
     cout << " # Faces:        " << faces.size() << endl;
 #endif
     cout << " # SLAE size:    " << dof_num << endl;
-#if defined VFEM_USE_NONHOMOGENEOUS_FIRST
     cout << " # SLAE surf:    " << global_to_local.size() << endl;
-#endif
 }
-
-#if defined VFEM_USE_PML
-cpoint VFEM::convert_point_to_pml(const point * p, const finite_element * fefe) const
-{
-    static const double pml_gauss_points_local[5] =
-    {
-        0.0,
-        sqrt(5.0 - 2.0 * sqrt(10.0 / 7.0)) / 3.0,
-        -sqrt(5.0 - 2.0 * sqrt(10.0 / 7.0)) / 3.0,
-        sqrt(5.0 + 2.0 * sqrt(10.0 / 7.0)) / 3.0,
-        -sqrt(5.0 + 2.0 * sqrt(10.0 / 7.0)) / 3.0,
-    };
-    static const double pml_gauss_weights[5] =
-    {
-        128.0 / 225.0,
-        (322.0 + 13.0 * sqrt(70.0)) / 900.0,
-        (322.0 + 13.0 * sqrt(70.0)) / 900.0,
-        (322.0 - 13.0 * sqrt(70.0)) / 900.0,
-        (322.0 - 13.0 * sqrt(70.0)) / 900.0
-    };
-
-    double h[3] = {0, 0, 0}, beg[3] = {0, 0, 0};
-    bool flag[3] = {false, false, false};
-
-    if(p->x > phys_pml.x1)
-    {
-        flag[0] = true;
-        h[0] = p->x - phys_pml.x1;
-        beg[0] = phys_pml.x1;
-    }
-    if(p->x < phys_pml.x0)
-    {
-        flag[0] = true;
-        h[0] = p->x - phys_pml.x0;
-        beg[0] = phys_pml.x0;
-    }
-
-    if(p->y > phys_pml.y1)
-    {
-        flag[1] = true;
-        h[1] = p->y - phys_pml.y1;
-        beg[1] = phys_pml.y1;
-    }
-    if(p->y < phys_pml.y0)
-    {
-        flag[1] = true;
-        h[1] = p->y - phys_pml.y0;
-        beg[1] = phys_pml.y0;
-    }
-
-    if(p->z > phys_pml.z1)
-    {
-        flag[2] = true;
-        h[2] = p->z - phys_pml.z1;
-        beg[2] = phys_pml.z1;
-    }
-    if(p->z < phys_pml.z0)
-    {
-        flag[2] = true;
-        h[2] = p->z - phys_pml.z0;
-        beg[2] = phys_pml.z0;
-    }
-
-    complex<double> new_point[3] = {0, 0, 0};
-
-    size_t num_steps = 10;
-    point h_small;
-    for(size_t k = 0; k < 3; k++)
-        h_small[k] = h[k] / (double)num_steps;
-
-    for(size_t m = 0; m < num_steps; m++)
-    {
-        for(size_t k = 0; k < 5; k++)
-        {
-            point gauss_point_global((pml_gauss_points_local[k] + 1.0) / 2.0 * (h_small[0] * (double)m) + beg[0],
-                                     (pml_gauss_points_local[k] + 1.0) / 2.0 * (h_small[1] * (double)m) + beg[1],
-                                     (pml_gauss_points_local[k] + 1.0) / 2.0 * (h_small[2] * (double)m) + beg[2]);
-            cvector3 s = get_s(gauss_point_global, fefe, & phys_pml);
-
-            for(size_t j = 0; j < 3; j++)
-            {
-                if(flag[j])
-                    new_point[j] += s[j] * pml_gauss_weights[k];
-            }
-        }
-    }
-
-    cpoint cp(* p);
-    for(size_t j = 0; j < 3; j++)
-    {
-        if(flag[j])
-            cp[j] = new_point[j] * h_small[j] / 2.0 + beg[j];
-    }
-    return cp;
-}
-
-void VFEM::input_pml()
-{
-    cout << " > Building PML-bound coordinates ..." << endl;
-    // Границы не PML точек
-    phys_pml.x0 = DBL_MAX;
-    phys_pml.x1 = -DBL_MAX;
-    phys_pml.y0 = DBL_MAX;
-    phys_pml.y1 = -DBL_MAX;
-    phys_pml.z0 = DBL_MAX;
-    phys_pml.z1 = -DBL_MAX;
-    map<point *, pair<cpoint, finite_element *> > pml_nodes_cache;
-
-    for(size_t i = 0; i < fes.size(); i++)
-    {
-        show_progress("scanned tetrahedrons", i, fes.size());
-        if(is_pml(fes[i].barycenter, &(fes[i])))
-        {
-            for(size_t j = 0; j < 4; j++)
-                pml_nodes_cache[fes[i].nodes[j]] = make_pair(cpoint(), &(fes[i]));
-        }
-        else
-        {
-            for(size_t j = 0; j < 4; j++)
-            {
-                if(fes[i].nodes[j]->x > phys_pml.x1) phys_pml.x1 = fes[i].nodes[j]->x;
-                if(fes[i].nodes[j]->y > phys_pml.y1) phys_pml.y1 = fes[i].nodes[j]->y;
-                if(fes[i].nodes[j]->z > phys_pml.z1) phys_pml.z1 = fes[i].nodes[j]->z;
-                if(fes[i].nodes[j]->x < phys_pml.x0) phys_pml.x0 = fes[i].nodes[j]->x;
-                if(fes[i].nodes[j]->y < phys_pml.y0) phys_pml.y0 = fes[i].nodes[j]->y;
-                if(fes[i].nodes[j]->z < phys_pml.z0) phys_pml.z0 = fes[i].nodes[j]->z;
-            }
-        }
-    }
-    cout << "  non-PML dimension: (" << phys_pml.x0 << "," << phys_pml.x1 << ")x(" << phys_pml.y0 << "," << phys_pml.y1 << ")x(" << phys_pml.z0 << "," << phys_pml.z1 << ")" << endl;
-
-    size_t i = 0;
-    for(map<point *, pair<cpoint, finite_element *> >::iterator it = pml_nodes_cache.begin(); it != pml_nodes_cache.end(); ++it)
-    {
-        show_progress("replaced points", i++, pml_nodes_cache.size());
-
-        point * p = it->first;
-        finite_element * fefe = it->second.second;
-        it->second.first = convert_point_to_pml(p, fefe);
-    }
-
-    for(size_t i = 0; i < fes.size(); i++)
-    {
-        show_progress("re-init tetrahedrons", i, fes.size());
-        cpoint cp[4];
-        size_t ph_curr = fes[i].phys->gmsh_num;
-        for(size_t j = 0; j < 4; j++)
-        {
-            if(is_pml(fes[i].barycenter, &(fes[i])))
-            {
-                map<point *, pair<cpoint, finite_element *> >::iterator it = pml_nodes_cache.find(fes[i].nodes[j]);
-                // Если есть в кэше, то возьмем из него
-                if(it->second.second->phys->gmsh_num == ph_curr)
-                    cp[j] = it->second.first;
-                // А иначе рассчитаем
-                else
-                    cp[j] = convert_point_to_pml(fes[i].nodes[j], &(fes[i]));
-            }
-            else
-            {
-                cp[j] = cpoint(* (fes[i].nodes[j]));
-            }
-        }
-        fes[i].init_pml(get_s, & phys_pml, cp);
-    }
-}
-#endif

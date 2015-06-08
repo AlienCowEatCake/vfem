@@ -1,7 +1,7 @@
 #include "problems.h"
 
 #if defined ANALYTICAL_CUBE
-#if !defined VFEM_USE_NONHOMOGENEOUS_FIRST || !defined VFEM_USE_ANALYTICAL || defined VFEM_USE_PML
+#if !defined VFEM_USE_ANALYTICAL
 #error "Please, reconfigure!"
 #endif
 

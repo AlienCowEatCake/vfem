@@ -25,17 +25,4 @@ public:
     friend ostream & operator << (ostream & os, const edge & a);
 };
 
-// Класс ребро с источником
-class edge_src : public edge
-{
-public:
-    double direction;   // Направление
-    phys_area * phys;   // Физическая область
-    edge * edge_main;   // Основное ребро
-    edge_src();
-    edge_src(const edge_src & f);
-    const phys_area & get_phys_area() const;
-    edge_src & operator = (const edge_src & other);
-};
-
 #endif // EDGE_H_INCLUDED
