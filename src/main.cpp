@@ -115,6 +115,7 @@ int main()
         VFEM v;
         v.input_phys(phys_filename);
         v.input_mesh(mesh_filename);
+        v.make();
         time_solve = mtime();
         v.solve();
         time_solve = mtime() - time_solve;

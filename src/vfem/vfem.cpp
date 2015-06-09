@@ -290,7 +290,7 @@ cvector3 VFEM::rotor(const point & p, const finite_element * fe) const
     return result;
 }
 
-void VFEM::solve()
+void VFEM::make()
 {
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
     if(global_to_local.size() > 0)
@@ -301,6 +301,10 @@ void VFEM::solve()
     apply_point_sources();
     apply_edges_sources();
     applying_bound();
+}
+
+void VFEM::solve()
+{
     extern double SLAE_MAIN_EPSILON;
     slae.solve(SLAE_MAIN_EPSILON);
 }

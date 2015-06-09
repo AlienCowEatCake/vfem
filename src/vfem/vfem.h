@@ -62,7 +62,9 @@ public:
     // Ввод данных
     void input_phys(const string & phys_filename);
     void input_mesh(const string & gmsh_filename);
-    // Процедура решения
+    // Процедура для сборки СЛАУ
+    void make();
+    // Запуск решения СЛАУ
     void solve();
     // Вывод данных в 3D сетке
     void output(const string & tecplot_filename);
