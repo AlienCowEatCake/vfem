@@ -2,6 +2,8 @@
 #include <ctime>
 
 #if !defined _WIN32 && defined USE_NOSIGHUP
+#include <sys/types.h>
+#include <unistd.h>
 #include <signal.h>
 
 // Обработчик SIGHUP
@@ -10,13 +12,14 @@ void sighup_handler(int)
     // Обычно этот сигнал приходит, когда отключается терминал
     // Перехватим этот сигнал и перенаправим выходные потоки консоли
     // куда-нибудь в файлы, чтобы не потерять информацию или
-    // проследить за процессом
+    // проследить за процессом (не использовать при отладке!)
     char timebuf[24];
     time_t seconds = time(NULL);
     strftime(timebuf, 24, "%Y-%m-%d_%H-%M-%S", localtime(&seconds));
-    string fn_out = "stdout_" + string(timebuf) + ".txt";
-    string fn_err = "stderr_" + string(timebuf) + ".txt";
-
+    stringstream ss;
+    ss << getpid() << "_" << timebuf << ".txt";
+    string fn_out = "stdout_" + ss.str();
+    string fn_err = "stderr_" + ss.str();
     * stdout = * fopen(fn_out.c_str(), "w");
     * stderr = * fopen(fn_err.c_str(), "w");
     std::ios::sync_with_stdio();
