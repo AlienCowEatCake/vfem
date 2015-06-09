@@ -1,6 +1,21 @@
 #include "problems/problems.h"
 #include <ctime>
 
+#if defined _WIN32
+#include <windows.h>
+unsigned long mtime()
+{
+    return GetTickCount();
+}
+#else
+unsigned long mtime()
+{
+    struct timespec t;
+    clock_gettime(CLOCK_MONOTONIC, & t);
+    return (unsigned long)t.tv_sec * 1000 + t.tv_nsec / 1000000;
+}
+#endif
+
 #if !defined _WIN32 && defined USE_NOSIGHUP
 #include <sys/types.h>
 #include <unistd.h>
@@ -26,25 +41,30 @@ void sighup_handler(int)
 }
 #endif
 
-void print_time(size_t seconds, const string & descr)
+void print_time(unsigned long msec, const string & descr)
 {
+    unsigned long seconds = msec / 1000;
     if(seconds > 3600)
     {
-        size_t h = (size_t)seconds / 3600;
-        size_t m = (size_t)(seconds - h * 3600.0) / 60;
-        size_t s = (size_t)(seconds - h * 3600.0 - m * 60.0);
+        unsigned long h = seconds / 3600;
+        unsigned long m = (seconds - h * 3600) / 60;
+        unsigned long s = seconds - h * 3600 - m * 60;
         cout << descr << ": \t" << h << " hr " << m << " min " << s << " sec." << endl;
     }
     else if(seconds > 60)
     {
-        size_t m = (size_t)(seconds) / 60;
-        size_t s = (size_t)(seconds - m * 60.0);
+        unsigned long m = seconds / 60;
+        unsigned long s = seconds - m * 60.0;
         cout << descr << ": \t" << m << " min " << s << " sec." << endl;
+    }
+    else if(seconds > 0)
+    {
+        unsigned long ms = msec - seconds * 1000;
+        cout << descr << ": \t" << seconds << " sec " << ms << " msec." << endl;
     }
     else
     {
-        size_t s = (size_t)seconds;
-        cout << descr << ": \t" << s << " sec." << endl;
+        cout << descr << ": \t" << msec << " msec." << endl;
     }
 }
 
@@ -87,16 +107,17 @@ int main()
     char timebuf[24];
     strftime(timebuf, 24, "%Y-%m-%d_%H-%M-%S", localtime(&seconds));
     new_tecplot_name += "_" + string(timebuf) + ".plt";
-    size_t time_solve = 0;
+    unsigned long time_exec = mtime();
+    unsigned long time_solve = 0;
 
     try
     {
         VFEM v;
         v.input_phys(phys_filename);
         v.input_mesh(mesh_filename);
-        time_solve = (size_t)time(NULL);
+        time_solve = mtime();
         v.solve();
-        time_solve = (size_t)time(NULL) - time_solve;
+        time_solve = mtime() - time_solve;
         v.output(new_tecplot_name);
         postprocessing(v, timebuf);
     }
@@ -114,7 +135,7 @@ int main()
     }
 
     print_time(time_solve, "Solve time");
-    size_t time_exec = (size_t)(time(NULL) - seconds);
+    time_exec = mtime() - time_exec;
     print_time(time_exec, "All time");
 #if defined _WIN32
     system("pause");
