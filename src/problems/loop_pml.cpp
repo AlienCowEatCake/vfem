@@ -1,11 +1,12 @@
 #include "problems.h"
 
 #if defined LOOP_PML
-#if defined VFEM_USE_NONHOMOGENEOUS_FIRST || (!defined VFEM_USE_PML && defined VFEM_USE_ANALYTICAL)
+#if defined VFEM_USE_NONHOMOGENEOUS_FIRST || defined VFEM_USE_ANALYTICAL
 #error "Please, reconfigure!"
 #endif
 
-double SLAE_MAIN_EPSILON = 1e-7;
+//#define SMALL_MESH
+double SLAE_MAIN_EPSILON = 1e-10;
 
 cvector3 func_rp(const point & p, const phys_area & phys)
 {
@@ -108,7 +109,11 @@ string tecplot_filename = "loop_pml.plt";
 
 string phys_filename_pml = "data/loop_pml/2-1.txt";
 string phys_filename_nonpml = "data/loop_pml/2-2.txt";
-string mesh_filename = "data/loop_pml/3.msh";
+#if !defined SMALL_MESH
+string mesh_filename = "data/loop_pml/4.msh";
+#else
+string mesh_filename = "data/loop_pml/4-small.msh";
+#endif
 #if defined VFEM_USE_PML
 string phys_filename = phys_filename_pml;
 #else
@@ -116,47 +121,44 @@ string phys_filename = phys_filename_nonpml;
 #endif
 string slae_dump_filename = "loop_pml_slae.txt";
 
-#if defined VFEM_USE_ANALYTICAL
-cvector3 func_true(const point & p)
-{
-    static VFEM vfem_anal;
-    if(vfem_anal.fes_num == 0)
-    {
-        vfem_anal.input_phys(phys_filename_nonpml);
-        vfem_anal.input_mesh(mesh_filename);
-        vfem_anal.slae.restore(slae_dump_filename);
-    }
-    return vfem_anal.solution(p);
-}
-#endif
-
 void postprocessing(VFEM & v, char * timebuf)
 {
     MAYBE_UNUSED(v);
     MAYBE_UNUSED(timebuf);
+#if !defined SMALL_MESH
     v.output_slice(string("loop_pml_slice") + "_" + string(timebuf) + ".dat",
                    'Z', 0.0, 'X', -700, 700, 20.0, 'Y', -700, 700, 20.0);
 #if !defined VFEM_USE_PML
-    v.slae.dump(slae_dump_filename);
-#elif defined VFEM_USE_ANALYTICAL
+    v.slae.dump_x(slae_dump_filename);
+#else
+    complex<double> * anal = new complex<double> [v.slae.n];
+    ifstream a;
+    a.open(slae_dump_filename.c_str(), ios::in);
+    for(size_t i = 0; i < v.slae.n; i++)
+        a >> anal[i];
+    a.close();
+
     double diff = 0.0, norm = 0.0;
-    for(size_t k = 0; k < v.fes_num; k++)
+    for(size_t k = 0; k < v.fes.size(); k++)
     {
-        if(fabs(v.fes[k].barycenter.x) <= 600 && fabs(v.fes[k].barycenter.x) >= 250 &&
-           fabs(v.fes[k].barycenter.y) <= 600 && fabs(v.fes[k].barycenter.y) >= 250 &&
-           fabs(v.fes[k].barycenter.z) <= 600 && fabs(v.fes[k].barycenter.z) >= 250)
+        if(fabs(v.fes[k].barycenter.x) <= 600 && fabs(v.fes[k].barycenter.x) >= 180 &&
+           fabs(v.fes[k].barycenter.y) <= 600 && fabs(v.fes[k].barycenter.y) >= 180 &&
+           fabs(v.fes[k].barycenter.z) <= 600 && fabs(v.fes[k].barycenter.z) >= 180)
         {
-            array_t<complex<double>, basis::tet_bf_num> q_loc;
+            array_t<complex<double>, basis::tet_bf_num> q_loc, q_loc_true;
             for(size_t i = 0; i < basis::tet_bf_num; i++)
             {
                 size_t dof = v.fes[k].dof[i];
                 q_loc[i] = v.slae.x[dof];
+                q_loc_true[i] = anal[dof];
             }
-            diff += v.fes[k].diff_normL2(q_loc, func_true);
-            norm += v.fes[k].normL2(func_true);
+            diff += v.fes[k].diff_normL2(q_loc, q_loc_true);
+            norm += v.fes[k].normL2(q_loc_true);
         }
     }
     cout << "Diff (L2): \t" << sqrt(diff / norm) << endl;
+    delete [] anal;
+#endif
 #endif
 }
 
