@@ -28,26 +28,26 @@ cvector3 get_s(const point & p, const finite_element * fe, const phys_pml_area *
     if(!is_pml(p, fe))
         return cvector3(1.0, 1.0, 1.0);
 
-    double m = 3;
-    complex<double> chi(3.7, 2.7);
+//    double m = 3;
+//    complex<double> chi(3.7, 2.7);
 
-//    static complex<double> chi(-1, -1);
-//    if(chi.real() < 0)
-//    {
-//        ifstream chi_st;
-//        char chi_name[] = "chi.txt";
-//        chi_st.open(chi_name, ios::in);
-//        if(!chi_st.good())
-//        {
-//            cerr << "Error in " << __FILE__ << ":" << __LINE__
-//                 << " while reading file " << chi_name << endl;
-//            throw IO_FILE_ERROR;
-//        }
-//        double chi_re, chi_im;
-//        chi_st >> chi_re >> chi_im;
-//        chi = complex<double>(chi_re, chi_im);
-//        chi_st.close();
-//    }
+    static complex<double> chi(-1, -1);
+    if(chi.real() < 0)
+    {
+        ifstream chi_st;
+        char chi_name[] = "chi.txt";
+        chi_st.open(chi_name, ios::in);
+        if(!chi_st.good())
+        {
+            cerr << "Error in " << __FILE__ << ":" << __LINE__
+                 << " while reading file " << chi_name << endl;
+            throw IO_FILE_ERROR;
+        }
+        double chi_re, chi_im;
+        chi_st >> chi_re >> chi_im;
+        chi = complex<double>(chi_re, chi_im);
+        chi_st.close();
+    }
 
     double pml_thickness_x = 100.0;
     double pml_thickness_y = 100.0;
@@ -110,9 +110,9 @@ string tecplot_filename = "loop_pml.plt";
 string phys_filename_pml = "data/loop_pml/2-1.txt";
 string phys_filename_nonpml = "data/loop_pml/2-2.txt";
 #if !defined SMALL_MESH
-string mesh_filename = "data/loop_pml/4.msh";
+string mesh_filename = "data/loop_pml/3.msh";
 #else
-string mesh_filename = "data/loop_pml/4-small.msh";
+string mesh_filename = "data/loop_pml/3-small.msh";
 #endif
 #if defined VFEM_USE_PML
 string phys_filename = phys_filename_pml;
