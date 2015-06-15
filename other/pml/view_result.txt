@@ -6,6 +6,9 @@ grep -R L2 *.txt | sed 's/.txt:Diff (L2): \t/ /g ; s/_/ /g'
 # Число итераций
 for i in `ls *_*.txt | grep -v slae | grep -v chi.txt`; do echo -n "$i" | sed 's/_/ /g ; s/.txt//g' ; cat "$i" | grep "LLT" | sed 's/\r/\n/g' | tail -1 | sed 's/COCG_LLT_Smooth Residual:\t/ /g ; s/\t.*//g'; done
 
+# Время
+for i in `ls *_*.txt | grep -v slae | grep -v chi.txt`; do echo -n "$i" | sed 's/_/\t/g ; s/.txt//g' ; cat "$i" | grep "Solve time" | sed 's/Solve time: \t/\t/g'; done
+
 ================================================================================
 
 # Погрешность

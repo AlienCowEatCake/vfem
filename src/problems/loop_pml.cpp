@@ -28,7 +28,7 @@ cvector3 get_s(const point & p, const finite_element * fe, const phys_pml_area *
     if(!is_pml(p, fe))
         return cvector3(1.0, 1.0, 1.0);
 
-//    double m = 3;
+    double m = 3;
 //    complex<double> chi(3.7, 2.7);
 
     static complex<double> chi(-1, -1);
