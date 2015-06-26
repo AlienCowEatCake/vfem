@@ -14,9 +14,9 @@
 #include "../vfem/phys.h"
 #include "../vfem/slae.h"
 
-#define VFEM_USE_PML
-//#define VFEM_USE_NONHOMOGENEOUS_FIRST
-//#define VFEM_USE_ANALYTICAL
+//#define VFEM_USE_PML
+#define VFEM_USE_NONHOMOGENEOUS_FIRST
+#define VFEM_USE_ANALYTICAL
 
 #if defined VFEM_USE_PML
 typedef tetrahedron_pml finite_element;
@@ -91,7 +91,7 @@ public:
 #endif
 
     // Основная СЛАУ
-    SLAE slae;
+    SLAE_V_cycle slae;
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
     // СЛАУ по границе
     SLAE surf_slae;
@@ -130,11 +130,17 @@ protected:
     // Степени свободы с первыми краевыми
     set<size_t> dof_first;
 #endif
+    // Ребра с первыми краевыми у ядра
+    set<size_t> ker_edges_first;
     // Восьмиричное дерево поиска
     octal_tree<finite_element> tree;
 
     // Генерация портрета глобальной матрицы
     void generate_portrait();
+    // Генерация портрета ядра для V-цикла
+    void generate_ker_portrait();
+    // Генерация портрета проектора для V-цикла
+    void generate_proj_portrait();
     // Сборка глобальной матрицы
     void assemble_matrix();
     // Применение краевых условий

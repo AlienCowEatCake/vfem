@@ -47,6 +47,15 @@ public:
     double normL2(cvector3(*func)(const point &)) const;
     double normL2(const array_t<complex<double>, basis::tet_bf_num> & q_true) const;
 
+    // Базисные функции ядра
+    vector3 kerw(size_t i, const point & p) const;
+    // Интегралы от базисных функций ядра
+    double integrate_kerw(size_t i, size_t j) const;
+    // Локальная матрица ядра
+    matrix_t<double, 10, 10> K() const;
+    // Локальная матрица проектора
+    matrix_t<double, 10, 12> R() const;
+
 protected:
     // Матрица L-координат
     matrix_t<double, 4, 4> L;

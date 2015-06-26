@@ -49,6 +49,120 @@ void VFEM::generate_portrait()
     delete [] portrait;
 }
 
+// Генерация портрета ядра для V-цикла
+void VFEM::generate_ker_portrait()
+{
+    cout << "Generating kernel portrait ..." << endl;
+
+    size_t n_size = nodes.size() + edges.size();
+
+    set<size_t> * portrait = new set<size_t> [n_size];
+    for(size_t k = 0; k < fes.size(); k++)
+    {
+        show_progress("step 1", k, fes.size());
+
+        // Заполняем степени свободы
+        size_t dof[10];
+        for(size_t i = 0; i < 4; i++)
+            dof[i] = fes[k].get_node(i).num;
+        for(size_t i = 0; i < 6; i++)
+            dof[i + 4] = fes[k].get_edge(i).num + nodes.size();
+
+        for(size_t i = 0; i < 10; i++)
+        {
+            size_t a = dof[i];
+            for(size_t j = 0; j < i; j++)
+            {
+                size_t b = dof[j];
+                if(b > a)
+                    portrait[b].insert(a);
+                else
+                    portrait[a].insert(b);
+            }
+        }
+    }
+
+    size_t gg_size = 0;
+    for(size_t i = 0; i < n_size; i++)
+        gg_size += portrait[i].size();
+
+    slae.ker_alloc_all(n_size, gg_size);
+
+    slae.ker_ig[0] = 0;
+    slae.ker_ig[1] = 0;
+    size_t tmp = 0;
+    for(size_t i = 0; i < n_size; i++)
+    {
+        show_progress("step 2", i, n_size);
+
+        for(set<size_t>::iterator j = portrait[i].begin(); j != portrait[i].end(); j++)
+        {
+            slae.ker_jg[tmp] = *j;
+            tmp++;
+        }
+        slae.ker_ig[i + 1] = slae.ker_ig[i] + portrait[i].size();
+
+        portrait[i].clear();
+    }
+
+    delete [] portrait;
+}
+
+// Генерация портрета проектора для V-цикла
+void VFEM::generate_proj_portrait()
+{
+    // для R
+    cout << "Generating projector portrait ..." << endl;
+
+    size_t n_size = slae.ker_n;
+
+    set<size_t> * portrait = new set<size_t> [n_size];
+    for(size_t k = 0; k < fes.size(); k++)
+    {
+        show_progress("step 1", k, fes.size());
+
+        // Заполняем степени свободы
+        size_t dof_lvl_2[10], dof_lvl_1[12];
+        for(size_t i = 0; i < 4; i++)
+            dof_lvl_2[i] = fes[k].get_node(i).num;
+        for(size_t i = 0; i < 6; i++)
+        {
+            dof_lvl_2[i + 4] = fes[k].get_edge(i).num + nodes.size();
+            dof_lvl_1[i] = fes[k].get_edge(i).num;
+            dof_lvl_1[i + 6] = fes[k].get_edge(i).num + edges.size();
+        }
+
+        for(size_t i = 0; i < 10; i++)
+            for(size_t j = 0; j < 12; j++)
+                portrait[dof_lvl_2[i]].insert(dof_lvl_1[j]);
+    }
+
+    size_t gg_size = 0;
+    for(size_t i = 0; i < n_size; i++)
+        gg_size += portrait[i].size();
+
+    slae.proj_alloc_all(n_size, gg_size);
+
+    slae.proj_ig[0] = 0;
+    slae.proj_ig[1] = 0;
+    size_t tmp = 0;
+    for(size_t i = 0; i < n_size; i++)
+    {
+        show_progress("step 2", i, n_size);
+
+        for(set<size_t>::iterator j = portrait[i].begin(); j != portrait[i].end(); j++)
+        {
+            slae.proj_jg[tmp] = *j;
+            tmp++;
+        }
+        slae.proj_ig[i + 1] = slae.proj_ig[i] + portrait[i].size();
+
+        portrait[i].clear();
+    }
+
+    delete [] portrait;
+}
+
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
 void VFEM::generate_surf_portrait()
 {
@@ -135,6 +249,28 @@ void VFEM::assemble_matrix()
             add = array_rp[i];
             slae.rp[i_num] += add;
         }
+
+        // Степени свободы ядра
+        size_t ker_dof[10];
+        for(size_t i = 0; i < 4; i++)
+            ker_dof[i] = fes[k].get_node(i).num;
+        for(size_t i = 0; i < 6; i++)
+            ker_dof[i + 4] = fes[k].get_edge(i).num + nodes.size();
+
+        // Матрица ядра
+        matrix_t<double, 10, 10> matrix_K = fes[k].K();
+        for(size_t i = 0; i < 10; i++)
+        {
+            for(size_t j = 0; j < i; j++)
+                slae.ker_add(ker_dof[i], ker_dof[j], matrix_K[i][j]);
+            slae.ker_di[ker_dof[i]] += matrix_K[i][i];
+        }
+
+        // Матрица проектора
+        matrix_t<double, 10, 12> matrix_R = fes[k].R();
+        for(size_t i = 0; i < 10; i++)
+            for(int j = 0; j < 12; j++)
+                slae.proj_set(ker_dof[i], fes[k].dof[j], matrix_R[i][j]);
     }
 }
 
@@ -224,6 +360,26 @@ void VFEM::applying_bound()
         }
     }
 #endif
+
+    // Первые краевые для матрицы ядра
+    for(size_t k = 0; k < slae.ker_n; k++)
+    {
+        // Пробегаем по всей матрице
+        if(ker_edges_first.find(k) != ker_edges_first.end())
+        {
+            slae.ker_di[k] = 1.0;
+            for(size_t i = slae.ker_ig[k]; i < slae.ker_ig[k + 1]; i++)
+                slae.ker_gg[i] = 0.0;
+        }
+        else
+        {
+            for(size_t i = slae.ker_ig[k]; i < slae.ker_ig[k + 1]; i++)
+            {
+                if(ker_edges_first.find(slae.ker_jg[i]) != ker_edges_first.end())
+                    slae.ker_gg[i] = 0.0;
+            }
+        }
+    }
 }
 
 void VFEM::apply_point_sources()
@@ -297,6 +453,8 @@ void VFEM::make()
         generate_surf_portrait();
 #endif
     generate_portrait();
+    generate_ker_portrait();
+    generate_proj_portrait();
     assemble_matrix();
     apply_point_sources();
     apply_edges_sources();
@@ -306,7 +464,14 @@ void VFEM::make()
 void VFEM::solve()
 {
     extern double SLAE_MAIN_EPSILON;
-    slae.solve(SLAE_MAIN_EPSILON);
+#if defined VFEM_USE_NONHOMOGENEOUS_FIRST
+    set<size_t> edges_first;
+    for(map<size_t, size_t>::iterator it = global_to_local.begin(); it != global_to_local.end(); ++it)
+        edges_first.insert(it->second);
+    slae.solve(SLAE_MAIN_EPSILON, & edges_first, & ker_edges_first);
+#else
+    slae.solve(SLAE_MAIN_EPSILON, & dof_first, & ker_edges_first);
+#endif
 }
 
 #if defined VFEM_USE_ANALYTICAL

@@ -1,5 +1,7 @@
 #include "slae.h"
 
+// ============================================================================
+
 SLAE::SLAE()
 {
     gg = di = rp = x = NULL;
@@ -192,4 +194,97 @@ void SLAE::restore_x(const string & filename)
     }
 
     slae_file.close();
+}
+
+// ============================================================================
+
+SLAE_V_cycle::SLAE_V_cycle()
+{
+    ker_gg = ker_di = NULL;
+    ker_ig = ker_jg = NULL;
+    ker_n = proj_n = 0;
+    proj_gg = NULL;
+    proj_ig = proj_jg = NULL;
+}
+
+SLAE_V_cycle::~SLAE_V_cycle()
+{
+    if(ker_gg) delete [] ker_gg;
+    if(ker_di) delete [] ker_di;
+    if(ker_ig) delete [] ker_ig;
+    if(ker_jg) delete [] ker_jg;
+    if(proj_gg) delete [] proj_gg;
+    if(proj_ig) delete [] proj_ig;
+    if(proj_jg) delete [] proj_jg;
+}
+
+void SLAE_V_cycle::solve(double eps, set<size_t> * edges_first, set<size_t> * ker_edges_first)
+{
+    cout << "Solving V-Cycle SLAE ..." << endl;
+    cout << "Main dim: " << n << "\nKernel dim: " << ker_n << endl;
+
+    solver_V.init_lvl1(ig, jg, di, gg, rp, n);
+    solver_V.init_lvl2(ker_ig, ker_jg, ker_di, ker_gg, ker_n);
+    solver_V.get_main_bounds(edges_first);
+    solver_V.get_grad_bounds(ker_edges_first);
+    solver_V.init_operators(proj_ig, proj_jg, proj_gg);
+
+    solver_V.solve(x, eps);
+}
+
+void SLAE_V_cycle::ker_alloc_all(size_t n_size, size_t gg_size)
+{
+    ker_n = n_size;
+    ker_ig = new size_t [ker_n + 1];
+    ker_jg = new size_t [gg_size];
+    ker_di = new complex<double> [ker_n];
+    ker_gg = new complex<double> [gg_size];
+
+    for(size_t i = 0; i < ker_n; i++)
+        ker_di[i] = complex<double>(0.0, 0.0);
+    for(size_t i = 0; i < gg_size; i++)
+        ker_gg[i] = complex<double>(0.0, 0.0);
+}
+
+void SLAE_V_cycle::ker_add(size_t i, size_t j, complex<double> elem)
+{
+    if(j > i)
+        swap(i, j);
+    size_t ind = 0;
+    bool flag = false;
+    for(size_t k = ker_ig[i]; k < ker_ig[i + 1] && !flag; k++)
+    {
+        if(ker_jg[k] == j)
+        {
+            ind = k;
+            flag = true;
+        }
+    }
+    ker_gg[ind] += elem;
+}
+
+void SLAE_V_cycle::proj_alloc_all(size_t n_size, size_t gg_size)
+{
+    proj_n = n_size;
+    proj_ig = new size_t [proj_n + 1];
+    proj_jg = new size_t [gg_size];
+    proj_gg = new double [gg_size];
+
+    for(size_t i = 0; i < gg_size; i++)
+        proj_gg[i] = 0.0;
+}
+
+void SLAE_V_cycle::proj_set(size_t i, size_t j, double elem)
+{
+    size_t ind = 0;
+    bool flag = false;
+    for(size_t k = proj_ig[i]; k < proj_ig[i + 1] && !flag; k++)
+    {
+        if(proj_jg[k] == j)
+        {
+            ind = k;
+            flag = true;
+        }
+    }
+    proj_gg[ind] = elem;
 }

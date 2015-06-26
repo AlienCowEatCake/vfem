@@ -496,6 +496,13 @@ void VFEM::input_mesh(const string & gmsh_filename)
             for(size_t j = 0; j < basis::tr_bf_num; j++)
                 dof_first.insert(trs[i].dof[j]);
 #endif
+
+        /// WARNING: Переделать это нормально!
+        for(size_t j = 0; j < 3; j++)
+        {
+            ker_edges_first.insert(trs[i].get_node(j).num);
+            ker_edges_first.insert(trs[i].get_edge(j).num + nodes.size());
+        }
     }
 
     cout << " > Building tree ..." << endl;
