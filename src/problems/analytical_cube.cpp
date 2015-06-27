@@ -70,7 +70,7 @@ cvector3 func_b1(const point & p, const triangle * tr)
     return cvector3(0.0, 0.0, 0.0);
 }
 
-string mesh_filename = "data/analytical_cube/cube_x2.msh";
+string mesh_filename = "data/analytical_cube/cube_x1.msh";
 string phys_filename = "data/analytical_cube/phys.txt";
 string tecplot_filename = "analytical_cube.plt";
 

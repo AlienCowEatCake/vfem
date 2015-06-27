@@ -248,6 +248,8 @@ void SLAE_V_cycle::ker_alloc_all(size_t n_size, size_t gg_size)
 
 void SLAE_V_cycle::ker_add(size_t i, size_t j, complex<double> elem)
 {
+    assert(i < ker_n);
+    assert(j < ker_n);
     if(j > i)
         swap(i, j);
     size_t ind = 0;
@@ -260,6 +262,7 @@ void SLAE_V_cycle::ker_add(size_t i, size_t j, complex<double> elem)
             flag = true;
         }
     }
+    assert(flag != false);
     ker_gg[ind] += elem;
 }
 
@@ -276,6 +279,8 @@ void SLAE_V_cycle::proj_alloc_all(size_t n_size, size_t gg_size)
 
 void SLAE_V_cycle::proj_set(size_t i, size_t j, double elem)
 {
+    assert(i < ker_n);
+    assert(j < n);
     size_t ind = 0;
     bool flag = false;
     for(size_t k = proj_ig[i]; k < proj_ig[i + 1] && !flag; k++)
@@ -286,5 +291,6 @@ void SLAE_V_cycle::proj_set(size_t i, size_t j, double elem)
             flag = true;
         }
     }
+    assert(flag != false);
     proj_gg[ind] = elem;
 }

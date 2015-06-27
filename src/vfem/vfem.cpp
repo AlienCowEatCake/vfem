@@ -262,8 +262,8 @@ void VFEM::assemble_matrix()
         for(size_t i = 0; i < 10; i++)
         {
             for(size_t j = 0; j < i; j++)
-                slae.ker_add(ker_dof[i], ker_dof[j], matrix_K[i][j]);
-            slae.ker_di[ker_dof[i]] += matrix_K[i][i];
+                slae.ker_add(ker_dof[i], ker_dof[j], matrix_K[i][j] * k2);
+            slae.ker_di[ker_dof[i]] += matrix_K[i][i] * k2;
         }
 
         // Матрица проектора
@@ -467,7 +467,7 @@ void VFEM::solve()
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
     set<size_t> edges_first;
     for(map<size_t, size_t>::iterator it = global_to_local.begin(); it != global_to_local.end(); ++it)
-        edges_first.insert(it->second);
+        edges_first.insert(it->first);
     slae.solve(SLAE_MAIN_EPSILON, & edges_first, & ker_edges_first);
 #else
     slae.solve(SLAE_MAIN_EPSILON, & dof_first, & ker_edges_first);

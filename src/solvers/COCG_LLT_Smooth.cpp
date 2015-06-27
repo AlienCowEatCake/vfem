@@ -161,7 +161,7 @@ bool COCG_LLT_Smooth::is_fpu_error(double x) const
 void COCG_LLT_Smooth::solve(complex<double> * solution, complex<double> * rp_s, double eps)
 {
     // Параметры решателя
-    size_t max_iter = 15000;
+    size_t max_iter = 1000;
     eps *= eps;
 
     rp = rp_s;

@@ -94,7 +94,7 @@ void BiCGStabComplex_VC::mul_matrix(const complex<double> * f, complex<double> *
 void BiCGStabComplex_VC::solve(complex<double> *solution, complex<double> *rp, double gamma)
 {
     double eps = gamma;
-    size_t max_iter = /*(size_t)sqrt(n)*/ 15000;
+    size_t max_iter = /*(size_t)sqrt(n)*/ 100;
 
     complex<double> omega, alpha, ro, beta;
     double rp_norm = sqrt(dot_prod_self(rp));

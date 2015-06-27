@@ -497,7 +497,9 @@ void VFEM::input_mesh(const string & gmsh_filename)
                 dof_first.insert(trs[i].dof[j]);
 #endif
 
-        /// WARNING: Переделать это нормально!
+#if defined __GNUC__
+#warning "TODO"
+#endif
         for(size_t j = 0; j < 3; j++)
         {
             ker_edges_first.insert(trs[i].get_node(j).num);

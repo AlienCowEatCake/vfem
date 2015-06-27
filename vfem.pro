@@ -26,10 +26,10 @@ SOURCES += \
     src/problems/area_2layers_loop_universal_pml.cpp \
     src/problems/area_3layers_inc_loop_pml.cpp \
     src/solvers/V_cycle.cpp \
-#    src/solvers/BiCGComplex_VC.cpp \
-#    src/solvers/BiCGStabComplex_VC.cpp \
-#    src/solvers/CGMComplex_LLT.cpp \
-#    src/solvers/CGMComplex_VC.cpp \
+    src/solvers/BiCGComplex_VC.cpp \
+    src/solvers/BiCGStabComplex_VC.cpp \
+    src/solvers/CGMComplex_LLT.cpp \
+    src/solvers/CGMComplex_VC.cpp \
     src/solvers/COCG_LLT_Smooth.cpp
 
 HEADERS += \
@@ -49,10 +49,10 @@ HEADERS += \
     src/vfem/vfem.h \
     src/problems/problems.h \
     src/solvers/V_cycle.h \
-#    src/solvers/BiCGComplex_VC.h \
-#    src/solvers/BiCGStabComplex_VC.h \
-#    src/solvers/CGMComplex_LLT.h \
-#    src/solvers/CGMComplex_VC.h \
+    src/solvers/BiCGComplex_VC.h \
+    src/solvers/BiCGStabComplex_VC.h \
+    src/solvers/CGMComplex_LLT.h \
+    src/solvers/CGMComplex_VC.h \
     src/solvers/COCG_LLT_Smooth.h
 
 *g++*|*clang* {

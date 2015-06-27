@@ -1,9 +1,9 @@
 #if !defined V_CYCLE_H_INCLUDED
 #define V_CYCLE_H_INCLUDED
 
-//#include "CGMComplex_VC.h"
-//#include "BiCGComplex_VC.h"
-//#include "BiCGStabComplex_VC.h"
+#include "CGMComplex_VC.h"
+#include "BiCGComplex_VC.h"
+#include "BiCGStabComplex_VC.h"
 #include "COCG_LLT_Smooth.h"
 
 #include <cstdlib>
@@ -33,9 +33,9 @@ public:
     void solve(complex<double> * solution, double eps);
 
 private:
-    void mul_matrix(complex<double> * f, complex<double> *& x);
-    complex<double> dot_prod(complex<double> * a, complex<double> * b);
-    void calc_nev(complex<double> * x0, complex<double> * p);
+    void mul_matrix(const complex<double> * f, complex<double> * x) const;
+    complex<double> dot_prod(const complex<double> * a, const complex<double> * b) const;
+    void calc_residual(const complex<double> * x0, complex<double> * p) const;
 
     size_t n_lvl1, n_lvl2;
 
@@ -51,6 +51,8 @@ private:
     set<size_t> * grad_bounds;
     set<size_t> * main_bounds;
 
+    //CGMComplex_VC bcgm_lvl1;
+    //CGMComplex_VC bcgm_lvl2;
     COCG_LLT_Smooth bcgm_lvl1;
     COCG_LLT_Smooth bcgm_lvl2;
     //BiCGStabComplex_VC bcgm_lvl1;

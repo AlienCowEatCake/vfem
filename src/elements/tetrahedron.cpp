@@ -356,34 +356,45 @@ matrix_t<double, 10, 10> tetrahedron_base::K() const
     return matr;
 }
 
+#if defined __GNUC__
+#warning "TODO"
+#endif
 // Локальная матрица проектора
 matrix_t<double, 10, 12> tetrahedron_base::R() const
 {
-    matrix_t<double, 10, 12> R_loc;
+    // P - матрица инцидентности ребер и узлов, элемент Pij равен -1, если из i-го
+    // узла выходит j-е ребро, 1, если ребро входит и 0 в остальных случаях
+    static const double P[4][6] =
+    {
+        {-1.0, -1.0, -1.0,  0.0,  0.0,  0.0},
+        { 1.0,  0.0,  0.0, -1.0, -1.0,  0.0},
+        { 0.0,  1.0,  0.0,  1.0,  0.0, -1.0},
+        { 0.0,  0.0,  1.0,  0.0,  1.0,  1.0}
+    };
+    // Матрица R имеет вид: | P  0 |
+    //                      | 0  I |
+    matrix_t<double, 10, 12> matr;
     for(size_t i = 0; i < 10; i++)
         for(size_t j = 0; j < 12; j++)
-            R_loc[i][j] = 0.0;
-
-    R_loc[0][0] = R_loc[0][1] = R_loc[0][2] = -1.0;
-    R_loc[1][0] = 1.0;
-    R_loc[1][3] = R_loc[1][4] = R_loc[1][5] = -1.0;
-    R_loc[2][1] = R_loc[2][3] = 1.0;
-    R_loc[2][5] = -1.0;
-    R_loc[3][2] = R_loc[3][4] = R_loc[3][5] = 1.0;
-
+            matr[i][j] = 0.0;
+    for(size_t i = 0; i < 4; i++)
+        for(size_t j = 0; j < 6; j++)
+            matr[i][j] = P[i][j];
     for(int i = 0; i < 6; i++)
-        R_loc[i + 4][i + 6] = 1.0;
-
-    return R_loc;
+        matr[i + 4][i + 6] = 1.0;
+    return matr;
 }
 
+#if defined __GNUC__
+#warning "TODO"
+#endif
 // Базисные функции ядра
 vector3 tetrahedron_base::kerw(size_t i, const point & p) const
 {
     if(i < 4)
         return grad_lambda(i);
     if(i < 10)
-        return w(i - 2, p);
+        return w(i + 2, p);
     cerr << "Error: Incorrect ker basis function number!" << endl;
     return vector3();
 }
@@ -392,7 +403,6 @@ vector3 tetrahedron_base::kerw(size_t i, const point & p) const
 double tetrahedron_base::integrate_kerw(size_t i, size_t j) const
 {
     using namespace tet_integration;
-    using namespace basis;
     double result = 0.0;
     for(size_t k = 0; k < gauss_num; k++)
         result += gauss_weights[k] *
