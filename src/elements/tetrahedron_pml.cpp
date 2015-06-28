@@ -172,6 +172,22 @@ cvector3 tetrahedron_pml::rotw_pml(size_t i, const cpoint & p, const point & p_n
     return cvector3();
 }
 
+cvector3 tetrahedron_pml::kerw_pml(size_t i, const cpoint & p, const point & p_non_PML) const
+{
+    assert(i < basis::tet_ker_bf_num);
+    if(i < 4)
+    {
+        cvector3 s = get_s(p_non_PML, this, phys_pml);
+        cvector3 grad_lambda_i = grad_lambda(i);
+        for(size_t ind = 0; ind < 3; ind++)
+            grad_lambda_i[ind] /= s[ind];
+        return grad_lambda_i;
+    }
+    if(i < 10)  return w_pml(i + 2, p);
+    if(i < 20)  return w_pml(i + 10, p);
+    return cvector3();
+}
+
 complex<double> tetrahedron_pml::integrate_w(size_t i, size_t j) const
 {
 //#if defined __GNUC__
@@ -214,6 +230,20 @@ complex<double> tetrahedron_pml::integrate_fw(cvector3(*func)(const point &, con
     return result * jacobian_pml;
 }
 
+complex<double> tetrahedron_pml::integrate_kerw(size_t i, size_t j) const
+{
+//#if defined __GNUC__
+//#warning conjugate
+//#endif
+    using namespace tet_integration;
+    complex<double> result = 0.0;
+    for(size_t k = 0; k < gauss_num; k++)
+        result += gauss_weights[k] *
+                  kerw_pml(i, gauss_points_pml[k], gauss_points[k]).cj() *
+                  kerw_pml(j, gauss_points_pml[k], gauss_points[k]).cj();
+    return result * jacobian;
+}
+
 matrix_t<complex<double>, basis::tet_bf_num, basis::tet_bf_num>
 tetrahedron_pml::G() const
 {
@@ -244,4 +274,15 @@ tetrahedron_pml::rp(cvector3(*func)(const point &, const phys_area &)) const
     for(size_t i = 0; i < tet_bf_num; i++)
         arr[i] = integrate_fw(func, i);
     return arr;
+}
+
+matrix_t<complex<double>, basis::tet_ker_bf_num, basis::tet_ker_bf_num>
+tetrahedron_pml::K() const
+{
+    using namespace basis;
+    matrix_t<complex<double>, tet_ker_bf_num, tet_ker_bf_num> matr;
+    for(size_t i = 0; i < tet_ker_bf_num; i++)
+        for(size_t j = 0; j <= i; j++)
+            matr[j][i] = matr[i][j] = integrate_kerw(i, j);
+    return matr;
 }

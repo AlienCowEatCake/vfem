@@ -404,9 +404,13 @@ void VFEM::input_mesh(const string & gmsh_filename)
         // Заполняем степени свободы
         for(size_t j = 0; j < 6; j++)
             fes[i].dof[j] = fes[i].edges[j]->num;
+        for(size_t j = 0; j < 4; j++)
+            fes[i].ker_dof[j] = fes[i].nodes[j]->num;
 #if BASIS_ORDER >= 2 || BASIS_TYPE == 2
         for(size_t j = 0; j < 6; j++)
             fes[i].dof[j + 6] = fes[i].edges[j]->num + edges.size();
+        for(size_t j = 0; j < 6; j++)
+            fes[i].ker_dof[j + 4] = fes[i].edges[j]->num + nodes.size();
 #endif
 #if BASIS_ORDER >= 2
         for(size_t j = 0; j < 4; j++)
@@ -419,6 +423,10 @@ void VFEM::input_mesh(const string & gmsh_filename)
             fes[i].dof[j + 20] = fes[i].faces[j]->num + 2 * edges.size() + 2 * faces.size();
         for(size_t j = 0; j < 6; j++)
             fes[i].dof[j + 24] = fes[i].edges[j]->num + 2 * edges.size() + 3 * faces.size();
+        for(size_t j = 0; j < 4; j++)
+            fes[i].ker_dof[j + 10] = fes[i].faces[j]->num + edges.size() + nodes.size();
+        for(size_t j = 0; j < 6; j++)
+            fes[i].ker_dof[j + 14] = fes[i].edges[j]->num + faces.size() + edges.size() + nodes.size();;
 #endif
         // Инициализируем
         fes[i].init();

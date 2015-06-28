@@ -159,6 +159,15 @@ vector3 tetrahedron_base::rotw(size_t i, const point & p) const
     return vector3();
 }
 
+vector3 tetrahedron_base::kerw(size_t i, const point & p) const
+{
+    assert(i < basis::tet_ker_bf_num);
+    if(i < 4)   return grad_lambda(i);
+    if(i < 10)  return w(i + 2, p);
+    if(i < 20)  return w(i + 10, p);
+    return vector3();
+}
+
 void tetrahedron_base::init()
 {
     using namespace tet_integration;
@@ -381,6 +390,17 @@ complex<double> tetrahedron::integrate_fw(cvector3(*func)(const point &, const p
     return result * jacobian;
 }
 
+double tetrahedron::integrate_kerw(size_t i, size_t j) const
+{
+    using namespace tet_integration;
+    double result = 0.0;
+    for(size_t k = 0; k < gauss_num; k++)
+        result += gauss_weights[k] *
+                  kerw(i, gauss_points[k]) *
+                  kerw(j, gauss_points[k]);
+    return result * jacobian;
+}
+
 matrix_t<double, basis::tet_bf_num, basis::tet_bf_num>
 tetrahedron::G() const
 {
@@ -411,6 +431,17 @@ tetrahedron::rp(cvector3(*func)(const point &, const phys_area &)) const
     for(size_t i = 0; i < tet_bf_num; i++)
         arr[i] = integrate_fw(func, i);
     return arr;
+}
+
+matrix_t<double, basis::tet_ker_bf_num, basis::tet_ker_bf_num>
+tetrahedron::K() const
+{
+    using namespace basis;
+    matrix_t<double, tet_ker_bf_num, tet_ker_bf_num> matr;
+    for(size_t i = 0; i < tet_ker_bf_num; i++)
+        for(size_t j = 0; j <= i; j++)
+            matr[j][i] = matr[i][j] = integrate_kerw(i, j);
+    return matr;
 }
 
 // ============================================================================
