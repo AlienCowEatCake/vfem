@@ -21,9 +21,11 @@
 #if defined VFEM_USE_PML
 typedef tetrahedron_pml finite_element;
 typedef matrix_t<complex<double>, basis::tet_bf_num, basis::tet_bf_num> l_matrix;
+typedef matrix_t<complex<double>, basis::tet_ker_bf_num, basis::tet_ker_bf_num> ker_l_matrix;
 #else
 typedef tetrahedron finite_element;
 typedef matrix_t<double, basis::tet_bf_num, basis::tet_bf_num> l_matrix;
+typedef matrix_t<double, basis::tet_ker_bf_num, basis::tet_ker_bf_num> ker_l_matrix;
 #endif
 
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
@@ -92,6 +94,8 @@ public:
 
     // Основная СЛАУ
     SLAE slae;
+    // СЛАУ на ядре
+    SLAE ker_slae;
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
     // СЛАУ по границе
     SLAE surf_slae;
@@ -123,6 +127,8 @@ protected:
 
     // Число степеней свободы
     size_t dof_num;
+    // Число степеней свободы ядра
+    size_t ker_dof_num;
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
     // Соответствие глобальных степеней свободы и по границе
     map<size_t, size_t> global_to_local;
@@ -130,11 +136,15 @@ protected:
     // Степени свободы с первыми краевыми
     set<size_t> dof_first;
 #endif
+    // Степени свободы с первыми краевыми у ядра
+    set<size_t> ker_edges_first;
     // Восьмиричное дерево поиска
     octal_tree<finite_element> tree;
 
     // Генерация портрета глобальной матрицы
     void generate_portrait();
+    // Генерация портрета глобальной матрицы ядра
+    void generate_ker_portrait();
     // Сборка глобальной матрицы
     void assemble_matrix();
     // Применение краевых условий
