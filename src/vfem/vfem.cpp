@@ -289,7 +289,7 @@ void VFEM::applying_bound()
     for(size_t k = 0; k < ker_slae.n; k++)
     {
         // Пробегаем по всей матрице
-        if(ker_edges_first.find(k) != ker_edges_first.end())
+        if(ker_dof_first.find(k) != ker_dof_first.end())
         {
             ker_slae.di[k] = 1.0;
             for(size_t i = ker_slae.ig[k]; i < ker_slae.ig[k + 1]; i++)
@@ -299,7 +299,7 @@ void VFEM::applying_bound()
         {
             for(size_t i = ker_slae.ig[k]; i < ker_slae.ig[k + 1]; i++)
             {
-                if(ker_edges_first.find(ker_slae.jg[i]) != ker_edges_first.end())
+                if(ker_dof_first.find(ker_slae.jg[i]) != ker_dof_first.end())
                     ker_slae.gg[i] = 0.0;
             }
         }

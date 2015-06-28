@@ -137,7 +137,7 @@ protected:
     set<size_t> dof_first;
 #endif
     // Степени свободы с первыми краевыми у ядра
-    set<size_t> ker_edges_first;
+    set<size_t> ker_dof_first;
     // Восьмиричное дерево поиска
     octal_tree<finite_element> tree;
 

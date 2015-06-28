@@ -4,12 +4,15 @@
 void VFEM::to_kernel_space(const complex<double> * in, complex<double> * out) const
 {
     size_t nodes_num = nodes.size();
+    MAYBE_UNUSED(nodes_num);
     size_t edges_num = edges.size();
+    MAYBE_UNUSED(edges_num);
 #if BASIS_ORDER >= 2
     size_t faces_num = faces.size();
+    MAYBE_UNUSED(faces_num);
 #endif
 
-    for(size_t i = 0; i < nodes_num; i++)
+    for(size_t i = 0; i < ker_dof_num; i++)
         out[i] = 0.0;
 
     for(set<edge>::iterator it = edges.begin(); it != edges.end(); ++it)
@@ -35,12 +38,15 @@ void VFEM::to_kernel_space(const complex<double> * in, complex<double> * out) co
 void VFEM::to_full_space(const complex<double> * in, complex<double> * out) const
 {
     size_t nodes_num = nodes.size();
+    MAYBE_UNUSED(nodes_num);
     size_t edges_num = edges.size();
+    MAYBE_UNUSED(edges_num);
 #if BASIS_ORDER >= 2
     size_t faces_num = faces.size();
+    MAYBE_UNUSED(faces_num);
 #endif
 
-    for(size_t i = 0; i < edges_num; i++)
+    for(size_t i = 0; i < dof_num; i++)
         out[i] = 0.0;
 
     for(set<edge>::iterator it = edges.begin(); it != edges.end(); ++it)
@@ -132,7 +138,7 @@ void VFEM::solve()
         to_kernel_space(r, g);
 
         // Правим краевые
-        for(set<size_t>::iterator it = ker_edges_first.begin(); it != ker_edges_first.end(); ++it)
+        for(set<size_t>::iterator it = ker_dof_first.begin(); it != ker_dof_first.end(); ++it)
             g[*it] = 0.0;
 
         // z = (PAPt)^-1 g или z = solve1(PAPt, g)

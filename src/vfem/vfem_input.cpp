@@ -513,7 +513,7 @@ void VFEM::input_mesh(const string & gmsh_filename)
 #endif
         if(trs[i].phys->type_of_bounds == 1)
             for(size_t j = 0; j < basis::tr_ker_bf_num; j++)
-                ker_edges_first.insert(trs[i].ker_dof[j]);
+                ker_dof_first.insert(trs[i].ker_dof[j]);
     }
 
     cout << " > Building tree ..." << endl;
