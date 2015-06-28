@@ -6,7 +6,7 @@
 #endif
 
 double SLAE_SURF_EPSILON = 1e-15;
-double SLAE_MAIN_EPSILON = 1e-15;
+double SLAE_MAIN_EPSILON = 1e-14;
 
 cvector3 func_true(const point & p)
 {

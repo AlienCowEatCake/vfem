@@ -411,7 +411,7 @@ double tetrahedron_base::integrate_kerw(size_t i, size_t j) const
     return result * jacobian;
 }
 
-matrix_t<double, 10, 12> tetrahedron_base::GetNodalStiff()
+matrix_t<double, 10, 10> tetrahedron_base::GetNodalStiff()
 {
     double x[4], y[4], z[4];
     x[0] = nodes[0]->x;
@@ -1114,9 +1114,9 @@ matrix_t<double, 10, 12> tetrahedron_base::GetNodalStiff()
     }
     return locStiff;
 */
-    matrix_t<double, 10, 12> matr;
+    matrix_t<double, 10, 10> matr;
     for(size_t i = 0; i < 10; i++)
-        for(size_t j = 0; j < 12; j++)
+        for(size_t j = 0; j < 10; j++)
             matr[i][j] = C_G[i][j];
     return matr;
 }

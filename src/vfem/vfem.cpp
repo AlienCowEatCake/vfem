@@ -258,7 +258,7 @@ void VFEM::assemble_matrix()
             ker_dof[i + 4] = fes[k].get_edge(i).num + nodes.size();
 
         // Матрица ядра
-        matrix_t<double, 10, 10> matrix_K = fes[k].K();
+        matrix_t<double, 10, 10> matrix_K = fes[k].GetNodalStiff();//fes[k].K();
         for(size_t i = 0; i < 10; i++)
         {
             for(size_t j = 0; j < i; j++)
@@ -267,7 +267,7 @@ void VFEM::assemble_matrix()
         }
 
         // Матрица проектора
-        matrix_t<double, 10, 12> matrix_P = /*fes[k].GetNodalStiff();*/fes[k].P();
+        matrix_t<double, 10, 12> matrix_P = fes[k].P();
         for(size_t i = 0; i < 10; i++)
             for(int j = 0; j < 12; j++)
                 slae.proj_set(ker_dof[i], fes[k].dof[j], matrix_P[i][j]);
