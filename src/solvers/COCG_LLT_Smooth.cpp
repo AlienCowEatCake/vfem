@@ -43,6 +43,8 @@ void COCG_LLT_Smooth::init(size_t * gi_s, size_t * gj_s, complex<double> * di_s,
 
     for(size_t i = 0 ; i < m ; i++)
         L_gg[i] = gg[i];
+
+    make_LLT_decomposition();
 }
 
 void COCG_LLT_Smooth::make_LLT_decomposition()
@@ -171,7 +173,7 @@ void COCG_LLT_Smooth::solve(complex<double> * solution, complex<double> * rp_s, 
         xs[i] = x0[i];
 
     mul_matrix(x0, r);
-    make_LLT_decomposition();
+    //make_LLT_decomposition();
 
     for(size_t i = 0; i < n ; i++)
         rs[i] = r[i] = rp[i] - r[i];

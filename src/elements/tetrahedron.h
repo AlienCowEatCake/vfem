@@ -54,7 +54,9 @@ public:
     // Локальная матрица ядра
     matrix_t<double, 10, 10> K() const;
     // Локальная матрица проектора
-    matrix_t<double, 10, 12> R() const;
+    matrix_t<double, 10, 12> P() const;
+
+    matrix_t<double, 10, 12> GetNodalStiff();
 
 protected:
     // Матрица L-координат

@@ -52,6 +52,18 @@ complex<double> V_cycle::dot_prod(const complex<double> * a, const complex<doubl
     return d_p;
 }
 
+double V_cycle::dot_prod_self(const complex<double> * a) const
+{
+    double d_p = 0.0;
+    for(size_t i = 0; i < n_lvl1; i++)
+    {
+        double re = a[i].real();
+        double im = a[i].imag();
+        d_p += re * re + im * im;
+    }
+    return d_p;
+}
+
 void V_cycle::mul_matrix(const complex<double> * f, complex<double> * x) const
 {
 
@@ -126,7 +138,7 @@ void V_cycle::solve(complex<double> * solution, double eps)
         }
 
         ofstream ofs("Re_lvl1.txt");
-        ofs.precision(16);
+        ofs.precision(17);
         ofs << scientific;
         for(size_t i = 0; i < n; i++)
         {
@@ -138,7 +150,7 @@ void V_cycle::solve(complex<double> * solution, double eps)
         ofs.close();
 
         ofs.open("Im_lvl1.txt");
-        ofs.precision(16);
+        ofs.precision(17);
         ofs << scientific;
         for(size_t i = 0; i < n; i++)
         {
@@ -169,7 +181,7 @@ void V_cycle::solve(complex<double> * solution, double eps)
         }
 
         ofstream ofs("Re_lvl2.txt");
-        ofs.precision(16);
+        ofs.precision(17);
         ofs << scientific;
         for(size_t i = 0; i < n; i++)
         {
@@ -181,7 +193,7 @@ void V_cycle::solve(complex<double> * solution, double eps)
         ofs.close();
 
         ofs.open("Im_lvl2.txt");
-        ofs.precision(16);
+        ofs.precision(17);
         ofs << scientific;
         for(size_t i = 0; i < n; i++)
         {
@@ -193,8 +205,8 @@ void V_cycle::solve(complex<double> * solution, double eps)
         ofs.close();
     }
 
-    bcgm_lvl1.solve(solution, rp, 0.01);
-
+    //bcgm_lvl1.solve(solution, rp, 0.01);
+/*
     size_t max_iter = 1000;
 
     complex<double> * x0 = new complex<double> [n_lvl1];
@@ -271,4 +283,76 @@ void V_cycle::solve(complex<double> * solution, double eps)
     delete [] v_g;
     delete [] v_Py;
     delete [] v_y;
+*/
+    size_t max_iter = 1000;
+    double gamma0 = 0.05;
+    double gamma1 = 0.09;
+    double gamma2 = 0.01;
+
+    // Уточнение начального приближения на полном пространстве
+    bcgm_lvl1.solve(solution, rp, gamma0);
+
+    double rp_norm = sqrt(dot_prod_self(rp));
+
+    // Вектор невязки
+    complex<double> * r = new complex<double> [n_lvl1];
+    calc_residual(solution, r);
+
+    complex<double> * g = new complex<double> [n_lvl2];
+    complex<double> * z = new complex<double> [n_lvl2];
+    complex<double> * y = new complex<double> [n_lvl1];
+
+    for(size_t iter = 0; iter < max_iter; iter++)
+    {
+        // g = Pr
+        for(size_t i = 0; i < n_lvl2; i++)
+            g[i] = 0.0;
+        for(size_t i = 0; i < n_lvl2; i++)
+        {
+            for(size_t j = gi_R[i]; j < gi_R[i + 1]; j++)
+                g[i] += gg_R[j] * r[gj_R[j]];
+        }
+        // Правим краевые
+        for(set<size_t>::iterator it = grad_bounds->begin(); it != grad_bounds->end(); ++it)
+            g[*it] = 0.0;
+
+        // z = (PAPt)^-1 g или z = solve1(PAPt, g)
+        for(size_t i = 0; i < n_lvl2; i++) z[i] = 0.0;
+        bcgm_lvl2.solve(z, g, gamma2);
+
+        // Уточнение на градиентном пространсте
+        // x = x + Ptz
+        for(size_t i = 0; i < n_lvl2; i++)
+            for(size_t j = gi_R[i]; j < gi_R[i + 1]; j++)
+                solution[gj_R[j]] += gg_R[j] * z[i];
+
+        // r = b - Ax
+        calc_residual(solution, r);
+        printf("[%u] Kersel space completed, residual = %3e\n", (unsigned)iter, sqrt(dot_prod_self(r)) / rp_norm);
+
+        // Правим краевые
+        for(set<size_t>::iterator it = main_bounds->begin(); it != main_bounds->end(); ++it)
+            r[(*it)] = 0.0;
+
+        // y = solve2(A, r)
+        for(size_t i = 0; i < n_lvl1; i++) y[i] = 0.0;
+        bcgm_lvl1.solve(y, r, gamma1);
+
+        //Уточненение на всём пространстве
+        // x = x + y
+        for(size_t i = 0; i < n_lvl1; i++)
+            solution[i] += y[i];
+
+        // r = b - Ax
+        calc_residual(solution, r);
+        double res = sqrt(dot_prod_self(r)) / rp_norm;
+        printf("[%u] Full space completed, residual = %3e\n", (unsigned)iter, res);
+
+        if(res < eps) break;
+    }
+
+    delete [] r;
+    delete [] g;
+    delete [] z;
+    delete [] y;
 }

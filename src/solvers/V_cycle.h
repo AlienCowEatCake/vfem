@@ -5,6 +5,7 @@
 #include "BiCGComplex_VC.h"
 #include "BiCGStabComplex_VC.h"
 #include "COCG_LLT_Smooth.h"
+#include "CGMComplex_LLT.h"
 
 #include <cstdlib>
 #include <complex>
@@ -35,6 +36,7 @@ public:
 private:
     void mul_matrix(const complex<double> * f, complex<double> * x) const;
     complex<double> dot_prod(const complex<double> * a, const complex<double> * b) const;
+    double dot_prod_self(const complex<double> * a) const;
     void calc_residual(const complex<double> * x0, complex<double> * p) const;
 
     size_t n_lvl1, n_lvl2;
@@ -51,6 +53,8 @@ private:
     set<size_t> * grad_bounds;
     set<size_t> * main_bounds;
 
+    //CGMComplex_LLT bcgm_lvl1;
+    //CGMComplex_LLT bcgm_lvl2;
     //CGMComplex_VC bcgm_lvl1;
     //CGMComplex_VC bcgm_lvl2;
     COCG_LLT_Smooth bcgm_lvl1;

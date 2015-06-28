@@ -267,10 +267,10 @@ void VFEM::assemble_matrix()
         }
 
         // Матрица проектора
-        matrix_t<double, 10, 12> matrix_R = fes[k].R();
+        matrix_t<double, 10, 12> matrix_P = /*fes[k].GetNodalStiff();*/fes[k].P();
         for(size_t i = 0; i < 10; i++)
             for(int j = 0; j < 12; j++)
-                slae.proj_set(ker_dof[i], fes[k].dof[j], matrix_R[i][j]);
+                slae.proj_set(ker_dof[i], fes[k].dof[j], matrix_P[i][j]);
     }
 }
 
