@@ -384,12 +384,6 @@ void VFEM::make()
     applying_bound();
 }
 
-void VFEM::solve()
-{
-    extern double SLAE_MAIN_EPSILON;
-    slae.solve(SLAE_MAIN_EPSILON);
-}
-
 #if defined VFEM_USE_ANALYTICAL
 void VFEM::calculate_diff() const
 {

@@ -164,6 +164,11 @@ protected:
     // Параметры PML
     phys_pml_area phys_pml;
 #endif
+
+    // Проектирование на пространство ядра
+    void to_kernel_space(const complex<double> * in, complex<double> * out) const;
+    // Интерполяция на полное пространство
+    void to_full_space(const complex<double> * in, complex<double> * out) const;
 };
 
 #endif // VFEM_H_INCLUDED
