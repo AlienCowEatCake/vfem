@@ -114,14 +114,15 @@ void VFEM::solve()
 
     size_t max_iter = 1000;
     double gamma0       = 0.1;
-    double gamma_full   = 0.2;
-    double gamma_ker    = 0.3;
+    double gamma_full   = 0.5;
+    double gamma_ker    = 0.1;
 
     slae.inline_init();
     ker_slae.inline_init();
 
     // Уточнение начального приближения на полном пространстве
     slae.inline_solve(slae.x, slae.rp, gamma0);
+    printf("\n");
 
     double rp_norm2 = dot_prod_self(slae.rp);
 
@@ -179,13 +180,11 @@ void VFEM::solve()
         double res = sqrt(dot_prod_self(r) / rp_norm2);
 //        printf("V-Cycle[F] Residual:\t%5lu\t%.3e\n", (unsigned long)iter, res);
 
-        if(res < SLAE_MAIN_EPSILON) break;
-
-        printf("V-Cycle Residual:\t%5lu\t%.3e\r", (unsigned long)iter, res);
+        printf("V-Cycle Residual:\t%5lu\t%.3e\n\n", (unsigned long)iter, res);
         fflush(stdout);
-    }
 
-    printf("V-Cycle Residual:\t%5lu\t%.3e\n", (unsigned long)iter - 1, sqrt(dot_prod_self(r) / rp_norm2));
+        if(res < SLAE_MAIN_EPSILON) break;
+    }
     if(iter >= max_iter) printf("Soulution can`t found, iteration limit exceeded!\n");
 
     delete [] r;
