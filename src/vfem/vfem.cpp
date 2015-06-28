@@ -58,7 +58,7 @@ void VFEM::generate_ker_portrait()
     {
         show_progress("step 1", k, fes.size());
 
-        for(size_t i = 0; i < basis::tet_bf_num; i++)
+        for(size_t i = 0; i < basis::tet_ker_bf_num; i++)
         {
             size_t a = fes[k].ker_dof[i];
             for(size_t j = 0; j < i; j++)
@@ -73,7 +73,7 @@ void VFEM::generate_ker_portrait()
     }
 
     size_t gg_size = 0;
-    for(size_t i = 0; i < dof_num; i++)
+    for(size_t i = 0; i < ker_dof_num; i++)
         gg_size += portrait[i].size();
 
     ker_slae.alloc_all(ker_dof_num, gg_size);

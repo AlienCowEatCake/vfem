@@ -15,6 +15,14 @@ public:
     SLAE();
     ~SLAE();
     void solve(double eps);
+    inline void inline_init()
+    {
+        solver.init(ig, jg, di, gg, n);
+    }
+    inline void inline_solve(complex<double> * solution, complex<double> * rp_s, double eps)
+    {
+        solver.solve(solution, rp_s, eps);
+    }
     void alloc_all(size_t n_size, size_t gg_size);
     void dealloc_all();
     void add(size_t i, size_t j, const complex<double> & elem);

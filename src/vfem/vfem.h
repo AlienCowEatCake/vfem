@@ -169,6 +169,12 @@ protected:
     void to_kernel_space(const complex<double> * in, complex<double> * out) const;
     // Интерполяция на полное пространство
     void to_full_space(const complex<double> * in, complex<double> * out) const;
+    // Скалярное произведение
+    double dot_prod_self(const complex<double> * a) const;
+    // Умножение матрицы с полного пространства на вектор
+    void mul_matrix(const complex<double> * f, complex<double> * x) const;
+    // Подсчет невязки
+    void calc_residual(const complex<double> * x0, complex<double> * p) const;
 };
 
 #endif // VFEM_H_INCLUDED
