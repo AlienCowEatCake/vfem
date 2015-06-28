@@ -123,7 +123,7 @@ void VFEM::solve()
     // Уточнение начального приближения на полном пространстве
     slae.inline_solve(slae.x, slae.rp, gamma0);
 
-    double rp_norm = sqrt(dot_prod_self(slae.rp));
+    double rp_norm2 = dot_prod_self(slae.rp);
 
     // Вектор невязки
     complex<double> * r = new complex<double> [dof_num];
@@ -132,7 +132,8 @@ void VFEM::solve()
     complex<double> * g = new complex<double> [ker_dof_num];
     complex<double> * y = new complex<double> [dof_num];
 
-    for(size_t iter = 0; iter < max_iter; iter++)
+    size_t iter;
+    for(iter = 0; iter < max_iter; iter++)
     {
         // g = Pr
         to_kernel_space(r, g);
@@ -153,7 +154,7 @@ void VFEM::solve()
 
         // r = b - Ax
         calc_residual(slae.x, r);
-        printf("V-Cycle[K] Residual:\t%5lu\t%.3e\n", (unsigned long)iter, sqrt(dot_prod_self(r)) / rp_norm);
+//        printf("V-Cycle[K] Residual:\t%5lu\t%.3e\n", (unsigned long)iter, sqrt(dot_prod_self(r) / rp_norm2));
 
         // Правим краевые
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
@@ -175,11 +176,17 @@ void VFEM::solve()
 
         // r = b - Ax
         calc_residual(slae.x, r);
-        double res = sqrt(dot_prod_self(r)) / rp_norm;
-        printf("V-Cycle[F] Residual:\t%5lu\t%.3e\n", (unsigned long)iter, res);
+        double res = sqrt(dot_prod_self(r) / rp_norm2);
+//        printf("V-Cycle[F] Residual:\t%5lu\t%.3e\n", (unsigned long)iter, res);
 
         if(res < SLAE_MAIN_EPSILON) break;
+
+        printf("V-Cycle Residual:\t%5lu\t%.3e\r", (unsigned long)iter, res);
+        fflush(stdout);
     }
+
+    printf("V-Cycle Residual:\t%5lu\t%.3e\n", (unsigned long)iter - 1, sqrt(dot_prod_self(r) / rp_norm2));
+    if(iter >= max_iter) printf("Soulution can`t found, iteration limit exceeded!\n");
 
     delete [] r;
     delete [] g;

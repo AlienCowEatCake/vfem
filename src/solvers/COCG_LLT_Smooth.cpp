@@ -208,11 +208,11 @@ void COCG_LLT_Smooth::solve(complex<double> * solution, complex<double> * rp_s, 
         }
 
         double residual = discr / rp_norm;
-        if(iter%10 == 0)
-        {
-            printf("COCG_LLT_Smooth Residual:\t%5lu\t%.3e\r", (unsigned long)iter, sqrt(residual));
-            fflush(stdout);
-        }
+//        if(iter%10 == 0)
+//        {
+//            printf("COCG_LLT_Smooth Residual:\t%5lu\t%.3e\r", (unsigned long)iter, sqrt(residual));
+//            fflush(stdout);
+//        }
 
         if(residual > eps)
         {
@@ -251,14 +251,14 @@ void COCG_LLT_Smooth::solve(complex<double> * solution, complex<double> * rp_s, 
             finished = true;
     }
 
-    mul_matrix(xs, r);
-    for(size_t i = 0; i < n; i++)
-        r[i] = rp[i] - r[i];
-    discr = dot_prod_self(r);
-    printf("COCG_LLT_Smooth Residual:\t%5lu\t%.3e\n", (unsigned long)iter - 1, sqrt(discr / rp_norm));
+//    mul_matrix(xs, r);
+//    for(size_t i = 0; i < n; i++)
+//        r[i] = rp[i] - r[i];
+//    discr = dot_prod_self(r);
+//    printf("COCG_LLT_Smooth Residual:\t%5lu\t%.3e\n", (unsigned long)iter - 1, sqrt(discr / rp_norm));
 
-    if(iter >= max_iter)
-        printf("Soulution can`t found, iteration limit exceeded!\n");
+//    if(iter >= max_iter)
+//        printf("Soulution can`t found, iteration limit exceeded!\n");
 
     for(size_t i = 0; i < n; i++)
         solution[i] = xs[i];
