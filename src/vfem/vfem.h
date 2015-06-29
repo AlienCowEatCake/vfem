@@ -70,8 +70,8 @@ public:
     void output(const string & tecplot_filename);
     // Вывод данных в 2D сетке
     void output_slice(const string & tecplot_filename, char slice_var, double slice_val,
-                      char var1, double min_var1, double max_var1, double step_var1,
-                      char var2, double min_var2, double max_var2, double step_var2);
+                      char var1, double min_var1, double max_var1, size_t num_var_1,
+                      char var2, double min_var2, double max_var2, size_t num_var_2);
 
     // Поиск конечного элемента по точке
     finite_element * get_fe(const point & p) const;

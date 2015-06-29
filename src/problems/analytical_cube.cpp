@@ -80,11 +80,11 @@ void postprocessing(VFEM & v, char * timebuf)
     MAYBE_UNUSED(timebuf);
 
     v.output_slice(string("analytical_cube_slice") + "_" + string(timebuf) + ".dat",
-                   'Y', 0.5, 'X', 0.0, 1.0 + 1e-10, 0.01, 'Z', 0.0, 1.0 + 1e-10, 0.01);
+                   'Y', 0.5, 'X', 0.0, 1.0, 100, 'Z', 0.0, 1.0, 100);
     v.calculate_diff();
 /*
     v.output_slice(string("analytical_cube_slice") + "_" + string(timebuf) + ".dat",
-                   'Y', 0.05, 'X', 0.0, 0.1, 0.005, 'Z', 0.0, 0.1, 0.005);
+                   'Y', 0.05, 'X', 0.0, 0.1, 200, 'Z', 0.0, 0.1, 200);
 
     cout << v.solution(point(0.01,0.01,0.01)) << endl;
 

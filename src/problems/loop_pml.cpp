@@ -127,7 +127,7 @@ void postprocessing(VFEM & v, char * timebuf)
     MAYBE_UNUSED(timebuf);
 #if !defined SMALL_MESH
     v.output_slice(string("loop_pml_slice") + "_" + string(timebuf) + ".dat",
-                   'Z', 0.0, 'X', -700, 700, 20.0, 'Y', -700, 700, 20.0);
+                   'Z', 0.0, 'X', -700, 700, 70, 'Y', -700, 700, 70);
 #if !defined VFEM_USE_PML
     v.slae.dump_x(slae_dump_filename);
 #else

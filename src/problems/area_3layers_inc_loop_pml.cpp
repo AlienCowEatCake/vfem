@@ -187,9 +187,9 @@ void postprocessing(VFEM & v, char * timebuf)
     MAYBE_UNUSED(v);
     MAYBE_UNUSED(timebuf);
     v.output_slice(string("area_3layers_inc_loop_pml_y=0") + "_" + string(timebuf) + ".dat",
-                   'Y', 0.0, 'X', -700, 700, 20.0, 'Z', -700, 700, 20.0);
+                   'Y', 0.0, 'X', -700, 700, 70, 'Z', -700, 700, 70);
     v.output_slice(string("area_3layers_inc_loop_pml_z=0") + "_" + string(timebuf) + ".dat",
-                   'Z', 0.0, 'X', -700, 700, 20.0, 'Y', -700, 700, 20.0);
+                   'Z', 0.0, 'X', -700, 700, 70, 'Y', -700, 700, 70);
 #if !defined VFEM_USE_PML
     v.slae.dump_x(slae_dump_filename);
 #else

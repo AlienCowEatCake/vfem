@@ -257,22 +257,22 @@ void postprocessing(VFEM & v, char * timebuf)
     MAYBE_UNUSED(timebuf);
 
 //    v.output_slice(string("area_2layers_loop_universal_pml_z=10") + "_" + string(timebuf) + ".dat",
-//                   'Z', 10.0, 'X', 600, 700, 20.0, 'Y', -700, 700, 20.0);
+//                   'Z', 10.0, 'X', 600, 700, 5, 'Y', -700, 700, 70);
 //    v.output_slice(string("area_2layers_loop_universal_pml_z=-10") + "_" + string(timebuf) + ".dat",
-//                   'Z', -10.0, 'X', 600, 700, 20.0, 'Y', -700, 700, 20.0);
+//                   'Z', -10.0, 'X', 600, 700, 5, 'Y', -700, 700, 70);
 //    v.output_slice(string("area_2layers_loop_universal_pml_z=50") + "_" + string(timebuf) + ".dat",
-//                   'Z', 50.0, 'X', 600, 700, 20.0, 'Y', -700, 700, 20.0);
+//                   'Z', 50.0, 'X', 600, 700, 5, 'Y', -700, 700, 70);
 //    v.output_slice(string("area_2layers_loop_universal_pml_z=-50") + "_" + string(timebuf) + ".dat",
-//                   'Z', -50.0, 'X', 600, 700, 20.0, 'Y', -700, 700, 20.0);
+//                   'Z', -50.0, 'X', 600, 700, 5, 'Y', -700, 700, 70);
 
 //    v.output_slice(string("area_2layers_loop_universal_pml_z=10") + "_" + string(timebuf) + ".dat",
-//                   'Z', 10.0, 'X', -700, 700, 5.0, 'Y', -700, 700, 5.0);
+//                   'Z', 10.0, 'X', -700, 700, 280, 'Y', -700, 700, 5.0);
 //    v.output_slice(string("area_2layers_loop_universal_pml_z=-10") + "_" + string(timebuf) + ".dat",
-//                   'Z', -10.0, 'X', -700, 700, 5.0, 'Y', -700, 700, 5.0);
+//                   'Z', -10.0, 'X', -700, 700, 280, 'Y', -700, 700, 5.0);
 //    v.output_slice(string("area_2layers_loop_universal_pml_z=50") + "_" + string(timebuf) + ".dat",
-//                   'Z', 50.0, 'X', -700, 700, 5.0, 'Y', -700, 700, 5.0);
+//                   'Z', 50.0, 'X', -700, 700, 280, 'Y', -700, 700, 5.0);
 //    v.output_slice(string("area_2layers_loop_universal_pml_z=-50") + "_" + string(timebuf) + ".dat",
-//                   'Z', -50.0, 'X', -700, 700, 5.0, 'Y', -700, 700, 5.0);
+//                   'Z', -50.0, 'X', -700, 700, 280, 'Y', -700, 700, 5.0);
 
 //    {
 //        double x = 650;
@@ -295,12 +295,12 @@ void postprocessing(VFEM & v, char * timebuf)
 
 #if !defined SMALL_MESH
     v.output_slice(string("area_2layers_loop_universal_pml") + "_" + string(timebuf) + ".dat",
-                   'Y', 0.0, 'X', -700, 700, 20.0, 'Z', -700, 700, 20.0);
+                   'Y', 0.0, 'X', -700, 700, 70, 'Z', -700, 700, 70);
 
     v.output_slice(string("area_2layers_loop_universal_pml_z=10") + "_" + string(timebuf) + ".dat",
-                   'Z', 10.0, 'X', -500, 500, 10.0, 'Y', -500, 500, 10.0);
+                   'Z', 10.0, 'X', -500, 500, 100, 'Y', -500, 500, 100);
     v.output_slice(string("area_2layers_loop_universal_pml_z=-10") + "_" + string(timebuf) + ".dat",
-                   'Z', -10.0, 'X', -500, 500, 10.0, 'Y', -500, 500, 10.0);
+                   'Z', -10.0, 'X', -500, 500, 100, 'Y', -500, 500, 100);
 
     double y = 0, z0 = 10, z1 = -10;
     size_t n = 65000;

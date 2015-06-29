@@ -21,7 +21,7 @@ void VFEM::output(const string & tecplot_filename)
     }
 
     tecplot_file.precision(17);
-    tecplot_file.setf(ios::fixed);
+    tecplot_file.setf(ios::scientific);
 
     size_t nodes_num = nodes.size();
     tecplot_file << "TITLE     = \"" << "Title" << "\" \n  VARIABLES = \"x\" \n \"y\" \n \"z\" \n \"ExR\" \n \"EyR\" \n \"EzR\" \n \"ExI\" \n \"EyI\" \n \"EzI\" \n \"abs(E)\"\n ";
@@ -64,89 +64,40 @@ void VFEM::output(const string & tecplot_filename)
 }
 
 void VFEM::output_slice(const string & tecplot_filename, char slice_var, double slice_val,
-                        char var1, double min_var1, double max_var1, double step_var1,
-                        char var2, double min_var2, double max_var2, double step_var2)
+                        char var1, double min_var1, double max_var1, size_t num_var_1,
+                        char var2, double min_var2, double max_var2, size_t num_var_2)
 {
     if(min_var1 > max_var1) swap(max_var1, min_var1);
     if(min_var2 > max_var2) swap(max_var2, min_var2);
 
-    double min_x = 0.0, max_x = 0.0, step_x = 0.0;
-    double min_y = 0.0, max_y = 0.0, step_y = 0.0;
-    double min_z = 0.0, max_z = 0.0, step_z = 0.0;
-    size_t nx = 0, ny = 0, nz = 0;
+    double step_var1 = (max_var1 - min_var1) / (double)(num_var_1 - 1);
+    double step_var2 = (max_var2 - min_var2) / (double)(num_var_2 - 1);
+    size_t index_slice = 0, index_1 = 0, index_2 = 0;
 
-    if(slice_var == 'x' || slice_var == 'X')
-    {
-        min_x = max_x = slice_val;
-        nx = 0;
-        step_x = 0.0;
-    }
-    else if (slice_var == 'y' || slice_var == 'Y')
-    {
-        min_y = max_y = slice_val;
-        ny = 0;
-        step_y = 0.0;
-    }
-    else if (slice_var == 'z' || slice_var == 'Z')
-    {
-        min_z = max_z = slice_val;
-        nz = 0;
-        step_z = 0.0;
-    }
+    // Определяем по какой переменной сечение
+    if      (slice_var == 'x' || slice_var == 'X') index_slice = 0;
+    else if (slice_var == 'y' || slice_var == 'Y') index_slice = 1;
+    else if (slice_var == 'z' || slice_var == 'Z') index_slice = 2;
     else
     {
         cerr << "Unknown variable, breaking ..." << endl;
         return;
     }
 
-    if(var1 == 'x' || var1 == 'X')
-    {
-        min_x = min_var1;
-        max_x = max_var1;
-        step_x = step_var1;
-        nx = (size_t)((max_var1 - min_var1) / step_var1);
-    }
-    else if (var1 == 'y' || var1 == 'Y')
-    {
-        min_y = min_var1;
-        max_y = max_var1;
-        step_y = step_var1;
-        ny = (size_t)((max_var1 - min_var1) / step_var1);
-    }
-    else if (var1 == 'z' || var1 == 'Z')
-    {
-        min_z = min_var1;
-        max_z = max_var1;
-        step_z = step_var1;
-        nz = (size_t)((max_var1 - min_var1) / step_var1);
-    }
+    // Определяем, какая переменная первая
+    if      (var1 == 'x' || var1 == 'X') index_1 = 0;
+    else if (var1 == 'y' || var1 == 'Y') index_1 = 1;
+    else if (var1 == 'z' || var1 == 'Z') index_1 = 2;
     else
     {
         cerr << "Unknown variable, breaking ..." << endl;
         return;
     }
 
-    if(var2 == 'x' || var2 == 'X')
-    {
-        min_x = min_var2;
-        max_x = max_var2;
-        step_x = step_var2;
-        nx = (size_t)((max_var2 - min_var2) / step_var2);
-    }
-    else if (var2 == 'y' || var2 == 'Y')
-    {
-        min_y = min_var2;
-        max_y = max_var2;
-        step_y = step_var2;
-        ny = (size_t)((max_var2 - min_var2) / step_var2);
-    }
-    else if (var2 == 'z' || var2 == 'Z')
-    {
-        min_z = min_var2;
-        max_z = max_var2;
-        step_z = step_var2;
-        nz = (size_t)((max_var2 - min_var2) / step_var2);
-    }
+    // Определяем, какая переменная вторая
+    if      (var2 == 'x' || var2 == 'X') index_2 = 0;
+    else if (var2 == 'y' || var2 == 'Y') index_2 = 1;
+    else if (var2 == 'z' || var2 == 'Z') index_2 = 2;
     else
     {
         cerr << "Unknown variable, breaking ..." << endl;
@@ -166,27 +117,27 @@ void VFEM::output_slice(const string & tecplot_filename, char slice_var, double 
     }
 
     tecplot_file << "TITLE = \"Slice " << slice_var << " = " << slice_val << "\"\n";
-    tecplot_file << "VARIABLES = \"x\", \"y\", \"z\", \"ExR\", \"EyR\", \"EzR\", \"ExI\", \"EyI\", \"EzI\", \"abs(E)\"\n";
-    tecplot_file << "ZONE I= " << nx + 1 << ", J= " << ny + 1 << ", K= " << nz + 1 << ", F=POINT\n";
+    tecplot_file << "VARIABLES = \"" << var1 <<"\", \"" << var2 << "\", \"ExR\", \"EyR\", \"EzR\", \"ExI\", \"EyI\", \"EzI\", \"abs(E)\"\n";
+    tecplot_file << "ZONE I= " << num_var_1 << ", J= " << num_var_2 << ", F=POINT\n";
 
     tecplot_file.precision(17);
     tecplot_file.setf(ios::scientific);
 
-    for(size_t i = 0; i <= nz; i++)
+    point p(0, 0, 0);
+    p[index_slice] = slice_val;
+    for(size_t i = 0; i < num_var_1; i++)
     {
-        double z = min_z + step_z * (double)i;
-        for(size_t j = 0; j <= ny; j++)
+        double v1 = min_var1 + step_var1 * (double)i;
+        for(size_t j = 0; j < num_var_2; j++)
         {
-            double y = min_y + step_y * (double)j;
-            for(size_t k = 0; k <= nx; k++)
-            {
-                double x = min_x + step_x * (double)k;
-                cvector3 sol = solution(point(x, y, z));
-                tecplot_file << x << " " << y << " " << z << " "
-                             << sol.x.real() << " " << sol.y.real() << " " << sol.z.real() << " "
-                             << sol.x.imag() << " " << sol.y.imag() << " " << sol.z.imag() << " "
-                             << sol.norm() << "\n";
-            }
+            double v2 = min_var2 + step_var2 * (double)j;
+            p[index_1] = v1;
+            p[index_2] = v2;
+            cvector3 sol = solution(p);
+            tecplot_file << v1 << " " << v2 << " "
+                         << sol.x.real() << " " << sol.y.real() << " " << sol.z.real() << " "
+                         << sol.x.imag() << " " << sol.y.imag() << " " << sol.z.imag() << " "
+                         << sol.norm() << "\n";
         }
     }
 

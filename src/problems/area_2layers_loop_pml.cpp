@@ -164,7 +164,7 @@ void postprocessing(VFEM & v, char * timebuf)
     MAYBE_UNUSED(v);
     MAYBE_UNUSED(timebuf);
     v.output_slice(string("area_2layers_loop_pml") + "_" + string(timebuf) + ".dat",
-                   'Y', 0.0, 'X', -700, 700, 20.0, 'Z', -700, 700, 20.0);
+                   'Y', 0.0, 'X', -700, 700, 70, 'Z', -700, 700, 70);
 
     double x = 100.0, y = 0;
     size_t n = 65000;
@@ -185,13 +185,13 @@ void postprocessing(VFEM & v, char * timebuf)
     ff.close();
 
 //    v.output_slice(string("area_2layers_loop_pml_xy") + "_" + string(timebuf) + ".dat",
-//                   'Z', 0.0, 'X', -700, 700, 20.0, 'Y', -700, 700, 20.0);
+//                   'Z', 0.0, 'X', -700, 700, 70, 'Y', -700, 700, 70);
 //    v.output_slice(string("area_2layers_loop_pml_xz") + "_" + string(timebuf) + ".dat",
-//                   'Y', 0.0, 'X', -700, 700, 20.0, 'Z', -700, 700, 20.0);
+//                   'Y', 0.0, 'X', -700, 700, 70, 'Z', -700, 700, 70);
 //    v.output_slice(string("area_2layers_loop_pml_xz1") + "_" + string(timebuf) + ".dat",
-//                   'Y', 10.0, 'X', -700, 700, 20.0, 'Z', -700, 700, 20.0);
+//                   'Y', 10.0, 'X', -700, 700, 70, 'Z', -700, 700, 70);
 //    v.output_slice(string("area_2layers_loop_pml_xz2") + "_" + string(timebuf) + ".dat",
-//                   'Y', 80.0, 'X', -700, 700, 20.0, 'Z', -700, 700, 20.0);
+//                   'Y', 80.0, 'X', -700, 700, 70, 'Z', -700, 700, 70);
 #if !defined VFEM_USE_PML
     v.slae.dump_x(slae_dump_filename);
 #else
