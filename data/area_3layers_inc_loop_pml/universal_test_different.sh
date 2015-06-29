@@ -12,7 +12,7 @@ function calc {
 
 cd "${CURR_DIR}"
 mkdir -p "${RESULT_DIR}/${MESH_DIR}"
-cp -a "${CURR_DIR}/${MESH_DIR}/*.geo" "${CURR_DIR}/${MESH_DIR}/*.txt" "${CURR_DIR}/${RESULT_DIR}/${MESH_DIR}/"
+cp -a "${CURR_DIR}/${MESH_DIR}/"*.geo "${CURR_DIR}/${MESH_DIR}/"*.txt "${CURR_DIR}/${RESULT_DIR}/${MESH_DIR}/"
 cd "${CURR_DIR}/${RESULT_DIR}/${MESH_DIR}"
 
 cat "${INP_FILE}" | sed "s/PML_BEGIN/${PML_BEGIN}/g ; s/PML_WIDTH/${PML_WIDTH}/g" |
