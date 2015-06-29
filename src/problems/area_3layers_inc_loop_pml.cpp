@@ -174,7 +174,7 @@ cvector3 get_s(const point & p, const finite_element * fe, const phys_pml_area *
 string tecplot_filename = "area_3layers_inc_loop_pml.plt";
 string phys_filename_pml = "data/area_3layers_inc_loop_pml/1.txt";
 string phys_filename_nonpml = "data/area_3layers_inc_loop_pml/2.txt";
-string mesh_filename = "data/area_3layers_inc_loop_pml/mesh3_inc_z=5.msh";
+string mesh_filename = "data/area_3layers_inc_loop_pml/mesh3_inc_z=-5.msh";
 #if defined VFEM_USE_PML
 string phys_filename = phys_filename_pml;
 #else

@@ -1,9 +1,9 @@
 // 2D mesh algorithm (1=MeshAdapt, 2=Automatic, 5=Delaunay, 6=Frontal, 7=bamg, 8=delquad)
 // Default value: 2
-Mesh.Algorithm = 6;
+//Mesh.Algorithm = 6;
 // 3D mesh algorithm (1=Delaunay, 4=Frontal, 5=Frontal Delaunay, 6=Frontal Hex, 7=MMG3D, 9=R-tree)
 // Default value: 1
-Mesh.Algorithm3D = 4;
+//Mesh.Algorithm3D = 4;
 
 x0 = 50;
 x1 = 280;
