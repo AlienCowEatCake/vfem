@@ -404,9 +404,13 @@ void VFEM::input_mesh(const string & gmsh_filename)
         // Заполняем степени свободы
         for(size_t j = 0; j < 6; j++)
             fes[i].dof[j] = fes[i].edges[j]->num;
+        for(size_t j = 0; j < 4; j++)
+            fes[i].ker_dof[j] = fes[i].nodes[j]->num;
 #if BASIS_ORDER >= 2 || BASIS_TYPE == 2
         for(size_t j = 0; j < 6; j++)
             fes[i].dof[j + 6] = fes[i].edges[j]->num + edges.size();
+        for(size_t j = 0; j < 6; j++)
+            fes[i].ker_dof[j + 4] = fes[i].edges[j]->num + nodes.size();
 #endif
 #if BASIS_ORDER >= 2
         for(size_t j = 0; j < 4; j++)
@@ -419,6 +423,10 @@ void VFEM::input_mesh(const string & gmsh_filename)
             fes[i].dof[j + 20] = fes[i].faces[j]->num + 2 * edges.size() + 2 * faces.size();
         for(size_t j = 0; j < 6; j++)
             fes[i].dof[j + 24] = fes[i].edges[j]->num + 2 * edges.size() + 3 * faces.size();
+        for(size_t j = 0; j < 4; j++)
+            fes[i].ker_dof[j + 10] = fes[i].faces[j]->num + edges.size() + nodes.size();
+        for(size_t j = 0; j < 6; j++)
+            fes[i].ker_dof[j + 14] = fes[i].edges[j]->num + faces.size() + edges.size() + nodes.size();;
 #endif
         // Инициализируем
         fes[i].init();
@@ -443,6 +451,8 @@ void VFEM::input_mesh(const string & gmsh_filename)
         // Первый неполный
         for(size_t j = 0; j < 3; j++)
             trs[i].dof[j] = trs[i].edges[j]->num;
+        for(size_t j = 0; j < 3; j++)
+            trs[i].ker_dof[j] = trs[i].nodes[j]->num;
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
         if(trs[i].phys->type_of_bounds == 1)
             for(size_t j = 0; j < 3; j++)
@@ -452,6 +462,8 @@ void VFEM::input_mesh(const string & gmsh_filename)
 #if BASIS_ORDER >= 2 || BASIS_TYPE == 2
         for(size_t j = 0; j < 3; j++)
             trs[i].dof[j + 3] = trs[i].edges[j]->num + edges.size();
+        for(size_t j = 0; j < 3; j++)
+            trs[i].ker_dof[j + 3] = trs[i].edges[j]->num + nodes.size();
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
         if(trs[i].phys->type_of_bounds == 1)
             for(size_t j = 0; j < 3; j++)
@@ -475,6 +487,9 @@ void VFEM::input_mesh(const string & gmsh_filename)
         trs[i].dof[8] = trs[i].faces->num + 2 * edges.size() + 2 * faces.size();
         for(size_t j = 0; j < 3; j++)
             trs[i].dof[j + 9] = trs[i].edges[j]->num + 2 * edges.size() + 3 * faces.size();
+        trs[i].ker_dof[6] = trs[i].faces->num + edges.size() + nodes.size();
+        for(size_t j = 0; j < 3; j++)
+            trs[i].ker_dof[j + 7] = trs[i].edges[j]->num + edges.size() + faces.size() + nodes.size();
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
         if(trs[i].phys->type_of_bounds == 1)
         {
@@ -496,6 +511,9 @@ void VFEM::input_mesh(const string & gmsh_filename)
             for(size_t j = 0; j < basis::tr_bf_num; j++)
                 dof_first.insert(trs[i].dof[j]);
 #endif
+        if(trs[i].phys->type_of_bounds == 1)
+            for(size_t j = 0; j < basis::tr_ker_bf_num; j++)
+                ker_dof_first.insert(trs[i].ker_dof[j]);
     }
 
     cout << " > Building tree ..." << endl;
@@ -527,15 +545,19 @@ void VFEM::input_mesh(const string & gmsh_filename)
 
 #if BASIS_ORDER == 1 && BASIS_TYPE == 1
     dof_num = edges.size();
+    ker_dof_num = nodes.size();
 #endif
 #if BASIS_ORDER == 1 && BASIS_TYPE == 2
     dof_num = 2 * edges.size();
+    ker_dof_num = nodes.size() + edges.size();
 #endif
 #if BASIS_ORDER == 2 && BASIS_TYPE == 1
     dof_num = 2 * edges.size() + 2 * faces.size();
+    ker_dof_num = nodes.size() + edges.size();
 #endif
 #if BASIS_ORDER == 2 && BASIS_TYPE == 2
     dof_num = 3 * edges.size() + 3 * faces.size();
+    ker_dof_num = nodes.size() + 2 * edges.size() + faces.size();
 #endif
 
     cout << "Statistics:" << endl;
@@ -546,6 +568,7 @@ void VFEM::input_mesh(const string & gmsh_filename)
     cout << " # Faces:        " << faces.size() << endl;
 #endif
     cout << " # SLAE size:    " << dof_num << endl;
+    cout << " # SLAE ker:     " << ker_dof_num << endl;
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
     cout << " # SLAE surf:    " << global_to_local.size() << endl;
 #endif

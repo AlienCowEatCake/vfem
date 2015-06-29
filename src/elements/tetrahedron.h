@@ -32,11 +32,14 @@ public:
     const phys_area & get_phys_area() const;
 
     size_t dof[basis::tet_bf_num];
+    size_t ker_dof[basis::tet_ker_bf_num];
 
     // Базисные функции
     vector3 w(size_t i, const point & p) const;
     // Роторы базисных функций
     vector3 rotw(size_t i, const point & p) const;
+    // Базисные функции ядра
+    vector3 kerw(size_t i, const point & p) const;
 
     point barycenter;
 
@@ -74,6 +77,8 @@ public:
     matrix_t<double, basis::tet_bf_num, basis::tet_bf_num> M() const;
     // Локальная правая часть
     array_t<complex<double>, basis::tet_bf_num> rp(cvector3(*func)(const point & , const phys_area &)) const;
+    // Локальная матрица ядра
+    matrix_t<double, basis::tet_ker_bf_num, basis::tet_ker_bf_num> K() const;
 
 protected:
     // Интеграл от бф
@@ -81,6 +86,8 @@ protected:
     // Интеграл от ротора бф
     double integrate_rotw(size_t i, size_t j) const;
     complex<double> integrate_fw(cvector3(*func)(const point & , const phys_area &), size_t i) const;
+    // Интегралы от базисных функций ядра
+    double integrate_kerw(size_t i, size_t j) const;
 };
 
 // Класс тетраэдр (для работы с PML-краевыми)
@@ -95,6 +102,8 @@ public:
     matrix_t<complex<double>, basis::tet_bf_num, basis::tet_bf_num> M() const;
     // Локальная правая часть
     array_t<complex<double>, basis::tet_bf_num> rp(cvector3(*func)(const point & , const phys_area &)) const;
+    // Локальная матрица ядра
+    matrix_t<complex<double>, basis::tet_ker_bf_num, basis::tet_ker_bf_num> K() const;
 
 protected:
     cvector3(* get_s)(const point &, const tetrahedron_pml *, const phys_pml_area *);
@@ -116,12 +125,16 @@ protected:
     cvector3 w_pml(size_t i, const cpoint & p) const;
     // Роторы базисных функций (в PML)
     cvector3 rotw_pml(size_t i, const cpoint & p, const point & p_non_PML) const;
+    // Базисные функции ядра (в PML)
+    cvector3 kerw_pml(size_t i, const cpoint & p, const point & p_non_PML) const;
 
     // Интеграл от бф
     complex<double> integrate_w(size_t i, size_t j) const;
     // Интеграл от ротора бф
     complex<double> integrate_rotw(size_t i, size_t j) const;
     complex<double> integrate_fw(cvector3(*func)(const point & , const phys_area &), size_t i) const;
+    // Интегралы от базисных функций ядра
+    complex<double> integrate_kerw(size_t i, size_t j) const;
 };
 
 #endif // TETRAHEDRON_H_INCLUDED

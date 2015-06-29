@@ -19,7 +19,9 @@
 namespace basis
 {
     static const size_t tet_bf_num = 6;
+    static const size_t tet_ker_bf_num = 4;
     static const size_t tr_bf_num = 3;
+    static const size_t tr_ker_bf_num = 3;
 }
 #endif
 
@@ -29,7 +31,9 @@ namespace basis
 namespace basis
 {
     static const size_t tet_bf_num = 12;
+    static const size_t tet_ker_bf_num = 10;
     static const size_t tr_bf_num = 6;
+    static const size_t tr_ker_bf_num = 6;
 }
 #endif
 
@@ -39,7 +43,9 @@ namespace basis
 namespace basis
 {
     static const size_t tet_bf_num = 20;
+    static const size_t tet_ker_bf_num = 10;
     static const size_t tr_bf_num = 8;
+    static const size_t tr_ker_bf_num = 6;
 }
 #endif
 
@@ -49,7 +55,9 @@ namespace basis
 namespace basis
 {
     static const size_t tet_bf_num = 30;
+    static const size_t tet_ker_bf_num = 20;
     static const size_t tr_bf_num = 12;
+    static const size_t tr_ker_bf_num = 10;
 }
 #endif
 

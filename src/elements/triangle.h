@@ -29,6 +29,7 @@ public:
     const phys_area & get_phys_area() const;
 
     size_t dof[basis::tr_bf_num];
+    size_t ker_dof[basis::tr_ker_bf_num];
 };
 
 // Класс треугольник (полный, для работы с первыми неоднородными краевыми)

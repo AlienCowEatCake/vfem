@@ -14,16 +14,18 @@
 #include "../vfem/phys.h"
 #include "../vfem/slae.h"
 
-#define VFEM_USE_PML
-//#define VFEM_USE_NONHOMOGENEOUS_FIRST
-//#define VFEM_USE_ANALYTICAL
+//#define VFEM_USE_PML
+#define VFEM_USE_NONHOMOGENEOUS_FIRST
+#define VFEM_USE_ANALYTICAL
 
 #if defined VFEM_USE_PML
 typedef tetrahedron_pml finite_element;
 typedef matrix_t<complex<double>, basis::tet_bf_num, basis::tet_bf_num> l_matrix;
+typedef matrix_t<complex<double>, basis::tet_ker_bf_num, basis::tet_ker_bf_num> ker_l_matrix;
 #else
 typedef tetrahedron finite_element;
 typedef matrix_t<double, basis::tet_bf_num, basis::tet_bf_num> l_matrix;
+typedef matrix_t<double, basis::tet_ker_bf_num, basis::tet_ker_bf_num> ker_l_matrix;
 #endif
 
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
@@ -92,6 +94,8 @@ public:
 
     // Основная СЛАУ
     SLAE slae;
+    // СЛАУ на ядре
+    SLAE ker_slae;
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
     // СЛАУ по границе
     SLAE surf_slae;
@@ -123,6 +127,8 @@ protected:
 
     // Число степеней свободы
     size_t dof_num;
+    // Число степеней свободы ядра
+    size_t ker_dof_num;
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
     // Соответствие глобальных степеней свободы и по границе
     map<size_t, size_t> global_to_local;
@@ -130,11 +136,15 @@ protected:
     // Степени свободы с первыми краевыми
     set<size_t> dof_first;
 #endif
+    // Степени свободы с первыми краевыми у ядра
+    set<size_t> ker_dof_first;
     // Восьмиричное дерево поиска
     octal_tree<finite_element> tree;
 
     // Генерация портрета глобальной матрицы
     void generate_portrait();
+    // Генерация портрета глобальной матрицы ядра
+    void generate_ker_portrait();
     // Сборка глобальной матрицы
     void assemble_matrix();
     // Применение краевых условий
@@ -154,6 +164,17 @@ protected:
     // Параметры PML
     phys_pml_area phys_pml;
 #endif
+
+    // Проектирование на пространство ядра
+    void to_kernel_space(const complex<double> * in, complex<double> * out) const;
+    // Интерполяция на полное пространство
+    void to_full_space(const complex<double> * in, complex<double> * out) const;
+    // Скалярное произведение
+    double dot_prod_self(const complex<double> * a) const;
+    // Умножение матрицы с полного пространства на вектор
+    void mul_matrix(const complex<double> * f, complex<double> * x) const;
+    // Подсчет невязки
+    void calc_residual(const complex<double> * x0, complex<double> * p) const;
 };
 
 #endif // VFEM_H_INCLUDED
