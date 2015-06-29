@@ -5,6 +5,8 @@
 #error "Please, reconfigure!"
 #endif
 
+//#define SMALL_MESH
+
 double SLAE_MAIN_EPSILON = 1e-10;
 
 cvector3 func_rp(const point & p, const phys_area & phys)
@@ -23,103 +25,156 @@ bool is_pml(const point & p, const finite_element * fe)
     return false;
 }
 
+class pml_config
+{
+public:
+    double begin;
+    double width;
+    complex<double> chi_air;
+    complex<double> chi_water;
+    complex<double> chi_ground;
+    double m;
+    pml_config()
+    {
+        begin = 600.0;
+        width = 100.0;
+        chi_air.real(5.0);
+        chi_air.imag(0.0);
+        chi_water.real(0.0);
+        chi_water.imag(7.0);
+        chi_ground.real(2.0);
+        chi_ground.imag(2.0);
+        m = 3.0;
+#if defined VFEM_USE_PML
+        load();
+#endif
+    }
+    void load()
+    {
+        ifstream ifs;
+        string name;
+        double tmp, tmp2;
+
+        name = "pml_chi_air.txt";
+        ifs.open(name.c_str(), ios::in);
+        ifs >> tmp >> tmp2;
+        if(!ifs.good())
+        {
+            cerr << "Error in " << __FILE__ << ":" << __LINE__
+                 << " while reading file " << name << endl;
+            //throw IO_FILE_ERROR;
+        }
+        else
+        {
+            chi_air.real(tmp);
+            chi_air.imag(tmp2);
+        }
+        ifs.close();
+
+        name = "pml_chi_water.txt";
+        ifs.open(name.c_str(), ios::in);
+        ifs >> tmp >> tmp2;
+        if(!ifs.good())
+        {
+            cerr << "Error in " << __FILE__ << ":" << __LINE__
+                 << " while reading file " << name << endl;
+            //throw IO_FILE_ERROR;
+        }
+        else
+        {
+            chi_water.real(tmp);
+            chi_water.imag(tmp2);
+        }
+        ifs.close();
+
+        name = "pml_chi_ground.txt";
+        ifs.open(name.c_str(), ios::in);
+        ifs >> tmp >> tmp2;
+        if(!ifs.good())
+        {
+            cerr << "Error in " << __FILE__ << ":" << __LINE__
+                 << " while reading file " << name << endl;
+            //throw IO_FILE_ERROR;
+        }
+        else
+        {
+            chi_ground.real(tmp);
+            chi_ground.imag(tmp2);
+        }
+        ifs.close();
+
+        name = "pml_m.txt";
+        ifs.open(name.c_str(), ios::in);
+        ifs >> tmp;
+        if(!ifs.good())
+        {
+            cerr << "Error in " << __FILE__ << ":" << __LINE__
+                 << " while reading file " << name << endl;
+            //throw IO_FILE_ERROR;
+        }
+        else
+            m = tmp;
+        ifs.close();
+
+        name = "pml_begin.txt";
+        ifs.open(name.c_str(), ios::in);
+        ifs >> tmp;
+        if(!ifs.good())
+        {
+            cerr << "Error in " << __FILE__ << ":" << __LINE__
+                 << " while reading file " << name << endl;
+            //throw IO_FILE_ERROR;
+        }
+        else
+            begin = tmp;
+        ifs.close();
+
+        name = "pml_width.txt";
+        ifs.open(name.c_str(), ios::in);
+        ifs >> tmp;
+        if(!ifs.good())
+        {
+            cerr << "Error in " << __FILE__ << ":" << __LINE__
+                 << " while reading file " << name << endl;
+            //throw IO_FILE_ERROR;
+        }
+        else
+            width = tmp;
+        ifs.close();
+    }
+};
+
+// Все данные будем читать из конфига
+static pml_config config;
+
 cvector3 get_s(const point & p, const finite_element * fe, const phys_pml_area * phys_pml)
 {
     if(!is_pml(p, fe))
         return cvector3(1.0, 1.0, 1.0);
 
     /// Нефиг пост-PML растягивать!
-    if(fabs(p.x) > 701.0 || fabs(p.y) > 701.0 || fabs(p.z) > 701.0)
+    if(fabs(p.x) > config.begin + config.width + 1.0 || fabs(p.y) > config.begin + config.width + 1.0 || fabs(p.z) > config.begin + config.width + 1.0)
         return cvector3(1.0, 1.0, 1.0);
 
-    double m = 3;
-    complex<double> chi(4, 3);
+    double m = config.m;
+    complex<double> chi = config.chi_air;
 
     // Воздух
-    if(fe->phys->gmsh_num == 21 || fe->phys->gmsh_num == 31)
-    {
-        double m_air = 3;
-        complex<double> chi_air(4, 0);
-/*
-        static complex<double> chi_air(-1, -1);
-        if(chi_air.real() < 0)
-        {
-            ifstream chi_st;
-            char chi_name[] = "chi_air.txt";
-            chi_st.open(chi_name, ios::in);
-            if(!chi_st.good())
-            {
-                cerr << "Error in " << __FILE__ << ":" << __LINE__
-                     << " while reading file " << chi_name << endl;
-                throw IO_FILE_ERROR;
-            }
-            double chi_re, chi_im;
-            chi_st >> chi_re >> chi_im;
-            chi_air = complex<double>(chi_re, chi_im);
-            chi_st.close();
-        }
-*/
-        m = m_air;
-        chi = chi_air;
-    }
+    if(fe->phys->gmsh_num % 10 == 1)
+        chi = config.chi_air;
     // Вода
-    if(fe->phys->gmsh_num == 22 || fe->phys->gmsh_num == 32)
-    {
-        double m_water = 3;
-        complex<double> chi_water(1, 7);
-/*
-        static complex<double> chi_water(-1, -1);
-        if(chi_water.real() < 0)
-        {
-            ifstream chi_st;
-            char chi_name[] = "chi_water.txt";
-            chi_st.open(chi_name, ios::in);
-            if(!chi_st.good())
-            {
-                cerr << "Error in " << __FILE__ << ":" << __LINE__
-                     << " while reading file " << chi_name << endl;
-                throw IO_FILE_ERROR;
-            }
-            double chi_re, chi_im;
-            chi_st >> chi_re >> chi_im;
-            chi_water = complex<double>(chi_re, chi_im);
-            chi_st.close();
-        }
-*/
-        m = m_water;
-        chi = chi_water;
-    }
-    // Грунт
-    if(fe->phys->gmsh_num == 23 || fe->phys->gmsh_num == 33)
-    {
-        double m_ground = 3;
-        complex<double> chi_ground(2, 2);
-/*
-        static complex<double> chi_ground(-1, -1);
-        if(chi_ground.real() < 0)
-        {
-            ifstream chi_st;
-            char chi_name[] = "chi_ground.txt";
-            chi_st.open(chi_name, ios::in);
-            if(!chi_st.good())
-            {
-                cerr << "Error in " << __FILE__ << ":" << __LINE__
-                     << " while reading file " << chi_name << endl;
-                throw IO_FILE_ERROR;
-            }
-            double chi_re, chi_im;
-            chi_st >> chi_re >> chi_im;
-            chi_ground = complex<double>(chi_re, chi_im);
-            chi_st.close();
-        }
-*/
-        m = m_ground;
-        chi = chi_ground;
-    }
+    else if(fe->phys->gmsh_num % 10 == 2)
+        chi = config.chi_water;
+    // Земля
+    else if(fe->phys->gmsh_num % 10 == 3)
+        chi = config.chi_ground;
+    // Где я? о_О
+    else
+        return cvector3(1.0, 1.0, 1.0);
 
-    double pml_thickness_x = 100.0;
-    double pml_thickness_y = 100.0;
-    double pml_thickness_z = 100.0;
+    double pml_thickness_x = config.width;
+    double pml_thickness_y = config.width;
+    double pml_thickness_z = config.width;
 
     double pml_distance_x = 0;
     double pml_distance_y = 0;
@@ -174,7 +229,12 @@ cvector3 get_s(const point & p, const finite_element * fe, const phys_pml_area *
 string tecplot_filename = "area_3layers_inc_loop_pml.plt";
 string phys_filename_pml = "data/area_3layers_inc_loop_pml/1.txt";
 string phys_filename_nonpml = "data/area_3layers_inc_loop_pml/2.txt";
-string mesh_filename = "data/area_3layers_inc_loop_pml/mesh3_inc_z=-5.msh";
+#if !defined SMALL_MESH
+//string mesh_filename = "data/area_3layers_inc_loop_pml/mesh3_inc_z=-5.msh";
+string mesh_filename = "data/area_3layers_inc_loop_pml/autogen_mesh3_inc_z=-5_full.msh";
+#else
+string mesh_filename = "data/area_3layers_inc_loop_pml/autogen_mesh3_inc_z=-5_small.msh";
+#endif
 #if defined VFEM_USE_PML
 string phys_filename = phys_filename_pml;
 #else
@@ -184,12 +244,22 @@ string slae_dump_filename = "area_3layers_inc_loop_pml_slae.txt";
 
 void postprocessing(VFEM & v, char * timebuf)
 {
+#if defined SMALL_MESH
+    return;
+#endif
+
     MAYBE_UNUSED(v);
     MAYBE_UNUSED(timebuf);
     v.output_slice(string("area_3layers_inc_loop_pml_y=0") + "_" + string(timebuf) + ".dat",
                    'Y', 0.0, 'X', -700, 700, 70, 'Z', -700, 700, 70);
     v.output_slice(string("area_3layers_inc_loop_pml_z=0") + "_" + string(timebuf) + ".dat",
                    'Z', 0.0, 'X', -700, 700, 70, 'Y', -700, 700, 70);
+
+    v.output_slice(string("area_3layers_inc_loop_pml_z=10") + "_" + string(timebuf) + ".dat",
+                   'Z', 10.0, 'X', -700, 700, 100, 'Y', -700, 700, 100);
+    v.output_slice(string("area_3layers_inc_loop_pml_z=-10") + "_" + string(timebuf) + ".dat",
+                   'Z', -10.0, 'X', -700, 700, 100, 'Y', -700, 700, 100);
+
 #if !defined VFEM_USE_PML
     v.slae.dump_x(slae_dump_filename);
 #else

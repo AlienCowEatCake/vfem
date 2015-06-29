@@ -14,9 +14,9 @@
 #include "../vfem/phys.h"
 #include "../vfem/slae.h"
 
-//#define VFEM_USE_PML
-#define VFEM_USE_NONHOMOGENEOUS_FIRST
-#define VFEM_USE_ANALYTICAL
+#define VFEM_USE_PML
+//#define VFEM_USE_NONHOMOGENEOUS_FIRST
+//#define VFEM_USE_ANALYTICAL
 
 #if defined VFEM_USE_PML
 typedef tetrahedron_pml finite_element;
