@@ -44,4 +44,17 @@ cat out_pml.txt | grep Residual | tail -1 ; \
 cat out_pml_small.txt | grep "Solve time" ; \
 cat out_pml.txt | grep Diff
 
+================================================================================
+
+for i in `find . -name out_pml.txt`
+do
+  echo -n "${i}" | sed 's/.*begin=//g ; s/_width=/ /g ; s/_chi-air=(/ /g ; s/)_chi-water=(/ /g ; s/)_chi-ground=(/ /g ; s/)_m=/ /g ; s/\/.*/ /g ; s/,/ /g'
+  cat "${i}" | grep 'Diff (L2)' | sed 's/.* //g'
+done
+
+for i in `find . -name out_pml_small.txt`
+do
+  echo -n "${i}" | sed 's/.*begin=//g ; s/_width=/ /g ; s/_chi-air=(/ /g ; s/)_chi-water=(/ /g ; s/)_chi-ground=(/ /g ; s/)_m=/ /g ; s/\/.*/ /g ; s/,/ /g'
+  cat "${i}" | grep 'Solve time:' | sed 's/.*\t//g'
+done
 
