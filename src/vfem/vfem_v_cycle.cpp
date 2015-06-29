@@ -134,7 +134,7 @@ void VFEM::solve()
     complex<double> * y = new complex<double> [dof_num];
 
     size_t iter;
-    for(iter = 0; iter < max_iter; iter++)
+    for(iter = 1; iter < max_iter; iter++)
     {
         // g = Pr
         to_kernel_space(r, g);
