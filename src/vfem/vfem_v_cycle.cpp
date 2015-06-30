@@ -112,16 +112,21 @@ void VFEM::solve()
     //slae.solve(SLAE_MAIN_EPSILON);
     //return;
 
-    size_t max_iter = 1000;
+    double eps = SLAE_MAIN_EPSILON;
     double gamma0       = 0.1;
     double gamma_full   = 0.5;
     double gamma_ker    = 0.1;
+    // V-цикл должен сойтись максимум за log(eps) / log(gamma_full)
+    // Но дадим ему небольшую фору на всякие погрешности и прочее
+    size_t max_iter = (size_t)(log(eps) / log(gamma_full) * 1.5);
+    // Локальное число итераций обычно небольшое
+    size_t max_iter_local = 100;//(size_t)sqrt((double)slae.n);
 
     slae.inline_init();
     ker_slae.inline_init();
 
     // Уточнение начального приближения на полном пространстве
-    slae.inline_solve(slae.x, slae.rp, gamma0);
+    slae.inline_solve(slae.x, slae.rp, gamma0, max_iter_local);
     printf("\n");
 
     double rp_norm2 = dot_prod_self(slae.rp);
@@ -134,6 +139,8 @@ void VFEM::solve()
     complex<double> * y = new complex<double> [dof_num];
 
     size_t iter;
+    double res, res_prev;
+    res = res_prev = sqrt(dot_prod_self(r) / rp_norm2);
     for(iter = 1; iter < max_iter; iter++)
     {
         // g = Pr
@@ -145,7 +152,7 @@ void VFEM::solve()
 
         // z = (PAPt)^-1 g или z = solve1(PAPt, g)
         for(size_t i = 0; i < ker_dof_num; i++) ker_slae.x[i] = 0.0;
-        ker_slae.inline_solve(ker_slae.x, g, gamma_ker);
+        ker_slae.inline_solve(ker_slae.x, g, gamma_ker, max_iter_local);
 
         // Уточнение на градиентном пространсте
         // x = x + Ptz
@@ -168,7 +175,7 @@ void VFEM::solve()
 
         // y = solve2(A, r)
         for(size_t i = 0; i < dof_num; i++) y[i] = 0.0;
-        slae.inline_solve(y, r, gamma_full);
+        slae.inline_solve(y, r, gamma_full, max_iter_local);
 
         //Уточненение на всём пространстве
         // x = x + y
@@ -177,15 +184,18 @@ void VFEM::solve()
 
         // r = b - Ax
         calc_residual(slae.x, r);
-        double res = sqrt(dot_prod_self(r) / rp_norm2);
+        res = sqrt(dot_prod_self(r) / rp_norm2);
 //        printf("V-Cycle[F] Residual:\t%5lu\t%.3e\n", (unsigned long)iter, res);
 
         printf("V-Cycle Residual:\t%5lu\t%.3e\n\n", (unsigned long)iter, res);
         fflush(stdout);
 
-        if(res < SLAE_MAIN_EPSILON) break;
+        if(res < eps) break;
+        if(res > res_prev) break;
+        res_prev = res;
     }
     if(iter >= max_iter) printf("Soulution can`t found, iteration limit exceeded!\n");
+    if(res >= res_prev)  printf("Soulution can`t found, residual increasing detected!\n");
 
     delete [] r;
     delete [] g;

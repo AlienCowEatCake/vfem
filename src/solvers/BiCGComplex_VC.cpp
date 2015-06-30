@@ -91,10 +91,9 @@ void BiCGComplex_VC::mul_matrix(const complex<double> * f, complex<double> * x) 
     }
 }
 
-void BiCGComplex_VC::solve(complex<double> * solution, complex<double> * rp, double gamma)
+void BiCGComplex_VC::solve(complex<double> * solution, complex<double> * rp, double gamma, size_t max_iter)
 {
     double eps = gamma;
-    size_t max_iter = /*(size_t) 100 * sqrt(n)*/ 15000;
 
     complex<double> dp1, dp2, alpha, beta;
     double rp_norm = sqrt(dot_prod_self(rp));

@@ -146,11 +146,8 @@ bool CGMComplex_LLT::is_fpu_error(double x) const
     return x != x || y != y;
 }
 
-void CGMComplex_LLT::solve(complex<double> * solution, complex<double> * rp_s, double eps)
+void CGMComplex_LLT::solve(complex<double> * solution, complex<double> * rp_s, double eps, size_t max_iter)
 {
-    // Параметры решателя
-    size_t max_iter = 20000;
-
     rp = rp_s;
 
     x0 = new complex<double> [n];

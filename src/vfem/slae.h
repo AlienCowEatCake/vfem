@@ -19,9 +19,9 @@ public:
     {
         solver.init(ig, jg, di, gg, n);
     }
-    inline void inline_solve(complex<double> * solution, complex<double> * rp_s, double eps)
+    inline void inline_solve(complex<double> * solution, complex<double> * rp_s, double eps, size_t max_iter)
     {
-        solver.solve(solution, rp_s, eps);
+        solver.solve(solution, rp_s, eps, max_iter);
     }
     void alloc_all(size_t n_size, size_t gg_size);
     void dealloc_all();

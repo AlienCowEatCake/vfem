@@ -16,7 +16,7 @@ void SLAE::solve(double eps)
 {
     cout << "Solving SLAE ..." << endl;
     solver.init(ig, jg, di, gg, n);
-    solver.solve(x, rp, eps);
+    solver.solve(x, rp, eps, 15000);
 }
 
 void SLAE::alloc_all(size_t n_size, size_t gg_size)

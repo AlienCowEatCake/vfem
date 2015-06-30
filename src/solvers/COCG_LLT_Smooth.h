@@ -10,7 +10,7 @@ class COCG_LLT_Smooth
 public:
     void init(size_t * gi_s, size_t * gj_s, complex<double> * di_s,
               complex<double> * gg_s, size_t n_s);
-    void solve(complex<double> * solution, complex<double> * rp_s, double eps);
+    void solve(complex<double> * solution, complex<double> * rp_s, double eps, size_t max_iter);
 
     COCG_LLT_Smooth();
     ~COCG_LLT_Smooth();

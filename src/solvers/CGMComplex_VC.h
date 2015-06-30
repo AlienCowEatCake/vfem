@@ -12,7 +12,7 @@ class CGMComplex_VC
 public:
     void init(size_t * gi_s, size_t * gj_s, complex<double> * di_s,
               complex<double> * gg_s, size_t n_s);
-    void solve(complex<double> * solution, complex<double> * rp, double gamma);
+    void solve(complex<double> * solution, complex<double> * rp, double gamma, size_t max_iter);
 
     CGMComplex_VC();
     ~CGMComplex_VC();

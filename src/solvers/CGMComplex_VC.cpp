@@ -91,10 +91,9 @@ void CGMComplex_VC::mul_matrix(const complex<double> * f, complex<double> * x) c
     }
 }
 
-void CGMComplex_VC::solve(complex<double> * solution, complex<double> * rp, double gamma)
+void CGMComplex_VC::solve(complex<double> * solution, complex<double> * rp, double gamma, size_t max_iter)
 {
     double eps = gamma;
-    size_t max_iter = /*(size_t)sqrt(n)*/ 15000;
 
     complex<double> alpha, beta, alpha1, alpha2;
     double rp_norm = sqrt(dot_prod_self(rp));
