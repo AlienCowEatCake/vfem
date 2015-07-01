@@ -54,7 +54,7 @@ void print_time(unsigned long msec, const string & descr)
     else if(seconds > 60)
     {
         unsigned long m = seconds / 60;
-        unsigned long s = seconds - m * 60.0;
+        unsigned long s = seconds - m * 60;
         cout << descr << ": \t" << m << " min " << s << " sec." << endl;
     }
     else if(seconds > 0)
