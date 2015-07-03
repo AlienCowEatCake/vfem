@@ -7,6 +7,26 @@ OUT_FILE_2="autogen_mesh3_inc_z=-5_full.msh"
 MESH_DIR="data/area_3layers_inc_loop_pml"
 CURR_DIR=`pwd`
 GMSH="nosrand gmsh"
+SLAE_FILE="area_3layers_inc_loop_pml_slae.txt"
+
+function calc_nomesh {
+
+cd "${CURR_DIR}"
+mkdir -p "${RESULT_DIR}/${MESH_DIR}"
+cp -a "${CURR_DIR}/${MESH_DIR}/"*.msh "${CURR_DIR}/${MESH_DIR}/"*.txt "${CURR_DIR}/${RESULT_DIR}/${MESH_DIR}/"
+cp -a "${CURR_DIR}/${SLAE_FILE}" "${CURR_DIR}/${RESULT_DIR}/"
+cd "${CURR_DIR}/${RESULT_DIR}"
+echo -e "${PML_BEGIN}\n\n" > "pml_begin.txt"
+echo -e "${PML_WIDTH}\n\n" > "pml_width.txt"
+echo -e "${PML_CHI_AIR_RE} ${PML_CHI_AIR_IM}\n\n" > "pml_chi_air.txt"
+echo -e "${PML_CHI_WATER_RE} ${PML_CHI_WATER_IM}\n\n" > "pml_chi_water.txt"
+echo -e "${PML_CHI_GROUND_RE} ${PML_CHI_GROUND_IM}\n\n" > "pml_chi_ground.txt"
+echo -e "${PML_M}\n\n" > "pml_m.txt"
+"${CURR_DIR}/vfem_pml" | tee "out_pml.txt"
+"${CURR_DIR}/vfem_pml_small" | tee "out_pml_small.txt"
+cd "${CURR_DIR}"
+
+}
 
 function calc {
 
