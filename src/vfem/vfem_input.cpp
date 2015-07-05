@@ -365,17 +365,27 @@ void VFEM::input_mesh(const string & gmsh_filename)
     // Индексируем ребра
     vector<edge *> edges_ind;
     edges_ind.resize(edges.size());
+    size_t index_edge = 0;
     /// WARNING: const_cast для элемента set'а!
     for(set<edge>::iterator i = edges.begin(); i != edges.end(); ++i)
-        edges_ind[i->num] = const_cast<edge *>(&(*i));
+    {
+        edge * ed = const_cast<edge *>(&(*i));
+        edges_ind[ed->num] = ed;
+        ed->num = index_edge++;
+    }
 
 #if BASIS_ORDER >= 2
     // Индексируем грани
     vector<face *> faces_ind;
     faces_ind.resize(faces.size());
+    size_t index_face = 0;
     /// WARNING: const_cast для элемента set'а!
     for(set<face>::iterator i = faces.begin(); i != faces.end(); ++i)
-        faces_ind[i->num] = const_cast<face *>(&(*i));
+    {
+        face * fc = const_cast<face *>(&(*i));
+        faces_ind[fc->num] = fc;
+        fc->num = index_face++;
+    }
 #endif
 
     // Разбираемся с ребрами с источниками
