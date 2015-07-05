@@ -118,7 +118,7 @@ void VFEM::solve()
     double gamma_ker    = 0.1;
     // V-цикл должен сойтись максимум за log(eps) / log(gamma_full)
     // Но дадим ему небольшую фору на всякие погрешности и прочее
-    size_t max_iter = (size_t)(log(eps) / log(gamma_full) * 1.5);
+    size_t max_iter = (size_t)(log(eps) / log(gamma_full) * 2.0);
     // Локальное число итераций обычно небольшое
     size_t max_iter_local = 100;//(size_t)sqrt((double)slae.n);
 
@@ -126,14 +126,15 @@ void VFEM::solve()
     ker_slae.inline_init();
 
     // Уточнение начального приближения на полном пространстве
-    slae.inline_solve(slae.x, slae.rp, gamma0, max_iter_local);
+    complex<double> * x_old = new complex<double> [dof_num];
+    slae.inline_solve(x_old, slae.rp, gamma0, max_iter_local);
     printf("\n");
 
     double rp_norm2 = dot_prod_self(slae.rp);
 
     // Вектор невязки
     complex<double> * r = new complex<double> [dof_num];
-    calc_residual(slae.x, r);
+    calc_residual(x_old, r);
 
     complex<double> * g = new complex<double> [ker_dof_num];
     complex<double> * y = new complex<double> [dof_num];
@@ -158,7 +159,7 @@ void VFEM::solve()
         // x = x + Ptz
         to_full_space(ker_slae.x, y);
         for(size_t i = 0; i < dof_num; i++)
-            slae.x[i] += y[i];
+            slae.x[i] = x_old[i] + y[i];
 
         // r = b - Ax
         calc_residual(slae.x, r);
@@ -191,6 +192,7 @@ void VFEM::solve()
         fflush(stdout);
 
         if(res < eps) break;
+        swap(slae.x, x_old);
         if(res > res_prev) break;
         res_prev = res;
     }
@@ -200,4 +202,5 @@ void VFEM::solve()
     delete [] r;
     delete [] g;
     delete [] y;
+    delete [] x_old;
 }
