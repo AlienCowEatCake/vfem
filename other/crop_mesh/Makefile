@@ -1,6 +1,6 @@
 CXX ?= g++
 CXXFLAGS_EXTRA ?= -Wall -Wextra -ansi -pedantic -pipe
-CXXFLAGS_OPTIMIZE ?= -O3 -march=native -mtune=native -DNDEBUG
+CXXFLAGS_OPTIMIZE ?= -O3 -DNDEBUG
 LDFLAGS_EXTRA ?= -s
 EXECUTABLE = crop_mesh
 
