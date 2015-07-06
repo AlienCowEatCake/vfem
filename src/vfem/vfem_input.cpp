@@ -393,6 +393,7 @@ void VFEM::input_mesh(const string & gmsh_filename)
     {
         show_progress("edges with source", i, edges_src.size());
         edges_src[i].edge_main = edges_ind[edges_src[i].num];
+        edges_src[i].num = edges_src[i].edge_main->num;
     }
 
     // Разбираемся с тетраэдрами
