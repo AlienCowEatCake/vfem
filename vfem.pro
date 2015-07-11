@@ -55,6 +55,8 @@ HEADERS += \
 #    src/solvers/CGMComplex_VC.h \
     src/solvers/COCG_LLT_Smooth.h
 
+unix:QMAKE_LIBS += -lrt
+
 *g++*|*clang* {
 #    QMAKE_CXXFLAGS *= -ansi
     QMAKE_CXXFLAGS += -std=c++0x
