@@ -30,6 +30,7 @@ SOURCES = \
 	src/problems/area_2layers_loop_many_pml.cpp \
 	src/problems/area_2layers_loop_universal_pml.cpp \
 	src/problems/area_3layers_inc_loop_pml.cpp \
+	src/problems/area_4layers_loop_pml.cpp \
 	src/solvers/COCG_LLT_Smooth.cpp
 OBJECTS = $(SOURCES:.cpp=.o)
 

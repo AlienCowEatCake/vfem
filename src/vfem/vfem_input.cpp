@@ -245,7 +245,9 @@ void VFEM::input_mesh(const string & gmsh_filename)
                 fake_element.phys = &(ph->second);
             else
             {
-                cerr << "Error: can`t detect physical id " << phys_num << " in " << gmsh_filename << endl;
+                cerr << "Error in " << __FILE__ << ":" << __LINE__
+                     << " while reading file " << gmsh_filename << endl;
+                cerr << "Can`t detect physical id " << phys_num << " in 4 (tetrahedron)" << endl;
                 throw IO_FILE_ERROR;
             }
 
@@ -278,7 +280,9 @@ void VFEM::input_mesh(const string & gmsh_filename)
                 fake_triangle.phys = &(ph->second);
             else
             {
-                cerr << "Error: can`t detect physical id " << phys_num << " in " << gmsh_filename << endl;
+                cerr << "Error in " << __FILE__ << ":" << __LINE__
+                     << " while reading file " << gmsh_filename << endl;
+                cerr << "Can`t detect physical id " << phys_num << " in 2 (triangle)" << endl;
                 throw IO_FILE_ERROR;
             }
 
@@ -321,7 +325,9 @@ void VFEM::input_mesh(const string & gmsh_filename)
                 fake_edge_src.phys = &(ph->second);
             else
             {
-                cerr << "Error: can`t detect physical id " << phys_num << " in " << gmsh_filename << endl;
+                cerr << "Error in " << __FILE__ << ":" << __LINE__
+                     << " while reading file " << gmsh_filename << endl;
+                cerr << "Can`t detect physical id " << phys_num << " in 1 (edge)" << endl;
                 throw IO_FILE_ERROR;
             }
 
@@ -358,6 +364,8 @@ void VFEM::input_mesh(const string & gmsh_filename)
     /// WARNING: C++11
     fes.shrink_to_fit();
     trs.shrink_to_fit();
+    pss.shrink_to_fit();
+    edges_src.shrink_to_fit();
 #endif
 
     cout << " > Converting data ..." << endl;
