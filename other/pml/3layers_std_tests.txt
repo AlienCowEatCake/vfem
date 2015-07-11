@@ -1,0 +1,65 @@
+// 1
+
+PML_BEGIN=600
+PML_WIDTH=100
+PML_M=3
+for j in `LANG=C seq 0 1`
+do
+for i in `LANG=C seq 2 6`
+do
+PML_CHI_AIR_RE=$i
+PML_CHI_AIR_IM=$j
+PML_CHI_WATER_RE=$i
+PML_CHI_WATER_IM=$j
+PML_CHI_GROUND_RE=$i
+PML_CHI_GROUND_IM=$j
+RESULT_DIR="test_begin=${PML_BEGIN}_width=${PML_WIDTH}_chi-air=(${PML_CHI_AIR_RE},${PML_CHI_AIR_IM})_chi-water=(${PML_CHI_WATER_RE},${PML_CHI_WATER_IM})_chi-ground=(${PML_CHI_GROUND_RE},${PML_CHI_GROUND_IM})_m=${PML_M}"
+calc_nomesh
+done
+done
+exit 0
+
+
+// 2
+
+PML_BEGIN=600
+PML_WIDTH=100
+PML_M=3
+for PML_CHI_AIR_RE in `LANG=C seq 3 4` ; do
+for PML_CHI_AIR_IM in `LANG=C seq 0 1` ; do
+for PML_CHI_WATER_RE in `LANG=C seq 0 1` ; do
+for PML_CHI_WATER_IM in `LANG=C seq 5 7` ; do
+for PML_CHI_GROUND_RE in `LANG=C seq 1 3` ; do
+for PML_CHI_GROUND_IM in `LANG=C seq 1 3` ; do
+RESULT_DIR="test_begin=${PML_BEGIN}_width=${PML_WIDTH}_chi-air=(${PML_CHI_AIR_RE},${PML_CHI_AIR_IM})_chi-water=(${PML_CHI_WATER_RE},${PML_CHI_WATER_IM})_chi-ground=(${PML_CHI_GROUND_RE},${PML_CHI_GROUND_IM})_m=${PML_M}"
+calc_nomesh
+done
+done
+done
+done
+done
+done
+exit 0
+
+
+// 3
+
+PML_BEGIN=600
+PML_WIDTH=100
+PML_M=3
+for PML_CHI_AIR_RE in `LANG=C seq 5 6` ; do
+for PML_CHI_AIR_IM in `LANG=C seq 0 1` ; do
+for PML_CHI_WATER_RE in `LANG=C seq 0 1` ; do
+for PML_CHI_WATER_IM in `LANG=C seq 5 7` ; do
+for PML_CHI_GROUND_RE in `LANG=C seq 1 3` ; do
+for PML_CHI_GROUND_IM in `LANG=C seq 1 3` ; do
+RESULT_DIR="test_begin=${PML_BEGIN}_width=${PML_WIDTH}_chi-air=(${PML_CHI_AIR_RE},${PML_CHI_AIR_IM})_chi-water=(${PML_CHI_WATER_RE},${PML_CHI_WATER_IM})_chi-ground=(${PML_CHI_GROUND_RE},${PML_CHI_GROUND_IM})_m=${PML_M}"
+calc_nomesh
+done
+done
+done
+done
+done
+done
+exit 0
+

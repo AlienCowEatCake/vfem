@@ -58,3 +58,21 @@ do
   cat "${i}" | grep 'Solve time:' | sed 's/.*\t//g'
 done
 
+for i in `find . -name out_pml_small.txt`
+do
+  echo -n "${i}" | sed 's/.*begin=//g ; s/_width=/ /g ; s/_chi-air=(/ /g ; s/)_chi-water=(/ /g ; s/)_chi-ground=(/ /g ; s/)_m=/ /g ; s/\/.*/ /g ; s/,/ /g'
+  cat "${i}" | grep 'V-Cycle Residual:' | tail -n 1 | sed 's/.*\t//g'
+done
+
+for i in `ls -d test_* --format=single-column`
+do
+  echo -n "${i}" | sed 's/.*begin=//g ; s/_width=/ /g ; s/_chi-air=(/ /g ; s/)_chi-water=(/ /g ; s/)_chi-ground=(/ /g ; s/)_m=/ /g ; s/\/.*/ /g ; s/,/ /g'
+  diff=`cat "${i}/out_pml.txt" | grep 'Diff (L2)' | sed 's/.* //g'`
+  time=`cat "${i}/out_pml_small.txt" | grep 'Solve time:' | sed 's/.*\t//g'`
+  min=`echo "${time}" | sed 's/ .*//g'`
+  sec=`echo "${time}" | sed 's/.*min //g ; s/ sec.*//g'`
+  let "time = min * 60 + sec"
+  residual=`cat "${i}/out_pml_small.txt" | grep 'V-Cycle Residual:' | tail -n 1 | sed 's/.*\t//g'`
+  echo "${diff}" "${time}" "${residual}"
+done
+
