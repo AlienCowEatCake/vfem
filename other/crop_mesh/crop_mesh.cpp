@@ -138,7 +138,7 @@ bool write_gmsh(string output)
     gmsh_file << "$EndNodes\n";
 
     size_t curr_fe = 1;
-    gmsh_file << "$Elements\n" << trs.size() + tets.size() << '\n';
+    gmsh_file << "$Elements\n" << eds.size() + trs.size() + tets.size() << '\n';
     for(size_t i = 0; i < eds.size(); i++)
     {
         gmsh_file << curr_fe << " 1 " << eds[i].tags_num << ' ';
