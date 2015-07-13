@@ -27,6 +27,7 @@ GOOD_DIFF="0.1"
 function calc_nomesh_notime {
 
 cd "${CURR_DIR}"
+#if [ -d "${RESULT_DIR}/${MESH_DIR}" ]; then return; fi
 mkdir -p "${RESULT_DIR}/${MESH_DIR}"
 cp -a "${CURR_DIR}/${MESH_DIR}/"*.msh "${CURR_DIR}/${MESH_DIR}/"*.txt "${CURR_DIR}/${RESULT_DIR}/${MESH_DIR}/"
 cp -a "${CURR_DIR}/${SLAE_FILE}" "${CURR_DIR}/${RESULT_DIR}/"
@@ -50,6 +51,7 @@ cd "${CURR_DIR}"
 function calc_nomesh {
 
 cd "${CURR_DIR}"
+#if [ -d "${RESULT_DIR}/${MESH_DIR}" ]; then return; fi
 mkdir -p "${RESULT_DIR}/${MESH_DIR}"
 cp -a "${CURR_DIR}/${MESH_DIR}/"*.msh "${CURR_DIR}/${MESH_DIR}/"*.txt "${CURR_DIR}/${RESULT_DIR}/${MESH_DIR}/"
 cp -a "${CURR_DIR}/${SLAE_FILE}" "${CURR_DIR}/${RESULT_DIR}/"
