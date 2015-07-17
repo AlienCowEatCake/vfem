@@ -264,6 +264,7 @@ void postprocessing(VFEM & v, char * timebuf)
 
     MAYBE_UNUSED(v);
     MAYBE_UNUSED(timebuf);
+#if !defined NONSYMM_PML
     v.output_slice(string("area_3layers_inc_loop_pml_y=0") + "_" + string(timebuf) + ".dat",
                    'Y', 0.0, 'X', -700, 700, 70, 'Z', -700, 700, 70);
     v.output_slice(string("area_3layers_inc_loop_pml_z=0") + "_" + string(timebuf) + ".dat",
@@ -273,6 +274,17 @@ void postprocessing(VFEM & v, char * timebuf)
                    'Z', 10.0, 'X', -700, 700, 100, 'Y', -700, 700, 100);
     v.output_slice(string("area_3layers_inc_loop_pml_z=-10") + "_" + string(timebuf) + ".dat",
                    'Z', -10.0, 'X', -700, 700, 100, 'Y', -700, 700, 100);
+#else
+    v.output_slice(string("area_3layers_inc_loop_pml_y=0") + "_" + string(timebuf) + ".dat",
+                   'Y', 0.0, 'X', -700, 700, 100, 'Z', -1000, 700, 100);
+    v.output_slice(string("area_3layers_inc_loop_pml_z=0") + "_" + string(timebuf) + ".dat",
+                   'Z', 0.0, 'X', -700, 700, 100, 'Y', -700, 700, 100);
+
+    v.output_slice(string("area_3layers_inc_loop_pml_z=10") + "_" + string(timebuf) + ".dat",
+                   'Z', 10.0, 'X', -700, 700, 100, 'Y', -700, 700, 100);
+    v.output_slice(string("area_3layers_inc_loop_pml_z=-10") + "_" + string(timebuf) + ".dat",
+                   'Z', -10.0, 'X', -700, 700, 100, 'Y', -700, 700, 100);
+#endif
 
 #if !defined VFEM_USE_PML
     v.slae.dump_x(slae_dump_filename);
@@ -287,9 +299,16 @@ void postprocessing(VFEM & v, char * timebuf)
     double diff = 0.0, norm = 0.0;
     for(size_t k = 0; k < v.fes.size(); k++)
     {
+#if !defined NONSYMM_PML
         if(fabs(v.fes[k].barycenter.x) <= 600 && fabs(v.fes[k].barycenter.x) >= 180 &&
            fabs(v.fes[k].barycenter.y) <= 600 && fabs(v.fes[k].barycenter.y) >= 180 &&
            fabs(v.fes[k].barycenter.z) <= 600 && fabs(v.fes[k].barycenter.z) >= 180)
+#else
+        if(fabs(v.fes[k].barycenter.x) <= 600 && fabs(v.fes[k].barycenter.x) >= 180 &&
+           fabs(v.fes[k].barycenter.y) <= 600 && fabs(v.fes[k].barycenter.y) >= 180 &&
+           v.fes[k].barycenter.z <= 600 && v.fes[k].barycenter.z >= -900 &&
+           (v.fes[k].barycenter.z >= 180 || v.fes[k].barycenter.z <= -210))
+#endif
         {
             array_t<complex<double>, basis::tet_bf_num> q_loc, q_loc_true;
             for(size_t i = 0; i < basis::tet_bf_num; i++)
