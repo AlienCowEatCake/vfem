@@ -6,6 +6,7 @@
 #endif
 
 //#define SMALL_MESH
+//#define NONSYMM_PML
 
 double SLAE_MAIN_EPSILON = 1e-10;
 
@@ -28,7 +29,9 @@ bool is_pml(const point & p, const finite_element * fe)
 class pml_config
 {
 public:
+#if !defined NONSYMM_PML
     double begin;
+#endif
     double width;
     complex<double> chi_air;
     complex<double> chi_water;
@@ -36,7 +39,9 @@ public:
     double m;
     pml_config()
     {
+#if !defined NONSYMM_PML
         begin = 600.0;
+#endif
         width = 100.0;
         chi_air.real(5.0);
         chi_air.imag(0.0);
@@ -116,6 +121,7 @@ public:
             m = tmp;
         ifs.close();
 
+#if !defined NONSYMM_PML
         name = "pml_begin.txt";
         ifs.open(name.c_str(), ios::in);
         ifs >> tmp;
@@ -128,6 +134,7 @@ public:
         else
             begin = tmp;
         ifs.close();
+#endif
 
         name = "pml_width.txt";
         ifs.open(name.c_str(), ios::in);
@@ -153,8 +160,13 @@ cvector3 get_s(const point & p, const finite_element * fe, const phys_pml_area *
         return cvector3(1.0, 1.0, 1.0);
 
     /// Нефиг пост-PML растягивать!
+#if !defined NONSYMM_PML
     if(fabs(p.x) > config.begin + config.width + 1.0 || fabs(p.y) > config.begin + config.width + 1.0 || fabs(p.z) > config.begin + config.width + 1.0)
         return cvector3(1.0, 1.0, 1.0);
+#else
+    if(fe->phys->gmsh_num == 31 || fe->phys->gmsh_num == 32 || fe->phys->gmsh_num == 33)
+        return cvector3(1.0, 1.0, 1.0);
+#endif
 
     double m = config.m;
     complex<double> chi = config.chi_air;
@@ -232,8 +244,10 @@ string phys_filename_nonpml = "data/area_3layers_inc_loop_pml/2.txt";
 #if !defined SMALL_MESH
 //string mesh_filename = "data/area_3layers_inc_loop_pml/mesh3_inc_z=-5.msh";
 string mesh_filename = "data/area_3layers_inc_loop_pml/autogen_mesh3_inc_z=-5_full.msh";
+//string mesh_filename = "data/area_3layers_inc_loop_pml/mesh3_inc_rot_z=-50_full.msh";
 #else
 string mesh_filename = "data/area_3layers_inc_loop_pml/autogen_mesh3_inc_z=-5_small.msh";
+//string mesh_filename = "data/area_3layers_inc_loop_pml/mesh3_inc_rot_z=-50_small.msh";
 #endif
 #if defined VFEM_USE_PML
 string phys_filename = phys_filename_pml;
