@@ -146,3 +146,71 @@ void VFEM::output_slice(const string & tecplot_filename, char slice_var, double 
     tecplot_file.close();
 }
 
+// Вывод данных по линии
+void VFEM::output_line(const string & filename, char slice_var1, double slice_val1, char slice_var2,
+                       double slice_val2, char var3, double min_var3, double max_var3, size_t num_var)
+{
+    if(min_var3 > max_var3) swap(max_var3, min_var3);
+    double step_var3 = (max_var3 - min_var3) / (double)(num_var - 1);
+    size_t index1 = 0, index2 = 0, index_3 = 0;
+
+    if      (slice_var1 == 'x' || slice_var1 == 'X') index1 = 0;
+    else if (slice_var1 == 'y' || slice_var1 == 'Y') index1 = 1;
+    else if (slice_var1 == 'z' || slice_var1 == 'Z') index1 = 2;
+    else
+    {
+        cerr << "Unknown variable, breaking ..." << endl;
+        return;
+    }
+
+    if      (slice_var2 == 'x' || slice_var2 == 'X') index2 = 0;
+    else if (slice_var2 == 'y' || slice_var2 == 'Y') index2 = 1;
+    else if (slice_var2 == 'z' || slice_var2 == 'Z') index2 = 2;
+    else
+    {
+        cerr << "Unknown variable, breaking ..." << endl;
+        return;
+    }
+
+    if      (var3 == 'x' || var3 == 'X') index_3 = 0;
+    else if (var3 == 'y' || var3 == 'Y') index_3 = 1;
+    else if (var3 == 'z' || var3 == 'Z') index_3 = 2;
+    else
+    {
+        cerr << "Unknown variable, breaking ..." << endl;
+        return;
+    }
+
+    cout << "Writing line to file ..." << endl;
+
+    ofstream file;
+    file.open(filename.c_str(), ios::out);
+
+    if(!file.good())
+    {
+        cerr << "Error in " << __FILE__ << ":" << __LINE__
+             << " while writing file " << filename << endl;
+        throw IO_FILE_ERROR;
+    }
+
+    file.precision(17);
+    file.setf(ios::scientific);
+
+    point p(0, 0, 0);
+    p[index1] = slice_val1;
+    p[index2] = slice_val2;
+    for(size_t i = 0; i < num_var; i++)
+    {
+        double v3 = min_var3 + step_var3 * (double)i;
+        p[index_3] = v3;
+        cvector3 sol = solution(p);
+        file << v3 << " "
+                   << sol.x.real() << " " << sol.y.real() << " " << sol.z.real() << " "
+                   << sol.x.imag() << " " << sol.y.imag() << " " << sol.z.imag() << " "
+                   << sol.norm() << "\n";
+    }
+
+    file << "\n";
+    file.flush();
+    file.close();
+}
