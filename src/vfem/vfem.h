@@ -75,8 +75,9 @@ public:
                       char var1, double min_var1, double max_var1, size_t num_var_1,
                       char var2, double min_var2, double max_var2, size_t num_var_2);
     // Вывод данных по линии
-    void output_line(const string & filename, char slice_var1, double slice_val1, char slice_var2,
-                     double slice_val2, char var3, double min_var3, double max_var3, size_t num_var);
+    void output_line(const string & tecplot_filename, char line_var1, double line_val1,
+                     char line_var2, double line_val2, char var3, double min_var3,
+                     double max_var3, size_t num_var);
 
     // Поиск конечного элемента по точке
     finite_element * get_fe(const point & p) const;
