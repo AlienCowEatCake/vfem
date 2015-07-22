@@ -244,10 +244,10 @@ string phys_filename_nonpml = "data/area_3layers_inc_loop_pml/2.txt";
 #if !defined SMALL_MESH
 //string mesh_filename = "data/area_3layers_inc_loop_pml/mesh3_inc_z=-5.msh";
 string mesh_filename = "data/area_3layers_inc_loop_pml/autogen_mesh3_inc_z=-5_full.msh";
-//string mesh_filename = "data/area_3layers_inc_loop_pml/mesh3_inc_rot_z=-50_full.msh";
+//string mesh_filename = "data/area_3layers_inc_loop_pml/mesh3_inc_rot_nosymm_z=-50_full.msh";
 #else
 string mesh_filename = "data/area_3layers_inc_loop_pml/autogen_mesh3_inc_z=-5_small.msh";
-//string mesh_filename = "data/area_3layers_inc_loop_pml/mesh3_inc_rot_z=-50_small.msh";
+//string mesh_filename = "data/area_3layers_inc_loop_pml/mesh3_inc_rot_nosymm_z=-50_small.msh";
 #endif
 #if defined VFEM_USE_PML
 string phys_filename = phys_filename_pml;
