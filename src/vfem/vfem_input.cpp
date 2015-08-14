@@ -360,12 +360,16 @@ void VFEM::input_mesh(const string & gmsh_filename)
 
     gmsh_file.close();
 
-#if  defined USE_CXX11
-    /// WARNING: C++11
+#if defined USE_CXX11
     fes.shrink_to_fit();
     trs.shrink_to_fit();
     pss.shrink_to_fit();
     edges_src.shrink_to_fit();
+#else
+    fes.swap(vector<finite_element>(fes));
+    trs.swap(vector<triangle>(trs));
+    pss.swap(vector<pair<point, cvector3> >(pss));
+    edges_src.swap(vector<edge_src>(edges_src));
 #endif
 
     cout << " > Converting data ..." << endl;
