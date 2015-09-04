@@ -84,6 +84,7 @@ ui_*.h
 /other/symmetrize/symmetrize
 /other/symmetrize/bin
 /other/symmetrize/obj
+!/other/crop_mesh/crop_mesh.exe
 
 # Code::Blocks
 *.layout
