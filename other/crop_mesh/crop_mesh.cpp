@@ -178,20 +178,32 @@ bool write_gmsh(string output)
     return true;
 }
 
+void maybe_pause()
+{
+#if defined _WIN32
+    system("pause");
+#endif
+}
+
 int main(int argc, char * argv[])
 {
     if(argc < 4)
     {
 #if defined _WIN32
         char * a = strrchr(argv[0], '\\');
+        char * progname = a ? a + 1 : argv[0];
+        if(strlen(progname) > 4)
+        {
+            size_t exe_pos = strlen(progname) - 4;
+            if(strcmp(progname + exe_pos, ".exe") == 0)
+                * (progname + exe_pos) = '\0';
+        }
 #else
         char * a = strrchr(argv[0], '/');
-#endif
         char * progname = a ? a + 1 : argv[0];
-        cerr << "Usage: " << progname << " input_mesh output_mesh phys_tag [phys_tag ...]" << endl;
-#if defined _WIN32
-        system("pause");
 #endif
+        cerr << "Usage: " << progname << " input_mesh output_mesh [2d|3d|full] phys_tag [phys_tag ...]" << endl;
+        maybe_pause();
         return 1;
     }
 
@@ -199,14 +211,18 @@ int main(int argc, char * argv[])
     if(!read_gmsh(argv[1]))
     {
         cerr << "Error reading file " << argv[1] << endl;
-#if defined _WIN32
-        system("pause");
-#endif
+        maybe_pause();
         return 1;
     }
 
+    bool mode_2d = strcmp(argv[3], "2d") == 0;
+    bool mode_3d = strcmp(argv[3], "3d") == 0;
+    bool mode_full = strcmp(argv[3], "full") == 0;
+    bool mode_set = mode_3d || mode_2d || mode_full;
+    mode_full |= !mode_set;
+
     set<size_t> exclude_tags;
-    for(int i = 3; i < argc; i++)
+    for(int i = mode_set ? 4 : 3; i < argc; i++)
         exclude_tags.insert(atoi(argv[i]));
 
     cout << "Cropping mesh ..." << endl;
@@ -220,21 +236,51 @@ int main(int argc, char * argv[])
             for(size_t j = 0; j < 4; j++)
                 used_nodes.insert(tets[i].nodes[j]);
 
-    cout << " * triangles ..." << endl;
-    for(size_t i = 0; i < trs.size(); i++)
-        if(exclude_tags.find(trs[i].tags[0]) != exclude_tags.end())
-            trs.erase(trs.begin() + i--);
-        else
-            for(size_t j = 0; j < 3; j++)
-                used_nodes.insert(trs[i].nodes[j]);
+    if(mode_3d)
+    {
+        cout << " * triangles ..." << endl;
+        for(size_t i = 0; i < trs.size(); i++)
+        {
+            bool used = true;
+            for(size_t j = 0; j < 3 && used; j++)
+                used = used_nodes.find(trs[i].nodes[j]) != used_nodes.end();
+            if(!used)
+                trs.erase(trs.begin() + i--);
+        }
+    }
+    else if(mode_full || mode_2d)
+    {
+        cout << " * triangles ..." << endl;
+        for(size_t i = 0; i < trs.size(); i++)
+            if(exclude_tags.find(trs[i].tags[0]) != exclude_tags.end())
+                trs.erase(trs.begin() + i--);
+            else
+                for(size_t j = 0; j < 3; j++)
+                    used_nodes.insert(trs[i].nodes[j]);
+    }
 
-    cout << " * edges ..." << endl;
-    for(size_t i = 0; i < eds.size(); i++)
-        if(exclude_tags.find(eds[i].tags[0]) != exclude_tags.end())
-            eds.erase(eds.begin() + i--);
-        else
-            for(size_t j = 0; j < 2; j++)
-                used_nodes.insert(eds[i].nodes[j]);
+    if(mode_3d || mode_2d)
+    {
+        cout << " * edges ..." << endl;
+        for(size_t i = 0; i < eds.size(); i++)
+        {
+            bool used = true;
+            for(size_t j = 0; j < 2 && used; j++)
+                used = used_nodes.find(eds[i].nodes[j]) != used_nodes.end();
+            if(!used)
+                eds.erase(eds.begin() + i--);
+        }
+    }
+    else if(mode_full)
+    {
+        cout << " * edges ..." << endl;
+        for(size_t i = 0; i < eds.size(); i++)
+            if(exclude_tags.find(eds[i].tags[0]) != exclude_tags.end())
+                eds.erase(eds.begin() + i--);
+            else
+                for(size_t j = 0; j < 2; j++)
+                    used_nodes.insert(eds[i].nodes[j]);
+    }
 
     cout << " * nodes ..." << endl;
     for(size_t i = 0; i < nodes.size(); i++)
@@ -243,7 +289,7 @@ int main(int argc, char * argv[])
 
     map<size_t, size_t> old_to_new;
     for(size_t i = 0; i < nodes.size(); i++)
-        old_to_new[nodes[i].num] = nodes[i].num = i + 1;
+        nodes[i].num = (old_to_new[nodes[i].num] = i + 1);
 
     for(size_t i = 0; i < tets.size(); i++)
         for(size_t j = 0; j < 4; j++)
@@ -259,16 +305,12 @@ int main(int argc, char * argv[])
     if(!write_gmsh(argv[2]))
     {
         cerr << "Error writing file " << argv[2] << endl;
-#if defined _WIN32
-        system("pause");
-#endif
+        maybe_pause();
         return 1;
     }
 
     cout << "Done." << endl;
-#if defined _WIN32
-    system("pause");
-#endif
+    maybe_pause();
     return 0;
 }
 
