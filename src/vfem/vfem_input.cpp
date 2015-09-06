@@ -366,10 +366,10 @@ void VFEM::input_mesh(const string & gmsh_filename)
     pss.shrink_to_fit();
     edges_src.shrink_to_fit();
 #else
-    fes.swap(vector<finite_element>(fes));
-    trs.swap(vector<triangle>(trs));
-    pss.swap(vector<pair<point, cvector3> >(pss));
-    edges_src.swap(vector<edge_src>(edges_src));
+    vector<finite_element>(fes).swap(fes);
+    vector<triangle>(trs).swap(trs);
+    vector<pair<point, cvector3> >(pss).swap(pss);
+    vector<edge_src>(edges_src).swap(edges_src);
 #endif
 
     cout << " > Converting data ..." << endl;

@@ -7,7 +7,6 @@ CONFIG += warn_on
 SOURCES += \
     src/main.cpp \
     src/config/config.cpp \
-    src/config/parser/parser.cpp \
     src/common/basis_config.cpp \
     src/common/cubatures.cpp \
     src/geometry/vector3.cpp \
@@ -36,7 +35,7 @@ SOURCES += \
 
 HEADERS += \
     src/config/config.h \
-    src/config/parser/parser.h \
+    src/config/parser.h \
     src/common/matrix.h \
     src/common/common.h \
     src/common/basis_config.h \
@@ -61,8 +60,8 @@ HEADERS += \
 unix:QMAKE_LIBS += -lrt
 
 *g++*|*clang* {
-#    QMAKE_CXXFLAGS *= -ansi
-    QMAKE_CXXFLAGS += -std=c++0x
+    QMAKE_CXXFLAGS *= -ansi
+#    QMAKE_CXXFLAGS += -std=c++0x
     QMAKE_CXXFLAGS *= -pedantic
     QMAKE_CXXFLAGS_WARN_ON *= -Wextra
     QMAKE_CXXFLAGS_RELEASE -= -O2

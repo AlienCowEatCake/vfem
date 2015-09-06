@@ -4,7 +4,7 @@
 #include <cstdlib>
 #include <string>
 #include <map>
-#include "parser/parser.h"
+#include "../config/parser.h"
 #include "../vfem/phys.h"
 #include "../geometry/point.h"
 #include "../geometry/vector3.h"
@@ -20,8 +20,8 @@ public:
     cvector3 eval(const point & p, const phys_area * phys);
 
 protected:
-    map<size_t, parser[3]> values;
-    parser default_value[3];
+    map<size_t, parser<complex<double> >[3]> values;
+    parser<complex<double> > default_value[3];
 };
 
 // Класс конфигурации
