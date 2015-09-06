@@ -6,6 +6,8 @@ CONFIG += warn_on
 
 SOURCES += \
     src/main.cpp \
+    src/config/config.cpp \
+    src/config/parser/parser.cpp \
     src/common/basis_config.cpp \
     src/common/cubatures.cpp \
     src/geometry/vector3.cpp \
@@ -33,6 +35,8 @@ SOURCES += \
     src/solvers/COCG_LLT_Smooth.cpp
 
 HEADERS += \
+    src/config/config.h \
+    src/config/parser/parser.h \
     src/common/matrix.h \
     src/common/common.h \
     src/common/basis_config.h \
