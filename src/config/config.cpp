@@ -1,5 +1,6 @@
 #include "config.h"
 #include <fstream>
+#include <cassert>
 
 // ============================================================================
 
@@ -40,21 +41,67 @@ config_type::config_type()
     load_defaults();
 }
 
+// Загрузка значений по-умолчанию
 void config_type::load_defaults()
 {
-    basis_order = 1;
-    basis_type = 2;
+    basis.order = 1;
+    basis.type = 2;
     eps_slae = 1e-10;
     eps_slae_bound = 1e-14;
+    gamma_v_cycle_0 = 0.1;
     gamma_v_cycle_full = 0.5;
     gamma_v_cycle_ker = 0.1;
+    max_iter_v_cycle_local = 100;
     filename_mesh = "mesh.msh";
     filename_phys = "phys.txt";
     filename_slae = "";
 
     analytical_enabled = false;
+
+    init(true);
 }
 
+// Пост-загрузочная инициализация
+bool config_type::init(bool status)
+{
+    assert(basis.order >= 1 && basis.order <= 2);
+    assert(basis.type == 1 || basis.type == 2);
+    // Базис первого неполного порядка
+    if(basis.order == 1 && basis.type == 1)
+    {
+        basis.tet_bf_num = 6;
+        basis.tet_ker_bf_num = 4;
+        basis.tr_bf_num = 3;
+        basis.tr_ker_bf_num = 3;
+    }
+    // Базис первого полного порядка
+    else if(basis.order == 1 && basis.type == 2)
+    {
+        basis.tet_bf_num = 12;
+        basis.tet_ker_bf_num = 10;
+        basis.tr_bf_num = 6;
+        basis.tr_ker_bf_num = 6;
+    }
+    // Базис второго неполного порядка
+    else if(basis.order == 2 && basis.type == 1)
+    {
+        basis.tet_bf_num = 20;
+        basis.tet_ker_bf_num = 10;
+        basis.tr_bf_num = 8;
+        basis.tr_ker_bf_num = 6;
+    }
+    // Базис второго полного порядка
+    else if(basis.order == 2 && basis.type == 2)
+    {
+        basis.tet_bf_num = 30;
+        basis.tet_ker_bf_num = 20;
+        basis.tr_bf_num = 12;
+        basis.tr_ker_bf_num = 10;
+    }
+    return status;
+}
+
+// Загрузка значений из файла
 bool config_type::load(const string & filename)
 {
     ifstream ifs(filename.c_str());
@@ -62,7 +109,7 @@ bool config_type::load(const string & filename)
     {
         cerr << "Error in " << __FILE__ << ":" << __LINE__
              << " while reading file " << filename << endl;
-        return false;
+        return init(false);
     }
 
     string line;
@@ -98,15 +145,17 @@ bool config_type::load(const string & filename)
                             if(value.length() > 1 && value[0] == '\"')
                                 value = trim(value.substr(1, value.length() - 2));
                             stringstream sst(value);
-                            if(param == "basis_order")              sst >> basis_order;
-                            else if(param == "basis_type")          sst >> basis_type;
-                            else if(param == "eps_slae")            sst >> eps_slae;
-                            else if(param == "eps_slae_bound")      sst >> eps_slae_bound;
-                            else if(param == "gamma_v_cycle_full")  sst >> gamma_v_cycle_full;
-                            else if(param == "gamma_v_cycle_ker")   sst >> gamma_v_cycle_ker;
-                            else if(param == "filename_mesh")       sst >> filename_mesh;
-                            else if(param == "filename_phys")       sst >> filename_phys;
-                            else if(param == "filename_slae")       sst >> filename_slae;
+                            if(param == "basis_order")                  sst >> basis.order;
+                            else if(param == "basis_type")              sst >> basis.type;
+                            else if(param == "eps_slae")                sst >> eps_slae;
+                            else if(param == "eps_slae_bound")          sst >> eps_slae_bound;
+                            else if(param == "gamma_v_cycle_full")      sst >> gamma_v_cycle_full;
+                            else if(param == "gamma_v_cycle_ker")       sst >> gamma_v_cycle_ker;
+                            else if(param == "gamma_v_cycle_0")         sst >> gamma_v_cycle_0;
+                            else if(param == "max_iter_v_cycle_local")  sst >> max_iter_v_cycle_local;
+                            else if(param == "filename_mesh")           sst >> filename_mesh;
+                            else if(param == "filename_phys")           sst >> filename_phys;
+                            else if(param == "filename_slae")           sst >> filename_slae;
                             cout << "  param = " << param << endl;
                             cout << "  value = " << value << endl;
                         }
@@ -168,9 +217,33 @@ bool config_type::load(const string & filename)
                             string value = trim(line.substr(eq_pos + 1));
                             if(value.length() > 1 && value[0] == '\"')
                                 value = trim(value.substr(1, value.length() - 2));
-                            if(param == "x")        (* curr_parser)[0].parse(value);
-                            else if(param == "y")   (* curr_parser)[1].parse(value);
-                            else if(param == "z")   (* curr_parser)[2].parse(value);
+                            if(param == "x")
+                            {
+                                if(!(* curr_parser)[0].parse(value) || !(* curr_parser)[0].simplify())
+                                {
+                                    cerr << "Error in " << __FILE__ << ":" << __LINE__
+                                         << " while parsing " << value << endl;
+                                    return init(false);
+                                }
+                            }
+                            else if(param == "y")
+                            {
+                                if(!(* curr_parser)[1].parse(value) || !(* curr_parser)[1].simplify())
+                                {
+                                    cerr << "Error in " << __FILE__ << ":" << __LINE__
+                                         << " while parsing " << value << endl;
+                                    return init(false);
+                                }
+                            }
+                            else if(param == "z")
+                            {
+                                if(!(* curr_parser)[2].parse(value) || !(* curr_parser)[2].simplify())
+                                {
+                                    cerr << "Error in " << __FILE__ << ":" << __LINE__
+                                         << " while parsing " << value << endl;
+                                    return init(false);
+                                }
+                            }
                             else if(param == "enabled" && section == "analytical")
                             {
                                 value = to_lowercase(value);
@@ -199,5 +272,5 @@ bool config_type::load(const string & filename)
     while(ifs.good());
 
     ifs.close();
-    return true;
+    return init(true);
 }

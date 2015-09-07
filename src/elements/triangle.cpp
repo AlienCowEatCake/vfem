@@ -2,15 +2,27 @@
 
 // ============================================================================
 
+// Индексы для построения базисных функций на треугольниках
+namespace tr_basis_indexes
+{
+    // Edges (Ребра) // k, l : k < l
+    const size_t ind_e[3][2] =
+    {
+        { 0, 1 },
+        { 0, 2 },
+        { 1, 2 }
+    };
+}
+
+// ============================================================================
+
 triangle_base::triangle_base()
 {
     for(size_t i = 0; i < 3; i++)
         nodes[i] = NULL;
     for(size_t i = 0; i < 3; i++)
         edges[i] = NULL;
-#if BASIS_ORDER >= 2
     faces = NULL;
-#endif
     phys = NULL;
 }
 
@@ -26,13 +38,11 @@ const edge & triangle_base::get_edge(size_t i) const
     return (* edges[i]);
 }
 
-#if BASIS_ORDER >= 2
 const face & triangle_base::get_face() const
 {
     assert(faces != NULL);
     return * faces;
 }
-#endif
 
 const phys_area & triangle_base::get_phys_area() const
 {
@@ -164,7 +174,7 @@ vector3 triangle_full::grad_lambda(size_t i) const
 vector3 triangle_full::w(size_t i, const point & p) const
 {
     using namespace tr_basis_indexes;
-    assert(i < basis::tr_bf_num);
+    assert(i < basis->tr_bf_num);
 
     point p_loc = to_local(p);
 
@@ -233,23 +243,20 @@ complex<double> triangle_full::integrate_fw(cvector3(*func)(const point &, const
     return result * jacobian;
 }
 
-matrix_t<double, basis::tr_bf_num, basis::tr_bf_num>
-triangle_full::M() const
+matrix_t<double> triangle_full::M() const
 {
-    using namespace basis;
-    matrix_t<double, tr_bf_num, tr_bf_num> matr;
-    for(size_t i = 0; i < tr_bf_num; i++)
+    matrix_t<double> matr(basis->tr_bf_num, basis->tr_bf_num);
+    for(size_t i = 0; i < basis->tr_bf_num; i++)
         for(size_t j = 0; j <= i; j++)
             matr[j][i] = matr[i][j] = integrate_w(i, j);
     return matr;
 }
 
-array_t<complex<double>, basis::tr_bf_num>
+array_t<complex<double> >
 triangle_full::rp(cvector3(*func)(const point &, const triangle_full *)) const
 {
-    using namespace basis;
-    array_t<complex<double>, tr_bf_num> arr;
-    for(size_t i = 0; i < tr_bf_num; i++)
+    array_t<complex<double> > arr(basis->tr_bf_num);
+    for(size_t i = 0; i < basis->tr_bf_num; i++)
         arr[i] = integrate_fw(func, i);
     return arr;
 }

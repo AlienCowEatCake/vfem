@@ -81,8 +81,8 @@ int main()
 
     /**/
     cout << "Configuration:" << endl;
-    cout << " # BASIS_ORDER: " << BASIS_ORDER << endl;
-    cout << " # BASIS_TYPE:  " << BASIS_TYPE << endl;
+    //cout << " # BASIS_ORDER: " << BASIS_ORDER << endl;
+    //cout << " # BASIS_TYPE:  " << BASIS_TYPE << endl;
 #if defined VFEM_USE_PML
     cout << " # VFEM_USE_PML" << endl;
 #endif
@@ -115,8 +115,8 @@ int main()
         VFEM v;
 
         v.config.load("config.ini");
-        system("pause");
-        return 0;
+        //system("pause");
+        //return 0;
 
         v.input_phys(phys_filename);
         v.input_mesh(mesh_filename);

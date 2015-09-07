@@ -7,7 +7,6 @@ CONFIG += warn_on
 SOURCES += \
     src/main.cpp \
     src/config/config.cpp \
-    src/common/basis_config.cpp \
     src/common/cubatures.cpp \
     src/geometry/vector3.cpp \
     src/elements/edge.cpp \
@@ -39,7 +38,6 @@ HEADERS += \
     src/common/trio.h \
     src/common/matrix.h \
     src/common/common.h \
-    src/common/basis_config.h \
     src/common/cubatures.h \
     src/geometry/point.h \
     src/geometry/vector3.h \

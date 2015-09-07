@@ -3,12 +3,22 @@
 
 #include "../common/common.h"
 #include "../common/matrix.h"
-#include "../common/basis_config.h"
+#include "../common/cubatures.h"
+#include "../config/config.h"
 #include "../geometry/point.h"
 #include "../geometry/vector3.h"
 #include "../elements/edge.h"
 #include "../elements/face.h"
 #include "../vfem/phys.h"
+
+using namespace tr_integration_8;
+
+// Индексы для построения базисных функций на треугольниках
+namespace tr_basis_indexes
+{
+    // Edges (Ребра) // k, l : k < l
+    extern const size_t ind_e[3][2];
+}
 
 // Класс треугольник (обычный)
 class triangle_base
@@ -20,16 +30,14 @@ public:
     edge * edges[3];    // Ребра
     const point & get_node(size_t i) const;
     const edge & get_edge(size_t i) const;
-#if BASIS_ORDER >= 2
     face * faces;       // Грани
     const face & get_face() const;
-#endif
 
     phys_area * phys;   // Физическая область
     const phys_area & get_phys_area() const;
 
-    size_t dof[basis::tr_bf_num];
-    size_t ker_dof[basis::tr_ker_bf_num];
+    size_t dof[/*basis::tr_bf_num*/42];
+    size_t ker_dof[/*basis::tr_ker_bf_num*/42];
 };
 
 // Класс треугольник (полный, для работы с первыми неоднородными краевыми)
@@ -38,12 +46,15 @@ class triangle_full : public triangle_base
 public:
     void init();
     // Локальная матрица массы
-    matrix_t<double, basis::tr_bf_num, basis::tr_bf_num> M() const;
+    matrix_t<double> M() const;
     // Локальная правая часть
-    array_t<complex<double>, basis::tr_bf_num> rp(cvector3(*func)(const point &, const triangle_full *)) const;
+    array_t<complex<double> > rp(cvector3(*func)(const point &, const triangle_full *)) const;
 
     // Номера степеней свободы по границе
-    size_t dof_surf[basis::tr_bf_num];
+    size_t dof_surf[/*basis::tr_bf_num*/42];
+
+    // Параметры базиса
+    const basis_type * basis;
 
 protected:
     // Матрица L-координат

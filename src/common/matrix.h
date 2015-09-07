@@ -4,7 +4,7 @@
 #include "../common/common.h"
 
 // Класс "статический массив"
-template<typename type, size_t dimension>
+template<typename type, size_t dimension = 0>
 class array_t
 {
 public:
@@ -20,8 +20,54 @@ protected:
     type a[dimension];
 };
 
+// Класс "динамический массив"
+template<typename type>
+class array_t<type, 0>
+{
+public:
+    array_t(size_t dimension)
+    {
+        this->dimension = dimension;
+        a = new type [dimension];
+    }
+    array_t(const array_t & other)
+    {
+        dimension = other.dimension;
+        a = new type [dimension];
+        for(size_t i = 0; i < dimension; i++)
+            a[i] = other.a[i];
+    }
+    ~array_t()
+    {
+        delete [] a;
+    }
+    array_t & operator = (const array_t & other)
+    {
+        if(this->a != other.a)
+        {
+            delete [] a;
+            dimension = other.dimension;
+            a = new type [dimension];
+            for(size_t i = 0; i < dimension; i++)
+                a[i] = other.a[i];
+        }
+        return * this;
+    }
+    type & operator [] (size_t i)
+    {
+        return a[i];
+    }
+    const type & operator [] (size_t i) const
+    {
+        return a[i];
+    }
+protected:
+    type * a;
+    size_t dimension;
+};
+
 // Класс "статическая матрица"
-template<typename type, size_t dimension_row, size_t dimension_col>
+template<typename type, size_t dimension_row = 0, size_t dimension_col = 0>
 class matrix_t
 {
 public:
@@ -35,6 +81,57 @@ public:
     }
 protected:
     type a[dimension_row][dimension_col];
+};
+
+// Класс "динамическая матрица"
+template<typename type>
+class matrix_t<type, 0, 0>
+{
+public:
+    matrix_t(size_t dimension_row, size_t dimension_col)
+    {
+        this->dimension_row = dimension_row;
+        this->dimension_col = dimension_col;
+        a = new type [dimension_row * dimension_col];
+    }
+    matrix_t(const matrix_t & other)
+    {
+        dimension_row = other.dimension_row;
+        dimension_col = other.dimension_col;
+        size_t len = dimension_row * dimension_col;
+        a = new type [len];
+        for(size_t i = 0; i < len; i++)
+            a[i] = other.a[i];
+    }
+    ~matrix_t()
+    {
+        delete [] a;
+    }
+    matrix_t & operator = (const matrix_t & other)
+    {
+        if(this->a != other.a)
+        {
+            delete [] a;
+            dimension_row = other.dimension_row;
+            dimension_col = other.dimension_col;
+            size_t len = dimension_row * dimension_col;
+            a = new type [len];
+            for(size_t i = 0; i < len; i++)
+                a[i] = other.a[i];
+        }
+        return * this;
+    }
+    type * operator [] (size_t i)
+    {
+        return a + dimension_row * i;
+    }
+    const type * operator [] (size_t i) const
+    {
+        return a + dimension_row * i;
+    }
+protected:
+    type * a;
+    size_t dimension_row, dimension_col;
 };
 
 // Определитель матрицы 3x3

@@ -45,7 +45,7 @@ cvector3 tetrahedron_pml::grad_lambda_pml(size_t i) const
 cvector3 tetrahedron_pml::w_pml(size_t i, const cpoint & p) const
 {
     using namespace tet_basis_indexes;
-    assert(i < basis::tet_bf_num);
+    assert(i < basis->tet_bf_num);
 
     // Первый неполный
     if(i < 6)
@@ -96,8 +96,7 @@ cvector3 tetrahedron_pml::w_pml(size_t i, const cpoint & p) const
 cvector3 tetrahedron_pml::rotw_pml(size_t i, const cpoint & p, const point & p_non_PML) const
 {
     using namespace tet_basis_indexes;
-    assert(i < basis::tet_bf_num);
-    MAYBE_UNUSED(p);
+    assert(i < basis->tet_bf_num);
 
     // Первый неполный
     if(i < 6)
@@ -174,7 +173,7 @@ cvector3 tetrahedron_pml::rotw_pml(size_t i, const cpoint & p, const point & p_n
 
 cvector3 tetrahedron_pml::kerw_pml(size_t i, const cpoint & p, const point & p_non_PML) const
 {
-    assert(i < basis::tet_ker_bf_num);
+    assert(i < basis->tet_ker_bf_num);
     if(i < 4)
     {
         cvector3 s = get_s(p_non_PML, this, phys_pml);
@@ -244,44 +243,40 @@ complex<double> tetrahedron_pml::integrate_kerw(size_t i, size_t j) const
     return result * jacobian;
 }
 
-matrix_t<complex<double>, basis::tet_bf_num, basis::tet_bf_num>
+matrix_t<complex<double> >
 tetrahedron_pml::G() const
 {
-    using namespace basis;
-    matrix_t<complex<double>, tet_bf_num, tet_bf_num> matr;
-    for(size_t i = 0; i < tet_bf_num; i++)
+    matrix_t<complex<double> > matr(basis->tet_bf_num, basis->tet_bf_num);
+    for(size_t i = 0; i < basis->tet_bf_num; i++)
         for(size_t j = 0; j <= i; j++)
             matr[j][i] = matr[i][j] = integrate_rotw(i, j);
     return matr;
 }
 
-matrix_t<complex<double>, basis::tet_bf_num, basis::tet_bf_num>
+matrix_t<complex<double> >
 tetrahedron_pml::M() const
 {
-    using namespace basis;
-    matrix_t<complex<double>, tet_bf_num, tet_bf_num> matr;
-    for(size_t i = 0; i < tet_bf_num; i++)
+    matrix_t<complex<double> > matr(basis->tet_bf_num, basis->tet_bf_num);
+    for(size_t i = 0; i < basis->tet_bf_num; i++)
         for(size_t j = 0; j <= i; j++)
             matr[j][i] = matr[i][j] = integrate_w(i, j);
     return matr;
 }
 
-array_t<complex<double>, basis::tet_bf_num>
+array_t<complex<double> >
 tetrahedron_pml::rp(cvector3(*func)(const point &, const phys_area &)) const
 {
-    using namespace basis;
-    array_t<complex<double>, tet_bf_num> arr;
-    for(size_t i = 0; i < tet_bf_num; i++)
+    array_t<complex<double> > arr(basis->tet_bf_num);
+    for(size_t i = 0; i < basis->tet_bf_num; i++)
         arr[i] = integrate_fw(func, i);
     return arr;
 }
 
-matrix_t<complex<double>, basis::tet_ker_bf_num, basis::tet_ker_bf_num>
+matrix_t<complex<double> >
 tetrahedron_pml::K() const
 {
-    using namespace basis;
-    matrix_t<complex<double>, tet_ker_bf_num, tet_ker_bf_num> matr;
-    for(size_t i = 0; i < tet_ker_bf_num; i++)
+    matrix_t<complex<double> > matr(basis->tet_ker_bf_num, basis->tet_ker_bf_num);
+    for(size_t i = 0; i < basis->tet_ker_bf_num; i++)
         for(size_t j = 0; j <= i; j++)
             matr[j][i] = matr[i][j] = integrate_kerw(i, j);
     return matr;

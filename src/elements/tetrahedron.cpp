@@ -2,16 +2,39 @@
 
 // ============================================================================
 
+// Индексы для построения базисных функций на тетраэдрах
+namespace tet_basis_indexes
+{
+    // Edges (Ребра) // k, l : k < l
+    const size_t ind_e[6][2] =
+    {
+        { 0, 1 },
+        { 0, 2 },
+        { 0, 3 },
+        { 1, 2 },
+        { 1, 3 },
+        { 2, 3 }
+    };
+    // Faces (Грани) // j, k, l : j < k < l
+    const size_t ind_f[4][3] =
+    {
+        { 0, 1, 2 },
+        { 0, 1, 3 },
+        { 0, 2, 3 },
+        { 1, 2, 3 }
+    };
+}
+
+// ============================================================================
+
 tetrahedron_base::tetrahedron_base()
 {
     for(size_t i = 0; i < 4; i++)
         nodes[i] = NULL;
     for(size_t i = 0; i < 6; i++)
         edges[i] = NULL;
-#if BASIS_ORDER >= 2
     for(size_t i = 0; i < 4; i++)
         faces[i] = NULL;
-#endif
     phys = NULL;
 }
 
@@ -29,14 +52,12 @@ const edge & tetrahedron_base::get_edge(size_t i) const
     return (* edges[i]);
 }
 
-#if BASIS_ORDER >= 2
 const face & tetrahedron_base::get_face(size_t i) const
 {
     assert(i < 4);
     assert(faces[i] != NULL);
     return (* faces[i]);
 }
-#endif
 
 const phys_area & tetrahedron_base::get_phys_area() const
 {
@@ -59,7 +80,7 @@ vector3 tetrahedron_base::grad_lambda(size_t i) const
 vector3 tetrahedron_base::w(size_t i, const point & p) const
 {
     using namespace tet_basis_indexes;
-    assert(i < basis::tet_bf_num);
+    assert(i < basis->tet_bf_num);
 
     // Первый неполный
     if(i < 6)
@@ -110,8 +131,7 @@ vector3 tetrahedron_base::w(size_t i, const point & p) const
 vector3 tetrahedron_base::rotw(size_t i, const point & p) const
 {
     using namespace tet_basis_indexes;
-    assert(i < basis::tet_bf_num);
-    MAYBE_UNUSED(p);
+    assert(i < basis->tet_bf_num);
 
     // Первый неполный
     if(i < 6)
@@ -161,7 +181,7 @@ vector3 tetrahedron_base::rotw(size_t i, const point & p) const
 
 vector3 tetrahedron_base::kerw(size_t i, const point & p) const
 {
-    assert(i < basis::tet_ker_bf_num);
+    assert(i < basis->tet_ker_bf_num);
     if(i < 4)   return grad_lambda(i);
     if(i < 10)  return w(i + 2, p);
     if(i < 20)  return w(i + 10, p);
@@ -285,15 +305,14 @@ bool tetrahedron_base::inside_tree(double x0, double x1, double y0, double y1, d
     return false;
 }
 
-double tetrahedron_base::diff_normL2(const array_t<complex<double>, basis::tet_bf_num> & q, cvector3(*func)(const point &)) const
+double tetrahedron_base::diff_normL2(const array_t<complex<double> > & q, cvector3(*func)(const point &)) const
 {
     using namespace tet_integration;
-    using namespace basis;
     complex<double> result = 0.0;
     for(size_t k = 0; k < gauss_num; k++)
     {
         cvector3 val(0.0, 0.0, 0.0);
-        for(size_t i = 0; i < tet_bf_num; i++)
+        for(size_t i = 0; i < basis->tet_bf_num; i++)
             val = val + q[i] * cvector3(w(i, gauss_points[k]));
         cvector3 func_d = func(gauss_points[k]) - val;
         //result += gauss_weights[k] * (func_d * func_d.cj());
@@ -303,15 +322,14 @@ double tetrahedron_base::diff_normL2(const array_t<complex<double>, basis::tet_b
     return result.real();
 }
 
-double tetrahedron_base::diff_normL2(const array_t<complex<double>, basis::tet_bf_num> & q, const array_t<complex<double>, basis::tet_bf_num> & q_true) const
+double tetrahedron_base::diff_normL2(const array_t<complex<double> > & q, const array_t<complex<double> > & q_true) const
 {
     using namespace tet_integration;
-    using namespace basis;
     complex<double> result = 0.0;
     for(size_t k = 0; k < gauss_num; k++)
     {
         cvector3 val(0.0, 0.0, 0.0), val_true(0.0, 0.0, 0.0);
-        for(size_t i = 0; i < tet_bf_num; i++)
+        for(size_t i = 0; i < basis->tet_bf_num; i++)
         {
             val = val + q[i] * cvector3(w(i, gauss_points[k]));
             val_true = val_true + q_true[i] * cvector3(w(i, gauss_points[k]));
@@ -338,15 +356,14 @@ double tetrahedron_base::normL2(cvector3(*func)(const point &)) const
     return result.real();
 }
 
-double tetrahedron_base::normL2(const array_t<complex<double>, basis::tet_bf_num> & q_true) const
+double tetrahedron_base::normL2(const array_t<complex<double> > & q_true) const
 {
     using namespace tet_integration;
-    using namespace basis;
     complex<double> result = 0.0;
     for(size_t k = 0; k < gauss_num; k++)
     {
         cvector3 func_d;
-        for(size_t i = 0; i < tet_bf_num; i++)
+        for(size_t i = 0; i < basis->tet_bf_num; i++)
             func_d = func_d + q_true[i] * cvector3(w(i, gauss_points[k]));
         //result += gauss_weights[k] * (func_d * func_d.cj());
         result += gauss_weights[k] * func_d.norm2();
@@ -401,44 +418,40 @@ double tetrahedron::integrate_kerw(size_t i, size_t j) const
     return result * jacobian;
 }
 
-matrix_t<double, basis::tet_bf_num, basis::tet_bf_num>
+matrix_t<double>
 tetrahedron::G() const
 {
-    using namespace basis;
-    matrix_t<double, tet_bf_num, tet_bf_num> matr;
-    for(size_t i = 0; i < tet_bf_num; i++)
+    matrix_t<double> matr(basis->tet_bf_num, basis->tet_bf_num);
+    for(size_t i = 0; i < basis->tet_bf_num; i++)
         for(size_t j = 0; j <= i; j++)
             matr[j][i] = matr[i][j] = integrate_rotw(i, j);
     return matr;
 }
 
-matrix_t<double, basis::tet_bf_num, basis::tet_bf_num>
+matrix_t<double>
 tetrahedron::M() const
 {
-    using namespace basis;
-    matrix_t<double, tet_bf_num, tet_bf_num> matr;
-    for(size_t i = 0; i < tet_bf_num; i++)
+    matrix_t<double> matr(basis->tet_bf_num, basis->tet_bf_num);
+    for(size_t i = 0; i < basis->tet_bf_num; i++)
         for(size_t j = 0; j <= i; j++)
             matr[j][i] = matr[i][j] = integrate_w(i, j);
     return matr;
 }
 
-array_t<complex<double>, basis::tet_bf_num>
+array_t<complex<double> >
 tetrahedron::rp(cvector3(*func)(const point &, const phys_area &)) const
 {
-    using namespace basis;
-    array_t<complex<double>, tet_bf_num> arr;
-    for(size_t i = 0; i < tet_bf_num; i++)
+    array_t<complex<double> > arr(basis->tet_bf_num);
+    for(size_t i = 0; i < basis->tet_bf_num; i++)
         arr[i] = integrate_fw(func, i);
     return arr;
 }
 
-matrix_t<double, basis::tet_ker_bf_num, basis::tet_ker_bf_num>
+matrix_t<double>
 tetrahedron::K() const
 {
-    using namespace basis;
-    matrix_t<double, tet_ker_bf_num, tet_ker_bf_num> matr;
-    for(size_t i = 0; i < tet_ker_bf_num; i++)
+    matrix_t<double> matr(basis->tet_ker_bf_num, basis->tet_ker_bf_num);
+    for(size_t i = 0; i < basis->tet_ker_bf_num; i++)
         for(size_t j = 0; j <= i; j++)
             matr[j][i] = matr[i][j] = integrate_kerw(i, j);
     return matr;

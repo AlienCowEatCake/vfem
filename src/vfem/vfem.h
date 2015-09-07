@@ -3,7 +3,7 @@
 
 #include "../common/common.h"
 #include "../common/matrix.h"
-#include "../common/basis_config.h"
+#include "../config/config.h"
 #include "../geometry/point.h"
 #include "../geometry/vector3.h"
 #include "../elements/octal_tree.h"
@@ -13,20 +13,19 @@
 #include "../elements/tetrahedron.h"
 #include "../vfem/phys.h"
 #include "../vfem/slae.h"
-#include "../config/config.h"
 
-#define VFEM_USE_PML
-//#define VFEM_USE_NONHOMOGENEOUS_FIRST
-//#define VFEM_USE_ANALYTICAL
+//#define VFEM_USE_PML
+#define VFEM_USE_NONHOMOGENEOUS_FIRST
+#define VFEM_USE_ANALYTICAL
 
 #if defined VFEM_USE_PML
 typedef tetrahedron_pml finite_element;
-typedef matrix_t<complex<double>, basis::tet_bf_num, basis::tet_bf_num> l_matrix;
-typedef matrix_t<complex<double>, basis::tet_ker_bf_num, basis::tet_ker_bf_num> ker_l_matrix;
+typedef matrix_t<complex<double> > l_matrix;
+typedef matrix_t<complex<double> > ker_l_matrix;
 #else
 typedef tetrahedron finite_element;
-typedef matrix_t<double, basis::tet_bf_num, basis::tet_bf_num> l_matrix;
-typedef matrix_t<double, basis::tet_ker_bf_num, basis::tet_ker_bf_num> ker_l_matrix;
+typedef matrix_t<double> l_matrix;
+typedef matrix_t<double> ker_l_matrix;
 #endif
 
 #if defined VFEM_USE_NONHOMOGENEOUS_FIRST
@@ -62,6 +61,7 @@ bool is_pml(const point & p, const finite_element * fe);
 class VFEM
 {
 public:
+    // Конфигурация
     config_type config;
 
     // Ввод данных
@@ -110,19 +110,15 @@ public:
 protected:
     // Добавление ребра в множество ребер
     size_t add_edge(edge ed, set<edge> & edges_set);
-#if BASIS_ORDER >= 2
     // Добавление грани в множество граней
     size_t add_face(face fc, set<face> & faces_set);
-#endif
 
     // Узлы
     vector<point> nodes;
     // Ребра
     set<edge> edges;
-#if BASIS_ORDER >= 2
     // Грани
     set<face> faces;
-#endif
     // Ребра с источниками
     vector<edge_src> edges_src;
     // Треугольники
@@ -147,6 +143,17 @@ protected:
     set<size_t> ker_dof_first;
     // Восьмиричное дерево поиска
     octal_tree<finite_element> tree;
+
+    // Получение степеней свободы тетраэдра в глобальной матрице
+    size_t get_tet_dof(size_t i) const;
+    // Получение степеней свободы тетраэдра в матрице ядра
+    size_t get_tet_ker_dof(size_t i) const;
+    // Получение степеней свободы треугольника в глобальной матрице
+    size_t get_tr_dof(size_t i) const;
+    // Получение степеней свободы треугольника в матрице ядра
+    size_t get_tr_ker_dof(size_t i) const;
+    // Получение степеней свободы треугольника в матрице по границе
+    size_t get_tr_surf_dof(size_t i) const;
 
     // Генерация портрета глобальной матрицы
     void generate_portrait();

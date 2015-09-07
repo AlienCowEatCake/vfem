@@ -4,13 +4,8 @@
 void VFEM::to_kernel_space(const complex<double> * in, complex<double> * out) const
 {
     size_t nodes_num = nodes.size();
-    MAYBE_UNUSED(nodes_num);
     size_t edges_num = edges.size();
-    MAYBE_UNUSED(edges_num);
-#if BASIS_ORDER >= 2
     size_t faces_num = faces.size();
-    MAYBE_UNUSED(faces_num);
-#endif
 
     for(size_t i = 0; i < ker_dof_num; i++)
         out[i] = 0.0;
@@ -21,30 +16,25 @@ void VFEM::to_kernel_space(const complex<double> * in, complex<double> * out) co
         out[it->nodes[1]->num] += in[it->num];
     }
 
-#if BASIS_ORDER >= 2 || BASIS_TYPE == 2
-    for(set<edge>::iterator it = edges.begin(); it != edges.end(); ++it)
-        out[nodes_num + it->num] = in[edges_num + it->num];
-#endif
+    if(config.basis.order >= 2 || config.basis.type == 2)
+        for(set<edge>::iterator it = edges.begin(); it != edges.end(); ++it)
+            out[nodes_num + it->num] = in[edges_num + it->num];
 
-#if BASIS_ORDER > 2 || (BASIS_TYPE == 2 && BASIS_ORDER == 2)
-    for(set<face>::iterator it = faces.begin(); it != faces.end(); ++it)
-        out[nodes_num + edges_num + it->num] = in[2 * edges_num + 2 * faces_num + it->num];
-    for(set<edge>::iterator it = edges.begin(); it != edges.end(); ++it)
-        out[nodes_num + edges_num + faces_num + it->num] = in[2 * edges_num + 3 * faces_num + it->num];
-#endif
+    if(config.basis.order > 2 || (config.basis.type == 2 && config.basis.order == 2))
+    {
+        for(set<face>::iterator it = faces.begin(); it != faces.end(); ++it)
+            out[nodes_num + edges_num + it->num] = in[2 * edges_num + 2 * faces_num + it->num];
+        for(set<edge>::iterator it = edges.begin(); it != edges.end(); ++it)
+            out[nodes_num + edges_num + faces_num + it->num] = in[2 * edges_num + 3 * faces_num + it->num];
+    }
 }
 
 // Интерполяция на полное пространство
 void VFEM::to_full_space(const complex<double> * in, complex<double> * out) const
 {
     size_t nodes_num = nodes.size();
-    MAYBE_UNUSED(nodes_num);
     size_t edges_num = edges.size();
-    MAYBE_UNUSED(edges_num);
-#if BASIS_ORDER >= 2
     size_t faces_num = faces.size();
-    MAYBE_UNUSED(faces_num);
-#endif
 
     for(size_t i = 0; i < dof_num; i++)
         out[i] = 0.0;
@@ -55,17 +45,17 @@ void VFEM::to_full_space(const complex<double> * in, complex<double> * out) cons
         out[it->num] += in[it->nodes[1]->num];
     }
 
-#if BASIS_ORDER >= 2 || BASIS_TYPE == 2
-    for(set<edge>::iterator it = edges.begin(); it != edges.end(); ++it)
-        out[edges_num + it->num] = in[nodes_num + it->num];
-#endif
+    if(config.basis.order >= 2 || config.basis.type == 2)
+        for(set<edge>::iterator it = edges.begin(); it != edges.end(); ++it)
+            out[edges_num + it->num] = in[nodes_num + it->num];
 
-#if BASIS_ORDER > 2 || (BASIS_TYPE == 2 && BASIS_ORDER == 2)
-    for(set<face>::iterator it = faces.begin(); it != faces.end(); ++it)
-        out[2 * edges_num + 2 * faces_num + it->num] = in[nodes_num + edges_num + it->num];
-    for(set<edge>::iterator it = edges.begin(); it != edges.end(); ++it)
-        out[2 * edges_num + 3 * faces_num + it->num] = in[nodes_num + edges_num + faces_num + it->num];
-#endif
+    if(config.basis.order > 2 || (config.basis.type == 2 && config.basis.order == 2))
+    {
+        for(set<face>::iterator it = faces.begin(); it != faces.end(); ++it)
+            out[2 * edges_num + 2 * faces_num + it->num] = in[nodes_num + edges_num + it->num];
+        for(set<edge>::iterator it = edges.begin(); it != edges.end(); ++it)
+            out[2 * edges_num + 3 * faces_num + it->num] = in[nodes_num + edges_num + faces_num + it->num];
+    }
 }
 
 // Скалярное произведение
@@ -108,19 +98,18 @@ void VFEM::calc_residual(const complex<double> * x0, complex<double> * p) const
 // Запуск решения СЛАУ
 void VFEM::solve()
 {
-    extern double SLAE_MAIN_EPSILON;
-    //slae.solve(SLAE_MAIN_EPSILON);
+    //slae.solve(config.eps_slae);
     //return;
 
-    double eps = SLAE_MAIN_EPSILON;
-    double gamma0       = 0.1;
-    double gamma_full   = 0.5;
-    double gamma_ker    = 0.1;
+    double eps          = config.eps_slae;
+    double gamma0       = config.gamma_v_cycle_0;
+    double gamma_full   = config.gamma_v_cycle_full;
+    double gamma_ker    = config.gamma_v_cycle_ker;
     // V-цикл должен сойтись максимум за log(eps) / log(gamma_full)
     // Но дадим ему небольшую фору на всякие погрешности и прочее
     size_t max_iter = (size_t)(log(eps) / log(gamma_full) * 2.0);
     // Локальное число итераций обычно небольшое
-    size_t max_iter_local = 100;//(size_t)sqrt((double)slae.n);
+    size_t max_iter_local = config.max_iter_v_cycle_local;
 
     slae.inline_init();
     ker_slae.inline_init();
@@ -136,12 +125,21 @@ void VFEM::solve()
     complex<double> * r = new complex<double> [dof_num];
     calc_residual(x_old, r);
 
+    double res, res_prev;
+    res = res_prev = sqrt(dot_prod_self(r) / rp_norm2);
+    if(res < eps)
+    {
+        swap(slae.x, x_old);
+        printf("Soulution found without V-Cycle!\n");
+        delete [] r;
+        delete [] x_old;
+        return;
+    }
+
     complex<double> * g = new complex<double> [ker_dof_num];
     complex<double> * y = new complex<double> [dof_num];
 
     size_t iter;
-    double res, res_prev;
-    res = res_prev = sqrt(dot_prod_self(r) / rp_norm2);
     for(iter = 1; iter < max_iter; iter++)
     {
         // g = Pr

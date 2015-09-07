@@ -310,8 +310,8 @@ void postprocessing(VFEM & v, char * timebuf)
            (v.fes[k].barycenter.z >= 180 || v.fes[k].barycenter.z <= -210))
 #endif
         {
-            array_t<complex<double>, basis::tet_bf_num> q_loc, q_loc_true;
-            for(size_t i = 0; i < basis::tet_bf_num; i++)
+            array_t<complex<double> > q_loc(v.config.basis.tet_bf_num), q_loc_true(v.config.basis.tet_bf_num);
+            for(size_t i = 0; i < v.config.basis.tet_bf_num; i++)
             {
                 size_t dof = v.fes[k].dof[i];
                 q_loc[i] = v.slae.x[dof];

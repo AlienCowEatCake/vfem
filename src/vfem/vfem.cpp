@@ -1,5 +1,35 @@
 #include "vfem.h"
 
+// Получение степеней свободы тетраэдра в глобальной матрице
+size_t VFEM::get_tet_dof(size_t i) const
+{
+    return 0;
+}
+
+// Получение степеней свободы тетраэдра в матрице ядра
+size_t VFEM::get_tet_ker_dof(size_t i) const
+{
+    return 0;
+}
+
+// Получение степеней свободы треугольника в глобальной матрице
+size_t VFEM::get_tr_dof(size_t i) const
+{
+    return 0;
+}
+
+// Получение степеней свободы треугольника в матрице ядра
+size_t VFEM::get_tr_ker_dof(size_t i) const
+{
+    return 0;
+}
+
+// Получение степеней свободы треугольника в матрице по границе
+size_t VFEM::get_tr_surf_dof(size_t i) const
+{
+    return 0;
+}
+
 void VFEM::generate_portrait()
 {
     cout << "Generating portrait ..." << endl;
@@ -9,7 +39,7 @@ void VFEM::generate_portrait()
     {
         show_progress("step 1", k, fes.size());
 
-        for(size_t i = 0; i < basis::tet_bf_num; i++)
+        for(size_t i = 0; i < config.basis.tet_bf_num; i++)
         {
             size_t a = fes[k].dof[i];
             for(size_t j = 0; j < i; j++)
@@ -58,7 +88,7 @@ void VFEM::generate_ker_portrait()
     {
         show_progress("step 1", k, fes.size());
 
-        for(size_t i = 0; i < basis::tet_ker_bf_num; i++)
+        for(size_t i = 0; i < config.basis.tet_ker_bf_num; i++)
         {
             size_t a = fes[k].ker_dof[i];
             for(size_t j = 0; j < i; j++)
@@ -111,7 +141,7 @@ void VFEM::generate_surf_portrait()
 
         if(trs[k].phys->type_of_bounds == 1)
         {
-            for(size_t i = 0; i < basis::tr_bf_num; i++)
+            for(size_t i = 0; i < config.basis.tr_bf_num; i++)
             {
                 size_t a = trs[k].dof_surf[i];
                 for(size_t j = 0; j < i; j++)
@@ -166,11 +196,11 @@ void VFEM::assemble_matrix()
         l_matrix matrix_G = fes[k].G();
         l_matrix matrix_M = fes[k].M();
         phys_area ph = fes[k].get_phys_area();
-        array_t<complex<double>, basis::tet_bf_num> array_rp = fes[k].rp(func_rp);
+        array_t<complex<double> > array_rp = fes[k].rp(func_rp);
         complex<double> k2(- ph.epsilon * ph.omega * ph.omega, ph.omega * ph.sigma);
 
         // Основная матрица
-        for(size_t i = 0; i < basis::tet_bf_num; i++)
+        for(size_t i = 0; i < config.basis.tet_bf_num; i++)
         {
             complex<double> add;
             size_t i_num = fes[k].dof[i];
@@ -188,7 +218,7 @@ void VFEM::assemble_matrix()
 
         // Матрица ядра
         ker_l_matrix matrix_K = fes[k].K();
-        for(size_t i = 0; i < basis::tet_ker_bf_num; i++)
+        for(size_t i = 0; i < config.basis.tet_ker_bf_num; i++)
         {
             size_t i_num = fes[k].ker_dof[i];
             for(size_t j = 0; j < i; j++)
@@ -211,10 +241,10 @@ void VFEM::applying_bound()
 
             if(trs[k].phys->type_of_bounds == 1)
             {
-                matrix_t<double, basis::tr_bf_num, basis::tr_bf_num> M_surf = trs[k].M();
-                array_t<complex<double>, basis::tr_bf_num> b_surf = trs[k].rp(func_b1);
+                matrix_t<double> M_surf = trs[k].M();
+                array_t<complex<double> > b_surf = trs[k].rp(func_b1);
 
-                for(size_t i = 0; i < basis::tr_bf_num; i++)
+                for(size_t i = 0; i < config.basis.tr_bf_num; i++)
                 {
                     for(size_t j = 0; j < i; j++)
                         surf_slae.add(trs[k].dof_surf[i], trs[k].dof_surf[j], M_surf[i][j]);
@@ -313,7 +343,7 @@ void VFEM::apply_point_sources()
     {
         show_progress("", k, pss.size());
         finite_element * fe = get_fe(pss[k].first);
-        for(size_t i = 0; i < basis::tet_bf_num; i++)
+        for(size_t i = 0; i < config.basis.tet_bf_num; i++)
             slae.rp[fe->dof[i]] += complex<double>(0.0, -1.0) * fe->phys->omega * pss[k].second * fe->w(i, pss[k].first);
     }
 }
@@ -348,7 +378,7 @@ cvector3 VFEM::solution(const point & p, const finite_element * fe) const
     cvector3 result;
     if(fe)
     {
-        for(size_t i = 0; i < basis::tet_bf_num; i++)
+        for(size_t i = 0; i < config.basis.tet_bf_num; i++)
             result = result + slae.x[fe->dof[i]] * fe->w(i, p);
     }
     return result;
@@ -364,7 +394,7 @@ cvector3 VFEM::rotor(const point & p, const finite_element * fe) const
     cvector3 result;
     if(fe)
     {
-        for(size_t i = 0; i < basis::tet_bf_num; i++)
+        for(size_t i = 0; i < config.basis.tet_bf_num; i++)
             result = result + slae.x[fe->dof[i]] * fe->rotw(i, p);
     }
     return result;
@@ -390,8 +420,8 @@ void VFEM::calculate_diff() const
     double diff = 0.0;
     for(size_t k = 0; k < fes.size(); k++)
     {
-        array_t<complex<double>, basis::tet_bf_num> q_loc;
-        for(size_t i = 0; i < basis::tet_bf_num; i++)
+        array_t<complex<double> > q_loc(config.basis.tet_bf_num);
+        for(size_t i = 0; i < config.basis.tet_bf_num; i++)
             q_loc[i] = slae.x[fes[k].dof[i]];
 
         diff += fes[k].diff_normL2(q_loc, func_true);
