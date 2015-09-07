@@ -1,12 +1,9 @@
 #include "problems.h"
 
 #if defined ANALYTICAL_CUBE
-#if !defined VFEM_USE_NONHOMOGENEOUS_FIRST || !defined VFEM_USE_ANALYTICAL || defined VFEM_USE_PML
+#if !defined VFEM_USE_ANALYTICAL || defined VFEM_USE_PML
 #error "Please, reconfigure!"
 #endif
-
-double SLAE_SURF_EPSILON = 1e-15;
-double SLAE_MAIN_EPSILON = 1e-14;
 
 cvector3 func_true(const point & p)
 {

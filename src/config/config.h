@@ -78,6 +78,7 @@ public:
     // ===== Boundary =====
 
     evaluator boundary;
+    bool boundary_enabled;
 
     // ===== Right =====
 

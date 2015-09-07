@@ -57,6 +57,7 @@ void config_type::load_defaults()
     filename_slae = "";
 
     analytical_enabled = false;
+    boundary_enabled = false;
 
     init(true);
 }
@@ -251,6 +252,14 @@ bool config_type::load(const string & filename)
                                     analytical_enabled = true;
                                 else
                                     analytical_enabled = false;
+                            }
+                            else if(param == "enabled" && section == "boundary")
+                            {
+                                value = to_lowercase(value);
+                                if(value == "yes" || value == "true" || value == "1")
+                                    boundary_enabled = true;
+                                else
+                                    boundary_enabled = false;
                             }
                             cout << "  param = " << param << endl;
                             cout << "  value = " << value << endl;

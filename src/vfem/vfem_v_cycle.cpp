@@ -164,13 +164,12 @@ void VFEM::solve()
 //        printf("V-Cycle[K] Residual:\t%5lu\t%.3e\n", (unsigned long)iter, sqrt(dot_prod_self(r) / rp_norm2));
 
         // Правим краевые
-#if defined VFEM_USE_NONHOMOGENEOUS_FIRST
-        for(map<size_t, size_t>::iterator it = global_to_local.begin(); it != global_to_local.end(); ++it)
-            r[it->first] = 0.0;
-#else
-        for(set<size_t>::iterator it = dof_first.begin(); it != dof_first.end(); ++it)
-            r[(*it)] = 0.0;
-#endif
+        if(config.boundary_enabled)
+            for(map<size_t, size_t>::iterator it = global_to_local.begin(); it != global_to_local.end(); ++it)
+                r[it->first] = 0.0;
+        else
+            for(set<size_t>::iterator it = dof_first.begin(); it != dof_first.end(); ++it)
+                r[(*it)] = 0.0;
 
         // y = solve2(A, r)
         for(size_t i = 0; i < dof_num; i++) y[i] = 0.0;

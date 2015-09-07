@@ -15,7 +15,6 @@
 #include "../vfem/slae.h"
 
 //#define VFEM_USE_PML
-#define VFEM_USE_NONHOMOGENEOUS_FIRST
 #define VFEM_USE_ANALYTICAL
 
 #if defined VFEM_USE_PML
@@ -28,19 +27,13 @@ typedef matrix_t<double> l_matrix;
 typedef matrix_t<double> ker_l_matrix;
 #endif
 
-#if defined VFEM_USE_NONHOMOGENEOUS_FIRST
 typedef triangle_full triangle;
-#else
-typedef triangle_base triangle;
-#endif
 
 // Правая часть
 cvector3 func_rp(const point & p, const phys_area & phys);
 
 // Функция неоднородных первых краевых условий
-#if defined VFEM_USE_NONHOMOGENEOUS_FIRST
 cvector3 func_b1(const point & p, const triangle * tr);
-#endif
 
 // Функция аналитического решения
 #if defined VFEM_USE_ANALYTICAL
@@ -103,10 +96,8 @@ public:
     SLAE slae;
     // СЛАУ на ядре
     SLAE ker_slae;
-#if defined VFEM_USE_NONHOMOGENEOUS_FIRST
     // СЛАУ по границе
     SLAE surf_slae;
-#endif
 protected:
     // Добавление ребра в множество ребер
     size_t add_edge(edge ed, set<edge> & edges_set);
@@ -132,28 +123,27 @@ protected:
     size_t dof_num;
     // Число степеней свободы ядра
     size_t ker_dof_num;
-#if defined VFEM_USE_NONHOMOGENEOUS_FIRST
     // Соответствие глобальных степеней свободы и по границе
+    // (не используется при config.boundary_enabled == false)
     map<size_t, size_t> global_to_local;
-#else
     // Степени свободы с первыми краевыми
+    // (не используется при config.boundary_enabled == true)
     set<size_t> dof_first;
-#endif
     // Степени свободы с первыми краевыми у ядра
     set<size_t> ker_dof_first;
     // Восьмиричное дерево поиска
     octal_tree<finite_element> tree;
 
     // Получение степеней свободы тетраэдра в глобальной матрице
-    size_t get_tet_dof(size_t i) const;
+    size_t get_tet_dof(const finite_element * fe, size_t i) const;
     // Получение степеней свободы тетраэдра в матрице ядра
-    size_t get_tet_ker_dof(size_t i) const;
+    size_t get_tet_ker_dof(const finite_element * fe, size_t i) const;
     // Получение степеней свободы треугольника в глобальной матрице
-    size_t get_tr_dof(size_t i) const;
+    size_t get_tr_dof(const triangle * tr, size_t i) const;
     // Получение степеней свободы треугольника в матрице ядра
-    size_t get_tr_ker_dof(size_t i) const;
+    size_t get_tr_ker_dof(const triangle * tr, size_t i) const;
     // Получение степеней свободы треугольника в матрице по границе
-    size_t get_tr_surf_dof(size_t i) const;
+    size_t get_tr_surf_dof(const triangle * tr, size_t i) const;
 
     // Генерация портрета глобальной матрицы
     void generate_portrait();
@@ -163,10 +153,8 @@ protected:
     void assemble_matrix();
     // Применение краевых условий
     void applying_bound();
-#if defined VFEM_USE_NONHOMOGENEOUS_FIRST
     // Генерация портрета по границе
     void generate_surf_portrait();
-#endif
     // Применение источников на ребрах
     void apply_edges_sources();
     // Применение точечных источников

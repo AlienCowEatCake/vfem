@@ -201,10 +201,8 @@ void VFEM::input_mesh(const string & gmsh_filename)
         throw IO_FILE_ERROR;
     }
 
-#if defined VFEM_USE_NONHOMOGENEOUS_FIRST
     set<edge> edges_surf_temp;
     set<face> faces_surf_temp;
-#endif
 
     // Чтение конечных элементов
     size_t fes_num;
@@ -301,8 +299,7 @@ void VFEM::input_mesh(const string & gmsh_filename)
             fake_triangle.edges[2] = (edge *) add_edge(edge(fake_triangle.nodes[1], fake_triangle.nodes[2]), edges);
             if(config.basis.order >= 2)
                 fake_triangle.faces = (face *) add_face(face(fake_triangle.nodes[0], fake_triangle.nodes[1], fake_triangle.nodes[2]), faces);
-#if defined VFEM_USE_NONHOMOGENEOUS_FIRST
-            if(bound_type == 1)
+            if(config.boundary_enabled && bound_type == 1)
             {
                 add_edge(edge(fake_triangle.nodes[0], fake_triangle.nodes[1]), edges_surf_temp);
                 add_edge(edge(fake_triangle.nodes[0], fake_triangle.nodes[2]), edges_surf_temp);
@@ -310,7 +307,6 @@ void VFEM::input_mesh(const string & gmsh_filename)
                 if(config.basis.order >= 2)
                     add_face(face(fake_triangle.nodes[0], fake_triangle.nodes[1], fake_triangle.nodes[2]), faces_surf_temp);
             }
-#endif
             trs.push_back(fake_triangle);
         }
         else if(type_of_elem == 1)
@@ -417,36 +413,6 @@ void VFEM::input_mesh(const string & gmsh_filename)
         if(config.basis.order >= 2)
             for(size_t j = 0; j < 4; j++)
                 fes[i].faces[j] = faces_ind[(size_t)fes[i].faces[j]];
-        // Заполняем степени свободы
-        for(size_t j = 0; j < 6; j++)
-            fes[i].dof[j] = fes[i].edges[j]->num;
-        for(size_t j = 0; j < 4; j++)
-            fes[i].ker_dof[j] = fes[i].nodes[j]->num;
-        if(config.basis.order >= 2 || config.basis.type == 2)
-        {
-            for(size_t j = 0; j < 6; j++)
-                fes[i].dof[j + 6] = fes[i].edges[j]->num + edges.size();
-            for(size_t j = 0; j < 6; j++)
-                fes[i].ker_dof[j + 4] = fes[i].edges[j]->num + nodes.size();
-        }
-        if(config.basis.order >= 2)
-        {
-            for(size_t j = 0; j < 4; j++)
-                fes[i].dof[j + 12] = fes[i].faces[j]->num + 2 * edges.size();
-            for(size_t j = 0; j < 4; j++)
-                fes[i].dof[j + 16] = fes[i].faces[j]->num + 2 * edges.size() + faces.size();
-        }
-        if(config.basis.order > 2 || (config.basis.type == 2 && config.basis.order == 2))
-        {
-            for(size_t j = 0; j < 4; j++)
-                fes[i].dof[j + 20] = fes[i].faces[j]->num + 2 * edges.size() + 2 * faces.size();
-            for(size_t j = 0; j < 6; j++)
-                fes[i].dof[j + 24] = fes[i].edges[j]->num + 2 * edges.size() + 3 * faces.size();
-            for(size_t j = 0; j < 4; j++)
-                fes[i].ker_dof[j + 10] = fes[i].faces[j]->num + edges.size() + nodes.size();
-            for(size_t j = 0; j < 6; j++)
-                fes[i].ker_dof[j + 14] = fes[i].edges[j]->num + faces.size() + edges.size() + nodes.size();
-        }
         // Инициализируем
         fes[i].init();
         fes[i].basis = & config.basis;
@@ -466,77 +432,75 @@ void VFEM::input_mesh(const string & gmsh_filename)
         if(config.basis.order >= 2)
             trs[i].faces = faces_ind[(size_t)trs[i].faces];
 
-        // Заполняем степени свободы
-        // Первый неполный
-        for(size_t j = 0; j < 3; j++)
-            trs[i].dof[j] = trs[i].edges[j]->num;
-        for(size_t j = 0; j < 3; j++)
-            trs[i].ker_dof[j] = trs[i].nodes[j]->num;
-#if defined VFEM_USE_NONHOMOGENEOUS_FIRST
+        // Заполняем степени свободы для первых краевых
         if(trs[i].phys->type_of_bounds == 1)
-            for(size_t j = 0; j < 3; j++)
-                trs[i].dof_surf[j] = edges_surf_temp.find(* trs[i].edges[j])->num;
-#endif
-        // Первый полный
-        if(config.basis.order >= 2 || config.basis.type == 2)
         {
+            array_t<size_t> dof(config.basis.tr_bf_num);
+            array_t<size_t> dof_surf(config.basis.tr_bf_num);
+            array_t<size_t> ker_dof(config.basis.tr_ker_bf_num);
+            // Первый неполный
             for(size_t j = 0; j < 3; j++)
-                trs[i].dof[j + 3] = trs[i].edges[j]->num + edges.size();
+                dof[j] = trs[i].edges[j]->num;
             for(size_t j = 0; j < 3; j++)
-                trs[i].ker_dof[j + 3] = trs[i].edges[j]->num + nodes.size();
-#if defined VFEM_USE_NONHOMOGENEOUS_FIRST
-            if(trs[i].phys->type_of_bounds == 1)
+                ker_dof[j] = trs[i].nodes[j]->num;
+            if(config.boundary_enabled)
                 for(size_t j = 0; j < 3; j++)
-                    trs[i].dof_surf[j + 3] = edges_surf_temp.find(* trs[i].edges[j])->num + edges_surf_temp.size();
-#endif
-        }
-        // Второй неполный
-        if(config.basis.order >= 2)
-        {
-            trs[i].dof[6] = trs[i].faces->num + 2 * edges.size();
-            trs[i].dof[7] = trs[i].faces->num + 2 * edges.size() + faces.size();
-#if defined VFEM_USE_NONHOMOGENEOUS_FIRST
-            if(trs[i].phys->type_of_bounds == 1)
+                    dof_surf[j] = edges_surf_temp.find(* trs[i].edges[j])->num;
+            // Первый полный
+            if(config.basis.order >= 2 || config.basis.type == 2)
             {
-                trs[i].dof_surf[6] = faces_surf_temp.find(* trs[i].faces)->num + 2 * edges_surf_temp.size();
-                trs[i].dof_surf[7] = faces_surf_temp.find(* trs[i].faces)->num + 2 * edges_surf_temp.size() + faces_surf_temp.size();
-            }
-#endif
-        }
-        // Второй полный
-        if(config.basis.order > 2 || (config.basis.type == 2 && config.basis.order == 2))
-        {
-            trs[i].dof[8] = trs[i].faces->num + 2 * edges.size() + 2 * faces.size();
-            for(size_t j = 0; j < 3; j++)
-                trs[i].dof[j + 9] = trs[i].edges[j]->num + 2 * edges.size() + 3 * faces.size();
-            trs[i].ker_dof[6] = trs[i].faces->num + edges.size() + nodes.size();
-            for(size_t j = 0; j < 3; j++)
-                trs[i].ker_dof[j + 7] = trs[i].edges[j]->num + edges.size() + faces.size() + nodes.size();
-#if defined VFEM_USE_NONHOMOGENEOUS_FIRST
-            if(trs[i].phys->type_of_bounds == 1)
-            {
-                trs[i].dof_surf[8] = faces_surf_temp.find(* trs[i].faces)->num + 2 * edges_surf_temp.size() + 2 * faces_surf_temp.size();
                 for(size_t j = 0; j < 3; j++)
-                    trs[i].dof_surf[j + 9] = edges_surf_temp.find(* trs[i].edges[j])->num + 2 * edges_surf_temp.size() + 3 * faces_surf_temp.size();
+                    dof[j + 3] = trs[i].edges[j]->num + edges.size();
+                for(size_t j = 0; j < 3; j++)
+                    ker_dof[j + 3] = trs[i].edges[j]->num + nodes.size();
+                if(config.boundary_enabled)
+                    for(size_t j = 0; j < 3; j++)
+                        dof_surf[j + 3] = edges_surf_temp.find(* trs[i].edges[j])->num + edges_surf_temp.size();
             }
-#endif
+            // Второй неполный
+            if(config.basis.order >= 2)
+            {
+                dof[6] = trs[i].faces->num + 2 * edges.size();
+                dof[7] = trs[i].faces->num + 2 * edges.size() + faces.size();
+                if(config.boundary_enabled)
+                {
+                    dof_surf[6] = faces_surf_temp.find(* trs[i].faces)->num + 2 * edges_surf_temp.size();
+                    dof_surf[7] = faces_surf_temp.find(* trs[i].faces)->num + 2 * edges_surf_temp.size() + faces_surf_temp.size();
+                }
+            }
+            // Второй полный
+            if(config.basis.order > 2 || (config.basis.type == 2 && config.basis.order == 2))
+            {
+                dof[8] = trs[i].faces->num + 2 * edges.size() + 2 * faces.size();
+                for(size_t j = 0; j < 3; j++)
+                    dof[j + 9] = trs[i].edges[j]->num + 2 * edges.size() + 3 * faces.size();
+                ker_dof[6] = trs[i].faces->num + edges.size() + nodes.size();
+                for(size_t j = 0; j < 3; j++)
+                    ker_dof[j + 7] = trs[i].edges[j]->num + edges.size() + faces.size() + nodes.size();
+                if(config.boundary_enabled)
+                {
+                    dof_surf[8] = faces_surf_temp.find(* trs[i].faces)->num + 2 * edges_surf_temp.size() + 2 * faces_surf_temp.size();
+                    for(size_t j = 0; j < 3; j++)
+                        dof_surf[j + 9] = edges_surf_temp.find(* trs[i].edges[j])->num + 2 * edges_surf_temp.size() + 3 * faces_surf_temp.size();
+                }
+            }
+            // Теперь все собираем
+            if(config.boundary_enabled)
+                for(size_t j = 0; j < config.basis.tr_bf_num; j++)
+                    global_to_local[dof[j]] = dof_surf[j];
+            else
+                for(size_t j = 0; j < config.basis.tr_bf_num; j++)
+                    dof_first.insert(dof[j]);
+            for(size_t j = 0; j < config.basis.tr_ker_bf_num; j++)
+                ker_dof_first.insert(ker_dof[j]);
         }
 
         // Инициализируем
-#if defined VFEM_USE_NONHOMOGENEOUS_FIRST
-        if(trs[i].phys->type_of_bounds == 1)
-            for(size_t j = 0; j < config.basis.tr_bf_num; j++)
-                global_to_local[trs[i].dof[j]] = trs[i].dof_surf[j];
-        trs[i].init();
-        trs[i].basis = & config.basis;
-#else
-        if(trs[i].phys->type_of_bounds == 1)
-            for(size_t j = 0; j < config.basis.tr_bf_num; j++)
-                dof_first.insert(trs[i].dof[j]);
-#endif
-        if(trs[i].phys->type_of_bounds == 1)
-            for(size_t j = 0; j < config.basis.tr_ker_bf_num; j++)
-                ker_dof_first.insert(trs[i].ker_dof[j]);
+        if(config.boundary_enabled)
+        {
+            trs[i].init();
+            trs[i].basis = & config.basis;
+        }
     }
 
     cout << " > Building tree ..." << endl;
@@ -603,9 +567,8 @@ void VFEM::input_mesh(const string & gmsh_filename)
         cout << " # Faces:        " << faces.size() << endl;
     cout << " # SLAE size:    " << dof_num << endl;
     cout << " # SLAE ker:     " << ker_dof_num << endl;
-#if defined VFEM_USE_NONHOMOGENEOUS_FIRST
-    cout << " # SLAE surf:    " << global_to_local.size() << endl;
-#endif
+    if(config.boundary_enabled)
+        cout << " # SLAE surf:    " << global_to_local.size() << endl;
 }
 
 #if defined VFEM_USE_PML

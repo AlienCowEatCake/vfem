@@ -35,9 +35,6 @@ public:
 
     phys_area * phys;   // Физическая область
     const phys_area & get_phys_area() const;
-
-    size_t dof[/*basis::tr_bf_num*/42];
-    size_t ker_dof[/*basis::tr_ker_bf_num*/42];
 };
 
 // Класс треугольник (полный, для работы с первыми неоднородными краевыми)
@@ -49,9 +46,6 @@ public:
     matrix_t<double> M() const;
     // Локальная правая часть
     array_t<complex<double> > rp(cvector3(*func)(const point &, const triangle_full *)) const;
-
-    // Номера степеней свободы по границе
-    size_t dof_surf[/*basis::tr_bf_num*/42];
 
     // Параметры базиса
     const basis_type * basis;

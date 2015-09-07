@@ -1,33 +1,57 @@
 #include "vfem.h"
 
 // Получение степеней свободы тетраэдра в глобальной матрице
-size_t VFEM::get_tet_dof(size_t i) const
+size_t VFEM::get_tet_dof(const finite_element * fe, size_t i) const
 {
+    assert(i < config.basis.tet_bf_num);
+    if(i < 6)       return fe->edges[i]->num;
+    else if(i < 12) return fe->edges[i-6]->num + edges.size();
+    else if(i < 16) return fe->faces[i-12]->num + 2 * edges.size();
+    else if(i < 20) return fe->faces[i-16]->num + 2 * edges.size() + faces.size();
+    else if(i < 24) return fe->faces[i-20]->num + 2 * edges.size() + 2 * faces.size();
+    else if(i < 30) return fe->edges[i-24]->num + 2 * edges.size() + 3 * faces.size();
     return 0;
 }
 
 // Получение степеней свободы тетраэдра в матрице ядра
-size_t VFEM::get_tet_ker_dof(size_t i) const
+size_t VFEM::get_tet_ker_dof(const finite_element * fe, size_t i) const
 {
+    assert(i < config.basis.tet_ker_bf_num);
+    if(i < 4)   return fe->nodes[i]->num;
+    if(i < 10)  return fe->edges[i-4]->num + nodes.size();
+    if(i < 14)  return fe->faces[i-10]->num + edges.size() + nodes.size();
+    if(i < 20)  return fe->edges[i-14]->num + faces.size() + edges.size() + nodes.size();
     return 0;
 }
 
 // Получение степеней свободы треугольника в глобальной матрице
-size_t VFEM::get_tr_dof(size_t i) const
+size_t VFEM::get_tr_dof(const triangle * tr, size_t i) const
 {
+    assert(i < config.basis.tr_bf_num);
+    if(i < 3)       return tr->edges[i]->num;
+    else if(i < 6)  return tr->edges[i-3]->num + edges.size();
+    else if(i < 7)  return tr->faces->num + 2 * edges.size();
+    else if(i < 8)  return tr->faces->num + 2 * edges.size() + faces.size();
+    else if(i < 9)  return tr->faces->num + 2 * edges.size() + 2 * faces.size();
+    else if(i < 12) return tr->edges[i-9]->num + 2 * edges.size() + 3 * faces.size();
     return 0;
 }
 
 // Получение степеней свободы треугольника в матрице ядра
-size_t VFEM::get_tr_ker_dof(size_t i) const
+size_t VFEM::get_tr_ker_dof(const triangle * tr, size_t i) const
 {
+    assert(i < config.basis.tr_ker_bf_num);
+    if(i < 3)       return tr->nodes[i]->num;
+    else if(i < 6)  return tr->edges[i-3]->num + nodes.size();
+    else if(i < 7)  return tr->faces->num + edges.size() + nodes.size();
+    else if(i < 10) return tr->edges[i]->num + edges.size() + faces.size() + nodes.size();
     return 0;
 }
 
 // Получение степеней свободы треугольника в матрице по границе
-size_t VFEM::get_tr_surf_dof(size_t i) const
+size_t VFEM::get_tr_surf_dof(const triangle * tr, size_t i) const
 {
-    return 0;
+    return global_to_local.find(get_tr_dof(tr, i))->second;
 }
 
 void VFEM::generate_portrait()
@@ -39,12 +63,16 @@ void VFEM::generate_portrait()
     {
         show_progress("step 1", k, fes.size());
 
+        array_t<size_t> dof(config.basis.tet_bf_num);
+        for(size_t i = 0; i < config.basis.tet_bf_num; i++)
+            dof[i] = get_tet_dof(&fes[k], i);
+
         for(size_t i = 0; i < config.basis.tet_bf_num; i++)
         {
-            size_t a = fes[k].dof[i];
+            size_t a = dof[i];
             for(size_t j = 0; j < i; j++)
             {
-                size_t b = fes[k].dof[j];
+                size_t b = dof[j];
                 if(b > a)
                     portrait[b].insert(a);
                 else
@@ -88,12 +116,16 @@ void VFEM::generate_ker_portrait()
     {
         show_progress("step 1", k, fes.size());
 
+        array_t<size_t> ker_dof(config.basis.tet_ker_bf_num);
+        for(size_t i = 0; i < config.basis.tet_ker_bf_num; i++)
+            ker_dof[i] = get_tet_ker_dof(&fes[k], i);
+
         for(size_t i = 0; i < config.basis.tet_ker_bf_num; i++)
         {
-            size_t a = fes[k].ker_dof[i];
+            size_t a = ker_dof[i];
             for(size_t j = 0; j < i; j++)
             {
-                size_t b = fes[k].ker_dof[j];
+                size_t b = ker_dof[j];
                 if(b > a)
                     portrait[b].insert(a);
                 else
@@ -128,7 +160,6 @@ void VFEM::generate_ker_portrait()
     delete [] portrait;
 }
 
-#if defined VFEM_USE_NONHOMOGENEOUS_FIRST
 void VFEM::generate_surf_portrait()
 {
     cout << "Generaing surface portrait ..." << endl;
@@ -139,14 +170,18 @@ void VFEM::generate_surf_portrait()
     {
         show_progress("step 1", k, trs.size());
 
+        array_t<size_t> dof_surf(config.basis.tr_bf_num);
+        for(size_t i = 0; i < config.basis.tr_bf_num; i++)
+            dof_surf[i] = get_tr_surf_dof(&trs[k], i);
+
         if(trs[k].phys->type_of_bounds == 1)
         {
             for(size_t i = 0; i < config.basis.tr_bf_num; i++)
             {
-                size_t a = trs[k].dof_surf[i];
+                size_t a = dof_surf[i];
                 for(size_t j = 0; j < i; j++)
                 {
-                    size_t b = trs[k].dof_surf[j];
+                    size_t b = dof_surf[j];
                     if(b > a)
                         portrait[b].insert(a);
                     else
@@ -181,7 +216,6 @@ void VFEM::generate_surf_portrait()
 
     delete [] portrait;
 }
-#endif
 
 void VFEM::assemble_matrix()
 {
@@ -193,6 +227,15 @@ void VFEM::assemble_matrix()
     {
         show_progress("", k, fes.size());
 
+        // Получение степеней свободы
+        array_t<size_t> dof(config.basis.tet_bf_num);
+        for(size_t i = 0; i < config.basis.tet_bf_num; i++)
+            dof[i] = get_tet_dof(&fes[k], i);
+        array_t<size_t> ker_dof(config.basis.tet_ker_bf_num);
+        for(size_t i = 0; i < config.basis.tet_ker_bf_num; i++)
+            ker_dof[i] = get_tet_ker_dof(&fes[k], i);
+
+        // Получение локальных матриц и правой части
         l_matrix matrix_G = fes[k].G();
         l_matrix matrix_M = fes[k].M();
         phys_area ph = fes[k].get_phys_area();
@@ -203,10 +246,10 @@ void VFEM::assemble_matrix()
         for(size_t i = 0; i < config.basis.tet_bf_num; i++)
         {
             complex<double> add;
-            size_t i_num = fes[k].dof[i];
+            size_t i_num = dof[i];
             for(size_t j = 0; j < i; j++)
             {
-                size_t j_num = fes[k].dof[j];
+                size_t j_num = dof[j];
                 add = matrix_G[i][j] / ph.mu + matrix_M[i][j] * k2;
                 slae.add(i_num, j_num, add);
             }
@@ -220,9 +263,9 @@ void VFEM::assemble_matrix()
         ker_l_matrix matrix_K = fes[k].K();
         for(size_t i = 0; i < config.basis.tet_ker_bf_num; i++)
         {
-            size_t i_num = fes[k].ker_dof[i];
+            size_t i_num = ker_dof[i];
             for(size_t j = 0; j < i; j++)
-                ker_slae.add(i_num, fes[k].ker_dof[j], matrix_K[i][j] * k2);
+                ker_slae.add(i_num, ker_dof[j], matrix_K[i][j] * k2);
             ker_slae.di[i_num] += matrix_K[i][i] * k2;
         }
     }
@@ -231,89 +274,98 @@ void VFEM::assemble_matrix()
 void VFEM::applying_bound()
 {
     cout << " > Applying first bound ..." << endl;
-#if defined VFEM_USE_NONHOMOGENEOUS_FIRST
-    // Решение СЛАУ по границе
-    if(global_to_local.size() > 0)
+
+    if(config.boundary_enabled)
     {
-        for(size_t k = 0; k < trs.size(); k++)
+
+        // Решение СЛАУ по границе
+        if(global_to_local.size() > 0)
         {
-            show_progress("building matrix", k, trs.size());
-
-            if(trs[k].phys->type_of_bounds == 1)
+            for(size_t k = 0; k < trs.size(); k++)
             {
-                matrix_t<double> M_surf = trs[k].M();
-                array_t<complex<double> > b_surf = trs[k].rp(func_b1);
+                show_progress("building matrix", k, trs.size());
 
-                for(size_t i = 0; i < config.basis.tr_bf_num; i++)
+                if(trs[k].phys->type_of_bounds == 1)
                 {
-                    for(size_t j = 0; j < i; j++)
-                        surf_slae.add(trs[k].dof_surf[i], trs[k].dof_surf[j], M_surf[i][j]);
-                    surf_slae.di[trs[k].dof_surf[i]] += M_surf[i][i];
-                    surf_slae.rp[trs[k].dof_surf[i]] += b_surf[i];
+                    array_t<size_t> dof_surf(config.basis.tr_bf_num);
+                    for(size_t i = 0; i < config.basis.tr_bf_num; i++)
+                        dof_surf[i] = get_tr_surf_dof(&trs[k], i);
+
+                    matrix_t<double> M_surf = trs[k].M();
+                    array_t<complex<double> > b_surf = trs[k].rp(func_b1);
+
+                    for(size_t i = 0; i < config.basis.tr_bf_num; i++)
+                    {
+                        for(size_t j = 0; j < i; j++)
+                            surf_slae.add(dof_surf[i], dof_surf[j], M_surf[i][j]);
+                        surf_slae.di[dof_surf[i]] += M_surf[i][i];
+                        surf_slae.rp[dof_surf[i]] += b_surf[i];
+                    }
                 }
             }
+            surf_slae.solve(config.eps_slae_bound);
         }
-        extern double SLAE_SURF_EPSILON;
-        surf_slae.solve(SLAE_SURF_EPSILON);
-    }
 
-    // Учет первых краевых
-    for(size_t k = 0; k < slae.n; k++) 	  // Пробегаем по всей матрице
-    {
-        show_progress("applying", k, slae.n);
-
-        if(global_to_local.find(k) != global_to_local.end())
+        // Учет первых краевых
+        for(size_t k = 0; k < slae.n; k++) 	  // Пробегаем по всей матрице
         {
-            complex<double> val = surf_slae.x[global_to_local[k]];
-            slae.rp[k] = val;
-            slae.di[k] = 1.0;
-            slae.x[k] = val; // Начальное приближение сразу знаем
+            show_progress("applying", k, slae.n);
 
-            for(size_t i = slae.ig[k]; i < slae.ig[k + 1]; i++)
+            if(global_to_local.find(k) != global_to_local.end())
             {
-                if(global_to_local.find(slae.jg[i]) == global_to_local.end())
+                complex<double> val = surf_slae.x[global_to_local[k]];
+                slae.rp[k] = val;
+                slae.di[k] = 1.0;
+                slae.x[k] = val; // Начальное приближение сразу знаем
+
+                for(size_t i = slae.ig[k]; i < slae.ig[k + 1]; i++)
                 {
-                    slae.rp[slae.jg[i]] -= slae.gg[i] * val;
-                }
-                slae.gg[i] = 0.0;
-            }
-        }
-        else
-        {
-            for(size_t i = slae.ig[k]; i < slae.ig[k + 1]; i++)
-            {
-                if(global_to_local.find(slae.jg[i]) != global_to_local.end())
-                {
-                    complex<double> val = surf_slae.x[global_to_local[slae.jg[i]]];
-                    slae.rp[k] -= slae.gg[i] * val;
+                    if(global_to_local.find(slae.jg[i]) == global_to_local.end())
+                        slae.rp[slae.jg[i]] -= slae.gg[i] * val;
                     slae.gg[i] = 0.0;
                 }
             }
-        }
-    }
-#else
-    for(size_t k = 0; k < slae.n; k++) 	  // Пробегаем по всей матрице
-    {
-        show_progress("", k, slae.n);
-
-        if(dof_first.find(k) != dof_first.end())
-        {
-            slae.rp[k] = 0.0;
-            slae.di[k] = 1.0;
-
-            for(size_t i = slae.ig[k]; i < slae.ig[k + 1]; i++)
-                slae.gg[i] = 0.0;
-        }
-        else
-        {
-            for(size_t i = slae.ig[k]; i < slae.ig[k + 1]; i++)
+            else
             {
-                if(dof_first.find(slae.jg[i]) != dof_first.end())
-                    slae.gg[i] = 0.0;
+                for(size_t i = slae.ig[k]; i < slae.ig[k + 1]; i++)
+                {
+                    if(global_to_local.find(slae.jg[i]) != global_to_local.end())
+                    {
+                        complex<double> val = surf_slae.x[global_to_local[slae.jg[i]]];
+                        slae.rp[k] -= slae.gg[i] * val;
+                        slae.gg[i] = 0.0;
+                    }
+                }
             }
         }
+
     }
-#endif
+    else
+    {
+
+        for(size_t k = 0; k < slae.n; k++) 	  // Пробегаем по всей матрице
+        {
+            show_progress("", k, slae.n);
+
+            if(dof_first.find(k) != dof_first.end())
+            {
+                slae.rp[k] = 0.0;
+                slae.di[k] = 1.0;
+
+                for(size_t i = slae.ig[k]; i < slae.ig[k + 1]; i++)
+                    slae.gg[i] = 0.0;
+            }
+            else
+            {
+                for(size_t i = slae.ig[k]; i < slae.ig[k + 1]; i++)
+                {
+                    if(dof_first.find(slae.jg[i]) != dof_first.end())
+                        slae.gg[i] = 0.0;
+                }
+            }
+        }
+
+    }
 
     // Первые краевые для матрицы ядра
     for(size_t k = 0; k < ker_slae.n; k++)
@@ -344,7 +396,7 @@ void VFEM::apply_point_sources()
         show_progress("", k, pss.size());
         finite_element * fe = get_fe(pss[k].first);
         for(size_t i = 0; i < config.basis.tet_bf_num; i++)
-            slae.rp[fe->dof[i]] += complex<double>(0.0, -1.0) * fe->phys->omega * pss[k].second * fe->w(i, pss[k].first);
+            slae.rp[get_tet_dof(fe, i)] += complex<double>(0.0, -1.0) * fe->phys->omega * pss[k].second * fe->w(i, pss[k].first);
     }
 }
 
@@ -379,7 +431,7 @@ cvector3 VFEM::solution(const point & p, const finite_element * fe) const
     if(fe)
     {
         for(size_t i = 0; i < config.basis.tet_bf_num; i++)
-            result = result + slae.x[fe->dof[i]] * fe->w(i, p);
+            result = result + slae.x[get_tet_dof(fe, i)] * fe->w(i, p);
     }
     return result;
 }
@@ -395,17 +447,15 @@ cvector3 VFEM::rotor(const point & p, const finite_element * fe) const
     if(fe)
     {
         for(size_t i = 0; i < config.basis.tet_bf_num; i++)
-            result = result + slae.x[fe->dof[i]] * fe->rotw(i, p);
+            result = result + slae.x[get_tet_dof(fe, i)] * fe->rotw(i, p);
     }
     return result;
 }
 
 void VFEM::make()
 {
-#if defined VFEM_USE_NONHOMOGENEOUS_FIRST
-    if(global_to_local.size() > 0)
+    if(config.boundary_enabled && global_to_local.size() > 0)
         generate_surf_portrait();
-#endif
     generate_portrait();
     generate_ker_portrait();
     assemble_matrix();
@@ -422,7 +472,7 @@ void VFEM::calculate_diff() const
     {
         array_t<complex<double> > q_loc(config.basis.tet_bf_num);
         for(size_t i = 0; i < config.basis.tet_bf_num; i++)
-            q_loc[i] = slae.x[fes[k].dof[i]];
+            q_loc[i] = slae.x[get_tet_dof(&fes[k], i)];
 
         diff += fes[k].diff_normL2(q_loc, func_true);
     }

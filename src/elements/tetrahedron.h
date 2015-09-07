@@ -43,9 +43,6 @@ public:
 
     const basis_type * basis;   // Параметры базиса
 
-    size_t dof[/*basis::tet_bf_num*/42];
-    size_t ker_dof[/*basis::tet_ker_bf_num*/42];
-
     // Базисные функции
     vector3 w(size_t i, const point & p) const;
     // Роторы базисных функций
