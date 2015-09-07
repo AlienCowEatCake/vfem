@@ -13,6 +13,7 @@
 #include "../elements/tetrahedron.h"
 #include "../vfem/phys.h"
 #include "../vfem/slae.h"
+#include "../config/config.h"
 
 #define VFEM_USE_PML
 //#define VFEM_USE_NONHOMOGENEOUS_FIRST
@@ -61,6 +62,8 @@ bool is_pml(const point & p, const finite_element * fe);
 class VFEM
 {
 public:
+    config_type config;
+
     // Ввод данных
     void input_phys(const string & phys_filename);
     void input_mesh(const string & gmsh_filename);

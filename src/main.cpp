@@ -1,4 +1,3 @@
-#include "config/parser.h"
 #include "problems/problems.h"
 #include <ctime>
 
@@ -71,21 +70,6 @@ void print_time(unsigned long msec, const string & descr)
 
 int main()
 {
-    parser<complex<double> > p("real(2 + 3 * i) + i * imag(2 + 3 * i)");
-    p.simplify();
-    complex<double> r;
-    p.calculate(r);
-    cout << r << endl;
-
-    parser<double> p2("2 + 2");
-    p2.simplify();
-    double r2;
-    p2.calculate(r2);
-    cout << r2 << endl;
-
-    system("pause");
-    return 0;
-
 #if !defined _WIN32 && defined USE_NOSIGHUP
     // Устанавливаем обработчик SIGHUP
     struct sigaction sigact;
@@ -129,6 +113,11 @@ int main()
     try
     {
         VFEM v;
+
+        v.config.load("config.ini");
+        system("pause");
+        return 0;
+
         v.input_phys(phys_filename);
         v.input_mesh(mesh_filename);
         v.make();

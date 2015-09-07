@@ -36,6 +36,7 @@ SOURCES += \
 HEADERS += \
     src/config/config.h \
     src/config/parser.h \
+    src/common/trio.h \
     src/common/matrix.h \
     src/common/common.h \
     src/common/basis_config.h \

@@ -8,6 +8,7 @@
 #include "../vfem/phys.h"
 #include "../geometry/point.h"
 #include "../geometry/vector3.h"
+#include "../common/matrix.h"
 
 using namespace std;
 
@@ -16,18 +17,16 @@ class evaluator
 {
 public:
     evaluator();
-    bool parse(const string & str);
     cvector3 eval(const point & p, const phys_area * phys);
-
-protected:
-    map<size_t, parser<complex<double> >[3]> values;
-    parser<complex<double> > default_value[3];
+    map<size_t, array_t<parser<complex<double> >, 3> > values;
+    array_t<parser<complex<double> >, 3> default_value;
 };
 
 // Класс конфигурации
-class config
+class config_type
 {
 public:
+    config_type();
     bool load(const string & filename);
 
     // ===== VFEM =====
@@ -49,6 +48,19 @@ public:
     string filename_phys;
     // Куда сохранять веса решения
     string filename_slae;
+
+    // ===== Boundary =====
+
+    evaluator boundary;
+
+    // ===== Right =====
+
+    evaluator right;
+
+    // ===== Analytical =====
+
+    evaluator analytical;
+    bool analytical_enabled;
 
 protected:
     void load_defaults();

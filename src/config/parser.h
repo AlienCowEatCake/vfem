@@ -57,6 +57,7 @@ protected:
             imag_value = sqrt(static_cast<T>(-1.0));
             functions.insert("imag");
             functions.insert("real");
+            functions.insert("conj");
         }
         else
         {
@@ -193,6 +194,11 @@ protected:
         if(func == "real")
         {
             result = arg.real();
+            return true;
+        }
+        if(func == "conj")
+        {
+            result = conj(arg);
             return true;
         }
         if(fabs(arg.imag()) < numeric_limits<U>::epsilon())
@@ -387,36 +393,54 @@ public:
                 {
                     a.push_back(sym);
                     ++it;
-                    sym = *it;
+                    if(it != str.end())
+                    {
+                        sym = *it;
+                    }
                 }
                 if(it != str.end() && (sym == '.' || sym == ','))
                 {
                     a.push_back('.');
                     ++it;
-                    sym = *it;
+                    if(it != str.end())
+                    {
+                        sym = *it;
+                    }
                     while(it != str.end() && sym >= '0' && sym <= '9')
                     {
                         a.push_back(sym);
                         ++it;
-                        sym = *it;
+                        if(it != str.end())
+                        {
+                            sym = *it;
+                        }
                     }
                 }
                 if(it != str.end() && (sym == 'e' || sym == 'E' || sym == 'd' || sym == 'D'))
                 {
                     a.push_back('e');
                     ++it;
-                    sym = *it;
+                    if(it != str.end())
+                    {
+                        sym = *it;
+                    }
                     if(it != str.end() && (sym == '-' || sym == '+'))
                     {
                         a.push_back(sym);
                         ++it;
-                        sym = *it;
+                        if(it != str.end())
+                        {
+                            sym = *it;
+                        }
                     }
                     while(it != str.end() && sym >= '0' && sym <= '9')
                     {
                         a.push_back(sym);
                         ++it;
-                        sym = *it;
+                        if(it != str.end())
+                        {
+                            sym = *it;
+                        }
                     }
                 }
 
@@ -472,6 +496,12 @@ public:
                 if(sym == '-' && str_begin)
                 {
                     string::const_iterator it2 = it + 1;
+                    if(it2 == str.end())
+                    {
+                        status = false;
+                        error_string = "Unexpected '-'!";
+                        break;
+                    }
                     if(*it2 >= '0' && *it2 <= '9')
                     {
                         unary_minus = true;
@@ -772,8 +802,9 @@ public:
 
         if(st.size() != 1)
         {
-            error_string = "Internal error!";
-            cerr << "[parser] Internal error: Stack size equal " << st.size() << endl;
+            stringstream sst;
+            sst << "Stack size equal " << st.size();
+            error_string = sst.str();
             return false;
         }
         result = st.top();

@@ -1,1 +1,203 @@
 #include "config.h"
+#include <fstream>
+
+// ============================================================================
+
+string trim(const string & str)
+{
+    size_t start = str.find_first_not_of(" \t\f\v\n\r");
+    size_t stop = str.find_last_not_of(" \t\f\v\n\r");
+    if(start == string::npos || stop == string::npos)
+        return "";
+    return str.substr(start, stop - start + 1);
+}
+
+string to_lowercase(const string & str)
+{
+    string result;
+    for(string::const_iterator it = str.begin(); it != str.end(); ++it)
+    {
+        char c = * it;
+        if(c >= 'A' && c <= 'Z')
+            c -= 'A' - 'a';
+        result += c;
+    }
+    return result;
+}
+
+// ============================================================================
+
+evaluator::evaluator()
+{
+    for(size_t i = 0; i < 3; i++)
+        default_value[i].parse("0.0");
+}
+
+// ============================================================================
+
+config_type::config_type()
+{
+    load_defaults();
+}
+
+void config_type::load_defaults()
+{
+    basis_order = 1;
+    basis_type = 2;
+    eps_slae = 1e-10;
+    eps_slae_bound = 1e-14;
+    gamma_v_cycle_full = 0.5;
+    gamma_v_cycle_ker = 0.1;
+    filename_mesh = "mesh.msh";
+    filename_phys = "phys.txt";
+    filename_slae = "";
+
+    analytical_enabled = false;
+}
+
+bool config_type::load(const string & filename)
+{
+    ifstream ifs(filename.c_str());
+    if(!ifs.good())
+    {
+        cerr << "Error in " << __FILE__ << ":" << __LINE__
+             << " while reading file " << filename << endl;
+        return false;
+    }
+
+    string line;
+    getline(ifs, line);
+    line = trim(line);
+    do
+    {
+        if(line.length() > 1 && line[0] == '[')
+        {
+            line = to_lowercase(line.substr(1, line.length() - 2));
+            string section = line, subsection;
+            size_t dot_pos = line.find_first_of(".");
+            if(dot_pos != string::npos)
+            {
+                section = line.substr(0, dot_pos);
+                subsection = line.substr(dot_pos + 1);
+            }
+            cout << "section: " << section << "\nsubsection: " << subsection << endl;
+
+            if(section == "vfem")
+            {
+                do
+                {
+                    getline(ifs, line);
+                    line = trim(line);
+                    if(line.length() > 1 && line[0] != ';')
+                    {
+                        size_t eq_pos = line.find_first_of("=");
+                        if(eq_pos != string::npos)
+                        {
+                            string param = to_lowercase(trim(line.substr(0, eq_pos)));
+                            string value = trim(line.substr(eq_pos + 1));
+                            if(value.length() > 1 && value[0] == '\"')
+                                value = trim(value.substr(1, value.length() - 2));
+                            stringstream sst(value);
+                            if(param == "basis_order")              sst >> basis_order;
+                            else if(param == "basis_type")          sst >> basis_type;
+                            else if(param == "eps_slae")            sst >> eps_slae;
+                            else if(param == "eps_slae_bound")      sst >> eps_slae_bound;
+                            else if(param == "gamma_v_cycle_full")  sst >> gamma_v_cycle_full;
+                            else if(param == "gamma_v_cycle_ker")   sst >> gamma_v_cycle_ker;
+                            else if(param == "filename_mesh")       sst >> filename_mesh;
+                            else if(param == "filename_phys")       sst >> filename_phys;
+                            else if(param == "filename_slae")       sst >> filename_slae;
+                            cout << "  param = " << param << endl;
+                            cout << "  value = " << value << endl;
+                        }
+                    }
+                }
+                while(ifs.good() && !(line.length() > 1 && line[0] == '['));
+            }
+
+            else if(section == "boundary" || section == "right" || section == "analytical")
+            {
+                array_t<parser<complex<double> >, 3> * curr_parser;
+                if(section == "boundary")
+                {
+                    if(subsection == "")
+                        curr_parser = & boundary.default_value;
+                    else
+                    {
+                        stringstream sst(subsection);
+                        size_t bound_phys;
+                        sst >> bound_phys;
+                        curr_parser = & boundary.values[bound_phys];
+                    }
+                }
+                else if(section == "right")
+                {
+                    if(subsection == "")
+                        curr_parser = & right.default_value;
+                    else
+                    {
+                        stringstream sst(subsection);
+                        size_t bound_phys;
+                        sst >> bound_phys;
+                        curr_parser = & right.values[bound_phys];
+                    }
+                }
+                else if(section == "analytical")
+                {
+                    if(subsection == "")
+                        curr_parser = & analytical.default_value;
+                    else
+                    {
+                        stringstream sst(subsection);
+                        size_t bound_phys;
+                        sst >> bound_phys;
+                        curr_parser = & analytical.values[bound_phys];
+                    }
+                }
+
+                do
+                {
+                    getline(ifs, line);
+                    line = trim(line);
+                    if(line.length() > 1 && line[0] != ';')
+                    {
+                        size_t eq_pos = line.find_first_of("=");
+                        if(eq_pos != string::npos)
+                        {
+                            string param = to_lowercase(trim(line.substr(0, eq_pos)));
+                            string value = trim(line.substr(eq_pos + 1));
+                            if(value.length() > 1 && value[0] == '\"')
+                                value = trim(value.substr(1, value.length() - 2));
+                            if(param == "x")        (* curr_parser)[0].parse(value);
+                            else if(param == "y")   (* curr_parser)[1].parse(value);
+                            else if(param == "z")   (* curr_parser)[2].parse(value);
+                            else if(param == "enabled" && section == "analytical")
+                            {
+                                value = to_lowercase(value);
+                                if(value == "yes" || value == "true" || value == "1")
+                                    analytical_enabled = true;
+                                else
+                                    analytical_enabled = false;
+                            }
+                            cout << "  param = " << param << endl;
+                            cout << "  value = " << value << endl;
+                        }
+                    }
+                }
+                while(ifs.good() && !(line.length() > 1 && line[0] == '['));
+            }
+
+
+
+        }
+        else
+        {
+            getline(ifs, line);
+            line = trim(line);
+        }
+    }
+    while(ifs.good());
+
+    ifs.close();
+    return true;
+}
