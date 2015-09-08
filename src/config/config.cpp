@@ -58,6 +58,7 @@ void config_type::load_defaults()
 
     analytical_enabled = false;
     boundary_enabled = false;
+    right_enabled = false;
 
     init(true);
 }
@@ -128,7 +129,7 @@ bool config_type::load(const string & filename)
                 section = line.substr(0, dot_pos);
                 subsection = line.substr(dot_pos + 1);
             }
-            cout << "section: " << section << "\nsubsection: " << subsection << endl;
+            //cout << "section: " << section << "\nsubsection: " << subsection << endl;
 
             if(section == "vfem")
             {
@@ -157,8 +158,10 @@ bool config_type::load(const string & filename)
                             else if(param == "filename_mesh")           sst >> filename_mesh;
                             else if(param == "filename_phys")           sst >> filename_phys;
                             else if(param == "filename_slae")           sst >> filename_slae;
-                            cout << "  param = " << param << endl;
-                            cout << "  value = " << value << endl;
+                            else cerr << "[Config] Unsupported param \"" << param<< "\" in section \"" << section
+                                      << (subsection == "" ? string("") : (string(".") + subsection)) << "\"" << endl;
+                            //cout << "  param = " << param << endl;
+                            //cout << "  value = " << value << endl;
                         }
                     }
                 }
@@ -245,31 +248,106 @@ bool config_type::load(const string & filename)
                                     return init(false);
                                 }
                             }
-                            else if(param == "enabled" && section == "analytical")
+                            else if(param == "enabled")
                             {
-                                value = to_lowercase(value);
-                                if(value == "yes" || value == "true" || value == "1")
-                                    analytical_enabled = true;
-                                else
-                                    analytical_enabled = false;
+                                if(section == "analytical")
+                                {
+                                    value = to_lowercase(value);
+                                    if(value == "yes" || value == "true" || value == "1")
+                                        analytical_enabled = true;
+                                    else
+                                        analytical_enabled = false;
+                                }
+                                else if(section == "boundary")
+                                {
+                                    value = to_lowercase(value);
+                                    if(value == "yes" || value == "true" || value == "1")
+                                        boundary_enabled = true;
+                                    else
+                                        boundary_enabled = false;
+                                }
+                                else if(section == "right")
+                                {
+                                    value = to_lowercase(value);
+                                    if(value == "yes" || value == "true" || value == "1")
+                                        right_enabled = true;
+                                    else
+                                        right_enabled = false;
+                                }
                             }
-                            else if(param == "enabled" && section == "boundary")
-                            {
-                                value = to_lowercase(value);
-                                if(value == "yes" || value == "true" || value == "1")
-                                    boundary_enabled = true;
-                                else
-                                    boundary_enabled = false;
-                            }
-                            cout << "  param = " << param << endl;
-                            cout << "  value = " << value << endl;
+                            else cerr << "[Config] Unsupported param \"" << param<< "\" in section \"" << section
+                                      << (subsection == "" ? string("") : (string(".") + subsection)) << "\"" << endl;
+                            //cout << "  param = " << param << endl;
+                            //cout << "  value = " << value << endl;
                         }
                     }
                 }
                 while(ifs.good() && !(line.length() > 1 && line[0] == '['));
             }
 
+            else if(section == "postprocessing")
+            {
+                stringstream sst(subsection);
+                size_t index;
+                sst >> index;
+                postprocessor * p = &(post[index]);
 
+                do
+                {
+                    getline(ifs, line);
+                    line = trim(line);
+                    if(line.length() > 1 && line[0] != ';')
+                    {
+                        size_t eq_pos = line.find_first_of("=");
+                        if(eq_pos != string::npos)
+                        {
+                            string param = to_lowercase(trim(line.substr(0, eq_pos)));
+                            string value = trim(line.substr(eq_pos + 1));
+                            if(value.length() > 1 && value[0] == '\"')
+                                value = trim(value.substr(1, value.length() - 2));
+                            stringstream sst(value);
+                            if(param == "filename")             sst >> p->filename;
+                            else if(param == "slice_var_name")  sst >> p->param_2d.slice_var_name;
+                            else if(param == "slice_var_value") sst >> p->param_2d.slice_var_value;
+                            else if(param == "var1_name")       sst >> p->param_2d.var1_name;
+                            else if(param == "var1_from")       sst >> p->param_2d.var1_from;
+                            else if(param == "var1_to")         sst >> p->param_2d.var1_to;
+                            else if(param == "var1_num")        sst >> p->param_2d.var1_num;
+                            else if(param == "var2_name")       sst >> p->param_2d.var2_name;
+                            else if(param == "var2_from")       sst >> p->param_2d.var2_from;
+                            else if(param == "var2_to")         sst >> p->param_2d.var2_to;
+                            else if(param == "var2_num")        sst >> p->param_2d.var2_num;
+                            else if(param == "line_var1_name")  sst >> p->param_1d.line_var1_name;
+                            else if(param == "line_var1_value") sst >> p->param_1d.line_var1_value;
+                            else if(param == "line_var2_name")  sst >> p->param_1d.line_var2_name;
+                            else if(param == "line_var2_value") sst >> p->param_1d.line_var2_value;
+                            else if(param == "var_name")        sst >> p->param_1d.var_name;
+                            else if(param == "var_from")        sst >> p->param_1d.var_from;
+                            else if(param == "var_to")          sst >> p->param_1d.var_to;
+                            else if(param == "var_num")         sst >> p->param_1d.var_num;
+                            else if(param == "timestamp")
+                            {
+                                value = to_lowercase(value);
+                                if(value == "yes" || value == "true" || value == "1")
+                                    p->timestamp = true;
+                                else
+                                    p->timestamp = false;
+                            }
+                            else if(param == "type")
+                            {
+                                if(value == "1d") p->type = 1;
+                                if(value == "2d") p->type = 2;
+                                if(value == "3d") p->type = 3;
+                            }
+                            else cerr << "[Config] Unsupported param \"" << param<< "\" in section \"" << section
+                                      << (subsection == "" ? string("") : (string(".") + subsection)) << "\"" << endl;
+                            //cout << "  param = " << param << endl;
+                            //cout << "  value = " << value << endl;
+                        }
+                    }
+                }
+                while(ifs.good() && !(line.length() > 1 && line[0] == '['));
+            }
 
         }
         else

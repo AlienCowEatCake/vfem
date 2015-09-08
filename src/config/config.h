@@ -44,6 +44,53 @@ public:
     array_t<parser<complex<double> >, 3> default_value;
 };
 
+// Конфигурация 1D постпроцессора
+struct postprocessor_1d
+{
+    char line_var1_name;
+    double line_var1_value;
+    char line_var2_name;
+    double line_var2_value;
+    char var_name;
+    double var_from;
+    double var_to;
+    size_t var_num;
+};
+
+// Конфигурация 2D постпроцессора
+struct postprocessor_2d
+{
+    char slice_var_name;
+    double slice_var_value;
+    char var1_name;
+    double var1_from;
+    double var1_to;
+    size_t var1_num;
+    char var2_name;
+    double var2_from;
+    double var2_to;
+    size_t var2_num;
+};
+
+// Общая конфигурация постпроцессора
+class postprocessor
+{
+public:
+    unsigned char type;
+    string filename;
+    bool timestamp;
+    union
+    {
+        postprocessor_1d param_1d;
+        postprocessor_2d param_2d;
+    };
+    postprocessor() : type(3), filename("plot.plt"), timestamp(false)
+    {
+        memset(&param_1d, 0, sizeof(postprocessor_1d));
+        memset(&param_1d, 0, sizeof(postprocessor_2d));
+    }
+};
+
 // Класс конфигурации
 class config_type
 {
@@ -83,11 +130,16 @@ public:
     // ===== Right =====
 
     evaluator right;
+    bool right_enabled;
 
     // ===== Analytical =====
 
     evaluator analytical;
     bool analytical_enabled;
+
+    // ===== Postprocessing =====
+
+    map<size_t, postprocessor> post;
 
 protected:
     // Загрузка значений по-умолчанию
