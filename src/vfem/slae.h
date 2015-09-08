@@ -29,10 +29,10 @@ public:
     complex<double> * gg, * di, * rp, * x;
     size_t * ig, * jg;
     size_t n;
-    void dump(const string & filename) const;
-    void restore(const string & filename);
-    void dump_x(const string & filename) const;
-    void restore_x(const string & filename);
+    bool dump(const string & filename) const;
+    bool restore(const string & filename);
+    bool dump_x(const string & filename) const;
+    bool restore_x(const string & filename);
 private:
     //BiCGComplex_VC solver;
     //BiCGStabComplex_VC solver;

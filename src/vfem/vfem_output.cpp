@@ -1,7 +1,7 @@
 #include "vfem.h"
 
 // Вывод данных в 3D сетке
-void VFEM::output(const string & tecplot_filename)
+bool VFEM::output(const string & tecplot_filename)
 {
     cout << "Writing to Tecplot ..." << endl;
 
@@ -18,7 +18,7 @@ void VFEM::output(const string & tecplot_filename)
     {
         cerr << "Error in " << __FILE__ << ":" << __LINE__
              << " while writing file " << tecplot_filename << endl;
-        throw IO_FILE_ERROR;
+        return false;
     }
 
     tecplot_file.precision(17);
@@ -62,10 +62,11 @@ void VFEM::output(const string & tecplot_filename)
     tecplot_file << "\n";
     tecplot_file.flush();
     tecplot_file.close();
+    return true;
 }
 
 // Вывод данных в 2D сетке
-void VFEM::output_slice(const string & tecplot_filename, char slice_var, double slice_val,
+bool VFEM::output_slice(const string & tecplot_filename, char slice_var, double slice_val,
                         char var1, double min_var1, double max_var1, size_t num_var_1,
                         char var2, double min_var2, double max_var2, size_t num_var_2)
 {
@@ -83,7 +84,7 @@ void VFEM::output_slice(const string & tecplot_filename, char slice_var, double 
     else
     {
         cerr << "Unknown variable, breaking ..." << endl;
-        return;
+        return false;
     }
 
     // Определяем, какая переменная первая
@@ -93,7 +94,7 @@ void VFEM::output_slice(const string & tecplot_filename, char slice_var, double 
     else
     {
         cerr << "Unknown variable, breaking ..." << endl;
-        return;
+        return false;
     }
 
     // Определяем, какая переменная вторая
@@ -103,7 +104,7 @@ void VFEM::output_slice(const string & tecplot_filename, char slice_var, double 
     else
     {
         cerr << "Unknown variable, breaking ..." << endl;
-        return;
+        return false;
     }
 
     cout << "Writing slice to Tecplot ..." << endl;
@@ -115,7 +116,7 @@ void VFEM::output_slice(const string & tecplot_filename, char slice_var, double 
     {
         cerr << "Error in " << __FILE__ << ":" << __LINE__
              << " while writing file " << tecplot_filename << endl;
-        throw IO_FILE_ERROR;
+        return false;
     }
 
     tecplot_file << "TITLE = \"Slice " << slice_var << " = " << slice_val << "\"\n";
@@ -146,10 +147,11 @@ void VFEM::output_slice(const string & tecplot_filename, char slice_var, double 
     tecplot_file << "\n";
     tecplot_file.flush();
     tecplot_file.close();
+    return true;
 }
 
 // Вывод данных по линии
-void VFEM::output_line(const string & tecplot_filename, char line_var1, double line_val1,
+bool VFEM::output_line(const string & tecplot_filename, char line_var1, double line_val1,
                        char line_var2, double line_val2, char var3, double min_var3,
                        double max_var3, size_t num_var)
 {
@@ -163,7 +165,7 @@ void VFEM::output_line(const string & tecplot_filename, char line_var1, double l
     else
     {
         cerr << "Unknown variable, breaking ..." << endl;
-        return;
+        return false;
     }
 
     if      (line_var2 == 'x' || line_var2 == 'X') index2 = 0;
@@ -172,7 +174,7 @@ void VFEM::output_line(const string & tecplot_filename, char line_var1, double l
     else
     {
         cerr << "Unknown variable, breaking ..." << endl;
-        return;
+        return false;
     }
 
     if      (var3 == 'x' || var3 == 'X') index_3 = 0;
@@ -181,7 +183,7 @@ void VFEM::output_line(const string & tecplot_filename, char line_var1, double l
     else
     {
         cerr << "Unknown variable, breaking ..." << endl;
-        return;
+        return false;
     }
 
     cout << "Writing line to Tecplot ..." << endl;
@@ -193,7 +195,7 @@ void VFEM::output_line(const string & tecplot_filename, char line_var1, double l
     {
         cerr << "Error in " << __FILE__ << ":" << __LINE__
              << " while writing file " << tecplot_filename << endl;
-        throw IO_FILE_ERROR;
+        return false;
     }
 
     tecplot_file << "TITLE = \"Line " << line_var1 << " = " << line_val1 << ", " << line_var2 << " = " << line_val2 << "\"\n";
@@ -220,4 +222,5 @@ void VFEM::output_line(const string & tecplot_filename, char line_var1, double l
     tecplot_file << "\n";
     tecplot_file.flush();
     tecplot_file.close();
+    return true;
 }

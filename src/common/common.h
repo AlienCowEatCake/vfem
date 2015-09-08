@@ -42,8 +42,6 @@
 
 using namespace std;
 
-static const int IO_FILE_ERROR      = 0xfb;
-
 #define MAYBE_UNUSED(a) (void)(a)
 
 inline void show_progress(const char * message, size_t index, size_t num_all)

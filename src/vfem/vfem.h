@@ -53,20 +53,20 @@ public:
     config_type config;
 
     // Ввод данных
-    void input_phys(const string & phys_filename);
-    void input_mesh(const string & gmsh_filename);
+    bool input_phys(const string & phys_filename);
+    bool input_mesh(const string & gmsh_filename);
     // Процедура для сборки СЛАУ
     void make();
     // Запуск решения СЛАУ
     void solve();
     // Вывод данных в 3D сетке
-    void output(const string & tecplot_filename);
+    bool output(const string & tecplot_filename);
     // Вывод данных в 2D сетке
-    void output_slice(const string & tecplot_filename, char slice_var, double slice_val,
+    bool output_slice(const string & tecplot_filename, char slice_var, double slice_val,
                       char var1, double min_var1, double max_var1, size_t num_var_1,
                       char var2, double min_var2, double max_var2, size_t num_var_2);
     // Вывод данных по линии
-    void output_line(const string & tecplot_filename, char line_var1, double line_val1,
+    bool output_line(const string & tecplot_filename, char line_var1, double line_val1,
                      char line_var2, double line_val2, char var3, double min_var3,
                      double max_var3, size_t num_var);
 
@@ -91,11 +91,6 @@ public:
     SLAE ker_slae;
     // СЛАУ по границе
     SLAE surf_slae;
-protected:
-    // Добавление ребра в множество ребер
-    size_t add_edge(edge ed, set<edge> & edges_set);
-    // Добавление грани в множество граней
-    size_t add_face(face fc, set<face> & faces_set);
 
     // Узлы
     vector<point> nodes;
@@ -152,6 +147,12 @@ protected:
     void apply_edges_sources();
     // Применение точечных источников
     void apply_point_sources();
+
+protected:
+    // Добавление ребра в множество ребер
+    size_t add_edge(edge ed, set<edge> & edges_set);
+    // Добавление грани в множество граней
+    size_t add_face(face fc, set<face> & faces_set);
 
 #if defined VFEM_USE_PML
     cpoint convert_point_to_pml(const point * p, const finite_element * fefe) const;

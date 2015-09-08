@@ -20,7 +20,7 @@ size_t VFEM::add_face(face fc, set<face> & faces_set)
     return fc.num;
 }
 
-void VFEM::input_phys(const string & phys_filename)
+bool VFEM::input_phys(const string & phys_filename)
 {
     cout << "Reading physical parameters ..." << endl;
 
@@ -31,7 +31,7 @@ void VFEM::input_phys(const string & phys_filename)
     {
         cerr << "Error in " << __FILE__ << ":" << __LINE__
              << " while reading file " << phys_filename << endl;
-        throw IO_FILE_ERROR;
+        return false;
     }
     double omega_global;
     phys_param >> omega_global;
@@ -121,7 +121,7 @@ void VFEM::input_phys(const string & phys_filename)
     {
         cerr << "Error in " << __FILE__ << ":" << __LINE__
              << " while reading file " << phys_filename << endl;
-        throw IO_FILE_ERROR;
+        return false;
     }
     size_t pss_num = 0;
     phys_param >> pss_num;
@@ -193,9 +193,11 @@ void VFEM::input_phys(const string & phys_filename)
         config.boundary.default_value[i].set_const("omega", omega_global);
         config.right.default_value[i].set_const("omega", omega_global);
     }
+
+    return true;
 }
 
-void VFEM::input_mesh(const string & gmsh_filename)
+bool VFEM::input_mesh(const string & gmsh_filename)
 {
     cout << "Reading mesh ..." << endl;
     string line;
@@ -214,7 +216,7 @@ void VFEM::input_mesh(const string & gmsh_filename)
     {
         cerr << "Error in " << __FILE__ << ":" << __LINE__
              << " while reading file " << gmsh_filename << endl;
-        throw IO_FILE_ERROR;
+        return false;
     }
 
     // Чтение узлов
@@ -251,7 +253,7 @@ void VFEM::input_mesh(const string & gmsh_filename)
     {
         cerr << "Error in " << __FILE__ << ":" << __LINE__
              << " while reading file " << gmsh_filename << endl;
-        throw IO_FILE_ERROR;
+        return false;
     }
 
     set<edge> edges_surf_temp;
@@ -295,7 +297,7 @@ void VFEM::input_mesh(const string & gmsh_filename)
                 cerr << "Error in " << __FILE__ << ":" << __LINE__
                      << " while reading file " << gmsh_filename << endl;
                 cerr << "Can`t detect physical id " << phys_num << " in 4 (tetrahedron)" << endl;
-                throw IO_FILE_ERROR;
+                return false;
             }
 
             for(size_t j = 0; j < 4; j++)
@@ -331,14 +333,14 @@ void VFEM::input_mesh(const string & gmsh_filename)
                 cerr << "Error in " << __FILE__ << ":" << __LINE__
                      << " while reading file " << gmsh_filename << endl;
                 cerr << "Can`t detect physical id " << phys_num << " in 2 (triangle)" << endl;
-                throw IO_FILE_ERROR;
+                return false;
             }
 
             size_t bound_type = fake_triangle.phys->type_of_bounds;
             if(bound_type != 1 && bound_type != 2)
             {
                 cerr << "Error: unaccounted bound, breaking..." << endl;
-                throw IO_FILE_ERROR;
+                return false;
             }
 
             for(size_t j = 0; j < 3; j++)
@@ -372,7 +374,7 @@ void VFEM::input_mesh(const string & gmsh_filename)
                 cerr << "Error in " << __FILE__ << ":" << __LINE__
                      << " while reading file " << gmsh_filename << endl;
                 cerr << "Can`t detect physical id " << phys_num << " in 1 (edge)" << endl;
-                throw IO_FILE_ERROR;
+                return false;
             }
 
             size_t nd[2];
@@ -455,7 +457,7 @@ void VFEM::input_mesh(const string & gmsh_filename)
     if(fes.size() == 0)
     {
         cerr << "Error: 0 tetrahedrons detected, breaking..." << endl;
-        throw IO_FILE_ERROR;
+        return false;
     }
     for(size_t i = 0; i < fes.size(); i++)
     {
@@ -475,7 +477,7 @@ void VFEM::input_mesh(const string & gmsh_filename)
     if(trs.size() == 0)
     {
         cerr << "Error: 0 triangles detected, breaking..." << endl;
-        throw IO_FILE_ERROR;
+        return false;
     }
     for(size_t i = 0; i < trs.size(); i++)
     {
@@ -622,6 +624,8 @@ void VFEM::input_mesh(const string & gmsh_filename)
     cout << " # SLAE ker:     " << ker_dof_num << endl;
     if(config.boundary_enabled)
         cout << " # SLAE surf:    " << global_to_local.size() << endl;
+
+    return true;
 }
 
 #if defined VFEM_USE_PML

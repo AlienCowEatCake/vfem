@@ -106,6 +106,8 @@ bool config_type::init(bool status)
 // Загрузка значений из файла
 bool config_type::load(const string & filename)
 {
+    cout << "Reading config file ..." << endl;
+
     ifstream ifs(filename.c_str());
     if(!ifs.good())
     {

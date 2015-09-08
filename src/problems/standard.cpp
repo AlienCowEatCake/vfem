@@ -1,10 +1,5 @@
 #include "problems.h"
 
-#if defined PROBLEM_STANDARD
-#if defined VFEM_USE_PML
-#error "Please, reconfigure!"
-#endif
-
 cvector3 func_true(const config_type * config, const point & p, const phys_area & phys)
 {
     cvector3 result(0, 0, 0);
@@ -103,9 +98,6 @@ cvector3 func_b1(const config_type * config, const point & p, const phys_area & 
 
 void postprocessing(VFEM & v, char * timebuf)
 {
-    MAYBE_UNUSED(v);
-    MAYBE_UNUSED(timebuf);
-
     if(v.config.filename_slae != "")
         v.slae.dump_x(v.config.filename_slae);
 
@@ -147,5 +139,3 @@ void postprocessing(VFEM & v, char * timebuf)
         }
     }
 }
-
-#endif

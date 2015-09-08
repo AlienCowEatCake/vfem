@@ -68,7 +68,7 @@ void print_time(unsigned long msec, const string & descr)
     }
 }
 
-int main()
+int main(int argc, char * argv [])
 {
 #if !defined _WIN32 && defined USE_NOSIGHUP
     // Устанавливаем обработчик SIGHUP
@@ -79,8 +79,6 @@ int main()
     sigaction(SIGHUP, & sigact, 0);
 #endif
 
-    /**/
-    cout << "Build configuration:" << endl;
 #if defined VFEM_USE_PML
     cout << " # VFEM_USE_PML" << endl;
 #endif
@@ -90,45 +88,51 @@ int main()
 #if defined USE_NOSIGHUP
     cout << " # USE_NOSIGHUP" << endl;
 #endif
-    /**/
 
-//    string new_tecplot_name = tecplot_filename.substr(0, tecplot_filename.find_last_of("."));
     time_t seconds = time(NULL);
     char timebuf[24];
     strftime(timebuf, 24, "%Y-%m-%d_%H-%M-%S", localtime(&seconds));
-//    new_tecplot_name += "_" + string(timebuf) + ".plt";
     unsigned long time_exec = mtime();
     unsigned long time_solve = 0;
 
-    try
+    bool nosolve = false;
+    bool nopost = false;
+    string config = "config.ini";
+    string config_dir = "";
+    for(int i = 1; i < argc; i++)
     {
-        VFEM v;
-
-        v.config.load("config.ini");
-        //system("pause");
-        //return 0;
-
-        v.input_phys(v.config.filename_phys);
-        v.input_mesh(v.config.filename_mesh);
-        v.make();
-        time_solve = mtime();
-        v.solve();
-        time_solve = mtime() - time_solve;
-        //v.output(new_tecplot_name);
-        postprocessing(v, timebuf);
-    }
-    catch(int errn)
-    {
-        switch(errn)
+        if(strcmp(argv[i], "-nosolve") == 0)        nosolve = true;
+        else if(strcmp(argv[i], "-nopost") == 0)    nopost = true;
+        else if(argv[i][0] != '-')
         {
-        case IO_FILE_ERROR:
-            cerr << "Throw IO_FILE_ERROR" << endl;
-            break;
-        default:
-            cerr << "Throw " << errn << " (unknown)" << endl;
-            break;
+            config = argv[i];
+            size_t delim_pos = config.find_last_of("/");
+#if defined _WIN32
+            size_t delim_pos_w = config.find_last_of("\\");
+            if(delim_pos == string::npos || (delim_pos_w != string::npos && delim_pos_w > delim_pos))
+                delim_pos = delim_pos_w;
+#endif
+            if(delim_pos != string::npos)
+                config_dir = config.substr(0, delim_pos + 1);
         }
+        else
+            cerr << "[Main] Unknown argument \"" << argv[i] << "\"" << endl;
     }
+
+    VFEM v;
+    v.config.load(config);
+    if(!v.input_phys(config_dir + v.config.filename_phys)) return 1;
+    if(!v.input_mesh(config_dir + v.config.filename_mesh)) return 1;
+    v.make();
+    time_solve = mtime();
+    if(!nosolve)
+        v.solve();
+    else
+        if(!(v.config.filename_slae != "" && v.slae.restore_x(v.config.filename_slae)))
+            return 1;
+    time_solve = mtime() - time_solve;
+    if(!nopost)
+        postprocessing(v, timebuf);
 
     print_time(time_solve, "Solve time");
     time_exec = mtime() - time_exec;

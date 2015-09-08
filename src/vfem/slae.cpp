@@ -74,7 +74,7 @@ void SLAE::add(size_t i, size_t j, const complex<double> & elem)
     gg[ind] += elem;
 }
 
-void SLAE::dump(const string & filename) const
+bool SLAE::dump(const string & filename) const
 {
     ofstream slae_file;
     slae_file.open(filename.c_str(), ios::out);
@@ -83,7 +83,7 @@ void SLAE::dump(const string & filename) const
     {
         cerr << "Error in " << __FILE__ << ":" << __LINE__
              << " while writing file " << filename << endl;
-        throw IO_FILE_ERROR;
+        return false;
     }
 
     slae_file.precision(17);
@@ -107,9 +107,10 @@ void SLAE::dump(const string & filename) const
     slae_file << '\n';
     slae_file.flush();
     slae_file.close();
+    return true;
 }
 
-void SLAE::restore(const string & filename)
+bool SLAE::restore(const string & filename)
 {
     ifstream slae_file;
     slae_file.open(filename.c_str(), ios::in);
@@ -117,7 +118,7 @@ void SLAE::restore(const string & filename)
     {
         cerr << "Error in " << __FILE__ << ":" << __LINE__
              << " while reading file " << filename << endl;
-        throw IO_FILE_ERROR;
+        return false;
     }
 
     size_t gg_size;
@@ -141,13 +142,14 @@ void SLAE::restore(const string & filename)
     {
         cerr << "Error in " << __FILE__ << ":" << __LINE__
              << " while reading file " << filename << endl;
-        throw IO_FILE_ERROR;
+        return false;
     }
 
     slae_file.close();
+    return true;
 }
 
-void SLAE::dump_x(const string & filename) const
+bool SLAE::dump_x(const string & filename) const
 {
     ofstream slae_file;
     slae_file.open(filename.c_str(), ios::out);
@@ -156,7 +158,7 @@ void SLAE::dump_x(const string & filename) const
     {
         cerr << "Error in " << __FILE__ << ":" << __LINE__
              << " while writing file " << filename << endl;
-        throw IO_FILE_ERROR;
+        return false;
     }
 
     slae_file.precision(17);
@@ -168,9 +170,10 @@ void SLAE::dump_x(const string & filename) const
     slae_file << '\n';
     slae_file.flush();
     slae_file.close();
+    return true;
 }
 
-void SLAE::restore_x(const string & filename)
+bool SLAE::restore_x(const string & filename)
 {
     ifstream slae_file;
     slae_file.open(filename.c_str(), ios::in);
@@ -178,7 +181,7 @@ void SLAE::restore_x(const string & filename)
     {
         cerr << "Error in " << __FILE__ << ":" << __LINE__
              << " while reading file " << filename << endl;
-        throw IO_FILE_ERROR;
+        return false;
     }
 
     for(size_t i = 0; i < n; i++)
@@ -188,8 +191,9 @@ void SLAE::restore_x(const string & filename)
     {
         cerr << "Error in " << __FILE__ << ":" << __LINE__
              << " while reading file " << filename << endl;
-        throw IO_FILE_ERROR;
+        return false;
     }
 
     slae_file.close();
+    return true;
 }

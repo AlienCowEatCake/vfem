@@ -11,10 +11,7 @@
 //#define AREA_3LAYERS_INC_LOOP_PML
 //#define AREA_4LAYERS_LOOP_PML
 #define PROBLEM_STANDARD
-
-extern string mesh_filename;
-extern string phys_filename;
-extern string tecplot_filename;
+//#define PROBLEM_STANDARD_PML
 
 void postprocessing(VFEM & v, char * timebuf);
 

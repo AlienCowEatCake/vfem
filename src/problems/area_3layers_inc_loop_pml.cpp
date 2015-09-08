@@ -313,7 +313,7 @@ void postprocessing(VFEM & v, char * timebuf)
             array_t<complex<double> > q_loc(v.config.basis.tet_bf_num), q_loc_true(v.config.basis.tet_bf_num);
             for(size_t i = 0; i < v.config.basis.tet_bf_num; i++)
             {
-                size_t dof = v.fes[k].dof[i];
+                size_t dof = v.get_tet_dof(&v.fes[k], i);
                 q_loc[i] = v.slae.x[dof];
                 q_loc_true[i] = anal[dof];
             }
