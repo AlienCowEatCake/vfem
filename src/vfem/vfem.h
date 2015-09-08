@@ -15,7 +15,6 @@
 #include "../vfem/slae.h"
 
 //#define VFEM_USE_PML
-#define VFEM_USE_ANALYTICAL
 
 #if defined VFEM_USE_PML
 typedef tetrahedron_pml finite_element;
@@ -30,23 +29,19 @@ typedef matrix_t<double> ker_l_matrix;
 typedef triangle_full triangle;
 
 // Правая часть
-cvector3 func_rp(const point & p, const phys_area & phys);
+cvector3 func_rp(const config_type * config, const point & p, const phys_area & phys);
 
 // Функция неоднородных первых краевых условий
-cvector3 func_b1(const point & p, const triangle * tr);
+cvector3 func_b1(const config_type * config, const point & p, const phys_area & phys);
 
 // Функция аналитического решения
-#if defined VFEM_USE_ANALYTICAL
-cvector3 func_true(const point & p);
-#endif
+cvector3 func_true(const config_type * config, const point & p, const phys_area & phys);
 
-// Коэффициент S для PML
 #if defined VFEM_USE_PML
+// Коэффициент S для PML
 cvector3 get_s(const point & p, const tetrahedron_pml * fe, const phys_pml_area * phys_pml);
-#endif
 
 // Проверка, PML или нет
-#if defined VFEM_USE_PML
 bool is_pml(const point & p, const finite_element * fe);
 #endif
 
@@ -88,9 +83,7 @@ public:
     // Конечные элементы (тетраэдры)
     vector<finite_element> fes;
 
-#if defined VFEM_USE_ANALYTICAL
     void calculate_diff() const;
-#endif
 
     // Основная СЛАУ
     SLAE slae;

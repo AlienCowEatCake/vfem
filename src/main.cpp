@@ -80,12 +80,9 @@ int main()
 #endif
 
     /**/
-    cout << "Configuration:" << endl;
+    cout << "Build configuration:" << endl;
 #if defined VFEM_USE_PML
     cout << " # VFEM_USE_PML" << endl;
-#endif
-#if defined VFEM_USE_ANALYTICAL
-    cout << " # VFEM_USE_ANALYTICAL" << endl;
 #endif
 #if defined USE_CXX11
     cout << " # USE_CXX11" << endl;
@@ -93,15 +90,13 @@ int main()
 #if defined USE_NOSIGHUP
     cout << " # USE_NOSIGHUP" << endl;
 #endif
-    cout << " # Mesh file: " << mesh_filename << endl;
-    cout << " # Phys file: " << phys_filename << endl;
     /**/
 
-    string new_tecplot_name = tecplot_filename.substr(0, tecplot_filename.find_last_of("."));
+//    string new_tecplot_name = tecplot_filename.substr(0, tecplot_filename.find_last_of("."));
     time_t seconds = time(NULL);
     char timebuf[24];
     strftime(timebuf, 24, "%Y-%m-%d_%H-%M-%S", localtime(&seconds));
-    new_tecplot_name += "_" + string(timebuf) + ".plt";
+//    new_tecplot_name += "_" + string(timebuf) + ".plt";
     unsigned long time_exec = mtime();
     unsigned long time_solve = 0;
 
@@ -113,13 +108,13 @@ int main()
         //system("pause");
         //return 0;
 
-        v.input_phys(phys_filename);
-        v.input_mesh(mesh_filename);
+        v.input_phys(v.config.filename_phys);
+        v.input_mesh(v.config.filename_mesh);
         v.make();
         time_solve = mtime();
         v.solve();
         time_solve = mtime() - time_solve;
-        v.output(new_tecplot_name);
+        //v.output(new_tecplot_name);
         postprocessing(v, timebuf);
     }
     catch(int errn)

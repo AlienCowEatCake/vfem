@@ -140,6 +140,59 @@ void VFEM::input_phys(const string & phys_filename)
     }
 
     phys_param.close();
+
+    // Заполним данные и в вычисляемых функциях
+    for(map<size_t, array_t<parser<complex<double> >, 3> >::iterator it = config.analytical.values.begin(); it != config.analytical.values.end(); ++it)
+    {
+        map<phys_id, phys_area>::const_iterator ph = phys.find(phys_id(4, it->first));
+        complex<double> k2(- ph->second.omega * ph->second.omega * ph->second.epsilon, ph->second.omega * ph->second.sigma);
+        for(size_t i = 0; i < 3; i++)
+        {
+            it->second[i].set_const("J0", ph->second.J0);
+            it->second[i].set_const("omega", omega_global);
+            it->second[i].set_const("epsilon", ph->second.epsilon);
+            it->second[i].set_const("sigma", ph->second.sigma);
+            it->second[i].set_const("mu", ph->second.mu);
+            it->second[i].set_const("k2", k2);
+            it->second[i].simplify();
+        }
+    }
+    for(map<size_t, array_t<parser<complex<double> >, 3> >::iterator it = config.boundary.values.begin(); it != config.boundary.values.end(); ++it)
+    {
+        map<phys_id, phys_area>::const_iterator ph = phys.find(phys_id(4, it->first));
+        complex<double> k2(- ph->second.omega * ph->second.omega * ph->second.epsilon, ph->second.omega * ph->second.sigma);
+        for(size_t i = 0; i < 3; i++)
+        {
+            it->second[i].set_const("J0", ph->second.J0);
+            it->second[i].set_const("omega", omega_global);
+            it->second[i].set_const("epsilon", ph->second.epsilon);
+            it->second[i].set_const("sigma", ph->second.sigma);
+            it->second[i].set_const("mu", ph->second.mu);
+            it->second[i].set_const("k2", k2);
+            it->second[i].simplify();
+        }
+    }
+    for(map<size_t, array_t<parser<complex<double> >, 3> >::iterator it = config.right.values.begin(); it != config.right.values.end(); ++it)
+    {
+        map<phys_id, phys_area>::const_iterator ph = phys.find(phys_id(4, it->first));
+        complex<double> k2(- ph->second.omega * ph->second.omega * ph->second.epsilon, ph->second.omega * ph->second.sigma);
+        for(size_t i = 0; i < 3; i++)
+        {
+            it->second[i].set_const("J0", ph->second.J0);
+            it->second[i].set_const("omega", omega_global);
+            it->second[i].set_const("epsilon", ph->second.epsilon);
+            it->second[i].set_const("sigma", ph->second.sigma);
+            it->second[i].set_const("mu", ph->second.mu);
+            it->second[i].set_const("k2", k2);
+            it->second[i].simplify();
+        }
+    }
+    for(size_t i = 0; i < 3; i++)
+    {
+        config.analytical.default_value[i].set_const("omega", omega_global);
+        config.boundary.default_value[i].set_const("omega", omega_global);
+        config.right.default_value[i].set_const("omega", omega_global);
+    }
 }
 
 void VFEM::input_mesh(const string & gmsh_filename)

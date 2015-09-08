@@ -13,6 +13,8 @@
 
 using namespace tr_integration_8;
 
+typedef cvector3(* eval_func)(const config_type *, const point &, const phys_area &);
+
 // Индексы для построения базисных функций на треугольниках
 namespace tr_basis_indexes
 {
@@ -45,7 +47,7 @@ public:
     // Локальная матрица массы
     matrix_t<double> M() const;
     // Локальная правая часть
-    array_t<complex<double> > rp(cvector3(*func)(const point &, const triangle_full *)) const;
+    array_t<complex<double> > rp(eval_func func, const config_type * config) const;
 
     // Параметры базиса
     const basis_type * basis;
@@ -73,7 +75,7 @@ protected:
     double jacobian;
 
     double integrate_w(size_t i, size_t j) const;
-    complex<double> integrate_fw(cvector3(*func)(const point &, const triangle_full *), size_t i) const;
+    complex<double> integrate_fw(eval_func func, const config_type * config, size_t i) const;
 };
 
 #endif // TRIANGLE_H_INCLUDED

@@ -239,7 +239,7 @@ void VFEM::assemble_matrix()
         l_matrix matrix_G = fes[k].G();
         l_matrix matrix_M = fes[k].M();
         phys_area ph = fes[k].get_phys_area();
-        array_t<complex<double> > array_rp = fes[k].rp(func_rp);
+        array_t<complex<double> > array_rp = fes[k].rp(func_rp, &config);
         complex<double> k2(- ph.epsilon * ph.omega * ph.omega, ph.omega * ph.sigma);
 
         // Основная матрица
@@ -292,7 +292,7 @@ void VFEM::applying_bound()
                         dof_surf[i] = get_tr_surf_dof(&trs[k], i);
 
                     matrix_t<double> M_surf = trs[k].M();
-                    array_t<complex<double> > b_surf = trs[k].rp(func_b1);
+                    array_t<complex<double> > b_surf = trs[k].rp(func_b1, &config);
 
                     for(size_t i = 0; i < config.basis.tr_bf_num; i++)
                     {
@@ -464,7 +464,6 @@ void VFEM::make()
     applying_bound();
 }
 
-#if defined VFEM_USE_ANALYTICAL
 void VFEM::calculate_diff() const
 {
     double diff = 0.0;
@@ -474,8 +473,7 @@ void VFEM::calculate_diff() const
         for(size_t i = 0; i < config.basis.tet_bf_num; i++)
             q_loc[i] = slae.x[get_tet_dof(&fes[k], i)];
 
-        diff += fes[k].diff_normL2(q_loc, func_true);
+        diff += fes[k].diff_normL2(q_loc, func_true, &config);
     }
     cout << "Diff (L2): \t" << sqrt(diff) << endl;
 }
-#endif

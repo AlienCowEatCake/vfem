@@ -795,7 +795,9 @@ public:
             }
             else
             {
-                error_string = "Constants must be defined!";
+                stringstream sst;
+                sst << "Constant `" << *it << "` must be defined!";
+                error_string = sst.str();
                 return false;
             }
         }

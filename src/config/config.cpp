@@ -48,10 +48,10 @@ void config_type::load_defaults()
     basis.type = 2;
     eps_slae = 1e-10;
     eps_slae_bound = 1e-14;
-    gamma_v_cycle_0 = 0.1;
-    gamma_v_cycle_full = 0.5;
-    gamma_v_cycle_ker = 0.1;
-    max_iter_v_cycle_local = 100;
+    gamma_v_cycle_0 = 0.01;
+    gamma_v_cycle_full = 0.05;
+    gamma_v_cycle_ker = 0.01;
+    max_iter_v_cycle_local = 500;
     filename_mesh = "mesh.msh";
     filename_phys = "phys.txt";
     filename_slae = "";

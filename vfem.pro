@@ -19,6 +19,7 @@ SOURCES += \
     src/vfem/vfem_input.cpp \
     src/vfem/vfem_output.cpp \
     src/vfem/vfem_v_cycle.cpp \
+    src/problems/standard.cpp \
     src/problems/analytical_cube.cpp \
     src/problems/loop_pml.cpp \
     src/problems/area_2layers_loop_pml.cpp \

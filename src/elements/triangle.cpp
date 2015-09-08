@@ -232,13 +232,13 @@ double triangle_full::integrate_w(size_t i, size_t j) const
     return result * jacobian;
 }
 
-complex<double> triangle_full::integrate_fw(cvector3(*func)(const point &, const triangle_full *), size_t i) const
+complex<double> triangle_full::integrate_fw(eval_func func, const config_type * config, size_t i) const
 {
     using namespace tr_integration;
     complex<double> result(0.0, 0.0);
     for(size_t k = 0; k < gauss_num; k++)
         result += gauss_weights[k] *
-                  func(gauss_points[k], this) *
+                  func(config, gauss_points[k], get_phys_area()) *
                   w(i, gauss_points[k]);
     return result * jacobian;
 }
@@ -253,11 +253,11 @@ matrix_t<double> triangle_full::M() const
 }
 
 array_t<complex<double> >
-triangle_full::rp(cvector3(*func)(const point &, const triangle_full *)) const
+triangle_full::rp(eval_func func, const config_type * config) const
 {
     array_t<complex<double> > arr(basis->tr_bf_num);
     for(size_t i = 0; i < basis->tr_bf_num; i++)
-        arr[i] = integrate_fw(func, i);
+        arr[i] = integrate_fw(func, config, i);
     return arr;
 }
 
