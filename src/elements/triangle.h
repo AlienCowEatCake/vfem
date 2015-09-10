@@ -37,20 +37,23 @@ public:
 
     phys_area * phys;   // Физическая область
     const phys_area & get_phys_area() const;
+
+    virtual void init(const basis_type *) {}
+    virtual matrix_t<double> M() const;
+    virtual array_t<complex<double> > rp(eval_func, const config_type *) const;
 };
 
 // Класс треугольник (полный, для работы с первыми неоднородными краевыми)
 class triangle_full : public triangle_base
 {
 public:
-    void init();
-    // Локальная матрица массы
-    matrix_t<double> M() const;
-    // Локальная правая часть
-    array_t<complex<double> > rp(eval_func func, const config_type * config) const;
+    triangle_full(const triangle_base & other = triangle_base());
 
-    // Параметры базиса
-    const basis_type * basis;
+    virtual void init(const basis_type * basis);
+    // Локальная матрица массы
+    virtual matrix_t<double> M() const;
+    // Локальная правая часть
+    virtual array_t<complex<double> > rp(eval_func func, const config_type * config) const;
 
 protected:
     // Матрица L-координат
@@ -60,6 +63,8 @@ protected:
     // Градиент L-координат в глобальных координатах
     vector3 grad_lambda(size_t i) const;
 
+    // Параметры базиса
+    const basis_type * basis;
     // Базисные функции
     vector3 w(size_t i, const point & p) const;
 
@@ -77,5 +82,7 @@ protected:
     double integrate_w(size_t i, size_t j) const;
     complex<double> integrate_fw(eval_func func, const config_type * config, size_t i) const;
 };
+
+typedef triangle_base triangle;
 
 #endif // TRIANGLE_H_INCLUDED

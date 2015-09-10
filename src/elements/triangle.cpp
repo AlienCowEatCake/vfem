@@ -50,9 +50,27 @@ const phys_area & triangle_base::get_phys_area() const
     return * phys;
 }
 
+matrix_t<double> triangle_base::M() const
+{
+    assert(false);
+    return matrix_t<double>(1, 1);
+}
+
+array_t<complex<double> > triangle_base::rp(eval_func, const config_type *) const
+{
+    assert(false);
+    return array_t<complex<double> >(1);
+}
+
 // ============================================================================
 
-void triangle_full::init()
+triangle_full::triangle_full(const triangle_base & other) : triangle_base(other)
+{
+    basis = NULL;
+    jacobian = 0.0;
+}
+
+void triangle_full::init(const basis_type * basis)
 {
     using namespace tr_integration;
 
@@ -107,6 +125,9 @@ void triangle_full::init()
     // Точки Гаусса в глобальной системе координат
     for(size_t i = 0; i < gauss_num; i++)
         gauss_points[i] = to_global(gauss_points_local[i]);
+
+    // Инициализируем параметры базиса
+    this->basis = basis;
 }
 
 point triangle_full::to_local(const point & p) const

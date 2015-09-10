@@ -26,8 +26,6 @@ typedef matrix_t<double> l_matrix;
 typedef matrix_t<double> ker_l_matrix;
 #endif
 
-typedef triangle_full triangle;
-
 // Правая часть
 cvector3 func_rp(const config_type * config, const point & p, const phys_area & phys);
 
@@ -101,7 +99,13 @@ public:
     // Ребра с источниками
     vector<edge_src> edges_src;
     // Треугольники
-    vector<triangle> trs;
+    vector<triangle *> trs;
+    // Треугольники простые
+    // (не используется при config.boundary_enabled == true)
+    vector<triangle_base> trs_base;
+    // Треугольники полные, для первых краевых
+    // (не используется при config.boundary_enabled == false)
+    vector<triangle_full> trs_full;
     // Точечные источники
     vector<pair<point, cvector3> > pss;
     // Физические области

@@ -172,9 +172,9 @@ void VFEM::generate_surf_portrait()
 
         array_t<size_t> dof_surf(config.basis.tr_bf_num);
         for(size_t i = 0; i < config.basis.tr_bf_num; i++)
-            dof_surf[i] = get_tr_surf_dof(&trs[k], i);
+            dof_surf[i] = get_tr_surf_dof(trs[k], i);
 
-        if(trs[k].phys->type_of_bounds == 1)
+        if(trs[k]->phys->type_of_bounds == 1)
         {
             for(size_t i = 0; i < config.basis.tr_bf_num; i++)
             {
@@ -285,14 +285,14 @@ void VFEM::applying_bound()
             {
                 show_progress("building matrix", k, trs.size());
 
-                if(trs[k].phys->type_of_bounds == 1)
+                if(trs[k]->phys->type_of_bounds == 1)
                 {
                     array_t<size_t> dof_surf(config.basis.tr_bf_num);
                     for(size_t i = 0; i < config.basis.tr_bf_num; i++)
-                        dof_surf[i] = get_tr_surf_dof(&trs[k], i);
+                        dof_surf[i] = get_tr_surf_dof(trs[k], i);
 
-                    matrix_t<double> M_surf = trs[k].M();
-                    array_t<complex<double> > b_surf = trs[k].rp(func_b1, &config);
+                    matrix_t<double> M_surf = trs[k]->M();
+                    array_t<complex<double> > b_surf = trs[k]->rp(func_b1, &config);
 
                     for(size_t i = 0; i < config.basis.tr_bf_num; i++)
                     {

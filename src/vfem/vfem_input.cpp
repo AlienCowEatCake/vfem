@@ -264,7 +264,7 @@ bool VFEM::input_mesh(const string & gmsh_filename)
     gmsh_file >> fes_num;
     size_t type_of_elem = 0;
     finite_element fake_element;
-    triangle fake_triangle;
+    triangle_base fake_triangle;
     edge_src fake_edge_src;
     vector<size_t> local_nodes_tet;
     local_nodes_tet.resize(4);
@@ -362,7 +362,10 @@ bool VFEM::input_mesh(const string & gmsh_filename)
                 if(config.basis.order >= 2)
                     add_face(face(fake_triangle.nodes[0], fake_triangle.nodes[1], fake_triangle.nodes[2]), faces_surf_temp);
             }
-            trs.push_back(fake_triangle);
+            if(config.boundary_enabled)
+                trs_full.push_back(triangle_full(fake_triangle));
+            else
+                trs_base.push_back(fake_triangle);
         }
         else if(type_of_elem == 1)
         {
@@ -408,12 +411,14 @@ bool VFEM::input_mesh(const string & gmsh_filename)
 
 #if defined USE_CXX11
     fes.shrink_to_fit();
-    trs.shrink_to_fit();
+    trs_base.shrink_to_fit();
+    trs_full.shrink_to_fit();
     pss.shrink_to_fit();
     edges_src.shrink_to_fit();
 #else
     vector<finite_element>(fes).swap(fes);
-    vector<triangle>(trs).swap(trs);
+    vector<triangle_base>(trs_base).swap(trs_base);
+    vector<triangle_full>(trs_full).swap(trs_full);
     vector<pair<point, cvector3> >(pss).swap(pss);
     vector<edge_src>(edges_src).swap(edges_src);
 #endif
@@ -474,6 +479,11 @@ bool VFEM::input_mesh(const string & gmsh_filename)
     }
 
     // Разбираемся с треугольниками
+    trs.reserve(trs_base.size() + trs_full.size());
+    for(size_t i = 0; i < trs_base.size(); i++)
+        trs.push_back(&trs_base[i]);
+    for(size_t i = 0; i < trs_full.size(); i++)
+        trs.push_back(&trs_full[i]);
     if(trs.size() == 0)
     {
         cerr << "Error: 0 triangles detected, breaking..." << endl;
@@ -483,60 +493,60 @@ bool VFEM::input_mesh(const string & gmsh_filename)
     {
         show_progress("triangles", i, trs.size());
         for(size_t j = 0; j < 3; j++)
-            trs[i].edges[j] = edges_ind[(size_t)trs[i].edges[j]];
+            trs[i]->edges[j] = edges_ind[(size_t)trs[i]->edges[j]];
         if(config.basis.order >= 2)
-            trs[i].faces = faces_ind[(size_t)trs[i].faces];
+            trs[i]->faces = faces_ind[(size_t)trs[i]->faces];
 
         // Заполняем степени свободы для первых краевых
-        if(trs[i].phys->type_of_bounds == 1)
+        if(trs[i]->phys->type_of_bounds == 1)
         {
             array_t<size_t> dof(config.basis.tr_bf_num);
             array_t<size_t> dof_surf(config.basis.tr_bf_num);
             array_t<size_t> ker_dof(config.basis.tr_ker_bf_num);
             // Первый неполный
             for(size_t j = 0; j < 3; j++)
-                dof[j] = trs[i].edges[j]->num;
+                dof[j] = trs[i]->edges[j]->num;
             for(size_t j = 0; j < 3; j++)
-                ker_dof[j] = trs[i].nodes[j]->num;
+                ker_dof[j] = trs[i]->nodes[j]->num;
             if(config.boundary_enabled)
                 for(size_t j = 0; j < 3; j++)
-                    dof_surf[j] = edges_surf_temp.find(* trs[i].edges[j])->num;
+                    dof_surf[j] = edges_surf_temp.find(* trs[i]->edges[j])->num;
             // Первый полный
             if(config.basis.order >= 2 || config.basis.type == 2)
             {
                 for(size_t j = 0; j < 3; j++)
-                    dof[j + 3] = trs[i].edges[j]->num + edges.size();
+                    dof[j + 3] = trs[i]->edges[j]->num + edges.size();
                 for(size_t j = 0; j < 3; j++)
-                    ker_dof[j + 3] = trs[i].edges[j]->num + nodes.size();
+                    ker_dof[j + 3] = trs[i]->edges[j]->num + nodes.size();
                 if(config.boundary_enabled)
                     for(size_t j = 0; j < 3; j++)
-                        dof_surf[j + 3] = edges_surf_temp.find(* trs[i].edges[j])->num + edges_surf_temp.size();
+                        dof_surf[j + 3] = edges_surf_temp.find(* trs[i]->edges[j])->num + edges_surf_temp.size();
             }
             // Второй неполный
             if(config.basis.order >= 2)
             {
-                dof[6] = trs[i].faces->num + 2 * edges.size();
-                dof[7] = trs[i].faces->num + 2 * edges.size() + faces.size();
+                dof[6] = trs[i]->faces->num + 2 * edges.size();
+                dof[7] = trs[i]->faces->num + 2 * edges.size() + faces.size();
                 if(config.boundary_enabled)
                 {
-                    dof_surf[6] = faces_surf_temp.find(* trs[i].faces)->num + 2 * edges_surf_temp.size();
-                    dof_surf[7] = faces_surf_temp.find(* trs[i].faces)->num + 2 * edges_surf_temp.size() + faces_surf_temp.size();
+                    dof_surf[6] = faces_surf_temp.find(* trs[i]->faces)->num + 2 * edges_surf_temp.size();
+                    dof_surf[7] = faces_surf_temp.find(* trs[i]->faces)->num + 2 * edges_surf_temp.size() + faces_surf_temp.size();
                 }
             }
             // Второй полный
             if(config.basis.order > 2 || (config.basis.type == 2 && config.basis.order == 2))
             {
-                dof[8] = trs[i].faces->num + 2 * edges.size() + 2 * faces.size();
+                dof[8] = trs[i]->faces->num + 2 * edges.size() + 2 * faces.size();
                 for(size_t j = 0; j < 3; j++)
-                    dof[j + 9] = trs[i].edges[j]->num + 2 * edges.size() + 3 * faces.size();
-                ker_dof[6] = trs[i].faces->num + edges.size() + nodes.size();
+                    dof[j + 9] = trs[i]->edges[j]->num + 2 * edges.size() + 3 * faces.size();
+                ker_dof[6] = trs[i]->faces->num + edges.size() + nodes.size();
                 for(size_t j = 0; j < 3; j++)
-                    ker_dof[j + 7] = trs[i].edges[j]->num + edges.size() + faces.size() + nodes.size();
+                    ker_dof[j + 7] = trs[i]->edges[j]->num + edges.size() + faces.size() + nodes.size();
                 if(config.boundary_enabled)
                 {
-                    dof_surf[8] = faces_surf_temp.find(* trs[i].faces)->num + 2 * edges_surf_temp.size() + 2 * faces_surf_temp.size();
+                    dof_surf[8] = faces_surf_temp.find(* trs[i]->faces)->num + 2 * edges_surf_temp.size() + 2 * faces_surf_temp.size();
                     for(size_t j = 0; j < 3; j++)
-                        dof_surf[j + 9] = edges_surf_temp.find(* trs[i].edges[j])->num + 2 * edges_surf_temp.size() + 3 * faces_surf_temp.size();
+                        dof_surf[j + 9] = edges_surf_temp.find(* trs[i]->edges[j])->num + 2 * edges_surf_temp.size() + 3 * faces_surf_temp.size();
                 }
             }
             // Теперь все собираем
@@ -551,11 +561,7 @@ bool VFEM::input_mesh(const string & gmsh_filename)
         }
 
         // Инициализируем
-        if(config.boundary_enabled)
-        {
-            trs[i].init();
-            trs[i].basis = & config.basis;
-        }
+        trs[i]->init(& config.basis);
     }
 
     cout << " > Building tree ..." << endl;
