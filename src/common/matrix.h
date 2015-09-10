@@ -16,6 +16,11 @@ public:
     {
         return a[i];
     }
+    array_t()
+    {
+        for(size_t i = 0; i < dimension; i++)
+            a[i] = type();
+    }
 protected:
     type a[dimension];
 };
@@ -29,6 +34,8 @@ public:
     {
         this->dimension = dimension;
         a = new type [dimension];
+        for(size_t i = 0; i < dimension; i++)
+            a[i] = type();
     }
     array_t(const array_t & other)
     {
@@ -79,6 +86,12 @@ public:
     {
         return a[i];
     }
+    matrix_t()
+    {
+        for(size_t i = 0; i < dimension_row; i++)
+            for(size_t j = 0; j < dimension_col; j++)
+                a[i][j] = type();
+    }
 protected:
     type a[dimension_row][dimension_col];
 };
@@ -92,7 +105,10 @@ public:
     {
         this->dimension_row = dimension_row;
         this->dimension_col = dimension_col;
-        a = new type [dimension_row * dimension_col];
+        size_t len = dimension_row * dimension_col;
+        a = new type [len];
+        for(size_t i = 0; i < len; i++)
+            a[i] = type();
     }
     matrix_t(const matrix_t & other)
     {

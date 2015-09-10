@@ -44,7 +44,7 @@ size_t VFEM::get_tr_ker_dof(const triangle * tr, size_t i) const
     if(i < 3)       return tr->nodes[i]->num;
     else if(i < 6)  return tr->edges[i-3]->num + nodes.size();
     else if(i < 7)  return tr->faces->num + edges.size() + nodes.size();
-    else if(i < 10) return tr->edges[i]->num + edges.size() + faces.size() + nodes.size();
+    else if(i < 10) return tr->edges[i-7]->num + edges.size() + faces.size() + nodes.size();
     return 0;
 }
 
