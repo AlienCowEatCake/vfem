@@ -240,11 +240,13 @@ cvector3 get_s(const point & p, const finite_element * fe, const phys_pml_area *
 
 string tecplot_filename = "area_3layers_inc_loop_pml.plt";
 string phys_filename_pml = "data/area_3layers_inc_loop_pml/1.txt";
-string phys_filename_nonpml = "data/area_3layers_inc_loop_pml/2.txt";
+//string phys_filename_nonpml = "data/area_3layers_inc_loop_pml/2.txt";
+string phys_filename_nonpml = "data/area_3layers_inc_loop_pml/2_electrodes.txt";
 #if !defined SMALL_MESH
 //string mesh_filename = "data/area_3layers_inc_loop_pml/mesh3_inc_z=-5.msh";
-string mesh_filename = "data/area_3layers_inc_loop_pml/autogen_mesh3_inc_z=-5_full.msh";
+//string mesh_filename = "data/area_3layers_inc_loop_pml/autogen_mesh3_inc_z=-5_full.msh";
 //string mesh_filename = "data/area_3layers_inc_loop_pml/mesh3_inc_rot_nosymm_z=-50_full.msh";
+string mesh_filename = "data/area_3layers_inc_loop_pml/mesh3_inc_rot_z=-5_electrodes.msh";
 #else
 string mesh_filename = "data/area_3layers_inc_loop_pml/autogen_mesh3_inc_z=-5_small.msh";
 //string mesh_filename = "data/area_3layers_inc_loop_pml/mesh3_inc_rot_nosymm_z=-50_small.msh";

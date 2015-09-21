@@ -14,7 +14,7 @@
 #include "../vfem/phys.h"
 #include "../vfem/slae.h"
 
-#define VFEM_USE_PML
+//#define VFEM_USE_PML
 //#define VFEM_USE_NONHOMOGENEOUS_FIRST
 //#define VFEM_USE_ANALYTICAL
 
@@ -161,6 +161,8 @@ protected:
     void apply_edges_sources();
     // Применение точечных источников
     void apply_point_sources();
+    // Применение электродов
+    void apply_electrodes();
 
 #if defined VFEM_USE_PML
     cpoint convert_point_to_pml(const point * p, const finite_element * fefe) const;

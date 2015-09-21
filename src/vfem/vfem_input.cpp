@@ -57,6 +57,7 @@ void VFEM::input_phys(const string & phys_filename)
             ph->omega = omega_global;
             ph->type_of_bounds = 0;
             ph->J0 = 0.0;
+            ph->E0 = 0.0;
         }
         else if(id.type_of_element == 2)
         {
@@ -72,6 +73,7 @@ void VFEM::input_phys(const string & phys_filename)
                 ph->epsilon = par->epsilon;
                 ph->sigma = par->sigma;
                 ph->J0 = par->J0;
+                ph->E0 = par->E0;
             }
             else
             {
@@ -80,6 +82,7 @@ void VFEM::input_phys(const string & phys_filename)
                 ph->epsilon = 0.0;
                 ph->sigma = 0.0;
                 ph->J0 = 0.0;
+                ph->E0 = 0.0;
                 cerr << "Warning: unaccounted parent \"" << parent_phys << "\" of phys area \""
                      << ph->gmsh_num << "\" (2), skipping..." << endl;
             }
@@ -88,7 +91,25 @@ void VFEM::input_phys(const string & phys_filename)
         {
             size_t parent_phys;
             phys_param >> parent_phys;
-            phys_param >> ph->J0;
+            string line;
+            getline(phys_param, line);
+            stringstream sst(line);
+            double I, l, rho, S;
+            sst >> I >> l >> rho >> S;
+            if(sst.good())
+            {
+                double R = rho * l / S;
+                double U = I * R;
+                ph->E0 = U / l;
+                ph->J0 = 0.0;
+                ph->type_of_bounds = 1;
+            }
+            else
+            {
+                ph->J0 = I;
+                ph->E0 = 0.0;
+                ph->type_of_bounds = 0;
+            }
             map<phys_id, phys_area>::const_iterator parent = phys.find(phys_id(4, parent_phys));
             if(parent != phys.end())
             {
@@ -97,7 +118,6 @@ void VFEM::input_phys(const string & phys_filename)
                 ph->mu = par->mu;
                 ph->epsilon = par->epsilon;
                 ph->sigma = par->sigma;
-                ph->type_of_bounds = par->type_of_bounds;
             }
             else
             {
@@ -105,7 +125,6 @@ void VFEM::input_phys(const string & phys_filename)
                 ph->mu = 0.0;
                 ph->epsilon = 0.0;
                 ph->sigma = 0.0;
-                ph->type_of_bounds = 0;
                 cerr << "Warning: unaccounted parent \"" << parent_phys << "\" of phys area \""
                      << ph->gmsh_num << "\" (1), skipping..." << endl;
             }
