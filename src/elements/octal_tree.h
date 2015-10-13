@@ -81,7 +81,7 @@ template<class element_type> bool octal_tree_node<element_type>::point_in_node(d
 
 template<class element_type> bool octal_tree_node<element_type>::split_condition()
 {
-    if(elements_num + 1 == split_constant && fabs(x1 - x0) > eps_x && fabs(y1 - y0) > eps_y && fabs(z1 - z0) > eps_z && level > level_barier)
+    if(elements_num + 1 == split_constant && fabs(x1 - x0) > eps_x && fabs(y1 - y0) > eps_y && fabs(z1 - z0) > eps_z && level <= level_barier)
         return true;
     return false;
 }
@@ -170,7 +170,7 @@ template<class element_type> void octal_tree<element_type>::make(double x0, doub
 {
     total_num = elements_num;
     split_constant = (size_t)sqrt((double)total_num);
-    size_t level_barier = (size_t)(log((double)total_num) / log(/*8.0*/2.0)) + 5; //скорость поиска в дереве O(log(n)), где n - число элементов,
+    size_t level_barier = (size_t)(log((double)total_num) / log(8.0)) + 5; //скорость поиска в дереве O(log(n)), где n - число элементов,
     root.init_node(x0, x1, y0, y1, z0, z1, split_constant, level_barier);
     root.level = 0;
     vector<element_type *> el_v;
