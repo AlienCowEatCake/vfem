@@ -6,7 +6,7 @@ EXECUTABLE = vfem
 
 LINK.o = $(LINK.cc)
 CXXFLAGS += $(CXXFLAGS_EXTRA) $(CXXFLAGS_OPTIMIZE)
-LDFLAGS += -lrt $(LDFLAGS_EXTRA)
+LDFLAGS += $(LDFLAGS_EXTRA) -lrt
 
 SOURCES = \
 	src/main.cpp \
@@ -37,8 +37,8 @@ all: $(SOURCES) $(EXECUTABLE)
 
 .PHONY: clean install
 
-$(EXECUTABLE): $(OBJECTS) 
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJECTS) -o $@
+$(EXECUTABLE): $(OBJECTS)
+	$(CXX) $(CXXFLAGS) $(OBJECTS) $(LDFLAGS) -o $@
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) -c $< -o $@
