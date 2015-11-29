@@ -46,8 +46,6 @@ void COCG_LLT_Smooth_MKL::init(size_t * gi_s, size_t * gj_s, complex<double> * d
     delete [] z;
     delete [] p;
     delete [] s;
-    delete [] L_aa;
-    delete [] LLT_tmp;
     delete [] xs;
     delete [] rs;
 
@@ -87,7 +85,9 @@ void COCG_LLT_Smooth_MKL::init(size_t * gi_s, size_t * gj_s, complex<double> * d
     }
 
 #if defined USE_LLT_PRECONDITIONER
-    LLT_tmp = new MKL_Complex16[n];
+    delete [] L_aa;
+    delete [] LLT_tmp;
+    LLT_tmp = new MKL_Complex16 [n];
     L_aa = new MKL_Complex16 [gi[n] + n];
     make_LLT_decomposition();
 #endif
@@ -95,7 +95,7 @@ void COCG_LLT_Smooth_MKL::init(size_t * gi_s, size_t * gj_s, complex<double> * d
 
 void COCG_LLT_Smooth_MKL::make_LLT_decomposition()
 {
-    cblas_zcopy(ia[m], aa, 1, L_aa, 1);
+    cblas_zcopy(ia[m] - 1, aa, 1, L_aa, 1);
     complex<double> * L_gg = reinterpret_cast<complex<double> *>(L_aa);
 
     complex<double> sum_d, sum_l;
@@ -559,3 +559,25 @@ void mkl_set_num_threads(int n)
 
 #endif
 
+// =================================================================================================
+
+#define MKL_TBB_THREADS
+//#define MKL_OMP_THREADS
+
+#if defined _WIN32
+#if !defined _WIN64
+#pragma comment(lib, "mkl_intel_c.lib")
+#else
+#pragma comment(lib, "mkl_intel_lp64.lib")
+#endif
+#pragma comment(lib, "mkl_core.lib")
+#if defined MKL_TBB_THREADS
+#pragma comment(lib, "mkl_tbb_thread.lib")
+#pragma comment(lib, "tbb.lib")
+#elif defined MKL_OMP_THREADS
+#pragma comment(lib, "mkl_intel_thread.lib")
+#pragma comment(lib, "libiomp5md.lib")
+#else
+#pragma comment(lib, "mkl_sequential.lib")
+#endif
+#endif
