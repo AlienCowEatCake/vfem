@@ -6,7 +6,7 @@
 #include "../common/basis_config.h"
 #include "../geometry/point.h"
 #include "../geometry/vector3.h"
-#include "../elements/octal_tree.h"
+#include "../elements/octree.h"
 #include "../elements/edge.h"
 #include "../elements/face.h"
 #include "../elements/triangle.h"
@@ -143,7 +143,7 @@ protected:
     // Степени свободы с первыми краевыми у ядра
     set<size_t> ker_dof_first;
     // Восьмиричное дерево поиска
-    octal_tree<finite_element> tree;
+    octree<finite_element> tree;
 
     // Генерация портрета глобальной матрицы
     void generate_portrait();

@@ -1,19 +1,20 @@
-#if !defined OCTAL_TREE_H_INCLUDED
-#define OCTAL_TREE_H_INCLUDED
+#if !defined OCTREE_H
+#define OCTREE_H
 
 #include <vector>
 #include <cstdlib>
 #include <cmath>
 #include <algorithm>
 
-using namespace std;
-
-template<class element_type> class octal_tree_node
+template<class element_type>
+class octree_node
 {
 public:
-    octal_tree_node();
+    octree_node();
+    ~octree_node();
+    void clear();
     void init_node(double x0, double x1, double y0, double y1, double z0, double z1, size_t split_constant, size_t level_barier);
-    void add_element(vector<element_type *> & added_elements);
+    void add_element(std::vector<element_type *> & added_elements);
     bool add_element(element_type * added_element);
     element_type * find(double x, double y, double z) const;
 
@@ -24,9 +25,9 @@ private:
     bool split_condition();
     void split();
 
-    vector<element_type *> elements;
+    std::vector<element_type *> elements;
     bool node_is_terminal;
-    octal_tree_node<element_type> * sub_nodes;
+    octree_node<element_type> * sub_nodes;
     double x0, x1, y0, y1, z0, z1;
     double eps_x, eps_y, eps_z;
     size_t elements_num;
@@ -34,27 +35,53 @@ private:
     size_t level_barier;
 };
 
-template<class element_type> class octal_tree
+template<class element_type>
+class octree
 {
 public:
-    void make(double x0, double x1, double y0, double y1, double z0, double z1, element_type * elements, size_t elements_num); //габариты области и список элементов
+    void make(double x0, double x1, double y0, double y1, double z0, double z1, std::vector<element_type> & elements); //габариты области и список элементов
     element_type * find(double x, double y, double z) const;
+    void clear();
 
 private:
-    octal_tree_node<element_type> root;
+    octree_node<element_type> root;
     size_t total_num;
     size_t split_constant;
 };
 
 // ============================================================================
 
-template<class element_type> octal_tree_node<element_type>::octal_tree_node()
+template<class element_type>
+octree_node<element_type>::octree_node()
 {
+    node_is_terminal = true;
+    elements_num = 0;
+    sub_nodes = NULL;
+}
+
+template<class element_type>
+octree_node<element_type>::~octree_node()
+{
+    clear();
+}
+
+template<class element_type>
+void octree_node<element_type>::clear()
+{
+    if(sub_nodes)
+    {
+        for(size_t i = 0; i < 8; i++)
+            sub_nodes[i].clear();
+        delete [] sub_nodes;
+        sub_nodes = NULL;
+    }
+    elements.clear();
     node_is_terminal = true;
     elements_num = 0;
 }
 
-template<class element_type> void octal_tree_node<element_type>::init_node(double x0, double x1, double y0, double y1, double z0, double z1, size_t split_constant, size_t level_barier)
+template<class element_type>
+void octree_node<element_type>::init_node(double x0, double x1, double y0, double y1, double z0, double z1, size_t split_constant, size_t level_barier)
 {
     this->x0 = x0;
     this->x1 = x1;
@@ -70,7 +97,8 @@ template<class element_type> void octal_tree_node<element_type>::init_node(doubl
     eps_z = 1e-12 * (z0 > z1 ? z0 : z1);
 }
 
-template<class element_type> bool octal_tree_node<element_type>::point_in_node(double x, double y, double z) const
+template<class element_type>
+bool octree_node<element_type>::point_in_node(double x, double y, double z) const
 {
     if(x >= x0 - eps_x && x <= x1 + eps_x &&
        y >= y0 - eps_y && y <= y1 + eps_y &&
@@ -79,16 +107,18 @@ template<class element_type> bool octal_tree_node<element_type>::point_in_node(d
     return false;
 }
 
-template<class element_type> bool octal_tree_node<element_type>::split_condition()
+template<class element_type>
+bool octree_node<element_type>::split_condition()
 {
     if(elements_num + 1 == split_constant && fabs(x1 - x0) > eps_x && fabs(y1 - y0) > eps_y && fabs(z1 - z0) > eps_z && level <= level_barier)
         return true;
     return false;
 }
 
-template<class element_type> bool octal_tree_node<element_type>::add_element(element_type * added_element)
+template<class element_type>
+bool octree_node<element_type>::add_element(element_type * added_element)
 {
-    if(added_element->inside_tree(x0, x1, y0, y1, z0, z1))
+    if(added_element->in_cube(x0, x1, y0, y1, z0, z1))
     {
         if(node_is_terminal)   //если узел терминальный (последний)
         {
@@ -112,16 +142,18 @@ template<class element_type> bool octal_tree_node<element_type>::add_element(ele
     return false;
 }
 
-template<class element_type> void octal_tree_node<element_type>::add_element(vector<element_type *> & added_elements)
+template<class element_type>
+void octree_node<element_type>::add_element(std::vector<element_type *> & added_elements)
 {
     for(size_t i = 0 ; i < added_elements.size(); i++)
         add_element(added_elements[i]);
 }
 
-template<class element_type> void octal_tree_node<element_type>::split()
+template<class element_type>
+void octree_node<element_type>::split()
 {
     node_is_terminal = false;
-    sub_nodes = new octal_tree_node<element_type> [8];
+    sub_nodes = new octree_node<element_type> [8];
 
     double dx = (x1 - x0) / 2.0, dy = (y1 - y0) / 2.0, dz = (z1 - z0) / 2.0;
 
@@ -143,14 +175,15 @@ template<class element_type> void octal_tree_node<element_type>::split()
     elements.clear();
 }
 
-template<class element_type> element_type * octal_tree_node<element_type>::find(double x, double y, double z) const
+template<class element_type>
+element_type * octree_node<element_type>::find(double x, double y, double z) const
 {
     if(point_in_node(x, y, z))
     {
         if(node_is_terminal)
         {
             for(size_t i = 0; i < elements_num; i++)
-                if (elements[i]->inside(x, y, z))
+                if(elements[i]->inside(x, y, z))
                     return elements[i];
         }
         else
@@ -166,22 +199,30 @@ template<class element_type> element_type * octal_tree_node<element_type>::find(
     return NULL;
 }
 
-template<class element_type> void octal_tree<element_type>::make(double x0, double x1, double y0, double y1, double z0, double z1, element_type * elements, size_t elements_num)
+template<class element_type>
+void octree<element_type>::make(double x0, double x1, double y0, double y1, double z0, double z1, std::vector<element_type> & elements)
 {
-    total_num = elements_num;
-    split_constant = (size_t)sqrt((double)total_num);
-    size_t level_barier = (size_t)(log((double)total_num) / log(8.0)) + 5; //скорость поиска в дереве O(log(n)), где n - число элементов,
+    total_num = elements.size();
+    size_t level_barier = (size_t)(log((double)total_num + 1) / log(8.0)) + 1;
+    split_constant = (size_t)(pow((double)total_num, 1.0 / 8.0) * 1000.0);
     root.init_node(x0, x1, y0, y1, z0, z1, split_constant, level_barier);
     root.level = 0;
-    vector<element_type *> el_v;
+    std::vector<element_type *> el_v(total_num);
     for(size_t i = 0; i < total_num; i++)
-        el_v.push_back(&elements[i]);
+        el_v[i] = &elements[i];
     root.add_element(el_v);
 }
 
-template<class element_type> element_type * octal_tree<element_type>::find(double x, double y, double z) const
+template<class element_type>
+element_type * octree<element_type>::find(double x, double y, double z) const
 {
     return root.find(x, y, z);
 }
 
-#endif // OCTAL_TREE_H_INCLUDED
+template<class element_type>
+void octree<element_type>::clear()
+{
+    root.clear();
+}
+
+#endif // OCTREE_H

@@ -43,7 +43,7 @@ public:
 
     point barycenter;
 
-    bool inside_tree(double x0, double x1, double y0, double y1, double z0, double z1) const;
+    bool in_cube(double x0, double x1, double y0, double y1, double z0, double z1) const;
 
     double diff_normL2(const array_t<complex<double>, basis::tet_bf_num> & q, cvector3(*func)(const point &)) const;
     double diff_normL2(const array_t<complex<double>, basis::tet_bf_num> & q, const array_t<complex<double>, basis::tet_bf_num> & q_true) const;

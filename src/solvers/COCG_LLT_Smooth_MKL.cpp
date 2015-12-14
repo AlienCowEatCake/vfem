@@ -561,6 +561,8 @@ void mkl_set_num_threads(int n)
 
 // =================================================================================================
 
+#if defined USE_MKL && defined _MSC_VER
+
 #define MKL_TBB_THREADS
 //#define MKL_OMP_THREADS
 
@@ -580,4 +582,6 @@ void mkl_set_num_threads(int n)
 #else
 #pragma comment(lib, "mkl_sequential.lib")
 #endif
+#endif
+
 #endif

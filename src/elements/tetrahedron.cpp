@@ -238,7 +238,7 @@ bool tetrahedron_base::inside(double x, double y, double z) const
     return inside(point(x, y, z));
 }
 
-bool tetrahedron_base::inside_tree(double x0, double x1, double y0, double y1, double z0, double z1) const
+bool tetrahedron_base::in_cube(double x0, double x1, double y0, double y1, double z0, double z1) const
 {
     // Тетраэдр внутри куба
     if(barycenter.inside(x0, x1, y0, y1, z0, z1))

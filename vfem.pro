@@ -44,7 +44,7 @@ HEADERS += \
     src/elements/face.h \
     src/elements/triangle.h \
     src/elements/tetrahedron.h \
-    src/elements/octal_tree.h \
+    src/elements/octree.h \
     src/vfem/phys.h \
     src/vfem/slae.h \
     src/vfem/vfem.h \

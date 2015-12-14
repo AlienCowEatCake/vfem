@@ -1,6 +1,8 @@
 #if !defined COCG_LLT_SMOOTH_MKL_H_INCLUDED
 #define COCG_LLT_SMOOTH_MKL_H_INCLUDED
 
+//#define USE_MKL
+
 #include <cstdlib>
 #include <complex>
 #include <omp.h>
