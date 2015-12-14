@@ -172,7 +172,7 @@ bool config_type::load(const string & filename)
 
             else if(section == "boundary" || section == "right" || section == "analytical")
             {
-                array_t<parser<complex<double> >, 3> * curr_parser;
+                array_t<parser<complex<double> >, 3> * curr_parser = NULL;
                 if(section == "boundary")
                 {
                     if(subsection == "")

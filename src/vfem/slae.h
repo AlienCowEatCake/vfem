@@ -7,6 +7,7 @@
 //#include "../solvers/CGMComplex_VC.h"
 //#include "../solvers/CGMComplex_LLT.h"
 #include "../solvers/COCG_LLT_Smooth.h"
+#include "../solvers/COCG_LLT_Smooth_MKL.h"
 
 // Класс СЛАУ
 class SLAE
@@ -38,7 +39,11 @@ private:
     //BiCGStabComplex_VC solver;
     //CGMComplex_VC solver;
     //CGMComplex_LLT solver;
+#if !defined USE_MKL
     COCG_LLT_Smooth solver;
+#else
+    COCG_LLT_Smooth_MKL solver;
+#endif
 };
 
 #endif // SLAE_H_INCLUDED

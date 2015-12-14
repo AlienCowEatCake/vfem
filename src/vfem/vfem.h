@@ -6,7 +6,7 @@
 #include "../config/config.h"
 #include "../geometry/point.h"
 #include "../geometry/vector3.h"
-#include "../elements/octal_tree.h"
+#include "../elements/octree.h"
 #include "../elements/edge.h"
 #include "../elements/face.h"
 #include "../elements/triangle.h"
@@ -124,7 +124,7 @@ public:
     // Степени свободы с первыми краевыми у ядра
     set<size_t> ker_dof_first;
     // Восьмиричное дерево поиска
-    octal_tree<finite_element> tree;
+    octree<finite_element> tree;
 
     // Получение степеней свободы тетраэдра в глобальной матрице
     size_t get_tet_dof(const finite_element * fe, size_t i) const;

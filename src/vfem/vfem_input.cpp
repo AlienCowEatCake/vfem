@@ -577,15 +577,9 @@ bool VFEM::input_mesh(const string & gmsh_filename)
         max_coord[i] += diff_coord[i];
         min_coord[i] -= diff_coord[i];
     }
-#if defined USE_CXX11
-    /// WARNING: C++11
+
     tree.make(min_coord[0], max_coord[0], min_coord[1], max_coord[1],
-              min_coord[2], max_coord[2], fes.data(), fes.size());
-#else
-    /// WARNING: &(fes[0]) для вектора!
-    tree.make(min_coord[0], max_coord[0], min_coord[1], max_coord[1],
-              min_coord[2], max_coord[2], &(fes[0]), fes.size());
-#endif
+              min_coord[2], max_coord[2], fes);
 
 #if defined VFEM_USE_PML
     input_pml();

@@ -32,7 +32,8 @@ SOURCES += \
 #    src/solvers/BiCGStabComplex_VC.cpp \
 #    src/solvers/CGMComplex_LLT.cpp \
 #    src/solvers/CGMComplex_VC.cpp \
-    src/solvers/COCG_LLT_Smooth.cpp
+    src/solvers/COCG_LLT_Smooth.cpp \
+    src/solvers/COCG_LLT_Smooth_MKL.cpp
 
 HEADERS += \
     src/config/config.h \
@@ -47,7 +48,7 @@ HEADERS += \
     src/elements/face.h \
     src/elements/triangle.h \
     src/elements/tetrahedron.h \
-    src/elements/octal_tree.h \
+    src/elements/octree.h \
     src/vfem/phys.h \
     src/vfem/slae.h \
     src/vfem/vfem.h \
@@ -56,11 +57,14 @@ HEADERS += \
 #    src/solvers/BiCGStabComplex_VC.h \
 #    src/solvers/CGMComplex_LLT.h \
 #    src/solvers/CGMComplex_VC.h \
-    src/solvers/COCG_LLT_Smooth.h
+    src/solvers/COCG_LLT_Smooth.h \
+    src/solvers/COCG_LLT_Smooth_MKL.h
 
 unix:QMAKE_LIBS += -lrt
 
 *g++*|*clang* {
+    QMAKE_CXXFLAGS += -fopenmp
+    QMAKE_LFLAGS += -fopenmp
     QMAKE_CXXFLAGS *= -ansi
 #    QMAKE_CXXFLAGS += -std=c++0x
     QMAKE_CXXFLAGS *= -pedantic
@@ -73,14 +77,9 @@ unix:QMAKE_LIBS += -lrt
 }
 
 *msvc* {
+    QMAKE_CXXFLAGS += -openmp
     QMAKE_CXXFLAGS_RELEASE -= -O2
     QMAKE_CXXFLAGS_RELEASE *= -Ox
     DEFINES += _CRT_SECURE_NO_WARNINGS
     DEFINES += _USE_MATH_DEFINES
-    # Добавлено: 24 Feb 2015
-    # MSVC 2013 использует странные оптимизации
-    *msvc2013* {
-        QMAKE_CXXFLAGS_RELEASE -= -Ox
-        QMAKE_CXXFLAGS_RELEASE *= -O1
-    }
 }
