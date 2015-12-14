@@ -121,7 +121,7 @@ bool VFEM::output_slice(const string & tecplot_filename, char slice_var, double 
 
     tecplot_file << "TITLE = \"Slice " << slice_var << " = " << slice_val << "\"\n";
     tecplot_file << "VARIABLES = \"" << var1 <<"\", \"" << var2 << "\", \"ExR\", \"EyR\", \"EzR\", \"ExI\", \"EyI\", \"EzI\", \"abs(E)\"\n";
-    tecplot_file << "ZONE I= " << num_var_1 << ", J= " << num_var_2 << ", F=POINT\n";
+    tecplot_file << "ZONE I= " << num_var_2 << ", J= " << num_var_1 << ", F=POINT\n";
 
     tecplot_file.precision(17);
     tecplot_file.setf(ios::scientific);
