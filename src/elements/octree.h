@@ -26,11 +26,9 @@ private:
     void split();
 
     std::vector<element_type *> elements;
-    bool node_is_terminal;
     octree_node<element_type> * sub_nodes;
     double x0, x1, y0, y1, z0, z1;
     double eps_x, eps_y, eps_z;
-    size_t elements_num;
     size_t split_constant;
     size_t level_barier;
 };
@@ -45,8 +43,6 @@ public:
 
 private:
     octree_node<element_type> root;
-    size_t total_num;
-    size_t split_constant;
 };
 
 // ============================================================================
@@ -54,8 +50,6 @@ private:
 template<class element_type>
 octree_node<element_type>::octree_node()
 {
-    node_is_terminal = true;
-    elements_num = 0;
     sub_nodes = NULL;
 }
 
@@ -76,8 +70,6 @@ void octree_node<element_type>::clear()
         sub_nodes = NULL;
     }
     elements.clear();
-    node_is_terminal = true;
-    elements_num = 0;
 }
 
 template<class element_type>
@@ -110,7 +102,7 @@ bool octree_node<element_type>::point_in_node(double x, double y, double z) cons
 template<class element_type>
 bool octree_node<element_type>::split_condition()
 {
-    if(elements_num + 1 == split_constant && fabs(x1 - x0) > eps_x && fabs(y1 - y0) > eps_y && fabs(z1 - z0) > eps_z && level <= level_barier)
+    if(elements.size() + 1 == split_constant && fabs(x1 - x0) > eps_x && fabs(y1 - y0) > eps_y && fabs(z1 - z0) > eps_z && level <= level_barier)
         return true;
     return false;
 }
@@ -120,7 +112,7 @@ bool octree_node<element_type>::add_element(element_type * added_element)
 {
     if(added_element->in_cube(x0, x1, y0, y1, z0, z1))
     {
-        if(node_is_terminal)   //если узел терминальный (последний)
+        if(!sub_nodes)  //если узел терминальный (последний)
         {
             if(split_condition())   //если узел после добавляения перестанет быть терминальным
             {
@@ -129,11 +121,9 @@ bool octree_node<element_type>::add_element(element_type * added_element)
             }
             else   //если после добавления останется треминальным
                 elements.push_back(added_element);
-            elements_num++;
         }
         else   //если узел не терминальный (есть поддеревья)
         {
-            elements_num++;
             for(size_t i = 0; i < 8; i++)
                 sub_nodes[i].add_element(added_element);
         }
@@ -152,7 +142,6 @@ void octree_node<element_type>::add_element(std::vector<element_type *> & added_
 template<class element_type>
 void octree_node<element_type>::split()
 {
-    node_is_terminal = false;
     sub_nodes = new octree_node<element_type> [8];
 
     double dx = (x1 - x0) / 2.0, dy = (y1 - y0) / 2.0, dz = (z1 - z0) / 2.0;
@@ -170,7 +159,6 @@ void octree_node<element_type>::split()
     for(size_t i = 0; i < 8; i++)
         sub_nodes[i].level = level + 1;
 
-    elements_num = 0;
     add_element(elements);
     elements.clear();
 }
@@ -180,8 +168,9 @@ element_type * octree_node<element_type>::find(double x, double y, double z) con
 {
     if(point_in_node(x, y, z))
     {
-        if(node_is_terminal)
+        if(!sub_nodes)
         {
+            size_t elements_num = elements.size();
             for(size_t i = 0; i < elements_num; i++)
                 if(elements[i]->inside(x, y, z))
                     return elements[i];
@@ -202,9 +191,9 @@ element_type * octree_node<element_type>::find(double x, double y, double z) con
 template<class element_type>
 void octree<element_type>::make(double x0, double x1, double y0, double y1, double z0, double z1, std::vector<element_type> & elements)
 {
-    total_num = elements.size();
+    size_t total_num = elements.size();
     size_t level_barier = (size_t)(log((double)total_num + 1) / log(8.0)) + 1;
-    split_constant = (size_t)(pow((double)total_num, 1.0 / 8.0) * 1000.0);
+    size_t split_constant = (size_t)(pow((double)total_num, 1.0 / 8.0) * 1000.0);
     root.init_node(x0, x1, y0, y1, z0, z1, split_constant, level_barier);
     root.level = 0;
     std::vector<element_type *> el_v(total_num);
