@@ -31,322 +31,220 @@ namespace std
 }
 #endif
 
+namespace parser_internal
+{
+    using namespace std;
+
+    template<typename T> T pi_sin   (const T & arg) { return sin(arg);   }
+    template<typename T> T pi_cos   (const T & arg) { return cos(arg);   }
+    template<typename T> T pi_tan   (const T & arg) { return tan(arg);   }
+    template<typename T> T pi_sinh  (const T & arg) { return sinh(arg);  }
+    template<typename T> T pi_cosh  (const T & arg) { return cosh(arg);  }
+    template<typename T> T pi_tanh  (const T & arg) { return tanh(arg);  }
+    template<typename T> T pi_log   (const T & arg) { return log(arg);   }
+    template<typename T> T pi_log10 (const T & arg) { return log10(arg); }
+    template<typename T> T pi_exp   (const T & arg) { return exp(arg);   }
+    template<typename T> T pi_sqrt  (const T & arg) { return sqrt(arg);  }
+    template<typename T> complex<T> pi_abs   (const complex<T> & arg) { return abs(arg);          }
+    template<typename T> complex<T> pi_asin  (const complex<T> & arg) { return asin(arg.real());  }
+    template<typename T> complex<T> pi_acos  (const complex<T> & arg) { return acos(arg.real());  }
+    template<typename T> complex<T> pi_atan  (const complex<T> & arg) { return atan(arg.real());  }
+    template<typename T> complex<T> pi_asinh (const complex<T> & arg) { return asinh(arg.real()); }
+    template<typename T> complex<T> pi_acosh (const complex<T> & arg) { return acosh(arg.real()); }
+    template<typename T> complex<T> pi_atanh (const complex<T> & arg) { return atanh(arg.real()); }
+    template<typename T> complex<T> pi_imag  (const complex<T> & arg) { return arg.imag();        }
+    template<typename T> complex<T> pi_real  (const complex<T> & arg) { return arg.real();        }
+    template<typename T> complex<T> pi_conj  (const complex<T> & arg) { return conj(arg);         }
+    template<typename T> T pi_abs   (const T & arg) { return fabs(arg);  }
+    template<typename T> T pi_asin  (const T & arg) { return asin(arg);  }
+    template<typename T> T pi_acos  (const T & arg) { return acos(arg);  }
+    template<typename T> T pi_atan  (const T & arg) { return atan(arg);  }
+    template<typename T> T pi_asinh (const T & arg) { return asinh(arg); }
+    template<typename T> T pi_acosh (const T & arg) { return acosh(arg); }
+    template<typename T> T pi_atanh (const T & arg) { return atanh(arg); }
+    template<typename T> T pi_imag  (const T & arg) { return arg * (T)0; }
+    template<typename T> T pi_real  (const T & arg) { return arg;        }
+    template<typename T> T pi_conj  (const T & arg) { return arg;        }
+
+    template<typename T>
+    void init_functions(map<string, T(*)(const T &)> & funcs_map)
+    {
+        funcs_map["imag"]  = pi_imag;
+        funcs_map["real"]  = pi_real;
+        funcs_map["conj"]  = pi_conj;
+        funcs_map["sin"]   = pi_sin;
+        funcs_map["cos"]   = pi_cos;
+        funcs_map["tan"]   = pi_tan;
+        funcs_map["asin"]  = pi_asin;
+        funcs_map["acos"]  = pi_acos;
+        funcs_map["atan"]  = pi_atan;
+        funcs_map["sinh"]  = pi_sinh;
+        funcs_map["cosh"]  = pi_cosh;
+        funcs_map["tanh"]  = pi_tanh;
+        funcs_map["asinh"] = pi_asinh;
+        funcs_map["acosh"] = pi_acosh;
+        funcs_map["atanh"] = pi_atanh;
+        funcs_map["log"]   = pi_log;
+        funcs_map["log10"] = pi_log10;
+        funcs_map["abs"]   = pi_abs;
+        funcs_map["exp"]   = pi_exp;
+        funcs_map["sqrt"]  = pi_sqrt;
+    }
+
+    template<typename T> T pi_plus  (const T & larg, const T & rarg) { return larg + rarg; }
+    template<typename T> T pi_minus (const T & larg, const T & rarg) { return larg - rarg; }
+    template<typename T> T pi_mult  (const T & larg, const T & rarg) { return larg * rarg; }
+    template<typename T> T pi_div   (const T & larg, const T & rarg) { return larg / rarg; }
+    template<typename T> T pi_pow   (const T & larg, const T & rarg) { return pow(larg, rarg); }
+
+    template<typename T>
+    void init_operators(map<char, pair<unsigned short int, T(*)(const T &, const T &)> > & opers_map)
+    {
+        typedef pair<unsigned short int, T(*)(const T &, const T &)> oper_type;
+        opers_map['+'] = oper_type(1, pi_plus);
+        opers_map['-'] = oper_type(1, pi_minus);
+        opers_map['*'] = oper_type(2, pi_mult);
+        opers_map['/'] = oper_type(2, pi_div);
+        opers_map['^'] = oper_type(3, pi_pow);
+    }
+
+    template<typename T>
+    void init_constants(map<string, T> & consts_map)
+    {
+        consts_map["pi"] = static_cast<T>(3.14159265358979323846264338327950);
+        consts_map["e"]  = static_cast<T>(2.71828182845904523536028747135266);
+        if(typeid(T) == typeid(complex<float>) ||
+           typeid(T) == typeid(complex<double>) ||
+           typeid(T) == typeid(complex<long double>))
+        {
+            consts_map["i"] = sqrt(static_cast<T>(-1.0));
+            consts_map["j"] = sqrt(static_cast<T>(-1.0));
+        }
+    }
+
+    template<typename T>
+    class parser_object
+    {
+    protected:
+        enum parser_object_type
+        {
+            PI_OBJ_OPERATOR,
+            PI_OBJ_FUNCTION,
+            PI_OBJ_VARIABLE,
+            PI_OBJ_CONSTANT
+        };
+        T value_data;
+        parser_object_type type;
+        string str_;
+        T(* func)(const T &);
+        T(* oper)(const T &, const T &);
+        T * value;
+        void init(parser_object_type n_type, const string & n_str, T * n_value,
+                  T(* n_func)(const T &), T(* n_oper)(const T &, const T &))
+        {
+            type = n_type;
+            str_ = n_str;
+            value = n_value;
+            func = n_func;
+            oper = n_oper;
+        }
+    public:
+        inline bool is_variable() const { return type == PI_OBJ_VARIABLE; }
+        inline bool is_constant() const { return type == PI_OBJ_CONSTANT; }
+        inline bool is_function() const { return type == PI_OBJ_FUNCTION; }
+        inline bool is_operator() const { return type == PI_OBJ_OPERATOR; }
+        inline const string & str() const { return str_; }
+        inline T eval() const { return value_data; }
+        inline T eval(const T & arg) const { return func(arg); }
+        inline T eval(const T & larg, const T & rarg) const { return oper(larg, rarg); }
+        parser_object(const string & new_str)
+        {
+            init(PI_OBJ_VARIABLE, new_str, NULL, NULL, NULL);
+        }
+        parser_object(const string & new_str, const T & new_value)
+        {
+            value_data = new_value;
+            init(PI_OBJ_CONSTANT, new_str, & value_data, NULL, NULL);
+        }
+        parser_object(const string & new_str, T(* new_func)(const T &))
+        {
+            init(PI_OBJ_FUNCTION, new_str, NULL, new_func, NULL);
+        }
+        parser_object(const string & new_str, T(* new_oper)(const T &, const T &))
+        {
+            init(PI_OBJ_OPERATOR, new_str, NULL, NULL, new_oper);
+        }
+    };
+}
+
 template<typename T>
 class parser
 {
 protected:
     std::vector<std::string> expression;
-    std::set<std::string> functions;
+    std::vector<parser_internal::parser_object<T> > expression_objects;
+    std::map<std::string, T(*)(const T &)> functions;
     std::map<std::string, T> constants;
-    std::map<char, unsigned short int> operators;
+    std::map<char, std::pair<unsigned short int, T(*)(const T &, const T &)> > operators;
     bool status;
     std::string error_string;
-
-    bool is_complex;
-    T imag_value;
 
     void init()
     {
         using namespace std;
-
-        if(typeid(T) == typeid(complex<float>) ||
-           typeid(T) == typeid(complex<double>) ||
-           typeid(T) == typeid(complex<long double>))
-        {
-            is_complex = true;
-            imag_value = sqrt(static_cast<T>(-1.0));
-            functions.insert("imag");
-            functions.insert("real");
-            functions.insert("conj");
-        }
-        else
-        {
-            is_complex = false;
-        }
-
-        functions.insert("sin");
-        functions.insert("cos");
-        functions.insert("tan");
-        functions.insert("asin");
-        functions.insert("acos");
-        functions.insert("atan");
-        functions.insert("sinh");
-        functions.insert("cosh");
-        functions.insert("tanh");
-        functions.insert("asinh");
-        functions.insert("acosh");
-        functions.insert("atanh");
-        functions.insert("log");
-        functions.insert("log10");
-        functions.insert("abs");
-        functions.insert("exp");
-        functions.insert("sqrt");
-
-        operators['+'] = 1;
-        operators['-'] = 1;
-        operators['*'] = 2;
-        operators['/'] = 2;
-        operators['^'] = 3;
+        using namespace parser_internal;
+        init_functions(functions);
+        init_operators(operators);
+        init_constants(constants);
     }
 
-    void init_const()
-    {
-        constants["pi"] = static_cast<T>(3.14159265358979323846264338327950);
-        constants["e"]  = static_cast<T>(2.71828182845904523536028747135266);
-        if(is_complex)
-        {
-            constants["i"] = imag_value;
-            constants["j"] = imag_value;
-        }
-    }
-
-    bool calc_operator(const std::string & oper, const T & larg, const T & rarg, T & result)
+    void convert_to_objects()
     {
         using namespace std;
-        switch(oper[0])
+        using namespace parser_internal;
+        expression_objects.clear();
+        expression_objects.reserve(expression.size());
+        for(vector<string>::const_iterator it = expression.begin(); it != expression.end(); ++it)
         {
-        case '+':
-            result = larg + rarg;
-            return true;
-        case '-':
-            result = larg - rarg;
-            return true;
-        case '*':
-            result = larg * rarg;
-            return true;
-        case '/':
-            result = larg / rarg;
-            return true;
-        case '^':
-            result = pow(larg, rarg);
-            return true;
-        }
-        stringstream sst;
-        sst << "Unknown operator " << oper;
-        error_string = sst.str();
-        return false;
-    }
-
-    template<typename U>
-    bool calc_function(const std::string & func, const std::complex<U> & arg, T & result)
-    {
-        using namespace std;
-        if(func == "sin")
-        {
-            result = sin(arg);
-            return true;
-        }
-        if(func == "cos")
-        {
-            result = cos(arg);
-            return true;
-        }
-        if(func == "tan")
-        {
-            result = tan(arg);
-            return true;
-        }
-        if(func == "sinh")
-        {
-            result = sinh(arg);
-            return true;
-        }
-        if(func == "cosh")
-        {
-            result = cosh(arg);
-            return true;
-        }
-        if(func == "tanh")
-        {
-            result = tanh(arg);
-            return true;
-        }
-        if(func == "log")
-        {
-            result = log(arg);
-            return true;
-        }
-        if(func == "log10")
-        {
-            result = log10(arg);
-            return true;
-        }
-        if(func == "abs")
-        {
-            result = abs(arg);
-            return true;
-        }
-        if(func == "sqrt")
-        {
-            result = sqrt(arg);
-            return true;
-        }
-        if(func == "exp")
-        {
-            result = exp(arg);
-            return true;
-        }
-        if(func == "imag")
-        {
-            result = arg.imag();
-            return true;
-        }
-        if(func == "real")
-        {
-            result = arg.real();
-            return true;
-        }
-        if(func == "conj")
-        {
-            result = conj(arg);
-            return true;
-        }
-        if(fabs(arg.imag()) < numeric_limits<U>::epsilon())
-        {
-            if(func == "asin")
+            typename map<string, T>::const_iterator itc = constants.find(*it);
+            if(itc != constants.end())
             {
-                result = asin(arg.real());
-                return true;
+                expression_objects.push_back(parser_object<T>(*it, itc->second));
             }
-            if(func == "acos")
+            else
             {
-                result = acos(arg.real());
-                return true;
-            }
-            if(func == "atan")
-            {
-                result = atan(arg.real());
-                return true;
-            }
-            if(func == "asinh")
-            {
-                result = asinh(arg.real());
-                return true;
-            }
-            if(func == "acosh")
-            {
-                result = acosh(arg.real());
-                return true;
-            }
-            if(func == "atanh")
-            {
-                result = atanh(arg.real());
-                return true;
+                typename map<char, pair<unsigned short int, T(*)(const T &, const T &)> >::const_iterator ito = operators.find((*it)[0]);
+                if(ito != operators.end())
+                {
+                    expression_objects.push_back(parser_object<T>(*it, ito->second.second));
+                }
+                else
+                {
+                    typename map<string, T(*)(const T &)>::const_iterator itf = functions.find(*it);
+                    if(itf != functions.end())
+                    {
+                        expression_objects.push_back(parser_object<T>(*it, itf->second));
+                    }
+                    else
+                    {
+                        expression_objects.push_back(parser_object<T>(*it));
+                    }
+                }
             }
         }
-        stringstream sst;
-        sst << "Unknown function " << func;
-        error_string = sst.str();
-        return false;
-    }
-
-    template<typename U>
-    bool calc_function(const std::string & func, const U & arg, T & result)
-    {
-        using namespace std;
-        if(func == "sin")
-        {
-            result = sin(arg);
-            return true;
-        }
-        if(func == "cos")
-        {
-            result = cos(arg);
-            return true;
-        }
-        if(func == "tan")
-        {
-            result = tan(arg);
-            return true;
-        }
-        if(func == "asin")
-        {
-            result = asin(arg);
-            return true;
-        }
-        if(func == "acos")
-        {
-            result = acos(arg);
-            return true;
-        }
-        if(func == "atan")
-        {
-            result = atan(arg);
-            return true;
-        }
-        if(func == "sinh")
-        {
-            result = sinh(arg);
-            return true;
-        }
-        if(func == "cosh")
-        {
-            result = cosh(arg);
-            return true;
-        }
-        if(func == "tanh")
-        {
-            result = tanh(arg);
-            return true;
-        }
-        if(func == "asinh")
-        {
-            result = asinh(arg);
-            return true;
-        }
-        if(func == "acosh")
-        {
-            result = acosh(arg);
-            return true;
-        }
-        if(func == "atanh")
-        {
-            result = atanh(arg);
-            return true;
-        }
-        if(func == "log")
-        {
-            result = log(arg);
-            return true;
-        }
-        if(func == "log10")
-        {
-            result = log10(arg);
-            return true;
-        }
-        if(func == "abs")
-        {
-            result = fabs(arg);
-            return true;
-        }
-        if(func == "sqrt")
-        {
-            result = sqrt(arg);
-            return true;
-        }
-        if(func == "exp")
-        {
-            result = exp(arg);
-            return true;
-        }
-        stringstream sst;
-        sst << "Unknown function " << func;
-        error_string = sst.str();
-        return false;
+        expression.clear();
     }
 
 public:
     parser()
     {
         init();
-        init_const();
         status = false;
     }
 
     parser(const std::string & str)
     {
         init();
-        init_const();
         parse(str);
     }
 
@@ -362,8 +260,9 @@ public:
 
     void reset_const()
     {
+        using namespace parser_internal;
         constants.clear();
-        init_const();
+        init_constants(constants);
     }
 
     bool is_parsed() const
@@ -374,8 +273,10 @@ public:
     bool parse(const std::string & str)
     {
         using namespace std;
+        using namespace parser_internal;
 
         expression.clear();
+        expression_objects.clear();
         error_string = "";
 
         status = true;
@@ -518,7 +419,7 @@ public:
                     char op;
                     if(!st.empty()) op = st.top().c_str()[0];
                     while(!st.empty() && operators.find(op) != operators.end() &&
-                          operators[sym] <= operators[op])
+                          operators[sym].first <= operators[op].first)
                     {
                         expression.push_back(st.top());
                         st.pop();
@@ -576,12 +477,14 @@ public:
             st.pop();
         }
 
+        if(status) convert_to_objects();
         return status;
     }
 
     bool simplify()
     {
         using namespace std;
+        using namespace parser_internal;
 
         if(!is_parsed())
         {
@@ -592,31 +495,31 @@ public:
         bool was_changed;
         do
         {
-            deque<string> dq;
+            deque<parser_object<T> > dq;
             was_changed = false;
 
-            for(vector<string>::iterator it = expression.begin(); it != expression.end(); ++it)
+            for(typename vector<parser_object<T> >::iterator it = expression_objects.begin(); it != expression_objects.end(); ++it)
             {
-                if(constants.find(*it) == constants.end() && operators.find((*it)[0]) != operators.end())
+                if(it->is_operator())
                 {
-                    string arg2 = dq.back();
-                    if(constants.find(arg2) != constants.end())
+                    parser_object<T> arg2 = dq.back();
+                    if(arg2.is_constant() || (arg2.is_variable() && (constants.find(arg2.str()) != constants.end())))
                     {
                         dq.pop_back();
-                        string arg1 = dq.back();
-                        if(constants.find(arg1) != constants.end())
+                        parser_object<T> arg1 = dq.back();
+                        if(arg1.is_constant() || (arg1.is_variable() && (constants.find(arg1.str()) != constants.end())))
                         {
                             dq.pop_back();
-                            T val;
-                            if(!calc_operator(*it, constants[arg1], constants[arg2], val))
-                                return false;
+                            T varg1 = (arg1.is_constant() ? arg1.eval() : constants[arg1.str()]);
+                            T varg2 = (arg2.is_constant() ? arg2.eval() : constants[arg2.str()]);
+                            T val = it->eval(varg1, varg2);
                             stringstream sst;
                             sst.precision(17);
                             sst.setf(ios::scientific);
                             sst << val;
                             string sst_st = sst.str();
                             constants[sst_st] = val;
-                            dq.push_back(sst_st);
+                            dq.push_back(parser_object<T>(sst_st, val));
                         }
                         else
                         {
@@ -629,22 +532,21 @@ public:
                         dq.push_back(*it);
                     }
                 }
-                else if(functions.find(*it) != functions.end())
+                else if(it->is_function())
                 {
-                    string arg = dq.back();
-                    if(constants.find(arg) != constants.end())
+                    parser_object<T> arg = dq.back();
+                    if(arg.is_constant() || (arg.is_variable() && (constants.find(arg.str()) != constants.end())))
                     {
                         dq.pop_back();
-                        T val;
-                        if(!calc_function(*it, constants[arg], val))
-                            return false;
+                        T varg = (arg.is_constant() ? arg.eval() : constants[arg.str()]);
+                        T val = it->eval(varg);
                         stringstream sst;
                         sst.precision(17);
                         sst.setf(ios::scientific);
                         sst << val;
                         string sst_st = sst.str();
                         constants[sst_st] = val;
-                        dq.push_back(sst_st);
+                        dq.push_back(parser_object<T>(sst_st, val));
                     }
                     else
                     {
@@ -657,13 +559,13 @@ public:
                 }
             }
 
-            if(expression.size() > dq.size())
+            if(expression_objects.size() > dq.size())
             {
-                expression.clear();
-                expression.reserve(dq.size());
+                expression_objects.clear();
+                expression_objects.reserve(dq.size());
                 while(!dq.empty())
                 {
-                    expression.push_back(dq.front());
+                    expression_objects.push_back(dq.front());
                     dq.pop_front();
                 }
                 was_changed = true;
@@ -673,51 +575,48 @@ public:
                 dq.clear();
             }
 
-            for(vector<string>::iterator it = expression.begin(); it != expression.end(); ++it)
+            for(typename vector<parser_object<T> >::iterator it = expression_objects.begin(); it != expression_objects.end(); ++it)
             {
-                if(constants.find(*it) == constants.end() && operators.find((*it)[0]) != operators.end())
+                if(it->is_operator())
                 {
-                    string arg2 = dq.back();
+                    parser_object<T> arg2 = dq.back();
                     dq.pop_back();
-                    string arg1 = dq.back();
+                    parser_object<T> arg1 = dq.back();
                     // Such things as a*0 or 0*a
-                    if(*it == "*" && ((constants.find(arg2) != constants.end() && constants[arg2] == static_cast<T>(0.0)) ||
-                                      (constants.find(arg1) != constants.end() && constants[arg1] == static_cast<T>(0.0) &&
-                                       operators.find(arg2[0]) == operators.end() &&
-                                       functions.find(arg2) == functions.end())))
+                    if(it->str() == "*" && ((arg2.is_constant() && arg2.eval() == static_cast<T>(0.0)) ||
+                                            (arg1.is_constant() && arg1.eval() == static_cast<T>(0.0) &&
+                                             !arg2.is_operator() && !arg2.is_function())))
                     {
                         dq.pop_back();
-                        if(constants.find(arg2) != constants.end() && constants[arg2] == static_cast<T>(0.0))
+                        if(arg2.is_constant() && arg2.eval() == static_cast<T>(0.0))
                             dq.push_back(arg2);
                         else
                             dq.push_back(arg1);
                     }
                     // Such things as a*1 or 1*a
-                    else if(*it == "*" && ((constants.find(arg2) != constants.end() && constants[arg2] == static_cast<T>(1.0)) ||
-                                           (constants.find(arg1) != constants.end() && constants[arg1] == static_cast<T>(1.0) &&
-                                            operators.find(arg2[0]) == operators.end() &&
-                                            functions.find(arg2) == functions.end())))
+                    else if(it->str() == "*" && ((arg2.is_constant() && arg2.eval() == static_cast<T>(1.0)) ||
+                                                 (arg1.is_constant() && arg1.eval() == static_cast<T>(1.0) &&
+                                                  !arg2.is_operator() && !arg2.is_function())))
                     {
                         dq.pop_back();
-                        if(constants.find(arg2) != constants.end() && constants[arg2] == static_cast<T>(1.0))
+                        if(arg2.is_constant() && arg2.eval() == static_cast<T>(1.0))
                             dq.push_back(arg1);
                         else
                             dq.push_back(arg2);
                     }
                     // Such things as a+0 or 0+a
-                    else if(*it == "+" && ((constants.find(arg2) != constants.end() && constants[arg2] == static_cast<T>(0.0)) ||
-                                           (constants.find(arg1) != constants.end() && constants[arg1] == static_cast<T>(0.0) &&
-                                            operators.find(arg2[0]) == operators.end() &&
-                                            functions.find(arg2) == functions.end())))
+                    else if(it->str() == "+" && ((arg2.is_constant() && arg2.eval() == static_cast<T>(0.0)) ||
+                                                 (arg1.is_constant() && arg1.eval() == static_cast<T>(0.0) &&
+                                                  !arg2.is_operator() && !arg2.is_function())))
                     {
                         dq.pop_back();
-                        if(constants.find(arg2) != constants.end() && constants[arg2] == static_cast<T>(0.0))
+                        if(arg2.is_constant() && arg2.eval() == static_cast<T>(0.0))
                             dq.push_back(arg1);
                         else
                             dq.push_back(arg2);
                     }
                     // Such things as a-0
-                    else if(*it == "-" && constants.find(arg2) != constants.end() && constants[arg2] == static_cast<T>(0.0))
+                    else if(it->str() == "-" && arg2.is_constant() && arg2.eval() == static_cast<T>(0.0))
                     {
                         dq.pop_back();
                         dq.push_back(arg1);
@@ -735,13 +634,13 @@ public:
                 }
             }
 
-            if(expression.size() > dq.size())
+            if(expression_objects.size() > dq.size())
             {
-                expression.clear();
-                expression.reserve(dq.size());
+                expression_objects.clear();
+                expression_objects.reserve(dq.size());
                 while(!dq.empty())
                 {
-                    expression.push_back(dq.front());
+                    expression_objects.push_back(dq.front());
                     dq.pop_front();
                 }
                 was_changed = true;
@@ -758,6 +657,7 @@ public:
     bool calculate(T & result)
     {
         using namespace std;
+        using namespace parser_internal;
 
         if(!is_parsed())
         {
@@ -767,38 +667,42 @@ public:
 
         stack<T> st;
 
-        for(vector<string>::const_iterator it = expression.begin(); it != expression.end(); ++it)
+        for(typename vector<parser_object<T> >::const_iterator it = expression_objects.begin(); it != expression_objects.end(); ++it)
         {
-            if(constants.find(*it) != constants.end())
+            if(it->is_constant())
             {
-                st.push((*constants.find(*it)).second);
+                st.push(it->eval());
             }
-            else if(operators.find((*it)[0]) != operators.end())
+            else if(it->is_variable())
+            {
+                typename map<string, T>::const_iterator itc = constants.find(it->str());
+                if(itc != constants.end())
+                {
+                    st.push(itc->second);
+                }
+                else
+                {
+                    stringstream sst;
+                    sst << "Constant `" << it->str() << "` must be defined!";
+                    error_string = sst.str();
+                    return false;
+                }
+            }
+            else if(it->is_operator())
             {
                 T arg2 = st.top();
                 st.pop();
                 T arg1 = st.top();
                 st.pop();
-                T val;
-                if(!calc_operator(*it, arg1, arg2, val))
-                    return false;
+                T val = it->eval(arg1, arg2);
                 st.push(val);
             }
-            else if(functions.find(*it) != functions.end())
+            else if(it->is_function())
             {
                 T arg = st.top();
                 st.pop();
-                T val;
-                if(!calc_function(*it, arg, val))
-                    return false;
+                T val = it->eval(arg);
                 st.push(val);
-            }
-            else
-            {
-                stringstream sst;
-                sst << "Constant `" << *it << "` must be defined!";
-                error_string = sst.str();
-                return false;
             }
         }
 
@@ -816,8 +720,13 @@ public:
     void debug_print() const
     {
         using namespace std;
-        for(vector<string>::const_iterator it = expression.begin(); it != expression.end(); ++it)
-            cout << * it << ' ';
+        using namespace parser_internal;
+        if(expression.size() > expression_objects.size())
+            for(vector<string>::const_iterator it = expression.begin(); it != expression.end(); ++it)
+                cout << * it << ' ';
+        else
+            for(typename vector<parser_object<T> >::const_iterator it = expression_objects.begin(); it != expression_objects.end(); ++it)
+                cout << it->str() << ' ';
         cout << endl;
     }
 };
