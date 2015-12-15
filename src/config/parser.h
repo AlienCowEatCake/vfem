@@ -174,6 +174,35 @@ namespace parser_internal
             init(PI_OBJ_OPERATOR, new_str, NULL, new_oper, T());
         }
     };
+
+    template<typename T, const size_t max_size = 16>
+    class simple_stack
+    {
+    public:
+        inline const T & top() const
+        {
+            return data[top_place];
+        }
+        inline void pop()
+        {
+            top_place--;
+        }
+        inline size_t size() const
+        {
+            return top_place;
+        }
+        inline void push(const T & val)
+        {
+            data[++top_place] = val;
+        }
+        simple_stack()
+        {
+            top_place = 0;
+        }
+    protected:
+        size_t top_place;
+        T data[max_size];
+    };
 }
 
 template<typename T>
@@ -232,6 +261,7 @@ protected:
             }
         }
         expression.clear();
+        constants.clear();
     }
 
 public:
@@ -502,22 +532,21 @@ public:
                 if(it->is_operator())
                 {
                     parser_object<T> arg2 = dq.back();
-                    if(arg2.is_constant() || (arg2.is_variable() && (constants.find(arg2.str()) != constants.end())))
+                    if(arg2.is_constant())
                     {
                         dq.pop_back();
                         parser_object<T> arg1 = dq.back();
-                        if(arg1.is_constant() || (arg1.is_variable() && (constants.find(arg1.str()) != constants.end())))
+                        if(arg1.is_constant())
                         {
                             dq.pop_back();
-                            T varg1 = (arg1.is_constant() ? arg1.eval() : constants[arg1.str()]);
-                            T varg2 = (arg2.is_constant() ? arg2.eval() : constants[arg2.str()]);
+                            T varg1 = arg1.eval();
+                            T varg2 = arg2.eval();
                             T val = it->eval(varg1, varg2);
                             stringstream sst;
                             sst.precision(17);
                             sst.setf(ios::scientific);
                             sst << val;
                             string sst_st = sst.str();
-                            constants[sst_st] = val;
                             dq.push_back(parser_object<T>(sst_st, val));
                         }
                         else
@@ -534,17 +563,16 @@ public:
                 else if(it->is_function())
                 {
                     parser_object<T> arg = dq.back();
-                    if(arg.is_constant() || (arg.is_variable() && (constants.find(arg.str()) != constants.end())))
+                    if(arg.is_constant())
                     {
                         dq.pop_back();
-                        T varg = (arg.is_constant() ? arg.eval() : constants[arg.str()]);
+                        T varg = arg.eval();
                         T val = it->eval(varg);
                         stringstream sst;
                         sst.precision(17);
                         sst.setf(ios::scientific);
                         sst << val;
                         string sst_st = sst.str();
-                        constants[sst_st] = val;
                         dq.push_back(parser_object<T>(sst_st, val));
                     }
                     else
@@ -664,7 +692,8 @@ public:
             return false;
         }
 
-        stack<T> st;
+        //stack<T> st;
+        simple_stack<T> st;
 
         for(typename vector<parser_object<T> >::const_iterator it = expression_objects.begin(); it != expression_objects.end(); ++it)
         {
