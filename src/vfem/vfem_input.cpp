@@ -1,5 +1,10 @@
 #include "vfem.h"
 
+// gmsh-2.11.0-source/Common/GmshDefines.h
+#define MSH_LIN_2    1  // 2-node line.
+#define MSH_TRI_3    2  // 3-node triangle.
+#define MSH_TET_4    4  // 4-node tetrahedron.
+
 size_t VFEM::add_edge(edge ed, set<edge> & edges_set)
 {
     set<edge>::iterator r = edges_set.find(ed);
@@ -47,7 +52,7 @@ bool VFEM::input_phys(const string & phys_filename)
 
         ph->gmsh_num = id.gmsh_num;
         ph->type_of_elem = id.type_of_element;
-        if(id.type_of_element == 4)
+        if(id.type_of_element == MSH_TET_4)
         {
             phys_param >> ph->mu >> ph->epsilon >> ph->sigma;
             ph->mu *= consts::mu0;
@@ -56,12 +61,12 @@ bool VFEM::input_phys(const string & phys_filename)
             ph->type_of_bounds = 0;
             ph->J0 = 0.0;
         }
-        else if(id.type_of_element == 2)
+        else if(id.type_of_element == MSH_TRI_3)
         {
             size_t parent_phys;
             phys_param >> parent_phys;
             phys_param >> ph->type_of_bounds;
-            map<phys_id, phys_area>::const_iterator parent = phys.find(phys_id(4, parent_phys));
+            map<phys_id, phys_area>::const_iterator parent = phys.find(phys_id(MSH_TET_4, parent_phys));
             if(parent != phys.end())
             {
                 const phys_area * par = &(parent->second);
@@ -79,15 +84,15 @@ bool VFEM::input_phys(const string & phys_filename)
                 ph->sigma = 0.0;
                 ph->J0 = 0.0;
                 cerr << "Warning: unaccounted parent \"" << parent_phys << "\" of phys area \""
-                     << ph->gmsh_num << "\" (2), skipping..." << endl;
+                     << ph->gmsh_num << "\" (2 - MSH_TRI_3), skipping..." << endl;
             }
         }
-        else if(id.type_of_element == 1)
+        else if(id.type_of_element == MSH_LIN_2)
         {
             size_t parent_phys;
             phys_param >> parent_phys;
             phys_param >> ph->J0;
-            map<phys_id, phys_area>::const_iterator parent = phys.find(phys_id(4, parent_phys));
+            map<phys_id, phys_area>::const_iterator parent = phys.find(phys_id(MSH_TET_4, parent_phys));
             if(parent != phys.end())
             {
                 const phys_area * par = &(parent->second);
@@ -105,7 +110,7 @@ bool VFEM::input_phys(const string & phys_filename)
                 ph->sigma = 0.0;
                 ph->type_of_bounds = 0;
                 cerr << "Warning: unaccounted parent \"" << parent_phys << "\" of phys area \""
-                     << ph->gmsh_num << "\" (1), skipping..." << endl;
+                     << ph->gmsh_num << "\" (1 - MSH_LIN_2), skipping..." << endl;
             }
         }
         else
@@ -144,7 +149,7 @@ bool VFEM::input_phys(const string & phys_filename)
     // Заполним данные и в вычисляемых функциях
     for(map<size_t, array_t<parser<complex<double> >, 3> >::iterator it = config.analytical.values.begin(); it != config.analytical.values.end(); ++it)
     {
-        map<phys_id, phys_area>::const_iterator ph = phys.find(phys_id(4, it->first));
+        map<phys_id, phys_area>::const_iterator ph = phys.find(phys_id(MSH_TET_4, it->first));
         complex<double> k2(- ph->second.omega * ph->second.omega * ph->second.epsilon, ph->second.omega * ph->second.sigma);
         for(size_t i = 0; i < 3; i++)
         {
@@ -159,7 +164,7 @@ bool VFEM::input_phys(const string & phys_filename)
     }
     for(map<size_t, array_t<parser<complex<double> >, 3> >::iterator it = config.boundary.values.begin(); it != config.boundary.values.end(); ++it)
     {
-        map<phys_id, phys_area>::const_iterator ph = phys.find(phys_id(4, it->first));
+        map<phys_id, phys_area>::const_iterator ph = phys.find(phys_id(MSH_TRI_3, it->first));
         complex<double> k2(- ph->second.omega * ph->second.omega * ph->second.epsilon, ph->second.omega * ph->second.sigma);
         for(size_t i = 0; i < 3; i++)
         {
@@ -174,7 +179,7 @@ bool VFEM::input_phys(const string & phys_filename)
     }
     for(map<size_t, array_t<parser<complex<double> >, 3> >::iterator it = config.right.values.begin(); it != config.right.values.end(); ++it)
     {
-        map<phys_id, phys_area>::const_iterator ph = phys.find(phys_id(4, it->first));
+        map<phys_id, phys_area>::const_iterator ph = phys.find(phys_id(MSH_TET_4, it->first));
         complex<double> k2(- ph->second.omega * ph->second.omega * ph->second.epsilon, ph->second.omega * ph->second.sigma);
         for(size_t i = 0; i < 3; i++)
         {
@@ -287,16 +292,16 @@ bool VFEM::input_mesh(const string & gmsh_filename)
                 gmsh_file >> fake_number;
         }
 
-        if(type_of_elem == 4)
+        if(type_of_elem == MSH_TET_4)
         {
-            map<phys_id, phys_area>::iterator ph = phys.find(phys_id(4, phys_num));
+            map<phys_id, phys_area>::iterator ph = phys.find(phys_id(MSH_TET_4, phys_num));
             if(ph != phys.end())
                 fake_element.phys = &(ph->second);
             else
             {
                 cerr << "Error in " << __FILE__ << ":" << __LINE__
                      << " while reading file " << gmsh_filename << endl;
-                cerr << "Can`t detect physical id " << phys_num << " in 4 (tetrahedron)" << endl;
+                cerr << "Can`t detect physical id " << phys_num << " in 4 - MSH_TET_4 (tetrahedron)" << endl;
                 return false;
             }
 
@@ -323,16 +328,16 @@ bool VFEM::input_mesh(const string & gmsh_filename)
 
             fes.push_back(fake_element);
         }
-        else if(type_of_elem == 2)
+        else if(type_of_elem == MSH_TRI_3)
         {
-            map<phys_id, phys_area>::iterator ph = phys.find(phys_id(2, phys_num));
+            map<phys_id, phys_area>::iterator ph = phys.find(phys_id(MSH_TRI_3, phys_num));
             if(ph != phys.end())
                 fake_triangle.phys = &(ph->second);
             else
             {
                 cerr << "Error in " << __FILE__ << ":" << __LINE__
                      << " while reading file " << gmsh_filename << endl;
-                cerr << "Can`t detect physical id " << phys_num << " in 2 (triangle)" << endl;
+                cerr << "Can`t detect physical id " << phys_num << " in 2 - MSH_TRI_3 (triangle)" << endl;
                 return false;
             }
 
@@ -367,16 +372,16 @@ bool VFEM::input_mesh(const string & gmsh_filename)
             else
                 trs_base.push_back(fake_triangle);
         }
-        else if(type_of_elem == 1)
+        else if(type_of_elem == MSH_LIN_2)
         {
-            map<phys_id, phys_area>::iterator ph = phys.find(phys_id(1, phys_num));
+            map<phys_id, phys_area>::iterator ph = phys.find(phys_id(MSH_LIN_2, phys_num));
             if(ph != phys.end())
                 fake_edge_src.phys = &(ph->second);
             else
             {
                 cerr << "Error in " << __FILE__ << ":" << __LINE__
                      << " while reading file " << gmsh_filename << endl;
-                cerr << "Can`t detect physical id " << phys_num << " in 1 (edge)" << endl;
+                cerr << "Can`t detect physical id " << phys_num << " in 1 - MSH_LIN_2 (edge)" << endl;
                 return false;
             }
 
