@@ -1,6 +1,8 @@
 #include "config.h"
 #include <fstream>
 #include <cassert>
+#include <cctype>
+#include <algorithm>
 
 // ============================================================================
 
@@ -15,14 +17,8 @@ string trim(const string & str)
 
 string to_lowercase(const string & str)
 {
-    string result;
-    for(string::const_iterator it = str.begin(); it != str.end(); ++it)
-    {
-        char c = * it;
-        if(c >= 'A' && c <= 'Z')
-            c -= 'A' - 'a';
-        result += c;
-    }
+    string result = str;
+    transform(str.begin(), str.end(), result.begin(), ::tolower);
     return result;
 }
 

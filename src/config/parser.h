@@ -15,6 +15,7 @@
 #include <complex>
 #include <typeinfo>
 #include <limits>
+#include <cctype>
 
 #if defined(_MSC_VER) && _MSC_VER < 1800
 namespace std
@@ -133,14 +134,13 @@ namespace parser_internal
             PI_OBJ_VARIABLE,
             PI_OBJ_CONSTANT
         };
-        T value_data;
         parser_object_type type;
         string str_;
         T(* func)(const T &);
         T(* oper)(const T &, const T &);
-        T * value;
-        void init(parser_object_type n_type, const string & n_str, T * n_value,
-                  T(* n_func)(const T &), T(* n_oper)(const T &, const T &))
+        T value;
+        void init(parser_object_type n_type, const string & n_str,
+                  T(* n_func)(const T &), T(* n_oper)(const T &, const T &), const T & n_value)
         {
             type = n_type;
             str_ = n_str;
@@ -154,25 +154,24 @@ namespace parser_internal
         inline bool is_function() const { return type == PI_OBJ_FUNCTION; }
         inline bool is_operator() const { return type == PI_OBJ_OPERATOR; }
         inline const string & str() const { return str_; }
-        inline T eval() const { return value_data; }
+        inline T eval() const { return value; }
         inline T eval(const T & arg) const { return func(arg); }
         inline T eval(const T & larg, const T & rarg) const { return oper(larg, rarg); }
         parser_object(const string & new_str)
         {
-            init(PI_OBJ_VARIABLE, new_str, NULL, NULL, NULL);
+            init(PI_OBJ_VARIABLE, new_str, NULL, NULL, T());
         }
         parser_object(const string & new_str, const T & new_value)
         {
-            value_data = new_value;
-            init(PI_OBJ_CONSTANT, new_str, & value_data, NULL, NULL);
+            init(PI_OBJ_CONSTANT, new_str, NULL, NULL, new_value);
         }
         parser_object(const string & new_str, T(* new_func)(const T &))
         {
-            init(PI_OBJ_FUNCTION, new_str, NULL, new_func, NULL);
+            init(PI_OBJ_FUNCTION, new_str, new_func, NULL, T());
         }
         parser_object(const string & new_str, T(* new_oper)(const T &, const T &))
         {
-            init(PI_OBJ_OPERATOR, new_str, NULL, NULL, new_oper);
+            init(PI_OBJ_OPERATOR, new_str, NULL, new_oper, T());
         }
     };
 }

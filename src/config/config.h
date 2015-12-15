@@ -87,7 +87,7 @@ public:
     postprocessor() : type(3), filename("plot.plt"), timestamp(false)
     {
         memset(&param_1d, 0, sizeof(postprocessor_1d));
-        memset(&param_1d, 0, sizeof(postprocessor_2d));
+        memset(&param_2d, 0, sizeof(postprocessor_2d));
     }
 };
 
