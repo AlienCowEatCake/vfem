@@ -120,7 +120,7 @@ int main(int argc, char * argv [])
     }
 
     VFEM v;
-    v.config.load(config);
+    if(!v.config.load(config)) return 1;
     if(!v.input_phys(config_dir + v.config.filename_phys)) return 1;
     if(!v.input_mesh(config_dir + v.config.filename_mesh)) return 1;
     v.make();

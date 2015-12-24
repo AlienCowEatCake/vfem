@@ -32,10 +32,28 @@ namespace std
 }
 #endif
 
+// Internal parser's classes & functions
 namespace parser_internal
 {
     using namespace std;
 
+    // Auto-allocatable container for variables.
+    template<typename T> class var_container
+    {
+    protected:
+        T * val;
+    public:
+        inline const T & value() const { return * val; }
+        inline       T & value()       { return * val; }
+        inline const T * pointer() const { return val; }
+        inline       T * pointer()       { return val; }
+        var_container(const T & new_val = T())     { val = new T(new_val); }
+        var_container(const var_container & other) { val = new T(other.value()); }
+        const var_container & operator = (const var_container & other) { val = new T; * val = other.value(); return * this; }
+        ~var_container() { delete val; }
+    };
+
+    // All fultions (must NOT be inline).
     template<typename T> T pi_sin   (const T & arg) { return sin(arg);   }
     template<typename T> T pi_cos   (const T & arg) { return cos(arg);   }
     template<typename T> T pi_tan   (const T & arg) { return tan(arg);   }
@@ -67,6 +85,7 @@ namespace parser_internal
     template<typename T> T pi_real  (const T & arg) { return arg;        }
     template<typename T> T pi_conj  (const T & arg) { return arg;        }
 
+    // Add function pointers into container.
     template<typename T>
     void init_functions(map<string, T(*)(const T &)> & funcs_map)
     {
@@ -92,12 +111,14 @@ namespace parser_internal
         funcs_map["sqrt"]  = pi_sqrt;
     }
 
+    // All operators (must NOT be inline).
     template<typename T> T pi_plus  (const T & larg, const T & rarg) { return larg + rarg; }
     template<typename T> T pi_minus (const T & larg, const T & rarg) { return larg - rarg; }
     template<typename T> T pi_mult  (const T & larg, const T & rarg) { return larg * rarg; }
     template<typename T> T pi_div   (const T & larg, const T & rarg) { return larg / rarg; }
     template<typename T> T pi_pow   (const T & larg, const T & rarg) { return pow(larg, rarg); }
 
+    // Add operators pointers into container.
     template<typename T>
     void init_operators(map<char, pair<unsigned short int, T(*)(const T &, const T &)> > & opers_map)
     {
@@ -109,42 +130,43 @@ namespace parser_internal
         opers_map['^'] = oper_type(3, pi_pow);
     }
 
+    // Init default constant values.
     template<typename T>
-    void init_constants(map<string, T> & consts_map)
+    void init_constants(map<string, var_container<T> > & consts_map)
     {
-        consts_map["pi"] = static_cast<T>(3.14159265358979323846264338327950);
-        consts_map["e"]  = static_cast<T>(2.71828182845904523536028747135266);
+        consts_map["pi"].value() = static_cast<T>(3.14159265358979323846264338327950);
+        consts_map["e"].value()  = static_cast<T>(2.71828182845904523536028747135266);
         if(typeid(T) == typeid(complex<float>) ||
            typeid(T) == typeid(complex<double>) ||
            typeid(T) == typeid(complex<long double>))
         {
-            consts_map["i"] = sqrt(static_cast<T>(-1.0));
-            consts_map["j"] = sqrt(static_cast<T>(-1.0));
+            consts_map["i"].value() = sqrt(static_cast<T>(-1.0));
+            consts_map["j"].value() = sqrt(static_cast<T>(-1.0));
         }
     }
 
+    // The universal parser object. It may be operator, function, variable or constant.
     template<typename T>
     class parser_object
     {
     protected:
         enum parser_object_type
         {
-            PI_OBJ_OPERATOR,
-            PI_OBJ_FUNCTION,
-            PI_OBJ_VARIABLE,
-            PI_OBJ_CONSTANT
+            PI_OBJ_OPERATOR, PI_OBJ_FUNCTION, PI_OBJ_VARIABLE, PI_OBJ_CONSTANT
         };
         parser_object_type type;
         string str_;
         T(* func)(const T &);
         T(* oper)(const T &, const T &);
         T value;
-        void init(parser_object_type n_type, const string & n_str,
-                  T(* n_func)(const T &), T(* n_oper)(const T &, const T &), const T & n_value)
+        const T * var_value;
+        void init(parser_object_type n_type, const string & n_str, T(* n_func)(const T &),
+                  T(* n_oper)(const T &, const T &), const T & n_value, const T * n_var_value)
         {
             type = n_type;
             str_ = n_str;
             value = n_value;
+            var_value = n_var_value;
             func = n_func;
             oper = n_oper;
         }
@@ -154,24 +176,24 @@ namespace parser_internal
         inline bool is_function() const { return type == PI_OBJ_FUNCTION; }
         inline bool is_operator() const { return type == PI_OBJ_OPERATOR; }
         inline const string & str() const { return str_; }
-        inline T eval() const { return value; }
+        inline T eval() const { return (type == PI_OBJ_VARIABLE ? (* var_value) : value); }
         inline T eval(const T & arg) const { return func(arg); }
         inline T eval(const T & larg, const T & rarg) const { return oper(larg, rarg); }
-        parser_object(const string & new_str)
+        parser_object(const string & new_str, const T * new_var_value)
         {
-            init(PI_OBJ_VARIABLE, new_str, NULL, NULL, T());
+            init(PI_OBJ_VARIABLE, new_str, NULL, NULL, T(), new_var_value);
         }
         parser_object(const string & new_str, const T & new_value)
         {
-            init(PI_OBJ_CONSTANT, new_str, NULL, NULL, new_value);
+            init(PI_OBJ_CONSTANT, new_str, NULL, NULL, new_value, NULL);
         }
         parser_object(const string & new_str, T(* new_func)(const T &))
         {
-            init(PI_OBJ_FUNCTION, new_str, new_func, NULL, T());
+            init(PI_OBJ_FUNCTION, new_str, new_func, NULL, T(), NULL);
         }
         parser_object(const string & new_str, T(* new_oper)(const T &, const T &))
         {
-            init(PI_OBJ_OPERATOR, new_str, NULL, new_oper, T());
+            init(PI_OBJ_OPERATOR, new_str, NULL, new_oper, T(), NULL);
         }
     };
 
@@ -212,10 +234,37 @@ protected:
     std::vector<std::string> expression;
     std::vector<parser_internal::parser_object<T> > expression_objects;
     std::map<std::string, T(*)(const T &)> functions;
-    std::map<std::string, T> constants;
+    std::map<std::string, parser_internal::var_container<T> > constants;
     std::map<char, std::pair<unsigned short int, T(*)(const T &, const T &)> > operators;
     bool status;
     std::string error_string;
+
+    template<typename U>
+    inline T incorrect_number(const std::complex<U> &) const
+    {
+        U num = std::numeric_limits<U>::max();
+        return static_cast<T>(std::complex<U>(num, num));
+    }
+
+    template<typename U>
+    inline T incorrect_number(const U &) const
+    {
+        return static_cast<T>(std::numeric_limits<U>::max());
+    }
+
+    template<typename U>
+    inline bool is_incorrect(const std::complex<U> & val) const
+    {
+        static U num = std::numeric_limits<U>::max() * (static_cast<U>(1.0) - static_cast<U>(1e-3));
+        return val.real() >= num && val.imag() >= num;
+    }
+
+    template<typename U>
+    inline bool is_incorrect(const U & val) const
+    {
+        static U num = std::numeric_limits<U>::max() * (static_cast<U>(1.0) - static_cast<U>(1e-3));
+        return val >= num;
+    }
 
     void init()
     {
@@ -234,10 +283,10 @@ protected:
         expression_objects.reserve(expression.size());
         for(vector<string>::const_iterator it = expression.begin(); it != expression.end(); ++it)
         {
-            typename map<string, T>::const_iterator itc = constants.find(*it);
-            if(itc != constants.end())
+            typename map<string, var_container<T> >::const_iterator itc = constants.find(*it);
+            if(itc != constants.end() && !is_incorrect(itc->second.value()))
             {
-                expression_objects.push_back(parser_object<T>(*it, itc->second));
+                expression_objects.push_back(parser_object<T>(*it, itc->second.value()));
             }
             else
             {
@@ -255,46 +304,74 @@ protected:
                     }
                     else
                     {
-                        expression_objects.push_back(parser_object<T>(*it));
+                        constants[*it].value() = incorrect_number(T());
+                        expression_objects.push_back(parser_object<T>(*it, constants[*it].pointer()));
                     }
                 }
             }
         }
         expression.clear();
-        constants.clear();
+    }
+
+    void copy_from_other_parser(const parser & other)
+    {
+        expression = other.expression;
+        expression_objects = other.expression_objects;
+        functions = other.functions;
+        constants = other.constants;
+        operators = other.operators;
+        status = other.status;
+        error_string = other.error_string;
     }
 
 public:
+    parser(const parser & other)
+    {
+        copy_from_other_parser(other);
+    }
+
+    const parser & operator = (const parser & other)
+    {
+        if(this != &other)
+            copy_from_other_parser(other);
+        return * this;
+    }
+
     parser()
     {
-        init();
         status = false;
+        init();
     }
 
     parser(const std::string & str)
     {
+        status = false;
         init();
         parse(str);
     }
 
-    const std::string & get_error() const
+    inline const std::string & get_error() const
     {
         return error_string;
     }
 
-    void set_const(const std::string & name, const T & value)
+    inline void set_const(const std::string & name, const T & value)
     {
-        constants[name] = value;
+        constants[name].value() = value;
     }
 
     void reset_const()
     {
+        using namespace std;
         using namespace parser_internal;
         constants.clear();
         init_constants(constants);
+        if(is_parsed())
+            for(typename vector<parser_object<T> >::iterator it = expression_objects.begin(); it != expression_objects.end(); ++it)
+                constants[it->str()].value() = incorrect_number(T());
     }
 
-    bool is_parsed() const
+    inline bool is_parsed() const
     {
         return status;
     }
@@ -384,7 +461,7 @@ public:
                 double c;
                 b >> c;
                 expression.push_back(a);
-                constants[a] = static_cast<T>(c);
+                constants[a].value() = static_cast<T>(c);
                 str_begin = false;
             }
             else if(sym == '(')
@@ -438,7 +515,7 @@ public:
                     }
                     else
                     {
-                        constants["-1.0"] = static_cast<T>(-1.0);
+                        constants["-1.0"].value() = static_cast<T>(-1.0);
                         expression.push_back("-1.0");
                         st.push("*");
                     }
@@ -476,7 +553,7 @@ public:
                 {
                     st.push(funcname);
                 }
-                else if(*it != '(')
+                else if(it == str.end() || *it != '(')
                 {
                     expression.push_back(funcname);
                 }
@@ -703,10 +780,10 @@ public:
             }
             else if(it->is_variable())
             {
-                typename map<string, T>::const_iterator itc = constants.find(it->str());
-                if(itc != constants.end())
+                T val = it->eval();
+                if(!is_incorrect(val))
                 {
-                    st.push(itc->second);
+                    st.push(val);
                 }
                 else
                 {
@@ -754,7 +831,13 @@ public:
                 cout << * it << ' ';
         else
             for(typename vector<parser_object<T> >::const_iterator it = expression_objects.begin(); it != expression_objects.end(); ++it)
-                cout << it->str() << ' ';
+            {
+                cout << it->str();
+                if(it->is_variable())
+                    cout << "->" << it->eval() << ' ';
+                else
+                    cout << ' ';
+            }
         cout << endl;
     }
 };
