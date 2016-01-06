@@ -51,6 +51,7 @@ void config_type::load_defaults()
     filename_mesh = "mesh.msh";
     filename_phys = "phys.txt";
     filename_slae = "";
+    jit_type = evaluator::JIT_DISABLE;
 
     analytical_enabled = false;
     boundary_enabled = false;
@@ -156,6 +157,16 @@ bool config_type::load(const string & filename)
                             else if(param == "filename_mesh")           sst >> filename_mesh;
                             else if(param == "filename_phys")           sst >> filename_phys;
                             else if(param == "filename_slae")           sst >> filename_slae;
+                            else if(param == "jit_type")
+                            {
+                                value = to_lowercase(value);
+                                if     (value == "inline")  jit_type = evaluator::JIT_INLINE;
+                                else if(value == "extcall") jit_type = evaluator::JIT_EXTCALL;
+                                else if(value == "disable") jit_type = evaluator::JIT_DISABLE;
+                                else cerr << "[Config] Unknown JIT-compiler type \"" << value << "\" in section \""
+                                          << section << (subsection == "" ? string("") : (string(".") + subsection))
+                                          << "\"" << endl;
+                            }
                             else cerr << "[Config] Unsupported param \"" << param<< "\" in section \"" << section
                                       << (subsection == "" ? string("") : (string(".") + subsection)) << "\"" << endl;
                             //cout << "  param = " << param << endl;
@@ -219,31 +230,35 @@ bool config_type::load(const string & filename)
                             string value = trim(line.substr(eq_pos + 1));
                             if(value.length() > 1 && value[0] == '\"')
                                 value = trim(value.substr(1, value.length() - 2));
-                            if(param == "x")
+                            if(param == "x" || param == "y" || param == "z")
                             {
-                                if(!(* curr_parser)[0].parse(value) || !(* curr_parser)[0].simplify())
+                                parser<complex<double> > * curr_parser_var = NULL;
+                                if(param == "x")      curr_parser_var = & ((* curr_parser)[0]);
+                                else if(param == "y") curr_parser_var = & ((* curr_parser)[1]);
+                                else if(param == "z") curr_parser_var = & ((* curr_parser)[2]);
+                                if(!curr_parser_var->parse(value) || !curr_parser_var->simplify())
                                 {
                                     cerr << "Error in " << __FILE__ << ":" << __LINE__
-                                         << " while parsing " << value << endl;
+                                         << " while parsing " << value << " ("
+                                         << curr_parser_var->get_error() << ")" << endl;
                                     return init(false);
                                 }
-                            }
-                            else if(param == "y")
-                            {
-                                if(!(* curr_parser)[1].parse(value) || !(* curr_parser)[1].simplify())
+                                switch(jit_type)
                                 {
-                                    cerr << "Error in " << __FILE__ << ":" << __LINE__
-                                         << " while parsing " << value << endl;
-                                    return init(false);
-                                }
-                            }
-                            else if(param == "z")
-                            {
-                                if(!(* curr_parser)[2].parse(value) || !(* curr_parser)[2].simplify())
-                                {
-                                    cerr << "Error in " << __FILE__ << ":" << __LINE__
-                                         << " while parsing " << value << endl;
-                                    return init(false);
+                                case evaluator::JIT_EXTCALL:
+                                    if(!curr_parser_var->compile_extcall())
+                                        cerr << "Error in " << __FILE__ << ":" << __LINE__
+                                             << " while compiling (extcall) " << value << " ("
+                                             << curr_parser_var->get_error() << ")" << endl;
+                                    break;
+                                case evaluator::JIT_INLINE:
+                                    if(!curr_parser_var->compile_inline())
+                                        cerr << "Error in " << __FILE__ << ":" << __LINE__
+                                             << " while compiling (inline) " << value << " ("
+                                             << curr_parser_var->get_error() << ")" << endl;
+                                    break;
+                                default:
+                                    break;
                                 }
                             }
                             else if(param == "enabled")

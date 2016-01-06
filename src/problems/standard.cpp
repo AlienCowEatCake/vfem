@@ -1,97 +1,58 @@
 #include "problems.h"
 
-cvector3 func_true(const config_type * config, const point & p, const phys_area & phys)
+cvector3 func_true(const point & p, const phys_area & phys, void * data)
 {
+    MAYBE_UNUSED(phys);
+    pair<const config_type *, array_t<parser<complex<double> > *, 3> > * params =
+            (pair<const config_type *, array_t<parser<complex<double> > *, 3> > *)(data);
     cvector3 result(0, 0, 0);
-    if(!config->analytical_enabled) return result;
-    complex<double> k2(- phys.omega * phys.omega * phys.epsilon, phys.omega * phys.sigma);
-    config_type * cfg = const_cast<config_type *>(config);
-    map<size_t, array_t<parser<complex<double> >, 3> >::iterator it = cfg->analytical.values.find(phys.gmsh_num);
-    parser<complex<double> > * evaluator[3];
-    if(it == cfg->analytical.values.end())
-        for(size_t i = 0; i < 3; i++)
-        {
-            evaluator[i] = &(cfg->analytical.default_value[i]);
-            evaluator[i]->set_const("epsilon", phys.epsilon);
-            evaluator[i]->set_const("sigma", phys.sigma);
-            evaluator[i]->set_const("mu", phys.mu);
-            evaluator[i]->set_const("J0", phys.J0);
-            evaluator[i]->set_const("k2", k2);
-        }
-    else
-        for(size_t i = 0; i < 3; i++)
-            evaluator[i] = &(it->second[i]);
+    if(!params->first->analytical_enabled) return result;
     for(size_t i = 0; i < 3; i++)
     {
-        evaluator[i]->set_const("x", p.x);
-        evaluator[i]->set_const("y", p.y);
-        evaluator[i]->set_const("z", p.z);
-        bool status = evaluator[i]->calculate(result[i]);
-        if(!status) cerr << "[Parser] " << evaluator[i]->get_error() << endl;
+        parser<complex<double> > * e = params->second[i];
+        e->set_var("x", p.x);
+        e->set_var("y", p.y);
+        e->set_var("z", p.z);
+        bool status = e->calculate(result[i]);
+        if(!status) cerr << "[Parser] " << e->get_error() << endl;
     }
     return result;
 }
 
-cvector3 func_rp(const config_type * config, const point & p, const phys_area & phys)
+cvector3 func_rp(const point & p, const phys_area & phys, void * data)
 {
+    MAYBE_UNUSED(phys);
+    pair<const config_type *, array_t<parser<complex<double> > *, 3> > * params =
+            (pair<const config_type *, array_t<parser<complex<double> > *, 3> > *)(data);
     cvector3 result(0, 0, 0);
-    if(!config->right_enabled) return result;
-    complex<double> k2(- phys.omega * phys.omega * phys.epsilon, phys.omega * phys.sigma);
-    config_type * cfg = const_cast<config_type *>(config);
-    map<size_t, array_t<parser<complex<double> >, 3> >::iterator it = cfg->right.values.find(phys.gmsh_num);
-    parser<complex<double> > * evaluator[3];
-    if(it == cfg->right.values.end())
-        for(size_t i = 0; i < 3; i++)
-        {
-            evaluator[i] = &(cfg->right.default_value[i]);
-            evaluator[i]->set_const("epsilon", phys.epsilon);
-            evaluator[i]->set_const("sigma", phys.sigma);
-            evaluator[i]->set_const("mu", phys.mu);
-            evaluator[i]->set_const("J0", phys.J0);
-            evaluator[i]->set_const("k2", k2);
-        }
-    else
-        for(size_t i = 0; i < 3; i++)
-            evaluator[i] = &(it->second[i]);
+    if(!params->first->right_enabled) return result;
     for(size_t i = 0; i < 3; i++)
     {
-        evaluator[i]->set_const("x", p.x);
-        evaluator[i]->set_const("y", p.y);
-        evaluator[i]->set_const("z", p.z);
-        bool status = evaluator[i]->calculate(result[i]);
-        if(!status) cerr << "[Parser] " << evaluator[i]->get_error() << endl;
+        parser<complex<double> > * e = params->second[i];
+        e->set_var("x", p.x);
+        e->set_var("y", p.y);
+        e->set_var("z", p.z);
+        bool status = e->calculate(result[i]);
+        if(!status) cerr << "[Parser] " << e->get_error() << endl;
     }
     return result;
 }
 
-cvector3 func_b1(const config_type * config, const point & p, const phys_area & phys)
+cvector3 func_b1(const point & p, const phys_area & phys, void * data)
 {
+    MAYBE_UNUSED(phys);
+    pair<const config_type *, array_t<parser<complex<double> > *, 3> > * params =
+            (pair<const config_type *, array_t<parser<complex<double> > *, 3> > *)(data);
     cvector3 result(0, 0, 0);
-    if(!config->boundary_enabled) return result;
-    complex<double> k2(- phys.omega * phys.omega * phys.epsilon, phys.omega * phys.sigma);
-    config_type * cfg = const_cast<config_type *>(config);
-    map<size_t, array_t<parser<complex<double> >, 3> >::iterator it = cfg->boundary.values.find(phys.gmsh_num);
-    parser<complex<double> > * evaluator[3];
-    if(it == cfg->boundary.values.end())
-        for(size_t i = 0; i < 3; i++)
-        {
-            evaluator[i] = &(cfg->boundary.default_value[i]);
-            evaluator[i]->set_const("epsilon", phys.epsilon);
-            evaluator[i]->set_const("sigma", phys.sigma);
-            evaluator[i]->set_const("mu", phys.mu);
-            evaluator[i]->set_const("J0", phys.J0);
-            evaluator[i]->set_const("k2", k2);
-        }
-    else
-        for(size_t i = 0; i < 3; i++)
-            evaluator[i] = &(it->second[i]);
+    if(!params->first->boundary_enabled) return result;
     for(size_t i = 0; i < 3; i++)
     {
-        evaluator[i]->set_const("x", p.x);
-        evaluator[i]->set_const("y", p.y);
-        evaluator[i]->set_const("z", p.z);
-        bool status = evaluator[i]->calculate(result[i]);
-        if(!status) cerr << "[Parser] " << evaluator[i]->get_error() << endl;
+        parser<complex<double> > * e = params->second[i];
+        e->set_var("x", p.x);
+        e->set_var("y", p.y);
+        e->set_var("z", p.z);
+        bool status = e->calculate(result[i]);
+        if(!status) cerr << "[Parser] " << e->get_error() << endl;
     }
     return result;
 }

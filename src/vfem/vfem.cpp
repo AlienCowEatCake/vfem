@@ -227,6 +227,29 @@ void VFEM::assemble_matrix()
     {
         show_progress("", k, fes.size());
 
+        // Получение физических параметров для заданного КЭ
+        phys_area ph = fes[k].get_phys_area();
+        complex<double> k2(- ph.epsilon * ph.omega * ph.omega, ph.omega * ph.sigma);
+
+        // Инициализация параметров вычислителей для правой части
+        pair<const config_type *, array_t<parser<complex<double> > *, 3> >
+                params_object(& config, array_t<parser<complex<double> > *, 3>());
+        map<size_t, array_t<parser<complex<double> >, 3> >::iterator
+                it = config.right.values.find(ph.gmsh_num);
+        if(it != config.right.values.end())
+            for(size_t i = 0; i < 3; i++)
+                params_object.second[i] = &(it->second[i]);
+        else
+            for(size_t i = 0; i < 3; i++)
+            {
+                params_object.second[i] = &(config.right.default_value[i]);
+                params_object.second[i]->set_var("epsilon", ph.epsilon);
+                params_object.second[i]->set_var("sigma", ph.sigma);
+                params_object.second[i]->set_var("mu", ph.mu);
+                params_object.second[i]->set_var("J0", ph.J0);
+                params_object.second[i]->set_var("k2", k2);
+            }
+
         // Получение степеней свободы
         array_t<size_t> dof(config.basis.tet_bf_num);
         for(size_t i = 0; i < config.basis.tet_bf_num; i++)
@@ -238,9 +261,7 @@ void VFEM::assemble_matrix()
         // Получение локальных матриц и правой части
         l_matrix matrix_G = fes[k].G();
         l_matrix matrix_M = fes[k].M();
-        phys_area ph = fes[k].get_phys_area();
-        array_t<complex<double> > array_rp = fes[k].rp(func_rp, &config);
-        complex<double> k2(- ph.epsilon * ph.omega * ph.omega, ph.omega * ph.sigma);
+        array_t<complex<double> > array_rp = fes[k].rp(func_rp, &params_object);
 
         // Основная матрица
         for(size_t i = 0; i < config.basis.tet_bf_num; i++)
@@ -285,15 +306,41 @@ void VFEM::applying_bound()
             {
                 show_progress("building matrix", k, trs.size());
 
-                if(trs[k]->phys->type_of_bounds == 1)
+                phys_area ph = trs[k]->get_phys_area();
+                if(ph.type_of_bounds == 1)
                 {
+                    // Получение физических параметров для текущего треугольника границы
+                    complex<double> k2(- ph.epsilon * ph.omega * ph.omega, ph.omega * ph.sigma);
+
+                    // Инициализация параметров вычислителей для первого краевого
+                    pair<const config_type *, array_t<parser<complex<double> > *, 3> >
+                            params_object(& config, array_t<parser<complex<double> > *, 3>());
+                    map<size_t, array_t<parser<complex<double> >, 3> >::iterator
+                            it = config.boundary.values.find(ph.gmsh_num);
+                    if(it != config.boundary.values.end())
+                        for(size_t i = 0; i < 3; i++)
+                            params_object.second[i] = &(it->second[i]);
+                    else
+                        for(size_t i = 0; i < 3; i++)
+                        {
+                            params_object.second[i] = &(config.boundary.default_value[i]);
+                            params_object.second[i]->set_var("epsilon", ph.epsilon);
+                            params_object.second[i]->set_var("sigma", ph.sigma);
+                            params_object.second[i]->set_var("mu", ph.mu);
+                            params_object.second[i]->set_var("J0", ph.J0);
+                            params_object.second[i]->set_var("k2", k2);
+                        }
+
+                    // Получение степеней свободы
                     array_t<size_t> dof_surf(config.basis.tr_bf_num);
                     for(size_t i = 0; i < config.basis.tr_bf_num; i++)
                         dof_surf[i] = get_tr_surf_dof(trs[k], i);
 
+                    // Получение локальных матриц и правой части
                     matrix_t<double> M_surf = trs[k]->M();
-                    array_t<complex<double> > b_surf = trs[k]->rp(func_b1, &config);
+                    array_t<complex<double> > b_surf = trs[k]->rp(func_b1, &params_object);
 
+                    // Добавляем полученное в матрицу с краевыми
                     for(size_t i = 0; i < config.basis.tr_bf_num; i++)
                     {
                         for(size_t j = 0; j < i; j++)
@@ -464,16 +511,41 @@ void VFEM::make()
     applying_bound();
 }
 
-void VFEM::calculate_diff() const
+void VFEM::calculate_diff()
 {
     double diff = 0.0;
     for(size_t k = 0; k < fes.size(); k++)
     {
+        // Получение физических параметров для заданного КЭ
+        phys_area ph = fes[k].get_phys_area();
+        complex<double> k2(- ph.epsilon * ph.omega * ph.omega, ph.omega * ph.sigma);
+
+        // Инициализация параметров вычислителей для аналитики
+        pair<const config_type *, array_t<parser<complex<double> > *, 3> >
+                params_object(& config, array_t<parser<complex<double> > *, 3>());
+        map<size_t, array_t<parser<complex<double> >, 3> >::iterator
+                it = config.analytical.values.find(ph.gmsh_num);
+        if(it != config.analytical.values.end())
+            for(size_t i = 0; i < 3; i++)
+                params_object.second[i] = &(it->second[i]);
+        else
+            for(size_t i = 0; i < 3; i++)
+            {
+                params_object.second[i] = &(config.analytical.default_value[i]);
+                params_object.second[i]->set_var("epsilon", ph.epsilon);
+                params_object.second[i]->set_var("sigma", ph.sigma);
+                params_object.second[i]->set_var("mu", ph.mu);
+                params_object.second[i]->set_var("J0", ph.J0);
+                params_object.second[i]->set_var("k2", k2);
+            }
+
+        // Находим локальные веса, связанные с этим КЭ
         array_t<complex<double> > q_loc(config.basis.tet_bf_num);
         for(size_t i = 0; i < config.basis.tet_bf_num; i++)
             q_loc[i] = slae.x[get_tet_dof(&fes[k], i)];
 
-        diff += fes[k].diff_normL2(q_loc, func_true, &config);
+        // И считаем разность в норме L2
+        diff += fes[k].diff_normL2(q_loc, func_true, &params_object);
     }
     cout << "Diff (L2): \t" << sqrt(diff) << endl;
 }

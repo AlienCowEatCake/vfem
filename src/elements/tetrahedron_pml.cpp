@@ -215,7 +215,7 @@ complex<double> tetrahedron_pml::integrate_rotw(size_t i, size_t j) const
     return result * jacobian_pml;
 }
 
-complex<double> tetrahedron_pml::integrate_fw(eval_func func, const config_type * config, size_t i) const
+complex<double> tetrahedron_pml::integrate_fw(eval_func func, size_t i, void * data) const
 {
 //#if defined __GNUC__
 //#warning conjugate
@@ -224,7 +224,7 @@ complex<double> tetrahedron_pml::integrate_fw(eval_func func, const config_type 
     complex<double> result = 0.0;
     for(size_t k = 0; k < gauss_num; k++)
         result += gauss_weights[k] *
-                  func(config, gauss_points[k], get_phys_area()) *
+                  func(gauss_points[k], get_phys_area(), data) *
                   w_pml(i, gauss_points_pml[k]).cj();
     return result * jacobian_pml;
 }
@@ -264,11 +264,11 @@ tetrahedron_pml::M() const
 }
 
 array_t<complex<double> >
-tetrahedron_pml::rp(eval_func func, const config_type * config) const
+tetrahedron_pml::rp(eval_func func, void * data) const
 {
     array_t<complex<double> > arr(basis->tet_bf_num);
     for(size_t i = 0; i < basis->tet_bf_num; i++)
-        arr[i] = integrate_fw(func, config, i);
+        arr[i] = integrate_fw(func, i, data);
     return arr;
 }
 

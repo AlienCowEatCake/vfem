@@ -56,7 +56,7 @@ matrix_t<double> triangle_base::M() const
     return matrix_t<double>(1, 1);
 }
 
-array_t<complex<double> > triangle_base::rp(eval_func, const config_type *) const
+array_t<complex<double> > triangle_base::rp(eval_func, void *) const
 {
     assert(false);
     return array_t<complex<double> >(1);
@@ -253,13 +253,13 @@ double triangle_full::integrate_w(size_t i, size_t j) const
     return result * jacobian;
 }
 
-complex<double> triangle_full::integrate_fw(eval_func func, const config_type * config, size_t i) const
+complex<double> triangle_full::integrate_fw(eval_func func, size_t i, void * data) const
 {
     using namespace tr_integration;
     complex<double> result(0.0, 0.0);
     for(size_t k = 0; k < gauss_num; k++)
         result += gauss_weights[k] *
-                  func(config, gauss_points[k], get_phys_area()) *
+                  func(gauss_points[k], get_phys_area(), data) *
                   w(i, gauss_points[k]);
     return result * jacobian;
 }
@@ -274,11 +274,11 @@ matrix_t<double> triangle_full::M() const
 }
 
 array_t<complex<double> >
-triangle_full::rp(eval_func func, const config_type * config) const
+triangle_full::rp(eval_func func, void * data) const
 {
     array_t<complex<double> > arr(basis->tr_bf_num);
     for(size_t i = 0; i < basis->tr_bf_num; i++)
-        arr[i] = integrate_fw(func, config, i);
+        arr[i] = integrate_fw(func, i, data);
     return arr;
 }
 

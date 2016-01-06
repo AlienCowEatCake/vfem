@@ -153,13 +153,24 @@ bool VFEM::input_phys(const string & phys_filename)
         complex<double> k2(- ph->second.omega * ph->second.omega * ph->second.epsilon, ph->second.omega * ph->second.sigma);
         for(size_t i = 0; i < 3; i++)
         {
-            it->second[i].set_const("J0", ph->second.J0);
-            it->second[i].set_const("omega", omega_global);
-            it->second[i].set_const("epsilon", ph->second.epsilon);
-            it->second[i].set_const("sigma", ph->second.sigma);
-            it->second[i].set_const("mu", ph->second.mu);
-            it->second[i].set_const("k2", k2);
+            it->second[i].set_var("J0", ph->second.J0);
+            it->second[i].set_var("omega", omega_global);
+            it->second[i].set_var("epsilon", ph->second.epsilon);
+            it->second[i].set_var("sigma", ph->second.sigma);
+            it->second[i].set_var("mu", ph->second.mu);
+            it->second[i].set_var("k2", k2);
             it->second[i].simplify();
+            switch(config.jit_type)
+            {
+            case evaluator::JIT_EXTCALL:
+                it->second[i].compile_extcall();
+                break;
+            case evaluator::JIT_INLINE:
+                it->second[i].compile_inline();
+                break;
+            default:
+                break;
+            }
         }
     }
     for(map<size_t, array_t<parser<complex<double> >, 3> >::iterator it = config.boundary.values.begin(); it != config.boundary.values.end(); ++it)
@@ -168,13 +179,24 @@ bool VFEM::input_phys(const string & phys_filename)
         complex<double> k2(- ph->second.omega * ph->second.omega * ph->second.epsilon, ph->second.omega * ph->second.sigma);
         for(size_t i = 0; i < 3; i++)
         {
-            it->second[i].set_const("J0", ph->second.J0);
-            it->second[i].set_const("omega", omega_global);
-            it->second[i].set_const("epsilon", ph->second.epsilon);
-            it->second[i].set_const("sigma", ph->second.sigma);
-            it->second[i].set_const("mu", ph->second.mu);
-            it->second[i].set_const("k2", k2);
+            it->second[i].set_var("J0", ph->second.J0);
+            it->second[i].set_var("omega", omega_global);
+            it->second[i].set_var("epsilon", ph->second.epsilon);
+            it->second[i].set_var("sigma", ph->second.sigma);
+            it->second[i].set_var("mu", ph->second.mu);
+            it->second[i].set_var("k2", k2);
             it->second[i].simplify();
+            switch(config.jit_type)
+            {
+            case evaluator::JIT_EXTCALL:
+                it->second[i].compile_extcall();
+                break;
+            case evaluator::JIT_INLINE:
+                it->second[i].compile_inline();
+                break;
+            default:
+                break;
+            }
         }
     }
     for(map<size_t, array_t<parser<complex<double> >, 3> >::iterator it = config.right.values.begin(); it != config.right.values.end(); ++it)
@@ -183,20 +205,31 @@ bool VFEM::input_phys(const string & phys_filename)
         complex<double> k2(- ph->second.omega * ph->second.omega * ph->second.epsilon, ph->second.omega * ph->second.sigma);
         for(size_t i = 0; i < 3; i++)
         {
-            it->second[i].set_const("J0", ph->second.J0);
-            it->second[i].set_const("omega", omega_global);
-            it->second[i].set_const("epsilon", ph->second.epsilon);
-            it->second[i].set_const("sigma", ph->second.sigma);
-            it->second[i].set_const("mu", ph->second.mu);
-            it->second[i].set_const("k2", k2);
+            it->second[i].set_var("J0", ph->second.J0);
+            it->second[i].set_var("omega", omega_global);
+            it->second[i].set_var("epsilon", ph->second.epsilon);
+            it->second[i].set_var("sigma", ph->second.sigma);
+            it->second[i].set_var("mu", ph->second.mu);
+            it->second[i].set_var("k2", k2);
             it->second[i].simplify();
+            switch(config.jit_type)
+            {
+            case evaluator::JIT_EXTCALL:
+                it->second[i].compile_extcall();
+                break;
+            case evaluator::JIT_INLINE:
+                it->second[i].compile_inline();
+                break;
+            default:
+                break;
+            }
         }
     }
     for(size_t i = 0; i < 3; i++)
     {
-        config.analytical.default_value[i].set_const("omega", omega_global);
-        config.boundary.default_value[i].set_const("omega", omega_global);
-        config.right.default_value[i].set_const("omega", omega_global);
+        config.analytical.default_value[i].set_var("omega", omega_global);
+        config.boundary.default_value[i].set_var("omega", omega_global);
+        config.right.default_value[i].set_var("omega", omega_global);
     }
 
     return true;

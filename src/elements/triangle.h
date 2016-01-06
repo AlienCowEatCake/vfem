@@ -13,7 +13,7 @@
 
 using namespace tr_integration_8;
 
-typedef cvector3(* eval_func)(const config_type *, const point &, const phys_area &);
+typedef cvector3(* eval_func)(const point &, const phys_area &, void *);
 
 // Индексы для построения базисных функций на треугольниках
 namespace tr_basis_indexes
@@ -40,7 +40,7 @@ public:
 
     virtual void init(const basis_type *) {}
     virtual matrix_t<double> M() const;
-    virtual array_t<complex<double> > rp(eval_func, const config_type *) const;
+    virtual array_t<complex<double> > rp(eval_func, void *) const;
 };
 
 // Класс треугольник (полный, для работы с первыми неоднородными краевыми)
@@ -53,7 +53,7 @@ public:
     // Локальная матрица массы
     virtual matrix_t<double> M() const;
     // Локальная правая часть
-    virtual array_t<complex<double> > rp(eval_func func, const config_type * config) const;
+    virtual array_t<complex<double> > rp(eval_func func, void * data) const;
 
 protected:
     // Матрица L-координат
@@ -80,7 +80,7 @@ protected:
     double jacobian;
 
     double integrate_w(size_t i, size_t j) const;
-    complex<double> integrate_fw(eval_func func, const config_type * config, size_t i) const;
+    complex<double> integrate_fw(eval_func func, size_t i, void * data) const;
 };
 
 typedef triangle_base triangle;

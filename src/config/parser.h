@@ -1,5 +1,27 @@
-#ifndef PARSER_H
+#if !defined PARSER_H
 #define PARSER_H
+
+// Usage example:
+//
+// #include "parser.h"
+// ...
+// parser<double> p;
+// if(!p.parse("exp(-(0.5-x)*(0.5-x)-(0.5-z)*(0.5-z))"))
+//     cerr << p.get_error() << endl;
+// else if(!p.simplify()) // simplify is optional step
+//     cerr << p.get_error() << endl;
+// else
+// {
+//     if(!p.compile()) // compile is optional step
+//        cerr << p.get_error() << endl;
+//     p.set_var("x", 0.4);
+//     p.set_var("z", 0.8);
+//     double result;
+//     if(!p.calculate(result))
+//        cerr << p.get_error() << endl;
+//     else
+//         cout << result << endl;
+// }
 
 #include <map>
 #include <set>
@@ -17,227 +39,109 @@
 #include <limits>
 #include <cctype>
 
-#if defined(_MSC_VER) && _MSC_VER < 1800
-namespace std
-{
-    // http://functions.wolfram.com/ElementaryFunctions/ArcCosh/02/
-    template<typename T>
-    T acosh(T x) { return log(x + sqrt(x * x - 1)); }
-    // http://functions.wolfram.com/ElementaryFunctions/ArcSinh/02/
-    template<typename T>
-    T asinh(T x) { return log(x + sqrt(x * x + 1)); }
-    // http://functions.wolfram.com/ElementaryFunctions/ArcTanh/02/
-    template<typename T>
-    T atanh(T x) { return  0.5 * log((1.0 + x) / (1.0 - x)); }
-}
-#endif
+//#define PARSER_ASM_DEBUG
+//#define PARSER_JIT_DISABLE
 
-// Internal parser's classes & functions
-namespace parser_internal
-{
-    using namespace std;
+#include "parser_internal.h"
+#include "parser_operations.h"
+#include "parser_opcodes.h"
+#include "parser_templates.h"
 
-    // Auto-allocatable container for variables.
-    template<typename T> class var_container
-    {
-    protected:
-        T * val;
-    public:
-        inline const T & value() const { return * val; }
-        inline       T & value()       { return * val; }
-        inline const T * pointer() const { return val; }
-        inline       T * pointer()       { return val; }
-        var_container(const T & new_val = T())     { val = new T(new_val); }
-        var_container(const var_container & other) { val = new T(other.value()); }
-        const var_container & operator = (const var_container & other) { val = new T; * val = other.value(); return * this; }
-        ~var_container() { delete val; }
-    };
+// =================================================================================================
 
-    // All fultions (must NOT be inline).
-    template<typename T> T pi_sin   (const T & arg) { return sin(arg);   }
-    template<typename T> T pi_cos   (const T & arg) { return cos(arg);   }
-    template<typename T> T pi_tan   (const T & arg) { return tan(arg);   }
-    template<typename T> T pi_sinh  (const T & arg) { return sinh(arg);  }
-    template<typename T> T pi_cosh  (const T & arg) { return cosh(arg);  }
-    template<typename T> T pi_tanh  (const T & arg) { return tanh(arg);  }
-    template<typename T> T pi_log   (const T & arg) { return log(arg);   }
-    template<typename T> T pi_log10 (const T & arg) { return log10(arg); }
-    template<typename T> T pi_exp   (const T & arg) { return exp(arg);   }
-    template<typename T> T pi_sqrt  (const T & arg) { return sqrt(arg);  }
-    template<typename T> complex<T> pi_abs   (const complex<T> & arg) { return abs(arg);          }
-    template<typename T> complex<T> pi_asin  (const complex<T> & arg) { return asin(arg.real());  }
-    template<typename T> complex<T> pi_acos  (const complex<T> & arg) { return acos(arg.real());  }
-    template<typename T> complex<T> pi_atan  (const complex<T> & arg) { return atan(arg.real());  }
-    template<typename T> complex<T> pi_asinh (const complex<T> & arg) { return asinh(arg.real()); }
-    template<typename T> complex<T> pi_acosh (const complex<T> & arg) { return acosh(arg.real()); }
-    template<typename T> complex<T> pi_atanh (const complex<T> & arg) { return atanh(arg.real()); }
-    template<typename T> complex<T> pi_imag  (const complex<T> & arg) { return arg.imag();        }
-    template<typename T> complex<T> pi_real  (const complex<T> & arg) { return arg.real();        }
-    template<typename T> complex<T> pi_conj  (const complex<T> & arg) { return conj(arg);         }
-    template<typename T> T pi_abs   (const T & arg) { return fabs(arg);  }
-    template<typename T> T pi_asin  (const T & arg) { return asin(arg);  }
-    template<typename T> T pi_acos  (const T & arg) { return acos(arg);  }
-    template<typename T> T pi_atan  (const T & arg) { return atan(arg);  }
-    template<typename T> T pi_asinh (const T & arg) { return asinh(arg); }
-    template<typename T> T pi_acosh (const T & arg) { return acosh(arg); }
-    template<typename T> T pi_atanh (const T & arg) { return atanh(arg); }
-    template<typename T> T pi_imag  (const T & arg) { return arg * (T)0; }
-    template<typename T> T pi_real  (const T & arg) { return arg;        }
-    template<typename T> T pi_conj  (const T & arg) { return arg;        }
+    /*
+    // S := EXPR
+    // SIGN := "+" | "-"
+    // OPER := SIGN | "*" | "/" | "^"
+    // FUNC := "abs" | "sin" | "cos" | "tan" | "log" | "exp" | "sqrt" | ...
+    // EXPR := SIGN E1 | E1
+    // E1 := var E2 | const E2 | FUNC "(" EXPR ") E2 | "(" EXPR ")" E2
+    // E2 := OPER E1 | eps
+    //
+    // [00|S]***[01|EXPR]    /->[04|SIGN]***[05|E1]
+    //            |          |                 |
+    //            V          |                 *------------------------------------\
+    //     /-->[02|EXPR|#1]--/                 |                                    |
+    //     |   [03|EXPR|#2]---->[06|E1]--------|    /->[11|var]***[12|E2]-----\     |
+    //     |                                   |    |                         |     |
+    //     \------\                            V    | /->[13|const]***[14|E2]-*     |
+    //            |                     [07|E1|#1]--/ |                       |     |
+    //            |                     [08|E1|#2]----/    /------------------*     |
+    //            |           /---------[09|E1|#3]         |                  |     |
+    //            |           |         [10|E1|#4]         |                  |     |
+    //            |           V             |              V                  |     |
+    //            |        [15|"("]         V         [24|E2|#1]------\       |     |
+    //            |          ***        [19|func]     [25|E2|#2]      |       |     |
+    //            *--------[16|EXPR]       ***             |          V       |     |
+    //            |          ***         [20|"("]          V      [27|OPER]   |     |
+    //            |        [17|")"]        ***          [26|eps]     ***      |     |
+    //            |          ***        [21|EXPR]---\              [28|E1]    |     |
+    //            |        [18|E2]         ***      |                 |       |     |
+    //            |           |          [22|")"]   |                 \-------)-----/
+    //            |           |            ***      |                         |
+    //            |           |          [23|E2]    |                         |
+    //            |           |             |       |                         |
+    //            |           \-------------*-------)-------------------------/
+    //            |                                 |
+    //            \---------------------------------/
+    //
+    // +----+------------------------+------+--------+-------+--------+-------+
+    // | N  |  Terminals             | Jump | Accept | Stack | Return | Error |
+    // +----+------------------------+------+--------+-------+--------+-------+
+    // | 00 |  func var const sign ( |  01  |   0    |   0   |    0   |   1   |
+    // | 01 |  func var const sign ( |  02  |   0    |   0   |    0   |   1   |
+    // | 02 |  sign                  |  04  |   0    |   0   |    0   |   0   |
+    // | 03 |  func var const (      |  06  |   0    |   0   |    0   |   1   |
+    // | 04 |  sign                  |  05  |   1    |   0   |    0   |   1   |
+    // | 05 |  func var const (      |  07  |   0    |   0   |    0   |   1   |
+    // | 06 |  func var const (      |  07  |   0    |   0   |    0   |   1   |
+    // | 07 |  var                   |  11  |   0    |   0   |    0   |   0   |
+    // | 08 |  const                 |  13  |   0    |   0   |    0   |   0   |
+    // | 09 |  (                     |  15  |   0    |   0   |    0   |   0   |
+    // | 10 |  func                  |  19  |   0    |   0   |    0   |   1   |
+    // | 11 |  var                   |  12  |   1    |   0   |    0   |   1   |
+    // | 12 |  oper eps              |  24  |   0    |   0   |    0   |   1   |
+    // | 13 |  const                 |  14  |   1    |   0   |    0   |   1   |
+    // | 14 |  oper eps              |  24  |   0    |   0   |    0   |   1   |
+    // | 15 |  (                     |  16  |   1    |   0   |    0   |   1   |
+    // | 16 |  func var const sign ( |  02  |   0    |   1   |    0   |   1   |
+    // | 17 |  )                     |  18  |   1    |   0   |    0   |   1   |
+    // | 18 |  oper eps              |  24  |   0    |   0   |    0   |   1   |
+    // | 19 |  func                  |  20  |   1    |   0   |    0   |   1   |
+    // | 20 |  (                     |  21  |   1    |   0   |    0   |   1   |
+    // | 21 |  func var const sign ( |  02  |   0    |   1   |    0   |   1   |
+    // | 22 |  )                     |  23  |   1    |   0   |    0   |   1   |
+    // | 23 |  oper eps              |  24  |   0    |   0   |    0   |   1   |
+    // | 24 |  oper                  |  27  |   0    |   0   |    0   |   0   |
+    // | 25 |  eps                   |  26  |   0    |   0   |    0   |   1   |
+    // | 26 |  eps                   |  -1  |   0    |   0   |    1   |   1   |
+    // | 27 |  oper                  |  28  |   1    |   0   |    0   |   1   |
+    // | 28 |  func var const (      |  07  |   0    |   0   |    0   |   1   |
+    // +----+------------------------+------+--------+-------+--------+-------+
+    */
 
-    // Add function pointers into container.
-    template<typename T>
-    void init_functions(map<string, T(*)(const T &)> & funcs_map)
-    {
-        funcs_map["imag"]  = pi_imag;
-        funcs_map["real"]  = pi_real;
-        funcs_map["conj"]  = pi_conj;
-        funcs_map["sin"]   = pi_sin;
-        funcs_map["cos"]   = pi_cos;
-        funcs_map["tan"]   = pi_tan;
-        funcs_map["asin"]  = pi_asin;
-        funcs_map["acos"]  = pi_acos;
-        funcs_map["atan"]  = pi_atan;
-        funcs_map["sinh"]  = pi_sinh;
-        funcs_map["cosh"]  = pi_cosh;
-        funcs_map["tanh"]  = pi_tanh;
-        funcs_map["asinh"] = pi_asinh;
-        funcs_map["acosh"] = pi_acosh;
-        funcs_map["atanh"] = pi_atanh;
-        funcs_map["log"]   = pi_log;
-        funcs_map["log10"] = pi_log10;
-        funcs_map["abs"]   = pi_abs;
-        funcs_map["exp"]   = pi_exp;
-        funcs_map["sqrt"]  = pi_sqrt;
-    }
-
-    // All operators (must NOT be inline).
-    template<typename T> T pi_plus  (const T & larg, const T & rarg) { return larg + rarg; }
-    template<typename T> T pi_minus (const T & larg, const T & rarg) { return larg - rarg; }
-    template<typename T> T pi_mult  (const T & larg, const T & rarg) { return larg * rarg; }
-    template<typename T> T pi_div   (const T & larg, const T & rarg) { return larg / rarg; }
-    template<typename T> T pi_pow   (const T & larg, const T & rarg) { return pow(larg, rarg); }
-
-    // Add operators pointers into container.
-    template<typename T>
-    void init_operators(map<char, pair<unsigned short int, T(*)(const T &, const T &)> > & opers_map)
-    {
-        typedef pair<unsigned short int, T(*)(const T &, const T &)> oper_type;
-        opers_map['+'] = oper_type(1, pi_plus);
-        opers_map['-'] = oper_type(1, pi_minus);
-        opers_map['*'] = oper_type(2, pi_mult);
-        opers_map['/'] = oper_type(2, pi_div);
-        opers_map['^'] = oper_type(3, pi_pow);
-    }
-
-    // Init default constant values.
-    template<typename T>
-    void init_constants(map<string, var_container<T> > & consts_map)
-    {
-        consts_map["pi"].value() = static_cast<T>(3.14159265358979323846264338327950);
-        consts_map["e"].value()  = static_cast<T>(2.71828182845904523536028747135266);
-        if(typeid(T) == typeid(complex<float>) ||
-           typeid(T) == typeid(complex<double>) ||
-           typeid(T) == typeid(complex<long double>))
-        {
-            consts_map["i"].value() = sqrt(static_cast<T>(-1.0));
-            consts_map["j"].value() = sqrt(static_cast<T>(-1.0));
-        }
-    }
-
-    // The universal parser object. It may be operator, function, variable or constant.
-    template<typename T>
-    class parser_object
-    {
-    protected:
-        enum parser_object_type
-        {
-            PI_OBJ_OPERATOR, PI_OBJ_FUNCTION, PI_OBJ_VARIABLE, PI_OBJ_CONSTANT
-        };
-        parser_object_type type;
-        string str_;
-        T(* func)(const T &);
-        T(* oper)(const T &, const T &);
-        T value;
-        const T * var_value;
-        void init(parser_object_type n_type, const string & n_str, T(* n_func)(const T &),
-                  T(* n_oper)(const T &, const T &), const T & n_value, const T * n_var_value)
-        {
-            type = n_type;
-            str_ = n_str;
-            value = n_value;
-            var_value = n_var_value;
-            func = n_func;
-            oper = n_oper;
-        }
-    public:
-        inline bool is_variable() const { return type == PI_OBJ_VARIABLE; }
-        inline bool is_constant() const { return type == PI_OBJ_CONSTANT; }
-        inline bool is_function() const { return type == PI_OBJ_FUNCTION; }
-        inline bool is_operator() const { return type == PI_OBJ_OPERATOR; }
-        inline const string & str() const { return str_; }
-        inline T eval() const { return (type == PI_OBJ_VARIABLE ? (* var_value) : value); }
-        inline T eval(const T & arg) const { return func(arg); }
-        inline T eval(const T & larg, const T & rarg) const { return oper(larg, rarg); }
-        parser_object(const string & new_str, const T * new_var_value)
-        {
-            init(PI_OBJ_VARIABLE, new_str, NULL, NULL, T(), new_var_value);
-        }
-        parser_object(const string & new_str, const T & new_value)
-        {
-            init(PI_OBJ_CONSTANT, new_str, NULL, NULL, new_value, NULL);
-        }
-        parser_object(const string & new_str, T(* new_func)(const T &))
-        {
-            init(PI_OBJ_FUNCTION, new_str, new_func, NULL, T(), NULL);
-        }
-        parser_object(const string & new_str, T(* new_oper)(const T &, const T &))
-        {
-            init(PI_OBJ_OPERATOR, new_str, NULL, new_oper, T(), NULL);
-        }
-    };
-
-    template<typename T, const size_t max_size = 16>
-    class simple_stack
-    {
-    public:
-        inline const T & top() const
-        {
-            return data[top_place];
-        }
-        inline void pop()
-        {
-            top_place--;
-        }
-        inline size_t size() const
-        {
-            return top_place;
-        }
-        inline void push(const T & val)
-        {
-            data[++top_place] = val;
-        }
-        simple_stack()
-        {
-            top_place = 0;
-        }
-    protected:
-        size_t top_place;
-        T data[max_size];
-    };
-}
+// =================================================================================================
 
 template<typename T>
 class parser
 {
 protected:
-    std::vector<std::string> expression;
-    std::vector<parser_internal::parser_object<T> > expression_objects;
+    std::vector<parser_internal::parser_table_record> parser_table;
+    std::vector<parser_internal::parser_object<T> > expression;
     std::map<std::string, T(*)(const T &)> functions;
-    std::map<std::string, parser_internal::var_container<T> > constants;
+    std::map<std::string, parser_internal::var_container<T> > variables;
     std::map<char, std::pair<unsigned short int, T(*)(const T &, const T &)> > operators;
     bool status;
     std::string error_string;
+#if !defined PARSER_JIT_DISABLE
+    bool is_compiled;
+    char * volatile jit_code;
+    size_t jit_code_size;
+    T * volatile jit_stack;
+    size_t jit_stack_size;
+#endif
+
+    // =============================================================================================
 
     template<typename U>
     inline T incorrect_number(const std::complex<U> &) const
@@ -266,63 +170,77 @@ protected:
         return val >= num;
     }
 
+    // =============================================================================================
+
     void init()
     {
         using namespace std;
         using namespace parser_internal;
+        status = false;
+#if !defined PARSER_JIT_DISABLE
+        is_compiled = false;
+        jit_code = NULL;
+        jit_code_size = 0;
+        jit_stack = NULL;
+        jit_stack_size = 0;
+#endif
         init_functions(functions);
         init_operators(operators);
-        init_constants(constants);
+        init_variables(variables);
+
+        parser_table.resize(29);
+        parser_table[ 0].set_values("func var const sign (",  1, false, false, false, true );
+        parser_table[ 1].set_values("func var const sign (",  2, false, false, false, true );
+        parser_table[ 2].set_values("sign",                   4, false, false, false, false);
+        parser_table[ 3].set_values("func var const (",       6, false, false, false, true );
+        parser_table[ 4].set_values("sign",                   5, true,  false, false, true );
+        parser_table[ 5].set_values("func var const (",       7, false, false, false, true );
+        parser_table[ 6].set_values("func var const (",       7, false, false, false, true );
+        parser_table[ 7].set_values("var",                   11, false, false, false, false);
+        parser_table[ 8].set_values("const",                 13, false, false, false, false);
+        parser_table[ 9].set_values("(",                     15, false, false, false, false);
+        parser_table[10].set_values("func",                  19, false, false, false, true );
+        parser_table[11].set_values("var",                   12, true,  false, false, true );
+        parser_table[12].set_values("oper eps",              24, false, false, false, true );
+        parser_table[13].set_values("const",                 14, true,  false, false, true );
+        parser_table[14].set_values("oper eps",              24, false, false, false, true );
+        parser_table[15].set_values("(",                     16, true,  false, false, true );
+        parser_table[16].set_values("func var const sign (",  2, false, true,  false, true );
+        parser_table[17].set_values(")",                     18, true,  false, false, true );
+        parser_table[18].set_values("oper eps",              24, false, false, false, true );
+        parser_table[19].set_values("func",                  20, true,  false, false, true );
+        parser_table[20].set_values("(",                     21, true,  false, false, true );
+        parser_table[21].set_values("func var const sign (",  2, false, true,  false, true );
+        parser_table[22].set_values(")",                     23, true,  false, false, true );
+        parser_table[23].set_values("oper eps",              24, false, false, false, true );
+        parser_table[24].set_values("oper",                  27, false, false, false, false);
+        parser_table[25].set_values("eps",                   26, false, false, false, true );
+        parser_table[26].set_values("eps",                   -1, false, false, true,  true );
+        parser_table[27].set_values("oper",                  28, true,  false, false, true );
+        parser_table[28].set_values("func var const (",       7, false, false, false, true );
     }
 
-    void convert_to_objects()
-    {
-        using namespace std;
-        using namespace parser_internal;
-        expression_objects.clear();
-        expression_objects.reserve(expression.size());
-        for(vector<string>::const_iterator it = expression.begin(); it != expression.end(); ++it)
-        {
-            typename map<string, var_container<T> >::const_iterator itc = constants.find(*it);
-            if(itc != constants.end() && !is_incorrect(itc->second.value()))
-            {
-                expression_objects.push_back(parser_object<T>(*it, itc->second.value()));
-            }
-            else
-            {
-                typename map<char, pair<unsigned short int, T(*)(const T &, const T &)> >::const_iterator ito = operators.find((*it)[0]);
-                if(ito != operators.end())
-                {
-                    expression_objects.push_back(parser_object<T>(*it, ito->second.second));
-                }
-                else
-                {
-                    typename map<string, T(*)(const T &)>::const_iterator itf = functions.find(*it);
-                    if(itf != functions.end())
-                    {
-                        expression_objects.push_back(parser_object<T>(*it, itf->second));
-                    }
-                    else
-                    {
-                        constants[*it].value() = incorrect_number(T());
-                        expression_objects.push_back(parser_object<T>(*it, constants[*it].pointer()));
-                    }
-                }
-            }
-        }
-        expression.clear();
-    }
+    // =============================================================================================
 
     void copy_from_other_parser(const parser & other)
     {
         expression = other.expression;
-        expression_objects = other.expression_objects;
         functions = other.functions;
-        constants = other.constants;
+        variables = other.variables;
         operators = other.operators;
         status = other.status;
         error_string = other.error_string;
+        parser_table = other.parser_table;
+#if !defined PARSER_JIT_DISABLE
+        is_compiled = false;
+        jit_code = NULL;
+        jit_code_size = 0;
+        jit_stack = NULL;
+        jit_stack_size = 0;
+#endif
     }
+
+    // =============================================================================================
 
 public:
     parser(const parser & other)
@@ -339,42 +257,69 @@ public:
 
     parser()
     {
-        status = false;
         init();
     }
 
     parser(const std::string & str)
     {
-        status = false;
         init();
         parse(str);
     }
+
+    ~parser()
+    {
+#if !defined PARSER_JIT_DISABLE
+        if(jit_code && jit_code_size)
+        {
+#if defined _WIN32 || defined _WIN64
+            free(jit_code);
+#else
+            munmap(jit_code, jit_code_size);
+#endif
+        }
+        if(jit_stack && jit_stack_size)
+        {
+            delete [] jit_stack;
+        }
+#endif
+    }
+
+    // =============================================================================================
 
     inline const std::string & get_error() const
     {
         return error_string;
     }
 
-    inline void set_const(const std::string & name, const T & value)
+    // =============================================================================================
+
+    inline void set_var(const std::string & name, const T & value)
     {
-        constants[name].value() = value;
+        variables[name].value() = value;
     }
+
+    // =============================================================================================
 
     void reset_const()
     {
         using namespace std;
         using namespace parser_internal;
-        constants.clear();
-        init_constants(constants);
+        variables.clear();
+        init_variables(variables);
         if(is_parsed())
-            for(typename vector<parser_object<T> >::iterator it = expression_objects.begin(); it != expression_objects.end(); ++it)
-                constants[it->str()].value() = incorrect_number(T());
+            for(typename vector<parser_object<T> >::iterator
+                it = expression.begin(); it != expression.end(); ++it)
+                variables[it->str()].value() = incorrect_number(T());
     }
+
+    // =============================================================================================
 
     inline bool is_parsed() const
     {
         return status;
     }
+
+    // =============================================================================================
 
     bool parse(const std::string & str)
     {
@@ -382,210 +327,328 @@ public:
         using namespace parser_internal;
 
         expression.clear();
-        expression_objects.clear();
-        error_string = "";
-
+        error_string.clear();
         status = true;
-        bool str_begin = true;
-        bool unary_minus = false;
-        stack<string> st;
 
-        for(string::const_iterator it = str.begin(); it != str.end() && status;)
+        vector<string> tokens;
+        for(string::const_iterator it = str.begin(); it != str.end();)
         {
-            char sym = *it;
-            if(sym >= '0' && sym <= '9')
+            string a;
+            if(*it >= '0' && *it <= '9')
             {
-                string a;
-                while(it != str.end() && sym >= '0' && sym <= '9')
+                while(it != str.end() && *it >= '0' && *it <= '9')
                 {
-                    a.push_back(sym);
-                    ++it;
-                    if(it != str.end())
-                    {
-                        sym = *it;
-                    }
+                    a.push_back(*(it++));
                 }
-                if(it != str.end() && (sym == '.' || sym == ','))
+                if(it != str.end() && (*it == '.' || *it == ','))
                 {
                     a.push_back('.');
-                    ++it;
-                    if(it != str.end())
+                    while((++it) != str.end() && *it >= '0' && *it <= '9')
                     {
-                        sym = *it;
-                    }
-                    while(it != str.end() && sym >= '0' && sym <= '9')
-                    {
-                        a.push_back(sym);
-                        ++it;
-                        if(it != str.end())
-                        {
-                            sym = *it;
-                        }
+                        a.push_back(*it);
                     }
                 }
-                if(it != str.end() && (sym == 'e' || sym == 'E' || sym == 'd' || sym == 'D'))
+                if(it != str.end() && (*it == 'e' || *it == 'E' || *it == 'd' || *it == 'D'))
                 {
                     a.push_back('e');
-                    ++it;
-                    if(it != str.end())
+                    if((++it) != str.end() && (*it == '-' || *it == '+'))
                     {
-                        sym = *it;
+                        a.push_back(*(it++));
                     }
-                    if(it != str.end() && (sym == '-' || sym == '+'))
+                    while(it != str.end() && *it >= '0' && *it <= '9')
                     {
-                        a.push_back(sym);
-                        ++it;
-                        if(it != str.end())
-                        {
-                            sym = *it;
-                        }
-                    }
-                    while(it != str.end() && sym >= '0' && sym <= '9')
-                    {
-                        a.push_back(sym);
-                        ++it;
-                        if(it != str.end())
-                        {
-                            sym = *it;
-                        }
+                        a.push_back(*(it++));
                     }
                 }
-
-                if(unary_minus)
-                {
-                    a = "-" + a;
-                    unary_minus = false;
-                }
-                stringstream b;
-                b << a;
-                double c;
-                b >> c;
-                expression.push_back(a);
-                constants[a].value() = static_cast<T>(c);
-                str_begin = false;
+                transform(a.begin(), a.end(), a.begin(), ::tolower);
+                tokens.push_back(a);
             }
-            else if(sym == '(')
+            else if((*it >= 'a' && *it <= 'z') || (*it >= 'A' && *it <= 'Z'))
             {
-                st.push("(");
-                str_begin = true;
-                ++it;
-            }
-            else if(sym == ')')
-            {
-                while(!st.empty() && st.top() != "(")
-                {
-                    expression.push_back(st.top());
-                    st.pop();
-                }
-                if(st.empty())
-                {
-                    status = false;
-                    error_string = "Wrong brackets balance!";
-                    break;
-                }
-                if(str_begin)
-                {
-                    status = false;
-                    error_string = "Unexpected ')'!";
-                    break;
-                }
-                st.pop();
-                if(!st.empty() && functions.find(st.top()) != functions.end())
-                {
-                    expression.push_back(st.top());
-                    st.pop();
-                }
-                str_begin = false;
-                ++it;
-            }
-            else if(operators.find(sym) != operators.end())
-            {
-                if(sym == '-' && str_begin)
-                {
-                    string::const_iterator it2 = it + 1;
-                    if(it2 == str.end())
-                    {
-                        status = false;
-                        error_string = "Unexpected '-'!";
-                        break;
-                    }
-                    if(*it2 >= '0' && *it2 <= '9')
-                    {
-                        unary_minus = true;
-                    }
-                    else
-                    {
-                        constants["-1.0"].value() = static_cast<T>(-1.0);
-                        expression.push_back("-1.0");
-                        st.push("*");
-                    }
-                }
-                else
-                {
-                    char op;
-                    if(!st.empty()) op = st.top().c_str()[0];
-                    while(!st.empty() && operators.find(op) != operators.end() &&
-                          operators[sym].first <= operators[op].first)
-                    {
-                        expression.push_back(st.top());
-                        st.pop();
-                        if(!st.empty()) op = st.top().c_str()[0];
-                    }
-                    string tmp;
-                    tmp.push_back(sym);
-                    st.push(tmp);
-                }
-                str_begin = false;
-                ++it;
-            }
-            else if(sym != ' ' && sym != '\t' && sym != '\0' && sym != '\r' && sym != '\n')
-            {
-                string funcname;
-                while(it != str.end() && *it != '(' && *it != ')' &&
+                while(it != str.end() && *it != '(' && *it != ')' && *it != '\f' && *it != '\v' &&
                       *it != ' ' && *it != '\t' && *it != '\0' && *it != '\r' && *it != '\n' &&
                       operators.find(*it) == operators.end())
                 {
-                    funcname.push_back(*it);
-                    ++it;
+                    a.push_back(*(it++));
                 }
-                transform(funcname.begin(), funcname.end(), funcname.begin(), ::tolower);
-                if(functions.find(funcname) != functions.end())
-                {
-                    st.push(funcname);
-                }
-                else if(it == str.end() || *it != '(')
-                {
-                    expression.push_back(funcname);
-                }
-                else
-                {
-                    status = false;
-                    error_string = "Wrong function!";
-                    break;
-                }
-                str_begin = false;
+                transform(a.begin(), a.end(), a.begin(), ::tolower);
+                tokens.push_back(a);
+            }
+            else if(operators.find(*it) != operators.end() || *it == '(' || *it == ')')
+            {
+                a.push_back(*(it++));
+                transform(a.begin(), a.end(), a.begin(), ::tolower);
+                tokens.push_back(a);
+            }
+            else if(*it == ' ' || *it == '\t' || *it == '\0' || *it == '\r' ||
+                    *it == '\n' || *it == '\f' || *it == '\v')
+            {
+                ++it;
             }
             else
             {
-                ++it;
+                status = false;
+                error_string = string("Unexpected symbol `") + string().assign(1, *it) + string("`!");
+                return false;
+            }
+        }
+
+        if(tokens.size() <= 0)
+        {
+            status = false;
+            error_string = "No tokens!";
+            return false;
+        }
+
+        enum token_type
+        {
+            TTYPE_EPS,
+            TTYPE_SIGN_MINUS,
+            TTYPE_SIGN_PLUS,
+            TTYPE_FUNC,
+            TTYPE_OPER,
+            TTYPE_VAR,
+            TTYPE_CONST,
+            TTYPE_BR_OPEN,
+            TTYPE_BR_CLOSE
+        };
+        token_type ttype_curr = TTYPE_EPS;
+        bool unary_minus = false;
+        stack<string> st;
+
+        size_t token_pos_curr = 0;
+        size_t table_pos_curr = 0;
+        stack<size_t> table_stack;
+        for(bool flag_continue = true; flag_continue;)
+        {
+            bool good_token = false;
+            for(vector<string>::const_iterator it = parser_table[table_pos_curr].Terminals.begin();
+                !good_token && it != parser_table[table_pos_curr].Terminals.end(); ++it)
+            {
+                if(token_pos_curr < tokens.size())
+                {
+                    if(*it == "eps")
+                    {
+                        if(tokens[token_pos_curr] == ")")
+                        {
+                            good_token = true;
+                            ttype_curr = TTYPE_EPS;
+                        }
+                    }
+                    else if(*it == "func")
+                    {
+                        if(functions.find(tokens[token_pos_curr]) != functions.end())
+                        {
+                            good_token = true;
+                            ttype_curr = TTYPE_FUNC;
+                        }
+                    }
+                    else if(*it == "oper")
+                    {
+                        if(operators.find(tokens[token_pos_curr][0]) != operators.end())
+                        {
+                            good_token = true;
+                            ttype_curr = TTYPE_OPER;
+                        }
+                    }
+                    else if(*it == "var")
+                    {
+                        if(tokens[token_pos_curr][0] >= 'a' && tokens[token_pos_curr][0] <= 'z' &&
+                           ((token_pos_curr + 1 >= tokens.size()) ||
+                            (operators.find(tokens[token_pos_curr + 1][0]) != operators.end()) ||
+                            (tokens[token_pos_curr + 1] == ")")))
+                        {
+                            good_token = true;
+                            ttype_curr = TTYPE_VAR;
+                        }
+                    }
+                    else if(*it == "const")
+                    {
+                        if(tokens[token_pos_curr][0] >= '0' && tokens[token_pos_curr][0] <= '9' &&
+                           ((token_pos_curr + 1 >= tokens.size()) ||
+                            (operators.find(tokens[token_pos_curr + 1][0]) != operators.end()) ||
+                            (tokens[token_pos_curr + 1] == ")")))
+                        {
+                            good_token = true;
+                            ttype_curr = TTYPE_CONST;
+                        }
+                    }
+                    else if(*it == "sign")
+                    {
+                        if(tokens[token_pos_curr][0] == '-' || tokens[token_pos_curr][0] == '+')
+                        {
+                            good_token = true;
+                            if(tokens[token_pos_curr][0] == '-')
+                            {
+                                ttype_curr = TTYPE_SIGN_MINUS;
+                                unary_minus = true;
+                            }
+                            else
+                                ttype_curr = TTYPE_SIGN_PLUS;
+                        }
+                    }
+                    else if(*it == tokens[token_pos_curr])
+                    {
+                        good_token = true;
+                        if(tokens[token_pos_curr][0] == '(')
+                            ttype_curr = TTYPE_BR_OPEN;
+                        else if(tokens[token_pos_curr][0] == ')')
+                            ttype_curr = TTYPE_BR_CLOSE;
+                    }
+                }
+                else if(*it == "eps")
+                {
+                    good_token = true;
+                    ttype_curr = TTYPE_EPS;
+                }
+            }
+
+            if(good_token)
+            {
+                if(parser_table[table_pos_curr].Stack)
+                    table_stack.push(table_pos_curr + 1);
+                if(parser_table[table_pos_curr].Accept)
+                {
+                    switch(ttype_curr)
+                    {
+                    case TTYPE_CONST:
+                    {
+                        string a = tokens[token_pos_curr];
+                        if(unary_minus)
+                        {
+                            a = "-" + a;
+                            unary_minus = false;
+                        }
+                        stringstream b;
+                        b << a;
+                        T c;
+                        b >> c;
+                        expression.push_back(parser_object<T>(a, c));
+                        break;
+                    }
+                    case TTYPE_VAR:
+                    {
+                        string a = tokens[token_pos_curr];
+                        if(unary_minus)
+                        {
+                            T m_one = static_cast<T>(-1);
+                            expression.push_back(parser_object<T>("-1", m_one));
+                            st.push("*");
+                            unary_minus = false;
+                        }
+                        typename map<string, var_container<T> >::const_iterator itc = variables.find(a);
+                        if(itc == variables.end())
+                        {
+                            variables[a].value() = incorrect_number(T());
+                            itc = variables.find(a);
+                        }
+                        expression.push_back(parser_object<T>(a, itc->second.pointer()));
+                        break;
+                    }
+                    case TTYPE_BR_OPEN:
+                    case TTYPE_FUNC:
+                    {
+                        if(unary_minus)
+                        {
+                            T m_one = static_cast<T>(-1);
+                            expression.push_back(parser_object<T>("-1", m_one));
+                            st.push("*");
+                            unary_minus = false;
+                        }
+                        st.push(tokens[token_pos_curr]);
+                        break;
+                    }
+                    case TTYPE_OPER:
+                    {
+                        char op, sym = tokens[token_pos_curr][0];
+                        if(!st.empty()) op = st.top()[0];
+                        while(!st.empty() && operators.find(op) != operators.end() &&
+                              operators[sym].first <= operators[op].first)
+                        {
+                            expression.push_back(parser_object<T>(st.top(),
+                                                         operators.find(st.top()[0])->second.second));
+                            st.pop();
+                            if(!st.empty()) op = st.top()[0];
+                        }
+                        st.push(tokens[token_pos_curr]);
+                        break;
+                    }
+                    case TTYPE_BR_CLOSE:
+                    {
+                        while(!st.empty() && st.top() != "(")
+                        {
+                            expression.push_back(parser_object<T>(st.top(),
+                                                         operators.find(st.top()[0])->second.second));
+                            st.pop();
+                        }
+                        if(st.empty())
+                        {
+                            status = false;
+                            error_string = "Wrong brackets balance!";
+                            return false;
+                        }
+                        st.pop();
+                        if(!st.empty() && functions.find(st.top()) != functions.end())
+                        {
+                            expression.push_back(parser_object<T>(st.top(),
+                                                         functions.find(st.top())->second));
+                            st.pop();
+                        }
+                        break;
+                    }
+                    default:
+                        break;
+                    }
+                    token_pos_curr++;
+                }
+                if(parser_table[table_pos_curr].Return)
+                {
+                    if(table_stack.size() > 0)
+                    {
+                        table_pos_curr = table_stack.top();
+                        table_stack.pop();
+                    }
+                    else
+                        flag_continue = false;
+                }
+                else
+                    table_pos_curr = (size_t)parser_table[table_pos_curr].Jump;
+            }
+            else
+            {
+                if(parser_table[table_pos_curr].Error)
+                {
+                    status = false;
+                    if(token_pos_curr < tokens.size())
+                        error_string = string("Bad token `") + tokens[token_pos_curr] + string("`!");
+                    else
+                        error_string = "Unexpected end of string!";
+                    return false;
+                }
+                else
+                {
+                    table_pos_curr++;
+                }
             }
         }
 
         while(status && !st.empty())
         {
-            if(operators.find(st.top().c_str()[0]) == operators.end())
+            if(operators.find(st.top()[0]) == operators.end())
             {
                 status = false;
                 error_string = "Wrong expression!";
                 break;
             }
-            expression.push_back(st.top());
+            expression.push_back(parser_object<T>(st.top(),
+                                         operators.find(st.top()[0])->second.second));
             st.pop();
         }
 
-        if(status) convert_to_objects();
         return status;
     }
+
+    // =============================================================================================
 
     bool simplify()
     {
@@ -604,7 +667,8 @@ public:
             deque<parser_object<T> > dq;
             was_changed = false;
 
-            for(typename vector<parser_object<T> >::iterator it = expression_objects.begin(); it != expression_objects.end(); ++it)
+            for(typename vector<parser_object<T> >::iterator
+                it = expression.begin(); it != expression.end(); ++it)
             {
                 if(it->is_operator())
                 {
@@ -663,13 +727,13 @@ public:
                 }
             }
 
-            if(expression_objects.size() > dq.size())
+            if(expression.size() > dq.size())
             {
-                expression_objects.clear();
-                expression_objects.reserve(dq.size());
+                expression.clear();
+                expression.reserve(dq.size());
                 while(!dq.empty())
                 {
-                    expression_objects.push_back(dq.front());
+                    expression.push_back(dq.front());
                     dq.pop_front();
                 }
                 was_changed = true;
@@ -679,7 +743,8 @@ public:
                 dq.clear();
             }
 
-            for(typename vector<parser_object<T> >::iterator it = expression_objects.begin(); it != expression_objects.end(); ++it)
+            for(typename vector<parser_object<T> >::iterator
+                it = expression.begin(); it != expression.end(); ++it)
             {
                 if(it->is_operator())
                 {
@@ -738,13 +803,13 @@ public:
                 }
             }
 
-            if(expression_objects.size() > dq.size())
+            if(expression.size() > dq.size())
             {
-                expression_objects.clear();
-                expression_objects.reserve(dq.size());
+                expression.clear();
+                expression.reserve(dq.size());
                 while(!dq.empty())
                 {
-                    expression_objects.push_back(dq.front());
+                    expression.push_back(dq.front());
                     dq.pop_front();
                 }
                 was_changed = true;
@@ -758,6 +823,8 @@ public:
         return true;
     }
 
+    // =============================================================================================
+
     bool calculate(T & result)
     {
         using namespace std;
@@ -769,10 +836,25 @@ public:
             return false;
         }
 
+#if !defined PARSER_JIT_DISABLE
+        if(is_compiled)
+        {
+            typedef void(PARSER_JIT_CALL * jit_f_type)();
+            jit_f_type func = NULL;
+            size_t call_addr = (size_t)(& func);
+            size_t code_addr = (size_t)(& jit_code);
+            memcpy((void *)call_addr, (void *)code_addr, sizeof(void *));
+            func();
+            result = jit_stack[0];
+            return true;
+        }
+#endif
+
         //stack<T> st;
         simple_stack<T> st;
 
-        for(typename vector<parser_object<T> >::const_iterator it = expression_objects.begin(); it != expression_objects.end(); ++it)
+        for(typename vector<parser_object<T> >::const_iterator
+            it = expression.begin(); it != expression.end(); ++it)
         {
             if(it->is_constant())
             {
@@ -822,24 +904,36 @@ public:
         return true;
     }
 
+    // =============================================================================================
+
+    bool compile_inline();
+    bool compile_extcall();
+
+    inline bool compile()
+    {
+        return compile_extcall();
+    }
+
+    // =============================================================================================
+
     void debug_print() const
     {
         using namespace std;
         using namespace parser_internal;
-        if(expression.size() > expression_objects.size())
-            for(vector<string>::const_iterator it = expression.begin(); it != expression.end(); ++it)
-                cout << * it << ' ';
-        else
-            for(typename vector<parser_object<T> >::const_iterator it = expression_objects.begin(); it != expression_objects.end(); ++it)
-            {
-                cout << it->str();
-                if(it->is_variable())
-                    cout << "->" << it->eval() << ' ';
-                else
-                    cout << ' ';
-            }
+        for(typename vector<parser_object<T> >::const_iterator
+            it = expression.begin(); it != expression.end(); ++it)
+        {
+            cout << it->str();
+            if(it->is_variable())
+                cout << "->" << it->eval() << ' ';
+            else
+                cout << ' ';
+        }
         cout << endl;
     }
 };
+
+#include "parser_compiler_inline.h"
+#include "parser_compiler_extcall.h"
 
 #endif // PARSER_H

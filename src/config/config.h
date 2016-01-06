@@ -39,9 +39,17 @@ class evaluator
 {
 public:
     evaluator();
-    cvector3 eval(const point & p, const phys_area * phys);
+    // Вычислители по физическим областям
     map<size_t, array_t<parser<complex<double> >, 3> > values;
+    // Вычислители по умолчанию
     array_t<parser<complex<double> >, 3> default_value;
+    // Тип JIT-компилятора в вычислителях
+    enum jit_types
+    {
+        JIT_DISABLE,
+        JIT_INLINE,
+        JIT_EXTCALL
+    };
 };
 
 // Конфигурация 1D постпроцессора
@@ -121,6 +129,8 @@ public:
     string filename_phys;
     // Куда сохранять веса решения
     string filename_slae;
+    // Тип JIT-компилятора в вычислителях
+    evaluator::jit_types jit_type;
 
     // ===== Boundary =====
 

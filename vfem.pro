@@ -38,6 +38,12 @@ SOURCES += \
 HEADERS += \
     src/config/config.h \
     src/config/parser.h \
+    src/config/parser_compiler_extcall.h \
+    src/config/parser_compiler_inline.h \
+    src/config/parser_internal.h \
+    src/config/parser_opcodes.h \
+    src/config/parser_operations.h \
+    src/config/parser_templates.h \
     src/common/trio.h \
     src/common/matrix.h \
     src/common/common.h \
@@ -80,6 +86,8 @@ unix:QMAKE_LIBS += -lrt
     QMAKE_CXXFLAGS += -openmp
     QMAKE_CXXFLAGS_RELEASE -= -O2
     QMAKE_CXXFLAGS_RELEASE *= -Ox
+    QMAKE_CXXFLAGS_RELEASE -= -GS
+    QMAKE_CXXFLAGS_RELEASE *= -GS-
     DEFINES += _CRT_SECURE_NO_WARNINGS
     DEFINES += _USE_MATH_DEFINES
 }

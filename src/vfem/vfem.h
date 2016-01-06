@@ -27,13 +27,13 @@ typedef matrix_t<double> ker_l_matrix;
 #endif
 
 // Правая часть
-cvector3 func_rp(const config_type * config, const point & p, const phys_area & phys);
+cvector3 func_rp(const point & p, const phys_area & phys, void * data);
 
 // Функция неоднородных первых краевых условий
-cvector3 func_b1(const config_type * config, const point & p, const phys_area & phys);
+cvector3 func_b1(const point & p, const phys_area & phys, void * data);
 
 // Функция аналитического решения
-cvector3 func_true(const config_type * config, const point & p, const phys_area & phys);
+cvector3 func_true(const point & p, const phys_area & phys, void * data);
 
 #if defined VFEM_USE_PML
 // Коэффициент S для PML
@@ -81,7 +81,7 @@ public:
     // Конечные элементы (тетраэдры)
     vector<finite_element> fes;
 
-    void calculate_diff() const;
+    void calculate_diff();
 
     // Основная СЛАУ
     SLAE slae;

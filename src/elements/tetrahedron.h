@@ -13,7 +13,7 @@
 
 using namespace tet_integration_8;
 
-typedef cvector3(* eval_func)(const config_type *, const point &, const phys_area &);
+typedef cvector3(* eval_func)(const point &, const phys_area &, void *);
 
 // Индексы для построения базисных функций на тетраэдрах
 namespace tet_basis_indexes
@@ -56,9 +56,9 @@ public:
 
     bool in_cube(double x0, double x1, double y0, double y1, double z0, double z1) const;
 
-    double diff_normL2(const array_t<complex<double> > & q, eval_func func, const config_type * config) const;
+    double diff_normL2(const array_t<complex<double> > & q, eval_func func, void * data) const;
     double diff_normL2(const array_t<complex<double> > & q, const array_t<complex<double> > & q_true) const;
-    double normL2(eval_func func, const config_type * config) const;
+    double normL2(eval_func func, void * data) const;
     double normL2(const array_t<complex<double> > & q_true) const;
 
 protected:
@@ -87,7 +87,7 @@ public:
     // Локальная матрица массы
     matrix_t<double> M() const;
     // Локальная правая часть
-    array_t<complex<double> > rp(eval_func func, const config_type * config) const;
+    array_t<complex<double> > rp(eval_func func, void * data) const;
     // Локальная матрица ядра
     matrix_t<double> K() const;
 
@@ -96,7 +96,7 @@ protected:
     double integrate_w(size_t i, size_t j) const;
     // Интеграл от ротора бф
     double integrate_rotw(size_t i, size_t j) const;
-    complex<double> integrate_fw(eval_func func, const config_type * config, size_t i) const;
+    complex<double> integrate_fw(eval_func func, size_t i, void * data) const;
     // Интегралы от базисных функций ядра
     double integrate_kerw(size_t i, size_t j) const;
 };
@@ -112,7 +112,7 @@ public:
     // Локальная матрица массы
     matrix_t<complex<double> > M() const;
     // Локальная правая часть
-    array_t<complex<double> > rp(eval_func func, const config_type * config) const;
+    array_t<complex<double> > rp(eval_func func, void * data) const;
     // Локальная матрица ядра
     matrix_t<complex<double> > K() const;
 
@@ -143,7 +143,7 @@ protected:
     complex<double> integrate_w(size_t i, size_t j) const;
     // Интеграл от ротора бф
     complex<double> integrate_rotw(size_t i, size_t j) const;
-    complex<double> integrate_fw(eval_func func, const config_type * config, size_t i) const;
+    complex<double> integrate_fw(eval_func func, size_t i, void * data) const;
     // Интегралы от базисных функций ядра
     complex<double> integrate_kerw(size_t i, size_t j) const;
 };
