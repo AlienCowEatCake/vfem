@@ -97,13 +97,15 @@ int main(int argc, char * argv [])
 
     bool nosolve = false;
     bool nopost = false;
+    bool config_readed = false;
     string config = "config.ini";
+    string config_pml = "config_pml.ini";
     string config_dir = "";
     for(int i = 1; i < argc; i++)
     {
         if(strcmp(argv[i], "-nosolve") == 0)        nosolve = true;
         else if(strcmp(argv[i], "-nopost") == 0)    nopost = true;
-        else if(argv[i][0] != '-')
+        else if(argv[i][0] != '-' && !config_readed)
         {
             config = argv[i];
             size_t delim_pos = config.find_last_of("/");
@@ -114,13 +116,17 @@ int main(int argc, char * argv [])
 #endif
             if(delim_pos != string::npos)
                 config_dir = config.substr(0, delim_pos + 1);
+            config_readed = true;
         }
-        else
-            cerr << "[Main] Unknown argument \"" << argv[i] << "\"" << endl;
+        else if(argv[i][0] != '-')  config_pml = argv[i];
+        else cerr << "[Main] Unknown argument \"" << argv[i] << "\"" << endl;
     }
 
     VFEM v;
     if(!v.config.load(config)) return 1;
+#if defined VFEM_USE_PML
+    if(!v.config.load_pml(config_pml)) return 1;
+#endif
     if(!v.input_phys(config_dir + v.config.filename_phys)) return 1;
     if(!v.input_mesh(config_dir + v.config.filename_mesh)) return 1;
     v.make();

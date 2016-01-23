@@ -167,7 +167,7 @@ bool config_type::load(const string & filename)
                                           << section << (subsection == "" ? string("") : (string(".") + subsection))
                                           << "\"" << endl;
                             }
-                            else cerr << "[Config] Unsupported param \"" << param<< "\" in section \"" << section
+                            else cerr << "[Config] Unsupported param \"" << param << "\" in section \"" << section
                                       << (subsection == "" ? string("") : (string(".") + subsection)) << "\"" << endl;
                             //cout << "  param = " << param << endl;
                             //cout << "  value = " << value << endl;
@@ -288,7 +288,7 @@ bool config_type::load(const string & filename)
                                         right_enabled = false;
                                 }
                             }
-                            else cerr << "[Config] Unsupported param \"" << param<< "\" in section \"" << section
+                            else cerr << "[Config] Unsupported param \"" << param << "\" in section \"" << section
                                       << (subsection == "" ? string("") : (string(".") + subsection)) << "\"" << endl;
                             //cout << "  param = " << param << endl;
                             //cout << "  value = " << value << endl;
@@ -352,7 +352,7 @@ bool config_type::load(const string & filename)
                                 if(value == "2d") p->type = 2;
                                 if(value == "3d") p->type = 3;
                             }
-                            else cerr << "[Config] Unsupported param \"" << param<< "\" in section \"" << section
+                            else cerr << "[Config] Unsupported param \"" << param << "\" in section \"" << section
                                       << (subsection == "" ? string("") : (string(".") + subsection)) << "\"" << endl;
                             //cout << "  param = " << param << endl;
                             //cout << "  value = " << value << endl;
@@ -373,4 +373,160 @@ bool config_type::load(const string & filename)
 
     ifs.close();
     return init(true);
+}
+
+bool config_type::load_pml(const string & filename)
+{
+    cout << "Reading PML config file ..." << endl;
+
+    ifstream ifs(filename.c_str());
+    if(!ifs.good())
+    {
+        cerr << "Error in " << __FILE__ << ":" << __LINE__
+             << " while reading file " << filename << endl;
+        return false;
+    }
+
+    // Умолчательные значения зададим пока огромными числами
+    complex<double> chi_def(DBL_MAX, DBL_MAX);
+    double m_def = DBL_MAX;
+    double width_def = DBL_MAX;
+    phys_pml.x0 = DBL_MAX;
+    phys_pml.x1 = -DBL_MAX;
+    phys_pml.y0 = DBL_MAX;
+    phys_pml.y1 = -DBL_MAX;
+    phys_pml.z0 = DBL_MAX;
+    phys_pml.z1 = -DBL_MAX;
+
+    string line;
+    getline(ifs, line);
+    line = trim(line);
+    do
+    {
+        if(line.length() > 1 && line[0] == '[')
+        {
+            line = to_lowercase(line.substr(1, line.length() - 2));
+            string section = line, subsection;
+            size_t dot_pos = line.find_first_of(".");
+            if(dot_pos != string::npos)
+            {
+                section = line.substr(0, dot_pos);
+                subsection = line.substr(dot_pos + 1);
+            }
+            //cout << "section: " << section << "\nsubsection: " << subsection << endl;
+
+            if(section == "pml")
+            {
+                if(subsection == "")
+                {
+                    do
+                    {
+                        getline(ifs, line);
+                        line = trim(line);
+                        if(line.length() > 1 && line[0] != ';')
+                        {
+                            size_t eq_pos = line.find_first_of("=");
+                            if(eq_pos != string::npos)
+                            {
+                                string param = to_lowercase(trim(line.substr(0, eq_pos)));
+                                string value = trim(line.substr(eq_pos + 1));
+                                if(value.length() > 1 && value[0] == '\"')
+                                    value = trim(value.substr(1, value.length() - 2));
+                                stringstream sst(value);
+                                double tmp;
+                                sst >> tmp;
+                                if(param == "chi_real")         chi_def.real(tmp);
+                                else if(param == "chi_imag")    chi_def.imag(tmp);
+                                else if(param == "m")           m_def = tmp;
+                                else if(param == "width")       width_def = tmp;
+                                else if(param == "x0")          phys_pml.x0 = tmp;
+                                else if(param == "x1")          phys_pml.x0 = tmp;
+                                else if(param == "y0")          phys_pml.y0 = tmp;
+                                else if(param == "y1")          phys_pml.y1 = tmp;
+                                else if(param == "z0")          phys_pml.z0 = tmp;
+                                else if(param == "z1")          phys_pml.z1 = tmp;
+                                else cerr << "[PML Config] Unsupported param \"" << param << "\" in section \"" << section
+                                          << (subsection == "" ? string("") : (string(".") + subsection)) << "\"" << endl;
+                                //cout << "  param = " << param << endl;
+                                //cout << "  value = " << value << endl;
+                            }
+                        }
+                    }
+                    while(ifs.good() && !(line.length() > 1 && line[0] == '['));
+                }
+                else
+                {
+                    stringstream sst(subsection);
+                    size_t pml_phys;
+                    sst >> pml_phys;
+                    pml_config_parameter * curr = NULL;
+                    if(phys_pml.params.find(pml_phys) != phys_pml.params.end())
+                    {
+                        curr = & (phys_pml.params[pml_phys]);
+                    }
+                    else
+                    {
+                        curr = & (phys_pml.params[pml_phys]);
+                        curr->chi = chi_def;
+                        curr->m = m_def;
+                        curr->width = width_def;
+                    }
+
+                    do
+                    {
+                        getline(ifs, line);
+                        line = trim(line);
+                        if(line.length() > 1 && line[0] != ';')
+                        {
+                            size_t eq_pos = line.find_first_of("=");
+                            if(eq_pos != string::npos)
+                            {
+                                string param = to_lowercase(trim(line.substr(0, eq_pos)));
+                                string value = trim(line.substr(eq_pos + 1));
+                                if(value.length() > 1 && value[0] == '\"')
+                                    value = trim(value.substr(1, value.length() - 2));
+                                stringstream sst(value);
+                                double tmp;
+                                sst >> tmp;
+                                if(param == "chi_real")         curr->chi.real(tmp);
+                                else if(param == "chi_imag")    curr->chi.imag(tmp);
+                                else if(param == "m")           curr->m = tmp;
+                                else if(param == "width")       curr->width = tmp;
+                                else cerr << "[PML Config] Unsupported param \"" << param << "\" in section \"" << section
+                                          << (subsection == "" ? string("") : (string(".") + subsection)) << "\"" << endl;
+                                //cout << "  param = " << param << endl;
+                                //cout << "  value = " << value << endl;
+                            }
+                        }
+                    }
+                    while(ifs.good() && !(line.length() > 1 && line[0] == '['));
+                }
+            }
+        }
+        else
+        {
+            getline(ifs, line);
+            line = trim(line);
+        }
+    }
+    while(ifs.good());
+
+    ifs.close();
+
+    // Проверим введенное на адекватность
+    pml_config_parameter def;
+    double big_num = DBL_MAX * 0.999;
+    if(chi_def.real() < big_num) def.chi.real(chi_def.real());
+    if(chi_def.imag() < big_num) def.chi.imag(chi_def.real());
+    if(m_def < big_num)          def.m = m_def;
+    if(width_def < big_num)      def.width = width_def;
+    for(map<size_t, pml_config_parameter>::iterator it = phys_pml.params.begin(); it != phys_pml.params.end(); ++it)
+    {
+        if(it->second.chi.real() >= big_num) it->second.chi.real(def.chi.real());
+        if(it->second.chi.imag() >= big_num) it->second.chi.imag(def.chi.imag());
+        if(it->second.m >= big_num)          it->second.m = def.m;
+        if(it->second.width >= big_num)      it->second.width = def.width;
+    }
+
+    return true;
 }

@@ -742,7 +742,9 @@ cpoint VFEM::convert_point_to_pml(const point * p, const finite_element * fefe) 
             point gauss_point_global((pml_gauss_points_local[k] + 1.0) / 2.0 * (h_small[0] * (double)m) + beg[0],
                                      (pml_gauss_points_local[k] + 1.0) / 2.0 * (h_small[1] * (double)m) + beg[1],
                                      (pml_gauss_points_local[k] + 1.0) / 2.0 * (h_small[2] * (double)m) + beg[2]);
-            cvector3 s = get_s(gauss_point_global, fefe, & phys_pml);
+            cvector3 s(0, 0, 0);
+            if(flag[0] || flag[1] || flag[2])
+                s = get_s(gauss_point_global, fefe, & phys_pml);
 
             for(size_t j = 0; j < 3; j++)
             {
@@ -764,20 +766,23 @@ cpoint VFEM::convert_point_to_pml(const point * p, const finite_element * fefe) 
 void VFEM::input_pml()
 {
     cout << " > Building PML-bound coordinates ..." << endl;
+
+    phys_pml = config.phys_pml;
+
     // Границы не PML точек
-    phys_pml.x0 = DBL_MAX;
-    phys_pml.x1 = -DBL_MAX;
-    phys_pml.y0 = DBL_MAX;
-    phys_pml.y1 = -DBL_MAX;
-    phys_pml.z0 = DBL_MAX;
-    phys_pml.z1 = -DBL_MAX;
+    double x0 = DBL_MAX;
+    double x1 = -DBL_MAX;
+    double y0 = DBL_MAX;
+    double y1 = -DBL_MAX;
+    double z0 = DBL_MAX;
+    double z1 = -DBL_MAX;
     map<point *, pair<cpoint, finite_element *> > pml_nodes_cache;
 
     for(size_t i = 0; i < fes.size(); i++)
     {
         show_progress("scanned tetrahedrons", i, fes.size());
         finite_element * fes_i = &(fes[i]);
-        if(is_pml(fes_i->barycenter, fes_i))
+        if(is_pml(fes_i->barycenter, fes_i, & phys_pml))
         {
             for(size_t j = 0; j < 4; j++)
                 pml_nodes_cache[fes_i->nodes[j]] = make_pair(cpoint(), fes_i);
@@ -787,16 +792,25 @@ void VFEM::input_pml()
             for(size_t j = 0; j < 4; j++)
             {
                 point * nodes_j = fes_i->nodes[j];
-                if(nodes_j->x > phys_pml.x1) phys_pml.x1 = nodes_j->x;
-                if(nodes_j->y > phys_pml.y1) phys_pml.y1 = nodes_j->y;
-                if(nodes_j->z > phys_pml.z1) phys_pml.z1 = nodes_j->z;
-                if(nodes_j->x < phys_pml.x0) phys_pml.x0 = nodes_j->x;
-                if(nodes_j->y < phys_pml.y0) phys_pml.y0 = nodes_j->y;
-                if(nodes_j->z < phys_pml.z0) phys_pml.z0 = nodes_j->z;
+                if(nodes_j->x > x1) x1 = nodes_j->x;
+                if(nodes_j->y > y1) y1 = nodes_j->y;
+                if(nodes_j->z > z1) z1 = nodes_j->z;
+                if(nodes_j->x < x0) x0 = nodes_j->x;
+                if(nodes_j->y < y0) y0 = nodes_j->y;
+                if(nodes_j->z < z0) z0 = nodes_j->z;
             }
         }
     }
-    cout << "  non-PML dimension: (" << phys_pml.x0 << "," << phys_pml.x1 << ")x(" << phys_pml.y0 << "," << phys_pml.y1 << ")x(" << phys_pml.z0 << "," << phys_pml.z1 << ")" << endl;
+    double big_num = DBL_MAX * 0.999;
+    if(phys_pml.x0 >= big_num)  phys_pml.x0 = x0;
+    if(phys_pml.x1 <= -big_num) phys_pml.x1 = x1;
+    if(phys_pml.y0 >= big_num)  phys_pml.y0 = y0;
+    if(phys_pml.y1 <= -big_num) phys_pml.y1 = y1;
+    if(phys_pml.z0 >= big_num)  phys_pml.z0 = z0;
+    if(phys_pml.z1 <= -big_num) phys_pml.z1 = z1;
+    cout << "  non-PML dimension: (" << phys_pml.x0 << "," << phys_pml.x1 << ")x("
+                                     << phys_pml.y0 << "," << phys_pml.y1 << ")x("
+                                     << phys_pml.z0 << "," << phys_pml.z1 << ")" << endl;
 
     size_t i = 0;
     for(map<point *, pair<cpoint, finite_element *> >::iterator it = pml_nodes_cache.begin(); it != pml_nodes_cache.end(); ++it)
@@ -815,7 +829,7 @@ void VFEM::input_pml()
         size_t ph_curr = fes[i].phys->gmsh_num;
         for(size_t j = 0; j < 4; j++)
         {
-            if(is_pml(fes[i].barycenter, &(fes[i])))
+            if(is_pml(fes[i].barycenter, & (fes[i]), & phys_pml))
             {
                 map<point *, pair<cpoint, finite_element *> >::iterator it = pml_nodes_cache.find(fes[i].nodes[j]);
                 // Если есть в кэше, то возьмем из него

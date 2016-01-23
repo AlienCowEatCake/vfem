@@ -106,6 +106,7 @@ public:
     config_type();
     // Загрузка значений из файла
     bool load(const string & filename);
+    bool load_pml(const string & filename);
 
     // ===== VFEM =====
 
@@ -150,6 +151,10 @@ public:
     // ===== Postprocessing =====
 
     map<size_t, postprocessor> post;
+
+    // ===== PML =====
+
+    phys_pml_area phys_pml;
 
 protected:
     // Загрузка значений по-умолчанию

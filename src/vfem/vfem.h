@@ -14,7 +14,7 @@
 #include "../vfem/phys.h"
 #include "../vfem/slae.h"
 
-//#define VFEM_USE_PML
+#define VFEM_USE_PML
 
 #if defined VFEM_USE_PML
 typedef tetrahedron_pml finite_element;
@@ -40,7 +40,7 @@ cvector3 func_true(const point & p, const phys_area & phys, void * data);
 cvector3 get_s(const point & p, const tetrahedron_pml * fe, const phys_pml_area * phys_pml);
 
 // Проверка, PML или нет
-bool is_pml(const point & p, const finite_element * fe);
+bool is_pml(const point & p, const finite_element * fe, const phys_pml_area * phys_pml);
 #endif
 
 // Класс векторный МКЭ

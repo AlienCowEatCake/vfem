@@ -234,21 +234,24 @@ void VFEM::assemble_matrix()
         // Инициализация параметров вычислителей для правой части
         pair<const config_type *, array_t<parser<complex<double> > *, 3> >
                 params_object(& config, array_t<parser<complex<double> > *, 3>());
-        map<size_t, array_t<parser<complex<double> >, 3> >::iterator
-                it = config.right.values.find(ph.gmsh_num);
-        if(it != config.right.values.end())
-            for(size_t i = 0; i < 3; i++)
-                params_object.second[i] = &(it->second[i]);
-        else
-            for(size_t i = 0; i < 3; i++)
-            {
-                params_object.second[i] = &(config.right.default_value[i]);
-                params_object.second[i]->set_var("epsilon", ph.epsilon);
-                params_object.second[i]->set_var("sigma", ph.sigma);
-                params_object.second[i]->set_var("mu", ph.mu);
-                params_object.second[i]->set_var("J0", ph.J0);
-                params_object.second[i]->set_var("k2", k2);
-            }
+        if(config.right_enabled)
+        {
+            map<size_t, array_t<parser<complex<double> >, 3> >::iterator
+                    it = config.right.values.find(ph.gmsh_num);
+            if(it != config.right.values.end())
+                for(size_t i = 0; i < 3; i++)
+                    params_object.second[i] = &(it->second[i]);
+            else
+                for(size_t i = 0; i < 3; i++)
+                {
+                    params_object.second[i] = &(config.right.default_value[i]);
+                    params_object.second[i]->set_var("epsilon", ph.epsilon);
+                    params_object.second[i]->set_var("sigma", ph.sigma);
+                    params_object.second[i]->set_var("mu", ph.mu);
+                    params_object.second[i]->set_var("J0", ph.J0);
+                    params_object.second[i]->set_var("k2", k2);
+                }
+        }
 
         // Получение степеней свободы
         array_t<size_t> dof(config.basis.tet_bf_num);

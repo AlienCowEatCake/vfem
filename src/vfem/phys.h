@@ -53,6 +53,21 @@ public:
     }
 };
 
+// Класс для хранения параметров PML для одной физической области
+class pml_config_parameter
+{
+public:
+    complex<double> chi;
+    double width;
+    double m;
+    pml_config_parameter(complex<double> n_chi = 1.0, double n_width = 100.0, double n_m = 3.0)
+    {
+        chi = n_chi;
+        width = n_width;
+        m = n_m;
+    }
+};
+
 // Класс для хранения параметров PML
 class phys_pml_area
 {
@@ -60,6 +75,7 @@ public:
     double x0, x1;
     double y0, y1;
     double z0, z1;
+    map<size_t, pml_config_parameter> params;
 };
 
 #endif // PHYS_H_INCLUDED
