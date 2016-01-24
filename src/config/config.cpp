@@ -440,7 +440,7 @@ bool config_type::load_pml(const string & filename)
                                 else if(param == "m")           m_def = tmp;
                                 else if(param == "width")       width_def = tmp;
                                 else if(param == "x0")          phys_pml.x0 = tmp;
-                                else if(param == "x1")          phys_pml.x0 = tmp;
+                                else if(param == "x1")          phys_pml.x1 = tmp;
                                 else if(param == "y0")          phys_pml.y0 = tmp;
                                 else if(param == "y1")          phys_pml.y1 = tmp;
                                 else if(param == "z0")          phys_pml.z0 = tmp;
