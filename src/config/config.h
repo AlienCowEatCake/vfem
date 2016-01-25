@@ -155,6 +155,7 @@ public:
     // ===== PML =====
 
     phys_pml_area phys_pml;
+    string filename_pml;
 
 protected:
     // Загрузка значений по-умолчанию

@@ -49,7 +49,8 @@ void config_type::load_defaults()
     gamma_v_cycle_ker = 0.01;
     max_iter_v_cycle_local = 500;
     filename_mesh = "mesh.msh";
-    filename_phys = "phys.txt";
+    filename_phys = "phys.ini";
+    filename_pml = "config_pml.ini";
     filename_slae = "";
     jit_type = evaluator3::JIT_DISABLE;
 
@@ -157,6 +158,7 @@ bool config_type::load(const string & filename)
                             else if(param == "filename_mesh")           sst >> filename_mesh;
                             else if(param == "filename_phys")           sst >> filename_phys;
                             else if(param == "filename_slae")           sst >> filename_slae;
+                            else if(param == "filename_pml")            sst >> filename_pml;
                             else if(param == "jit_type")
                             {
                                 value = to_lowercase(value);

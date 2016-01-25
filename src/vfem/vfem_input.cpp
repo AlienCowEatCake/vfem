@@ -38,113 +38,324 @@ bool VFEM::input_phys(const string & phys_filename)
              << " while reading file " << phys_filename << endl;
         return false;
     }
-    double omega_global;
-    phys_param >> omega_global;
-    omega_global *= 2.0 * M_PI;
 
-    size_t phys_num;
-    phys_param >> phys_num;
-    for(size_t i = 0; i < phys_num; i++)
+    double mu_default    = consts::mu0;
+    double eps_default   = consts::epsilon0;
+    double sigma_default = 0.0;
+    double omega_global  = -1.0 * 2.0 * M_PI;
+
+    string to_lowercase(const string & str);
+    string trim(const string & str);
+
+    string line;
+    getline(phys_param, line);
+    line = trim(line);
+    do
     {
-        phys_id id;
-        phys_param >> id.gmsh_num >> id.type_of_element;
-        phys_area * ph = &(phys[id]);
+        if(line.length() > 1 && line[0] == '[')
+        {
+            line = to_lowercase(line.substr(1, line.length() - 2));
+            string section = line, subsection;
+            size_t dot_pos = line.find_first_of(".");
+            if(dot_pos != string::npos)
+            {
+                section = line.substr(0, dot_pos);
+                subsection = line.substr(dot_pos + 1);
+            }
+            //cout << "section: " << section << "\nsubsection: " << subsection << endl;
 
-        ph->gmsh_num = id.gmsh_num;
-        ph->type_of_elem = id.type_of_element;
-        if(id.type_of_element == MSH_TET_4)
-        {
-            phys_param >> ph->mu >> ph->epsilon >> ph->sigma;
-            ph->mu *= consts::mu0;
-            ph->epsilon *= consts::epsilon0;
-            ph->omega = omega_global;
-            ph->type_of_bounds = 0;
-            ph->J0 = 0.0;
-        }
-        else if(id.type_of_element == MSH_TRI_3)
-        {
-            size_t parent_phys;
-            phys_param >> parent_phys;
-            phys_param >> ph->type_of_bounds;
-            map<phys_id, phys_area>::const_iterator parent = phys.find(phys_id(MSH_TET_4, parent_phys));
-            if(parent != phys.end())
+            if(section == "global")
             {
-                const phys_area * par = &(parent->second);
-                ph->omega = par->omega;
-                ph->mu = par->mu;
-                ph->epsilon = par->epsilon;
-                ph->sigma = par->sigma;
-                ph->J0 = par->J0;
+                do
+                {
+                    getline(phys_param, line);
+                    line = trim(line);
+                    if(line.length() > 1 && line[0] != ';')
+                    {
+                        size_t eq_pos = line.find_first_of("=");
+                        if(eq_pos != string::npos)
+                        {
+                            string param = to_lowercase(trim(line.substr(0, eq_pos)));
+                            string value = trim(line.substr(eq_pos + 1));
+                            if(value.length() > 1 && value[0] == '\"')
+                                value = trim(value.substr(1, value.length() - 2));
+                            stringstream sst(value);
+                            double tmp;
+                            sst >> tmp;
+                            if(param == "frequency")  omega_global = tmp;
+                            else if(param == "mu")    mu_default = tmp;
+                            else if(param == "eps")   eps_default = tmp;
+                            else if(param == "sigma") sigma_default = tmp;
+                            else cerr << "[Phys Config] Unsupported param \"" << param << "\" in section \""
+                                      << section << (subsection == "" ? string("") : (string(".") + subsection))
+                                      << "\"" << endl;
+                            //cout << "  param = " << param << endl;
+                            //cout << "  value = " << value << endl;
+                        }
+                    }
+                }
+                while(phys_param.good() && !(line.length() > 1 && line[0] == '['));
             }
-            else
+            else if(section == "phys3d")
             {
-                ph->omega = omega_global;
-                ph->mu = 0.0;
-                ph->epsilon = 0.0;
-                ph->sigma = 0.0;
-                ph->J0 = 0.0;
-                cerr << "Warning: unaccounted parent \"" << parent_phys << "\" of phys area \""
-                     << ph->gmsh_num << "\" (2 - MSH_TRI_3), skipping..." << endl;
+                if(subsection != "")
+                {
+                    if(omega_global < 0)
+                    {
+                        cerr << "[Phys Config] Unknown frequency in section \"" << section
+                             << "." << subsection << "\"" << endl;
+                        return false;
+                    }
+
+                    stringstream sst(subsection);
+                    size_t gmsh_num;
+                    sst >> gmsh_num;
+                    phys_area * ph = &(phys[phys_id(MSH_TET_4, gmsh_num)]);
+
+                    ph->gmsh_num = gmsh_num;
+                    ph->type_of_elem = MSH_TET_4;
+                    ph->mu = mu_default;
+                    ph->epsilon = eps_default;
+                    ph->sigma = sigma_default;
+                    ph->omega = omega_global;
+                    ph->type_of_bounds = 0;
+                    ph->J0 = 0.0;
+
+                    do
+                    {
+                        getline(phys_param, line);
+                        line = trim(line);
+                        if(line.length() > 1 && line[0] != ';')
+                        {
+                            size_t eq_pos = line.find_first_of("=");
+                            if(eq_pos != string::npos)
+                            {
+                                string param = to_lowercase(trim(line.substr(0, eq_pos)));
+                                string value = trim(line.substr(eq_pos + 1));
+                                if(value.length() > 1 && value[0] == '\"')
+                                    value = trim(value.substr(1, value.length() - 2));
+                                stringstream sst(value);
+                                double tmp;
+                                sst >> tmp;
+                                if(param == "mu")         ph->mu = tmp;
+                                else if(param == "eps")   ph->epsilon = tmp;
+                                else if(param == "sigma") ph->sigma = tmp;
+                                else cerr << "[Phys Config] Unsupported param \"" << param << "\" in section \""
+                                          << section << (subsection == "" ? string("") : (string(".") + subsection))
+                                          << "\"" << endl;
+                                //cout << "  param = " << param << endl;
+                                //cout << "  value = " << value << endl;
+                            }
+                        }
+                    }
+                    while(phys_param.good() && !(line.length() > 1 && line[0] == '['));
+                }
+                else
+                {
+                    cerr << "[Phys Config] No subsection in section \"" << section << "\"" << endl;
+                    return false;
+                }
             }
-        }
-        else if(id.type_of_element == MSH_LIN_2)
-        {
-            size_t parent_phys;
-            phys_param >> parent_phys;
-            phys_param >> ph->J0;
-            map<phys_id, phys_area>::const_iterator parent = phys.find(phys_id(MSH_TET_4, parent_phys));
-            if(parent != phys.end())
+            else if(section == "phys2d")
             {
-                const phys_area * par = &(parent->second);
-                ph->omega = par->omega;
-                ph->mu = par->mu;
-                ph->epsilon = par->epsilon;
-                ph->sigma = par->sigma;
-                ph->type_of_bounds = par->type_of_bounds;
+                if(subsection != "")
+                {
+                    if(omega_global < 0)
+                    {
+                        cerr << "[Phys Config] Unknown frequency in section \"" << section
+                             << "." << subsection << "\"" << endl;
+                        return false;
+                    }
+
+                    stringstream sst(subsection);
+                    size_t gmsh_num;
+                    sst >> gmsh_num;
+                    phys_area * ph = &(phys[phys_id(MSH_TRI_3, gmsh_num)]);
+
+                    ph->gmsh_num = gmsh_num;
+                    ph->type_of_elem = MSH_TRI_3;
+                    ph->mu = mu_default;
+                    ph->epsilon = eps_default;
+                    ph->sigma = sigma_default;
+                    ph->omega = omega_global;
+                    ph->type_of_bounds = 2;
+                    ph->J0 = 0.0;
+
+                    do
+                    {
+                        getline(phys_param, line);
+                        line = trim(line);
+                        if(line.length() > 1 && line[0] != ';')
+                        {
+                            size_t eq_pos = line.find_first_of("=");
+                            if(eq_pos != string::npos)
+                            {
+                                string param = to_lowercase(trim(line.substr(0, eq_pos)));
+                                string value = trim(line.substr(eq_pos + 1));
+                                if(value.length() > 1 && value[0] == '\"')
+                                    value = trim(value.substr(1, value.length() - 2));
+                                stringstream sst(value);
+                                size_t tmp;
+                                sst >> tmp;
+                                if(param == "boundary") ph->type_of_bounds = tmp;
+                                else if(param == "parent")
+                                {
+                                    map<phys_id, phys_area>::const_iterator parent =
+                                            phys.find(phys_id(MSH_TET_4, tmp));
+                                    if(parent != phys.end())
+                                    {
+                                        const phys_area * par = &(parent->second);
+                                        ph->mu = par->mu;
+                                        ph->epsilon = par->epsilon;
+                                        ph->sigma = par->sigma;
+                                    }
+                                    else
+                                    {
+                                        cerr << "[Phys Config] Warning: unaccounted parent \""
+                                             << tmp << "\" of phys area \"" << ph->gmsh_num
+                                             << "\" (2 - MSH_TRI_3), skipping..." << endl;
+                                    }
+                                }
+                                else cerr << "[Phys Config] Unsupported param \"" << param << "\" in section \""
+                                          << section << (subsection == "" ? string("") : (string(".") + subsection))
+                                          << "\"" << endl;
+                                //cout << "  param = " << param << endl;
+                                //cout << "  value = " << value << endl;
+                            }
+                        }
+                    }
+                    while(phys_param.good() && !(line.length() > 1 && line[0] == '['));
+                }
+                else
+                {
+                    cerr << "[Phys Config] No subsection in section \"" << section << "\"" << endl;
+                    return false;
+                }
             }
-            else
+            else if(section == "phys1d")
             {
-                ph->omega = omega_global;
-                ph->mu = 0.0;
-                ph->epsilon = 0.0;
-                ph->sigma = 0.0;
-                ph->type_of_bounds = 0;
-                cerr << "Warning: unaccounted parent \"" << parent_phys << "\" of phys area \""
-                     << ph->gmsh_num << "\" (1 - MSH_LIN_2), skipping..." << endl;
+                if(subsection != "")
+                {
+                    if(omega_global < 0)
+                    {
+                        cerr << "[Phys Config] Unknown frequency in section \"" << section
+                             << "." << subsection << "\"" << endl;
+                        return false;
+                    }
+
+                    stringstream sst(subsection);
+                    size_t gmsh_num;
+                    sst >> gmsh_num;
+                    phys_area * ph = &(phys[phys_id(MSH_LIN_2, gmsh_num)]);
+
+                    ph->gmsh_num = gmsh_num;
+                    ph->type_of_elem = MSH_LIN_2;
+                    ph->mu = mu_default;
+                    ph->epsilon = eps_default;
+                    ph->sigma = sigma_default;
+                    ph->omega = omega_global;
+                    ph->type_of_bounds = 0;
+                    ph->J0 = 0.0;
+
+                    do
+                    {
+                        getline(phys_param, line);
+                        line = trim(line);
+                        if(line.length() > 1 && line[0] != ';')
+                        {
+                            size_t eq_pos = line.find_first_of("=");
+                            if(eq_pos != string::npos)
+                            {
+                                string param = to_lowercase(trim(line.substr(0, eq_pos)));
+                                string value = trim(line.substr(eq_pos + 1));
+                                if(value.length() > 1 && value[0] == '\"')
+                                    value = trim(value.substr(1, value.length() - 2));
+                                stringstream sst(value);
+                                if(param == "current") sst >> ph->J0;
+                                else if(param == "parent")
+                                {
+                                    size_t parent_phys;
+                                    sst >> parent_phys;
+                                    map<phys_id, phys_area>::const_iterator parent =
+                                            phys.find(phys_id(MSH_TET_4, parent_phys));
+                                    if(parent != phys.end())
+                                    {
+                                        const phys_area * par = &(parent->second);
+                                        ph->mu = par->mu;
+                                        ph->epsilon = par->epsilon;
+                                        ph->sigma = par->sigma;
+                                    }
+                                    else
+                                    {
+                                        cerr << "[Phys Config] Warning: unaccounted parent \""
+                                             << parent_phys << "\" of phys area \"" << ph->gmsh_num
+                                             << "\" (1 - MSH_LIN_2), skipping..." << endl;
+                                    }
+                                }
+                                else cerr << "[Phys Config] Unsupported param \"" << param << "\" in section \""
+                                          << section << (subsection == "" ? string("") : (string(".") + subsection))
+                                          << "\"" << endl;
+                                //cout << "  param = " << param << endl;
+                                //cout << "  value = " << value << endl;
+                            }
+                        }
+                    }
+                    while(phys_param.good() && !(line.length() > 1 && line[0] == '['));
+                }
+                else
+                {
+                    cerr << "[Phys Config] No subsection in section \"" << section << "\"" << endl;
+                    return false;
+                }
+            }
+            else if(section == "phys0d")
+            {
+                point pss_point;
+                cvector3 pss_value;
+                do
+                {
+                    getline(phys_param, line);
+                    line = trim(line);
+                    if(line.length() > 1 && line[0] != ';')
+                    {
+                        size_t eq_pos = line.find_first_of("=");
+                        if(eq_pos != string::npos)
+                        {
+                            string param = to_lowercase(trim(line.substr(0, eq_pos)));
+                            string value = trim(line.substr(eq_pos + 1));
+                            if(value.length() > 1 && value[0] == '\"')
+                                value = trim(value.substr(1, value.length() - 2));
+                            stringstream sst(value);
+                            double tmp;
+                            sst >> tmp;
+                            if(param == "point_x")      pss_point.x = tmp;
+                            else if(param == "point_y") pss_point.y = tmp;
+                            else if(param == "point_z") pss_point.z = tmp;
+                            else if(param == "value_x") pss_value.x = tmp;
+                            else if(param == "value_y") pss_value.y = tmp;
+                            else if(param == "value_z") pss_value.z = tmp;
+                            else cerr << "[Phys Config] Unsupported param \"" << param << "\" in section \""
+                                      << section << (subsection == "" ? string("") : (string(".") + subsection))
+                                      << "\"" << endl;
+                            //cout << "  param = " << param << endl;
+                            //cout << "  value = " << value << endl;
+                        }
+                    }
+                }
+                while(phys_param.good() && !(line.length() > 1 && line[0] == '['));
+                pss.push_back(make_pair(pss_point, pss_value));
             }
         }
         else
         {
-            cerr << "Warning: unaccounted type of element \"" << id.type_of_element
-                 << "\" of phys area \"" << id.gmsh_num << "\", skipping..." << endl;
-            string line;
             getline(phys_param, line);
+            line = trim(line);
         }
     }
-
-    if(!phys_param.good())
-    {
-        cerr << "Error in " << __FILE__ << ":" << __LINE__
-             << " while reading file " << phys_filename << endl;
-        return false;
-    }
-    size_t pss_num = 0;
-    phys_param >> pss_num;
-    if(pss_num)
-        pss.resize(pss_num);
-    for(size_t i = 0; i < pss_num; i++)
-    {
-        for(size_t j = 0; j < 3; j++)
-            phys_param >> pss[i].first[j];
-        double d;
-        for(size_t j = 0; j < 3; j++)
-        {
-            phys_param >> d;
-            pss[i].second[j] = d;
-        }
-    }
+    while(phys_param.good());
 
     phys_param.close();
+
 
     // Заполним данные и в вычисляемых функциях
     for(map<size_t, array_t<evaluator<complex<double> >, 3> >::iterator
