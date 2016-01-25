@@ -64,6 +64,10 @@ ui_*.h
 # Temp files
 *~
 
+# Stackdump files
+*.stackdump
+
+
 # ======================== VFEM-specific .gitignore file =======================
 
 # Gmsh meshes

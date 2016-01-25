@@ -232,11 +232,11 @@ void VFEM::assemble_matrix()
         complex<double> k2(- ph.epsilon * ph.omega * ph.omega, ph.omega * ph.sigma);
 
         // Инициализация параметров вычислителей для правой части
-        pair<const config_type *, array_t<parser<complex<double> > *, 3> >
-                params_object(& config, array_t<parser<complex<double> > *, 3>());
+        pair<const config_type *, array_t<evaluator<complex<double> > *, 3> >
+                params_object(& config, array_t<evaluator<complex<double> > *, 3>());
         if(config.right_enabled)
         {
-            map<size_t, array_t<parser<complex<double> >, 3> >::iterator
+            map<size_t, array_t<evaluator<complex<double> >, 3> >::iterator
                     it = config.right.values.find(ph.gmsh_num);
             if(it != config.right.values.end())
                 for(size_t i = 0; i < 3; i++)
@@ -316,9 +316,9 @@ void VFEM::applying_bound()
                     complex<double> k2(- ph.epsilon * ph.omega * ph.omega, ph.omega * ph.sigma);
 
                     // Инициализация параметров вычислителей для первого краевого
-                    pair<const config_type *, array_t<parser<complex<double> > *, 3> >
-                            params_object(& config, array_t<parser<complex<double> > *, 3>());
-                    map<size_t, array_t<parser<complex<double> >, 3> >::iterator
+                    pair<const config_type *, array_t<evaluator<complex<double> > *, 3> >
+                            params_object(& config, array_t<evaluator<complex<double> > *, 3>());
+                    map<size_t, array_t<evaluator<complex<double> >, 3> >::iterator
                             it = config.boundary.values.find(ph.gmsh_num);
                     if(it != config.boundary.values.end())
                         for(size_t i = 0; i < 3; i++)
@@ -524,9 +524,9 @@ void VFEM::calculate_diff()
         complex<double> k2(- ph.epsilon * ph.omega * ph.omega, ph.omega * ph.sigma);
 
         // Инициализация параметров вычислителей для аналитики
-        pair<const config_type *, array_t<parser<complex<double> > *, 3> >
-                params_object(& config, array_t<parser<complex<double> > *, 3>());
-        map<size_t, array_t<parser<complex<double> >, 3> >::iterator
+        pair<const config_type *, array_t<evaluator<complex<double> > *, 3> >
+                params_object(& config, array_t<evaluator<complex<double> > *, 3>());
+        map<size_t, array_t<evaluator<complex<double> >, 3> >::iterator
                 it = config.analytical.values.find(ph.gmsh_num);
         if(it != config.analytical.values.end())
             for(size_t i = 0; i < 3; i++)

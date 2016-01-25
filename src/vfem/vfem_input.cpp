@@ -147,10 +147,12 @@ bool VFEM::input_phys(const string & phys_filename)
     phys_param.close();
 
     // Заполним данные и в вычисляемых функциях
-    for(map<size_t, array_t<parser<complex<double> >, 3> >::iterator it = config.analytical.values.begin(); it != config.analytical.values.end(); ++it)
+    for(map<size_t, array_t<evaluator<complex<double> >, 3> >::iterator
+        it = config.analytical.values.begin(); it != config.analytical.values.end(); ++it)
     {
         map<phys_id, phys_area>::const_iterator ph = phys.find(phys_id(MSH_TET_4, it->first));
-        complex<double> k2(- ph->second.omega * ph->second.omega * ph->second.epsilon, ph->second.omega * ph->second.sigma);
+        complex<double> k2(- ph->second.omega * ph->second.omega * ph->second.epsilon,
+                           ph->second.omega * ph->second.sigma);
         for(size_t i = 0; i < 3; i++)
         {
             it->second[i].set_var("J0", ph->second.J0);
@@ -162,10 +164,10 @@ bool VFEM::input_phys(const string & phys_filename)
             it->second[i].simplify();
             switch(config.jit_type)
             {
-            case evaluator::JIT_EXTCALL:
+            case evaluator3::JIT_EXTCALL:
                 it->second[i].compile_extcall();
                 break;
-            case evaluator::JIT_INLINE:
+            case evaluator3::JIT_INLINE:
                 it->second[i].compile_inline();
                 break;
             default:
@@ -173,10 +175,12 @@ bool VFEM::input_phys(const string & phys_filename)
             }
         }
     }
-    for(map<size_t, array_t<parser<complex<double> >, 3> >::iterator it = config.boundary.values.begin(); it != config.boundary.values.end(); ++it)
+    for(map<size_t, array_t<evaluator<complex<double> >, 3> >::iterator
+        it = config.boundary.values.begin(); it != config.boundary.values.end(); ++it)
     {
         map<phys_id, phys_area>::const_iterator ph = phys.find(phys_id(MSH_TRI_3, it->first));
-        complex<double> k2(- ph->second.omega * ph->second.omega * ph->second.epsilon, ph->second.omega * ph->second.sigma);
+        complex<double> k2(- ph->second.omega * ph->second.omega * ph->second.epsilon,
+                           ph->second.omega * ph->second.sigma);
         for(size_t i = 0; i < 3; i++)
         {
             it->second[i].set_var("J0", ph->second.J0);
@@ -188,10 +192,10 @@ bool VFEM::input_phys(const string & phys_filename)
             it->second[i].simplify();
             switch(config.jit_type)
             {
-            case evaluator::JIT_EXTCALL:
+            case evaluator3::JIT_EXTCALL:
                 it->second[i].compile_extcall();
                 break;
-            case evaluator::JIT_INLINE:
+            case evaluator3::JIT_INLINE:
                 it->second[i].compile_inline();
                 break;
             default:
@@ -199,10 +203,12 @@ bool VFEM::input_phys(const string & phys_filename)
             }
         }
     }
-    for(map<size_t, array_t<parser<complex<double> >, 3> >::iterator it = config.right.values.begin(); it != config.right.values.end(); ++it)
+    for(map<size_t, array_t<evaluator<complex<double> >, 3> >::iterator
+        it = config.right.values.begin(); it != config.right.values.end(); ++it)
     {
         map<phys_id, phys_area>::const_iterator ph = phys.find(phys_id(MSH_TET_4, it->first));
-        complex<double> k2(- ph->second.omega * ph->second.omega * ph->second.epsilon, ph->second.omega * ph->second.sigma);
+        complex<double> k2(- ph->second.omega * ph->second.omega * ph->second.epsilon,
+                           ph->second.omega * ph->second.sigma);
         for(size_t i = 0; i < 3; i++)
         {
             it->second[i].set_var("J0", ph->second.J0);
@@ -214,10 +220,10 @@ bool VFEM::input_phys(const string & phys_filename)
             it->second[i].simplify();
             switch(config.jit_type)
             {
-            case evaluator::JIT_EXTCALL:
+            case evaluator3::JIT_EXTCALL:
                 it->second[i].compile_extcall();
                 break;
-            case evaluator::JIT_INLINE:
+            case evaluator3::JIT_INLINE:
                 it->second[i].compile_inline();
                 break;
             default:

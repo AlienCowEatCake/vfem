@@ -24,7 +24,7 @@ string to_lowercase(const string & str)
 
 // ============================================================================
 
-evaluator::evaluator()
+evaluator3::evaluator3()
 {
     for(size_t i = 0; i < 3; i++)
         default_value[i].parse("0.0");
@@ -51,7 +51,7 @@ void config_type::load_defaults()
     filename_mesh = "mesh.msh";
     filename_phys = "phys.txt";
     filename_slae = "";
-    jit_type = evaluator::JIT_DISABLE;
+    jit_type = evaluator3::JIT_DISABLE;
 
     analytical_enabled = false;
     boundary_enabled = false;
@@ -160,9 +160,9 @@ bool config_type::load(const string & filename)
                             else if(param == "jit_type")
                             {
                                 value = to_lowercase(value);
-                                if     (value == "inline")  jit_type = evaluator::JIT_INLINE;
-                                else if(value == "extcall") jit_type = evaluator::JIT_EXTCALL;
-                                else if(value == "disable") jit_type = evaluator::JIT_DISABLE;
+                                if     (value == "inline")  jit_type = evaluator3::JIT_INLINE;
+                                else if(value == "extcall") jit_type = evaluator3::JIT_EXTCALL;
+                                else if(value == "disable") jit_type = evaluator3::JIT_DISABLE;
                                 else cerr << "[Config] Unknown JIT-compiler type \"" << value << "\" in section \""
                                           << section << (subsection == "" ? string("") : (string(".") + subsection))
                                           << "\"" << endl;
@@ -179,7 +179,7 @@ bool config_type::load(const string & filename)
 
             else if(section == "boundary" || section == "right" || section == "analytical")
             {
-                array_t<parser<complex<double> >, 3> * curr_parser = NULL;
+                array_t<evaluator<complex<double> >, 3> * curr_parser = NULL;
                 if(section == "boundary")
                 {
                     if(subsection == "")
@@ -232,7 +232,7 @@ bool config_type::load(const string & filename)
                                 value = trim(value.substr(1, value.length() - 2));
                             if(param == "x" || param == "y" || param == "z")
                             {
-                                parser<complex<double> > * curr_parser_var = NULL;
+                                evaluator<complex<double> > * curr_parser_var = NULL;
                                 if(param == "x")      curr_parser_var = & ((* curr_parser)[0]);
                                 else if(param == "y") curr_parser_var = & ((* curr_parser)[1]);
                                 else if(param == "z") curr_parser_var = & ((* curr_parser)[2]);
@@ -245,13 +245,13 @@ bool config_type::load(const string & filename)
                                 }
                                 switch(jit_type)
                                 {
-                                case evaluator::JIT_EXTCALL:
+                                case evaluator3::JIT_EXTCALL:
                                     if(!curr_parser_var->compile_extcall())
                                         cerr << "Error in " << __FILE__ << ":" << __LINE__
                                              << " while compiling (extcall) " << value << " ("
                                              << curr_parser_var->get_error() << ")" << endl;
                                     break;
-                                case evaluator::JIT_INLINE:
+                                case evaluator3::JIT_INLINE:
                                     if(!curr_parser_var->compile_inline())
                                         cerr << "Error in " << __FILE__ << ":" << __LINE__
                                              << " while compiling (inline) " << value << " ("

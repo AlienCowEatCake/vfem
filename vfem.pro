@@ -7,6 +7,11 @@ CONFIG += warn_on
 SOURCES += \
     src/main.cpp \
     src/config/config.cpp \
+    src/config/evaluator/evaluator_internal/transition_table.cpp \
+    src/config/evaluator/evaluator_internal/jit/common.cpp \
+    src/config/evaluator/evaluator_internal/jit/func_templates.cpp \
+    src/config/evaluator/evaluator_internal/jit/oper_templates.cpp \
+    src/config/evaluator/evaluator_internal/jit/real_templates.cpp \
     src/common/cubatures.cpp \
     src/geometry/vector3.cpp \
     src/elements/edge.cpp \
@@ -37,13 +42,23 @@ SOURCES += \
 
 HEADERS += \
     src/config/config.h \
-    src/config/parser.h \
-    src/config/parser_compiler_extcall.h \
-    src/config/parser_compiler_inline.h \
-    src/config/parser_internal.h \
-    src/config/parser_opcodes.h \
-    src/config/parser_operations.h \
-    src/config/parser_templates.h \
+    src/config/evaluator/evaluator.h \
+    src/config/evaluator/evaluator_operations.h \
+    src/config/evaluator/evaluator_internal/evaluator_object.h \
+    src/config/evaluator/evaluator_internal/var_container.h \
+    src/config/evaluator/evaluator_internal/transition_table.h \
+    src/config/evaluator/evaluator_internal/misc.h \
+    src/config/evaluator/evaluator_internal/parse.h \
+    src/config/evaluator/evaluator_internal/simplify.h \
+    src/config/evaluator/evaluator_internal/calculate.h \
+    src/config/evaluator/evaluator_internal/jit/common.h \
+    src/config/evaluator/evaluator_internal/jit/opcodes.h \
+    src/config/evaluator/evaluator_internal/jit/func_templates.h \
+    src/config/evaluator/evaluator_internal/jit/oper_templates.h \
+    src/config/evaluator/evaluator_internal/jit/real_templates.h \
+    src/config/evaluator/evaluator_internal/jit/complex_templates.h \
+    src/config/evaluator/evaluator_internal/jit/compile_inline.h \
+    src/config/evaluator/evaluator_internal/jit/compile_extcall.h \
     src/common/trio.h \
     src/common/matrix.h \
     src/common/common.h \

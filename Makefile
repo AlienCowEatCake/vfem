@@ -11,6 +11,11 @@ LDFLAGS += $(LDFLAGS_EXTRA) -lrt
 SOURCES = \
 	src/main.cpp \
 	src/config/config.cpp \
+	src/config/evaluator/evaluator_internal/transition_table.cpp \
+	src/config/evaluator/evaluator_internal/jit/common.cpp \
+	src/config/evaluator/evaluator_internal/jit/func_templates.cpp \
+	src/config/evaluator/evaluator_internal/jit/oper_templates.cpp \
+	src/config/evaluator/evaluator_internal/jit/real_templates.cpp \
 	src/common/cubatures.cpp \
 	src/geometry/vector3.cpp \
 	src/elements/edge.cpp \
@@ -38,7 +43,7 @@ OBJECTS = $(SOURCES:.cpp=.o)
 
 all: $(SOURCES) $(EXECUTABLE)
 
-.PHONY: clean install
+.PHONY: clean distclean
 
 $(EXECUTABLE): $(OBJECTS)
 	$(CXX) $(CXXFLAGS) $(OBJECTS) $(LDFLAGS) -o $@
@@ -47,5 +52,8 @@ $(EXECUTABLE): $(OBJECTS)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(OBJECTS) $(EXECUTABLE)
+	rm -f $(OBJECTS)
+
+distclean: clean
+	rm -f $(EXECUTABLE)
 

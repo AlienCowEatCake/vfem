@@ -4,7 +4,7 @@
 #include <cstdlib>
 #include <string>
 #include <map>
-#include "../config/parser.h"
+#include "../config/evaluator/evaluator.h"
 #include "../vfem/phys.h"
 #include "../geometry/point.h"
 #include "../geometry/vector3.h"
@@ -35,14 +35,14 @@ struct basis_type
 };
 
 // Вычислитель для вычисляемых значений
-class evaluator
+class evaluator3
 {
 public:
-    evaluator();
+    evaluator3();
     // Вычислители по физическим областям
-    map<size_t, array_t<parser<complex<double> >, 3> > values;
+    map<size_t, array_t<evaluator<complex<double> >, 3> > values;
     // Вычислители по умолчанию
-    array_t<parser<complex<double> >, 3> default_value;
+    array_t<evaluator<complex<double> >, 3> default_value;
     // Тип JIT-компилятора в вычислителях
     enum jit_types
     {
@@ -131,21 +131,21 @@ public:
     // Куда сохранять веса решения
     string filename_slae;
     // Тип JIT-компилятора в вычислителях
-    evaluator::jit_types jit_type;
+    evaluator3::jit_types jit_type;
 
     // ===== Boundary =====
 
-    evaluator boundary;
+    evaluator3 boundary;
     bool boundary_enabled;
 
     // ===== Right =====
 
-    evaluator right;
+    evaluator3 right;
     bool right_enabled;
 
     // ===== Analytical =====
 
-    evaluator analytical;
+    evaluator3 analytical;
     bool analytical_enabled;
 
     // ===== Postprocessing =====
