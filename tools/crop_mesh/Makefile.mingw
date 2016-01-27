@@ -2,7 +2,7 @@ CXX ?= g++
 CXXFLAGS_EXTRA ?= -Wall -Wextra -ansi -pedantic -pipe
 CXXFLAGS_OPTIMIZE ?= -O3 -DNDEBUG
 LDFLAGS_EXTRA ?= -s
-EXECUTABLE = crop_mesh
+EXECUTABLE = crop_mesh.exe
 
 LINK.o = $(LINK.cc)
 CXXFLAGS += $(CXXFLAGS_EXTRA) $(CXXFLAGS_OPTIMIZE)
@@ -13,14 +13,17 @@ OBJECTS = $(SOURCES:.cpp=.o)
 
 all: $(SOURCES) $(EXECUTABLE)
 
-.PHONY: clean install
+.PHONY: clean distclean
 
-$(EXECUTABLE): $(OBJECTS) 
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJECTS) -o $@
+$(EXECUTABLE): $(OBJECTS)
+	$(CXX) $(CXXFLAGS) $(OBJECTS) $(LDFLAGS) -o $@
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(OBJECTS) $(EXECUTABLE)
+	del /q /f $(OBJECTS) 2>nul
+
+distclean: clean
+	del /q /f $(EXECUTABLE) 2>nul
 

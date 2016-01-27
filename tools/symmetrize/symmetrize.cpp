@@ -43,7 +43,7 @@ vector<triangle> trs;
 vector<tetrahedron> tets;
 map<size_t, size_t> new_nodes;
 
-void read_gmsh(string input)
+bool read_gmsh(string input)
 {
     ifstream gmsh_file;
     gmsh_file.open(input.c_str(), ios::in);
@@ -52,6 +52,8 @@ void read_gmsh(string input)
     do
         getline(gmsh_file, line);
     while(line.find("$Nodes") == string::npos && gmsh_file.good());
+
+    if(!gmsh_file.good()) return false;
 
     size_t nodes_num;
     gmsh_file >> nodes_num;
@@ -67,6 +69,8 @@ void read_gmsh(string input)
     do
         getline(gmsh_file, line);
     while(line.find("$Elements") == string::npos && gmsh_file.good());
+
+    if(!gmsh_file.good()) return false;
 
     edge fake_ed;
     triangle fake_tr;
@@ -109,12 +113,17 @@ void read_gmsh(string input)
             tets.push_back(fake_tet);
         }
     }
+
+    if(!gmsh_file.good()) return false;
+    gmsh_file.close();
+    return true;
 }
 
-void write_gmsh(string output)
+bool write_gmsh(string output)
 {
     ofstream gmsh_file;
     gmsh_file.open(output.c_str(), ios::out);
+    if(!gmsh_file.good()) return false;
 
     //gmsh_file << scientific;
     //gmsh_file.precision(17);
@@ -165,13 +174,19 @@ void write_gmsh(string output)
     }
     gmsh_file << "$EndElements\n\n";
 
+    if(!gmsh_file.good()) return false;
     gmsh_file.flush();
     gmsh_file.close();
+    return true;
 }
 
 void symmetrize(string input, string output)
 {
-    read_gmsh(input);
+    if(!read_gmsh(input))
+    {
+        cerr << "Error reading file " << input << endl;
+        return;
+    }
 
     size_t nodes_size = nodes.size();
     for(size_t i = 0; i < nodes_size; i++)
@@ -214,11 +229,20 @@ void symmetrize(string input, string output)
         tets.push_back(tmp_tetrahedron);
     }
 
-    write_gmsh(output);
+    if(!write_gmsh(output))
+    {
+        cerr << "Error writing file " << output << endl;
+        return;
+    }
+
+    cout << "Done." << endl;
 }
 
 int main()
 {
     symmetrize("area.msh", "area_symm.msh");
+#if defined _WIN32
+    system("pause");
+#endif
     return 0;
 }

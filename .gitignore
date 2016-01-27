@@ -85,14 +85,13 @@ ui_*.h
 
 # Binaries
 /vfem
-/other/symmetrize/symmetrize
-/other/symmetrize/bin
-/other/symmetrize/obj
-!/other/crop_mesh/crop_mesh.exe
-
-# Code::Blocks
-*.layout
-*.depend
+/tools/symmetrize/symmetrize
+/tools/crop_mesh/crop_mesh
+/tools/tet_mesh_gen/tet_mesh_gen
+!/tools/symmetrize/symmetrize.exe
+!/tools/crop_mesh/crop_mesh.exe
+!/tools/tet_mesh_gen/tet_mesh_gen.exe
+/tools/*build-*
 
 # Temp directories
 /#*

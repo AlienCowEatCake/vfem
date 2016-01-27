@@ -1,0 +1,21 @@
+CXXFLAGS = /Ox /DNDEBUG /MT /GS- /nologo /W3 /EHsc
+LDFLAGS = /NOLOGO /SUBSYSTEM:CONSOLE /RELEASE /SAFESEH:NO /MANIFEST:NO
+EXECUTABLE = crop_mesh.exe
+OBJECTS = crop_mesh.obj
+
+all: $(OBJECTS) $(EXECUTABLE)
+
+.PHONY: clean distclean
+
+.cpp.obj:
+	cl $(CXXFLAGS) /c $< /Fo$@
+
+$(EXECUTABLE): $(OBJECTS)
+	link $(OBJECTS) $(LDFLAGS) /out:$@
+
+clean:
+	del /q /f $(OBJECTS) 2>nul
+
+distclean: clean
+	del /q /f $(EXECUTABLE) 2>nul
+

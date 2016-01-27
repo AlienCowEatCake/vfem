@@ -1,6 +1,6 @@
 CXX ?= g++
-CXXFLAGS_EXTRA ?= -Wall -Wextra -ansi -pedantic
-CXXFLAGS_OPTIMIZE ?= -O3 -march=native -mtune=native
+CXXFLAGS_EXTRA ?= -Wall -Wextra -ansi -pedantic -pipe
+CXXFLAGS_OPTIMIZE ?= -O3 -DNDEBUG
 LDFLAGS_EXTRA ?= -s
 EXECUTABLE = symmetrize
 
@@ -14,13 +14,17 @@ OBJECTS = $(SOURCES:.cpp=.o)
 
 all: $(SOURCES) $(EXECUTABLE)
 
-.PHONY: clean install
+.PHONY: clean distclean
 
-$(EXECUTABLE): $(OBJECTS) 
-	$(CXX) $(LDFLAGS) $(OBJECTS) -o $@
+$(EXECUTABLE): $(OBJECTS)
+	$(CXX) $(CXXFLAGS) $(OBJECTS) $(LDFLAGS) -o $@
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(OBJECTS) $(EXECUTABLE)
+	rm -f $(OBJECTS)
+
+distclean: clean
+	rm -f $(EXECUTABLE)
+
