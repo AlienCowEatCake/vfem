@@ -1,0 +1,23 @@
+#if !defined VFEM_USE_PML
+    v.slae.dump(slae_dump_filename);
+#elif defined VFEM_USE_ANALYTICAL
+    double diff = 0.0, norm = 0.0;
+    for(size_t k = 0; k < v.fes_num; k++)
+    {
+        if(fabs(v.fes[k].barycenter.x) <= 600 && fabs(v.fes[k].barycenter.x) >= 10 &&
+           fabs(v.fes[k].barycenter.y) <= 600 && fabs(v.fes[k].barycenter.y) >= 10 &&
+           fabs(v.fes[k].barycenter.z) <= 600 && fabs(v.fes[k].barycenter.z) >= 10)
+        {
+            array_t<complex<double>, basis::tet_bf_num> q_loc;
+            for(size_t i = 0; i < basis::tet_bf_num; i++)
+            {
+                size_t dof = v.fes[k].dof[i];
+                q_loc[i] = v.slae.x[dof];
+            }
+            diff += v.fes[k].diff_normL2(q_loc, func_true);
+            norm += v.fes[k].normL2(func_true);
+        }
+    }
+    cout << "Diff (L2): \t" << sqrt(diff / norm) << endl;
+#endif
+

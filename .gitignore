@@ -73,8 +73,8 @@ ui_*.h
 # Gmsh meshes
 *.msh
 #!/data/approx/**/*.msh
-!/other/legacy/ANALYTICAL_CUBE/approx/**/*.msh
-!/other/pml/test/data/**/*.msh
+!/legacy/old_config/ANALYTICAL_CUBE/approx/**/*.msh
+!/legacy/scripts_for_pml/test*/data/**/*.msh
 
 # Tecplot results
 *.plt
@@ -98,5 +98,5 @@ ui_*.h
 
 # Gnuplot scripts
 !/data/**/*.plt
-!/other/**/*.plt
+!/legacy/**/*.plt
 
