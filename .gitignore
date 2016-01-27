@@ -73,7 +73,8 @@ ui_*.h
 # Gmsh meshes
 *.msh
 #!/data/approx/**/*.msh
-!/legacy/old_config/ANALYTICAL_CUBE/approx/**/*.msh
+!/data/cube_analytical/*.msh
+!/legacy/old_config/ANALYTICAL_CUBE*/**/*.msh
 !/legacy/scripts_for_pml/test*/data/**/*.msh
 
 # Tecplot results

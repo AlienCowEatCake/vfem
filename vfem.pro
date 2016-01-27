@@ -26,13 +26,6 @@ SOURCES += \
     src/vfem/vfem_v_cycle.cpp \
     src/problems/standard.cpp \
     src/problems/standard_pml.cpp \
-    src/problems/analytical_cube.cpp \
-    src/problems/loop_pml.cpp \
-    src/problems/area_2layers_loop_pml.cpp \
-    src/problems/area_2layers_loop_many_pml.cpp \
-    src/problems/area_2layers_loop_universal_pml.cpp \
-    src/problems/area_3layers_inc_loop_pml.cpp \
-    src/problems/area_4layers_loop_pml.cpp \
 #    src/solvers/BiCGComplex_VC.cpp \
 #    src/solvers/BiCGStabComplex_VC.cpp \
 #    src/solvers/CGMComplex_LLT.cpp \
