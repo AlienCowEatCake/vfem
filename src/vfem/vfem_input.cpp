@@ -82,9 +82,9 @@ bool VFEM::input_phys(const string & phys_filename)
                             stringstream sst(value);
                             double tmp;
                             sst >> tmp;
-                            if(param == "frequency")  omega_global = tmp;
-                            else if(param == "mu")    mu_default = tmp;
-                            else if(param == "eps")   eps_default = tmp;
+                            if(param == "frequency")  omega_global = tmp * 2.0 * M_PI;
+                            else if(param == "mu")    mu_default = tmp * consts::mu0;
+                            else if(param == "eps")   eps_default = tmp * consts::epsilon0;
                             else if(param == "sigma") sigma_default = tmp;
                             else cerr << "[Phys Config] Unsupported param \"" << param << "\" in section \""
                                       << section << (subsection == "" ? string("") : (string(".") + subsection))
@@ -137,8 +137,8 @@ bool VFEM::input_phys(const string & phys_filename)
                                 stringstream sst(value);
                                 double tmp;
                                 sst >> tmp;
-                                if(param == "mu")         ph->mu = tmp;
-                                else if(param == "eps")   ph->epsilon = tmp;
+                                if(param == "mu")         ph->mu = tmp * consts::mu0;
+                                else if(param == "eps")   ph->epsilon = tmp * consts::epsilon0;
                                 else if(param == "sigma") ph->sigma = tmp;
                                 else cerr << "[Phys Config] Unsupported param \"" << param << "\" in section \""
                                           << section << (subsection == "" ? string("") : (string(".") + subsection))

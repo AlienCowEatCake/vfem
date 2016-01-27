@@ -68,6 +68,16 @@ void print_time(unsigned long msec, const string & descr)
     }
 }
 
+int paused(int ret)
+{
+#if defined _WIN32
+    char * session = getenv("SESSIONNAME");
+    if(!session || stricmp(session, "Console"))
+        system("pause");
+#endif
+    return ret;
+}
+
 int main(int argc, char * argv [])
 {
 #if !defined _WIN32 && defined USE_NOSIGHUP
@@ -119,19 +129,19 @@ int main(int argc, char * argv [])
     }
 
     VFEM v;
-    if(!v.config.load(config)) return 1;
+    if(!v.config.load(config)) return paused(1);
 #if defined VFEM_USE_PML
-    if(!v.config.load_pml(v.config.filename_pml)) return 1;
+    if(!v.config.load_pml(v.config.filename_pml)) return paused(1);
 #endif
-    if(!v.input_phys(config_dir + v.config.filename_phys)) return 1;
-    if(!v.input_mesh(config_dir + v.config.filename_mesh)) return 1;
+    if(!v.input_phys(config_dir + v.config.filename_phys)) return paused(1);
+    if(!v.input_mesh(config_dir + v.config.filename_mesh)) return paused(1);
     v.make();
     time_solve = mtime();
     if(!nosolve)
         v.solve();
     else
         if(!(v.config.filename_slae != "" && v.slae.restore_x(v.config.filename_slae)))
-            return 1;
+            return paused(1);
     time_solve = mtime() - time_solve;
     if(!nopost)
         postprocessing(v, timebuf);
@@ -139,8 +149,5 @@ int main(int argc, char * argv [])
     print_time(time_solve, "Solve time");
     time_exec = mtime() - time_exec;
     print_time(time_exec, "All time");
-#if defined _WIN32
-    system("pause");
-#endif
-    return 0;
+    return paused(0);
 }
