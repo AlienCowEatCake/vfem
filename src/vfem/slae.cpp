@@ -12,11 +12,11 @@ SLAE::~SLAE()
     dealloc_all();
 }
 
-void SLAE::solve(double eps)
+void SLAE::solve(double eps, size_t max_iter)
 {
     cout << "Solving SLAE ..." << endl;
     solver.init(ig, jg, di, gg, n);
-    solver.solve(x, rp, eps, 15000);
+    solver.solve(x, rp, eps, max_iter);
 }
 
 void SLAE::alloc_all(size_t n_size, size_t gg_size)

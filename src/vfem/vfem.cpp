@@ -257,9 +257,6 @@ void VFEM::assemble_matrix()
         array_t<size_t> dof(config.basis.tet_bf_num);
         for(size_t i = 0; i < config.basis.tet_bf_num; i++)
             dof[i] = get_tet_dof(&fes[k], i);
-        array_t<size_t> ker_dof(config.basis.tet_ker_bf_num);
-        for(size_t i = 0; i < config.basis.tet_ker_bf_num; i++)
-            ker_dof[i] = get_tet_ker_dof(&fes[k], i);
 
         // Получение локальных матриц и правой части
         l_matrix matrix_G = fes[k].G();
@@ -284,13 +281,20 @@ void VFEM::assemble_matrix()
         }
 
         // Матрица ядра
-        ker_l_matrix matrix_K = fes[k].K();
-        for(size_t i = 0; i < config.basis.tet_ker_bf_num; i++)
+        if(config.v_cycle_enabled)
         {
-            size_t i_num = ker_dof[i];
-            for(size_t j = 0; j < i; j++)
-                ker_slae.add(i_num, ker_dof[j], matrix_K[i][j] * k2);
-            ker_slae.di[i_num] += matrix_K[i][i] * k2;
+            array_t<size_t> ker_dof(config.basis.tet_ker_bf_num);
+            for(size_t i = 0; i < config.basis.tet_ker_bf_num; i++)
+                ker_dof[i] = get_tet_ker_dof(&fes[k], i);
+
+            ker_l_matrix matrix_K = fes[k].K();
+            for(size_t i = 0; i < config.basis.tet_ker_bf_num; i++)
+            {
+                size_t i_num = ker_dof[i];
+                for(size_t j = 0; j < i; j++)
+                    ker_slae.add(i_num, ker_dof[j], matrix_K[i][j] * k2);
+                ker_slae.di[i_num] += matrix_K[i][i] * k2;
+            }
         }
     }
 }
@@ -353,7 +357,7 @@ void VFEM::applying_bound()
                     }
                 }
             }
-            surf_slae.solve(config.eps_slae_bound);
+            surf_slae.solve(config.eps_slae_bound, config.max_iter);
         }
 
         // Учет первых краевых
@@ -417,22 +421,25 @@ void VFEM::applying_bound()
 
     }
 
-    // Первые краевые для матрицы ядра
-    for(size_t k = 0; k < ker_slae.n; k++)
+    if(config.v_cycle_enabled)
     {
-        // Пробегаем по всей матрице
-        if(ker_dof_first.find(k) != ker_dof_first.end())
+        // Первые краевые для матрицы ядра
+        for(size_t k = 0; k < ker_slae.n; k++)
         {
-            ker_slae.di[k] = 1.0;
-            for(size_t i = ker_slae.ig[k]; i < ker_slae.ig[k + 1]; i++)
-                ker_slae.gg[i] = 0.0;
-        }
-        else
-        {
-            for(size_t i = ker_slae.ig[k]; i < ker_slae.ig[k + 1]; i++)
+            // Пробегаем по всей матрице
+            if(ker_dof_first.find(k) != ker_dof_first.end())
             {
-                if(ker_dof_first.find(ker_slae.jg[i]) != ker_dof_first.end())
+                ker_slae.di[k] = 1.0;
+                for(size_t i = ker_slae.ig[k]; i < ker_slae.ig[k + 1]; i++)
                     ker_slae.gg[i] = 0.0;
+            }
+            else
+            {
+                for(size_t i = ker_slae.ig[k]; i < ker_slae.ig[k + 1]; i++)
+                {
+                    if(ker_dof_first.find(ker_slae.jg[i]) != ker_dof_first.end())
+                        ker_slae.gg[i] = 0.0;
+                }
             }
         }
     }
@@ -502,12 +509,17 @@ cvector3 VFEM::rotor(const point & p, const finite_element * fe) const
     return result;
 }
 
-void VFEM::make()
+void VFEM::make_struct()
 {
     if(config.boundary_enabled && global_to_local.size() > 0)
         generate_surf_portrait();
     generate_portrait();
-    generate_ker_portrait();
+    if(config.v_cycle_enabled)
+        generate_ker_portrait();
+}
+
+void VFEM::make_data()
+{
     assemble_matrix();
     apply_point_sources();
     apply_edges_sources();

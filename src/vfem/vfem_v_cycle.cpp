@@ -98,8 +98,11 @@ void VFEM::calc_residual(const complex<double> * x0, complex<double> * p) const
 // Запуск решения СЛАУ
 void VFEM::solve()
 {
-    //slae.solve(config.eps_slae);
-    //return;
+    if(!config.v_cycle_enabled)
+    {
+        slae.solve(config.eps_slae, config.max_iter);
+        return;
+    }
 
     double eps          = config.eps_slae;
     double gamma0       = config.gamma_v_cycle_0;

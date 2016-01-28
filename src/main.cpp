@@ -135,10 +135,13 @@ int main(int argc, char * argv [])
 #endif
     if(!v.input_phys(config_dir + v.config.filename_phys)) return paused(1);
     if(!v.input_mesh(config_dir + v.config.filename_mesh)) return paused(1);
-    v.make();
+    v.make_struct();
     time_solve = mtime();
     if(!nosolve)
+    {
+        v.make_data();
         v.solve();
+    }
     else
         if(!(v.config.filename_slae != "" && v.slae.restore_x(v.config.filename_slae)))
             return paused(1);

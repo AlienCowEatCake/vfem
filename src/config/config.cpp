@@ -47,6 +47,8 @@ void config_type::load_defaults()
     gamma_v_cycle_0 = 0.01;
     gamma_v_cycle_full = 0.05;
     gamma_v_cycle_ker = 0.01;
+    v_cycle_enabled = false;
+    max_iter = 15000;
     max_iter_v_cycle_local = 500;
     filename_mesh = "mesh.msh";
     filename_phys = "phys.ini";
@@ -97,6 +99,13 @@ bool config_type::init(bool status)
         basis.tet_ker_bf_num = 20;
         basis.tr_bf_num = 12;
         basis.tr_ker_bf_num = 10;
+    }
+    // Если точность решения СЛАУ больше точности первичного
+    // уточнения решения, значит следует выключить V-цикл
+    if(eps_slae >= gamma_v_cycle_0)
+    {
+        eps_slae = gamma_v_cycle_0;
+        v_cycle_enabled = false;
     }
     return status;
 }
@@ -155,6 +164,7 @@ bool config_type::load(const string & filename)
                             else if(param == "gamma_v_cycle_ker")       sst >> gamma_v_cycle_ker;
                             else if(param == "gamma_v_cycle_0")         sst >> gamma_v_cycle_0;
                             else if(param == "max_iter_v_cycle_local")  sst >> max_iter_v_cycle_local;
+                            else if(param == "max_iter")                sst >> max_iter;
                             else if(param == "filename_mesh")           sst >> filename_mesh;
                             else if(param == "filename_phys")           sst >> filename_phys;
                             else if(param == "filename_slae")           sst >> filename_slae;
@@ -168,6 +178,14 @@ bool config_type::load(const string & filename)
                                 else cerr << "[Config] Unknown JIT-compiler type \"" << value << "\" in section \""
                                           << section << (subsection == "" ? string("") : (string(".") + subsection))
                                           << "\"" << endl;
+                            }
+                            else if(param == "v_cycle_enabled")
+                            {
+                                value = to_lowercase(value);
+                                if(value == "yes" || value == "true" || value == "1")
+                                    v_cycle_enabled = true;
+                                else
+                                    v_cycle_enabled = false;
                             }
                             else cerr << "[Config] Unsupported param \"" << param << "\" in section \"" << section
                                       << (subsection == "" ? string("") : (string(".") + subsection)) << "\"" << endl;

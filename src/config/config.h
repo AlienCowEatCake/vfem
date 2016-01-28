@@ -116,13 +116,17 @@ public:
     double eps_slae;
     // Точность решения СЛАУ для краевых
     double eps_slae_bound;
+    // Включен V-цикл или нет
+    bool v_cycle_enabled;
     // Точность начального решения перед запуском v-цикла
     double gamma_v_cycle_0;
     // Точность решения на полном пространстве
     double gamma_v_cycle_full;
     // Точность решения на пространстве ядра
     double gamma_v_cycle_ker;
-    // Максимальное локальное число итераций v-цикла
+    // Максимальное количество итераций для не V-цикловых решателей
+    size_t max_iter;
+    // Максимальное локальное число итераций V-цикла
     size_t max_iter_v_cycle_local;
     // Сетка
     string filename_mesh;

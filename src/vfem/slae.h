@@ -15,7 +15,7 @@ class SLAE
 public:
     SLAE();
     ~SLAE();
-    void solve(double eps);
+    void solve(double eps, size_t max_iter);
     inline void inline_init()
     {
         solver.init(ig, jg, di, gg, n);

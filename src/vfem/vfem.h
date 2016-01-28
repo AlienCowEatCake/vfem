@@ -54,7 +54,8 @@ public:
     bool input_phys(const string & phys_filename);
     bool input_mesh(const string & gmsh_filename);
     // Процедура для сборки СЛАУ
-    void make();
+    void make_struct();
+    void make_data();
     // Запуск решения СЛАУ
     void solve();
     // Вывод данных в 3D сетке
