@@ -14,7 +14,7 @@
 #include "../vfem/phys.h"
 #include "../vfem/slae.h"
 
-//#define VFEM_USE_PML
+#define VFEM_USE_PML
 
 #if defined VFEM_USE_PML
 typedef tetrahedron_pml finite_element;

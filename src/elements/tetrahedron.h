@@ -4,6 +4,7 @@
 #include "../common/common.h"
 #include "../common/matrix.h"
 #include "../common/cubatures.h"
+#include "../common/trio.h"
 #include "../config/config.h"
 #include "../geometry/point.h"
 #include "../geometry/vector3.h"
@@ -56,10 +57,14 @@ public:
 
     bool in_cube(double x0, double x1, double y0, double y1, double z0, double z1) const;
 
-    pair<double, cvector3> diff_normL2(const array_t<complex<double> > & q, eval_func func, void * data) const;
-    pair<double, cvector3> diff_normL2(const array_t<complex<double> > & q, const array_t<complex<double> > & q_true) const;
-    pair<double, cvector3> normL2(eval_func func, void * data) const;
-    pair<double, cvector3> normL2(const array_t<complex<double> > & q_true) const;
+    trio<double, vector3, cvector3>
+    diff_normL2(const array_t<complex<double> > & q, eval_func func, void * data) const;
+    trio<double, vector3, cvector3>
+    diff_normL2(const array_t<complex<double> > & q, const array_t<complex<double> > & q_true) const;
+    trio<double, vector3, cvector3>
+    normL2(eval_func func, void * data) const;
+    trio<double, vector3, cvector3>
+    normL2(const array_t<complex<double> > & q_true) const;
 
 protected:
     // Матрица L-координат

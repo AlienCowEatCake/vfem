@@ -25,6 +25,7 @@ SOURCES += \
     src/vfem/vfem_output.cpp \
     src/vfem/vfem_v_cycle.cpp \
     src/problems/standard.cpp \
+    src/problems/standard_diff.cpp \
     src/problems/standard_pml.cpp \
 #    src/solvers/BiCGComplex_VC.cpp \
 #    src/solvers/BiCGStabComplex_VC.cpp \

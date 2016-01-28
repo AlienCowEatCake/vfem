@@ -305,12 +305,13 @@ bool tetrahedron_base::in_cube(double x0, double x1, double y0, double y1, doubl
     return false;
 }
 
-pair<double, cvector3>
+trio<double, vector3, cvector3>
 tetrahedron_base::diff_normL2(const array_t<complex<double> > & q, eval_func func, void * data) const
 {
     using namespace tet_integration;
     complex<double> result = 0.0;
-    cvector3 result_all(0.0, 0.0, 0.0);
+    vector3 result_v3(0.0, 0.0, 0.0);
+    cvector3 result_cv3(0.0, 0.0, 0.0);
     for(size_t k = 0; k < gauss_num; k++)
     {
         cvector3 val(0.0, 0.0, 0.0);
@@ -321,22 +322,27 @@ tetrahedron_base::diff_normL2(const array_t<complex<double> > & q, eval_func fun
         result += gauss_weights[k] * func_d.norm2();
         for(size_t i = 0; i < 3; i++)
         {
-            func_d[i].real(func_d[i].real() * func_d[i].real());
-            func_d[i].imag(func_d[i].imag() * func_d[i].imag());
+            double re = func_d[i].real() * func_d[i].real();
+            double im = func_d[i].imag() * func_d[i].imag();
+            func_d[i].real(re);
+            func_d[i].imag(im);
+            result_v3[i] += gauss_weights[k] * (re + im);
         }
-        result_all += gauss_weights[k] * func_d;
+        result_cv3 += gauss_weights[k] * func_d;
     }
     result *= jacobian;
-    result_all *= jacobian;
-    return make_pair(result.real(), result_all);
+    result_v3 *= jacobian;
+    result_cv3 *= jacobian;
+    return make_trio(result.real(), result_v3, result_cv3);
 }
 
-pair<double, cvector3>
+trio<double, vector3, cvector3>
 tetrahedron_base::diff_normL2(const array_t<complex<double> > & q, const array_t<complex<double> > & q_true) const
 {
     using namespace tet_integration;
     complex<double> result = 0.0;
-    cvector3 result_all(0.0, 0.0, 0.0);
+    vector3 result_v3(0.0, 0.0, 0.0);
+    cvector3 result_cv3(0.0, 0.0, 0.0);
     for(size_t k = 0; k < gauss_num; k++)
     {
         cvector3 val(0.0, 0.0, 0.0), val_true(0.0, 0.0, 0.0);
@@ -350,22 +356,27 @@ tetrahedron_base::diff_normL2(const array_t<complex<double> > & q, const array_t
         result += gauss_weights[k] * func_d.norm2();
         for(size_t i = 0; i < 3; i++)
         {
-            func_d[i].real(func_d[i].real() * func_d[i].real());
-            func_d[i].imag(func_d[i].imag() * func_d[i].imag());
+            double re = func_d[i].real() * func_d[i].real();
+            double im = func_d[i].imag() * func_d[i].imag();
+            func_d[i].real(re);
+            func_d[i].imag(im);
+            result_v3[i] += gauss_weights[k] * (re + im);
         }
-        result_all += gauss_weights[k] * func_d;
+        result_cv3 += gauss_weights[k] * func_d;
     }
     result *= jacobian;
-    result_all *= jacobian;
-    return make_pair(result.real(), result_all);
+    result_v3 *= jacobian;
+    result_cv3 *= jacobian;
+    return make_trio(result.real(), result_v3, result_cv3);
 }
 
-pair<double, cvector3>
+trio<double, vector3, cvector3>
 tetrahedron_base::normL2(eval_func func, void * data) const
 {
     using namespace tet_integration;
     complex<double> result = 0.0;
-    cvector3 result_all(0.0, 0.0, 0.0);
+    vector3 result_v3(0.0, 0.0, 0.0);
+    cvector3 result_cv3(0.0, 0.0, 0.0);
     for(size_t k = 0; k < gauss_num; k++)
     {
         cvector3 func_d = func(gauss_points[k], get_phys_area(), data);
@@ -373,22 +384,27 @@ tetrahedron_base::normL2(eval_func func, void * data) const
         result += gauss_weights[k] * func_d.norm2();
         for(size_t i = 0; i < 3; i++)
         {
-            func_d[i].real(func_d[i].real() * func_d[i].real());
-            func_d[i].imag(func_d[i].imag() * func_d[i].imag());
+            double re = func_d[i].real() * func_d[i].real();
+            double im = func_d[i].imag() * func_d[i].imag();
+            func_d[i].real(re);
+            func_d[i].imag(im);
+            result_v3[i] += gauss_weights[k] * (re + im);
         }
-        result_all += gauss_weights[k] * func_d;
+        result_cv3 += gauss_weights[k] * func_d;
     }
     result *= jacobian;
-    result_all *= jacobian;
-    return make_pair(result.real(), result_all);
+    result_v3 *= jacobian;
+    result_cv3 *= jacobian;
+    return make_trio(result.real(), result_v3, result_cv3);
 }
 
-pair<double, cvector3>
+trio<double, vector3, cvector3>
 tetrahedron_base::normL2(const array_t<complex<double> > & q_true) const
 {
     using namespace tet_integration;
     complex<double> result = 0.0;
-    cvector3 result_all(0.0, 0.0, 0.0);
+    vector3 result_v3(0.0, 0.0, 0.0);
+    cvector3 result_cv3(0.0, 0.0, 0.0);
     for(size_t k = 0; k < gauss_num; k++)
     {
         cvector3 func_d;
@@ -398,14 +414,18 @@ tetrahedron_base::normL2(const array_t<complex<double> > & q_true) const
         result += gauss_weights[k] * func_d.norm2();
         for(size_t i = 0; i < 3; i++)
         {
-            func_d[i].real(func_d[i].real() * func_d[i].real());
-            func_d[i].imag(func_d[i].imag() * func_d[i].imag());
+            double re = func_d[i].real() * func_d[i].real();
+            double im = func_d[i].imag() * func_d[i].imag();
+            func_d[i].real(re);
+            func_d[i].imag(im);
+            result_v3[i] += gauss_weights[k] * (re + im);
         }
-        result_all += gauss_weights[k] * func_d;
+        result_cv3 += gauss_weights[k] * func_d;
     }
     result *= jacobian;
-    result_all *= jacobian;
-    return make_pair(result.real(), result_all);
+    result_v3 *= jacobian;
+    result_cv3 *= jacobian;
+    return make_trio(result.real(), result_v3, result_cv3);
 }
 
 // ============================================================================

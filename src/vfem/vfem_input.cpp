@@ -34,7 +34,7 @@ bool VFEM::input_phys(const string & phys_filename)
     phys_param.open(phys_filename.c_str(), ios::in);
     if(!phys_param.good())
     {
-        cerr << "Error in " << __FILE__ << ":" << __LINE__
+        cerr << "[Phys Config] Error in " << __FILE__ << ":" << __LINE__
              << " while reading file " << phys_filename << endl;
         return false;
     }

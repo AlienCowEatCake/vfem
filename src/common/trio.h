@@ -1,18 +1,7 @@
 #ifndef TRIO_H
 #define TRIO_H
 
-#include <cstddef>
-#include <cassert>
-
-#if ((__cplusplus) >= 201103L || (defined (_MSC_VER) && (_MSC_VER) >= 1700))
-#define TRIO_CXX_11
-#endif
-
-#if defined TRIO_CXX_11
-template<typename T1, typename T2 = T1, typename T3 = T2>
-#else
 template<typename T1, typename T2, typename T3>
-#endif
 struct trio
 {
     typedef T1 first_type;
@@ -39,21 +28,13 @@ struct trio
     }
 };
 
-#if defined TRIO_CXX_11
-template<typename T1, typename T2 = T1, typename T3 = T2>
-#else
 template<typename T1, typename T2, typename T3>
-#endif
 inline bool operator == (const trio<T1, T2, T3> & x, const trio<T1, T2, T3> & y)
 {
     return x.first == y.first && x.second == y.second && x.third = y.third;
 }
 
-#if defined TRIO_CXX_11
-template<typename T1, typename T2 = T1, typename T3 = T2>
-#else
 template<typename T1, typename T2, typename T3>
-#endif
 inline bool operator < (const trio<T1, T2, T3> & x, const trio<T1, T2, T3> & y)
 {
     return x.first < y.first ||
@@ -61,51 +42,31 @@ inline bool operator < (const trio<T1, T2, T3> & x, const trio<T1, T2, T3> & y)
            (!(y.second < x.second) && x.third < y.third);
 }
 
-#if defined TRIO_CXX_11
-template<typename T1, typename T2 = T1, typename T3 = T2>
-#else
 template<typename T1, typename T2, typename T3>
-#endif
 inline bool operator != (const trio<T1, T2, T3> & x, const trio<T1, T2, T3> & y)
 {
     return !(x == y);
 }
 
-#if defined TRIO_CXX_11
-template<typename T1, typename T2 = T1, typename T3 = T2>
-#else
 template<typename T1, typename T2, typename T3>
-#endif
 inline bool operator > (const trio<T1, T2, T3> & x, const trio<T1, T2, T3> & y)
 {
     return y < x;
 }
 
-#if defined TRIO_CXX_11
-template<typename T1, typename T2 = T1, typename T3 = T2>
-#else
 template<typename T1, typename T2, typename T3>
-#endif
 inline bool operator <= (const trio<T1, T2, T3> & x, const trio<T1, T2, T3> & y)
 {
     return !(y < x);
 }
 
-#if defined TRIO_CXX_11
-template<typename T1, typename T2 = T1, typename T3 = T2>
-#else
 template<typename T1, typename T2, typename T3>
-#endif
 inline bool operator >= (const trio<T1, T2, T3> & x, const trio<T1, T2, T3> & y)
 {
     return !(x < y);
 }
 
-#if defined TRIO_CXX_11
-template<typename T1, typename T2 = T1, typename T3 = T2>
-#else
 template<typename T1, typename T2, typename T3>
-#endif
 inline trio<T1, T2, T3> make_trio(const T1 & a, const T2 & b, const T3 & c)
 {
     return trio<T1, T2, T3>(a, b, c);

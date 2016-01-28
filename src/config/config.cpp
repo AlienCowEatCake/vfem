@@ -52,13 +52,23 @@ void config_type::load_defaults()
     max_iter_v_cycle_local = 500;
     filename_mesh = "mesh.msh";
     filename_phys = "phys.ini";
-    filename_pml = "config_pml.ini";
+    filename_pml = "";
     filename_slae = "";
     jit_type = evaluator3::JIT_DISABLE;
 
     analytical_enabled = false;
     boundary_enabled = false;
     right_enabled = false;
+
+    // Если это не исправлено при чтении конфига с PML,
+    // значит пусть вся область считается как область без PML
+    phys_pml.x0 = -DBL_MAX;
+    phys_pml.x1 = DBL_MAX;
+    phys_pml.y0 = -DBL_MAX;
+    phys_pml.y1 = DBL_MAX;
+    phys_pml.z0 = -DBL_MAX;
+    phys_pml.z1 = DBL_MAX;
+    phys_pml.params.clear();
 
     init(true);
 }
@@ -118,7 +128,7 @@ bool config_type::load(const string & filename)
     ifstream ifs(filename.c_str());
     if(!ifs.good())
     {
-        cerr << "Error in " << __FILE__ << ":" << __LINE__
+        cerr << "[Config] Error in " << __FILE__ << ":" << __LINE__
              << " while reading file " << filename << endl;
         return init(false);
     }
@@ -399,10 +409,16 @@ bool config_type::load_pml(const string & filename)
 {
     cout << "Reading PML config file ..." << endl;
 
+    if(filename == "")
+    {
+        cerr << "[PML Config] Warning: \"filename_pml\" parameter is not set" << endl;
+        return true;
+    }
+
     ifstream ifs(filename.c_str());
     if(!ifs.good())
     {
-        cerr << "Error in " << __FILE__ << ":" << __LINE__
+        cerr << "[PML Config] Error in " << __FILE__ << ":" << __LINE__
              << " while reading file " << filename << endl;
         return false;
     }
