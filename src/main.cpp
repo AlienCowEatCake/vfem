@@ -114,7 +114,13 @@ bool vfem_solve(VFEM & v, const string & config, bool nosolve, bool nopost, cons
     else
     {
         cout << "Restoring solution ..." << endl;
-        if(!(v.config.filename_slae != "" && v.slae.restore_x(v.config.filename_slae)))
+        if(v.config.filename_slae == "")
+        {
+            cerr << "Error in " << __FILE__ << ":" << __LINE__
+                 << " empty VFEM::config.filename_slae" << endl;
+            return false;
+        }
+        if(!v.slae.restore_x(v.config.filename_slae))
             return false;
     }
     time_solve = mtime() - time_solve;
@@ -126,6 +132,21 @@ bool vfem_solve(VFEM & v, const string & config, bool nosolve, bool nopost, cons
     print_time(time_exec, "All time");
     return true;
 }
+
+// Параметры командной строки для одной задачи
+class cl_param
+{
+public:
+    bool nosolve;
+    bool nopost;
+    string config;
+    cl_param()
+    {
+        nosolve = false;
+        nopost = false;
+        config = "config.ini";
+    }
+};
 
 // Main
 int main(int argc, char * argv [])
@@ -153,9 +174,8 @@ int main(int argc, char * argv [])
     char timebuf[24];
     strftime(timebuf, 24, "%Y-%m-%d_%H-%M-%S", localtime(&seconds));
 
-    bool nosolve = false;
-    bool nopost = false;
-    string config = "config.ini";
+    vector<cl_param> cl_params;
+    cl_param cl_param_curr;
     enum
     {
         DIFF_NO,
@@ -163,11 +183,6 @@ int main(int argc, char * argv [])
         DIFF_COMPLEX
     };
     int diff_type = DIFF_NO;
-
-    VFEM master;
-    VFEM slave;
-    bool master_complete = false;
-    bool slave_complete = false;
 
     for(int i = 1; i < argc; i++)
     {
@@ -193,46 +208,13 @@ int main(int argc, char * argv [])
         else if(strcmp(argv[i], "-diff_simple") == 0 || strcmp(argv[i], "--diff_simple") == 0)
             diff_type = DIFF_SIMPLE;
         else if(strcmp(argv[i], "-nosolve") == 0 || strcmp(argv[i], "--nosolve") == 0)
-            nosolve = true;
+            cl_param_curr.nosolve = true;
         else if(strcmp(argv[i], "-nopost") == 0 || strcmp(argv[i], "--nopost") == 0)
-            nopost = true;
+            cl_param_curr.nopost = true;
         else if(argv[i][0] != '-')
         {
-            config = argv[i];
-            if(!master_complete)
-            {
-                if(!vfem_solve(master, config, nosolve, nopost, timebuf))
-                    return paused(1);
-                nosolve = false;
-                nopost = false;
-                config = "config.ini";
-                master_complete = true;
-            }
-            else if(!slave_complete && diff_type != DIFF_NO)
-            {
-                if(!vfem_solve(slave, config, nosolve, nopost, timebuf))
-                    return paused(1);
-                nosolve = false;
-                nopost = false;
-                config = "config.ini";
-                slave_complete = true;
-            }
-            else if(diff_type != DIFF_NO)
-            {
-                vector<diff_area> areas;
-                if(!input_diff(config, areas))
-                    return paused(1);
-                if(diff_type == DIFF_SIMPLE)
-                    compare_simple(master, slave, areas);
-                else
-                    compare_complex(master, slave, areas);
-                return paused(0);
-            }
-            else
-            {
-                cerr << "[Main] Unknown argument \"" << argv[i] << "\"" << endl;
-                return paused(1);
-            }
+            cl_param_curr.config = argv[i];
+            cl_params.push_back(cl_param_curr);
         }
         else
         {
@@ -241,10 +223,36 @@ int main(int argc, char * argv [])
         }
     }
 
-    if(!master_complete)
+    if(diff_type != DIFF_NO && cl_params.size() != 3)
     {
-        if(!vfem_solve(master, config, nosolve, nopost, timebuf))
+        cerr << "[Main] Incorrect command line arguments" << endl;
+        return paused(1);
+    }
+    if(cl_params.size() == 0)
+    {
+        cl_params.push_back(cl_param_curr);
+    }
+
+    if(diff_type == DIFF_NO)
+    {
+        VFEM v;
+        if(!vfem_solve(v, cl_params[0].config, cl_params[0].nosolve, cl_params[0].nopost, timebuf))
             return paused(1);
+    }
+    else
+    {
+        vector<diff_area> areas;
+        if(!input_diff(cl_params[2].config, areas))
+            return paused(1);
+        VFEM master, slave;
+        if(!vfem_solve(master, cl_params[0].config, cl_params[0].nosolve, cl_params[0].nopost, timebuf))
+            return paused(1);
+        if(!vfem_solve(slave, cl_params[1].config, cl_params[1].nosolve, cl_params[1].nopost, timebuf))
+            return paused(1);
+        if(diff_type == DIFF_SIMPLE)
+            compare_simple(master, slave, areas);
+        else
+            compare_complex(master, slave, areas);
     }
 
     return paused(0);

@@ -14,12 +14,17 @@ void compare_simple(VFEM & master, VFEM & slave, const vector<diff_area> & areas
         finite_element * fe_m = &(master.fes[i]);
         for(size_t j = 0; j < areas.size(); j++)
         {
-            if(fe_m->in_cube(areas[j].p1.x, areas[j].p2.x, areas[j].p1.y, areas[j].p2.y, areas[j].p1.z, areas[j].p2.z))
+            if(fe_m->barycenter.x >= areas[j].p1.x && fe_m->barycenter.x <= areas[j].p2.x &&
+               fe_m->barycenter.y >= areas[j].p1.y && fe_m->barycenter.y <= areas[j].p2.y &&
+               fe_m->barycenter.z >= areas[j].p1.z && fe_m->barycenter.z <= areas[j].p2.z)
             {
                 if(areas[j].included)
                     flag = true;
                 else
+                {
+                    flag = false;
                     break;
+                }
             }
         }
         // Если нужно - обработаем
@@ -82,12 +87,17 @@ void compare_complex(VFEM & master, VFEM & slave, const vector<diff_area> & area
         finite_element * fe_m = &(master.fes[i]);
         for(size_t j = 0; j < areas.size(); j++)
         {
-            if(fe_m->in_cube(areas[j].p1.x, areas[j].p2.x, areas[j].p1.y, areas[j].p2.y, areas[j].p1.z, areas[j].p2.z))
+            if(fe_m->barycenter.x >= areas[j].p1.x && fe_m->barycenter.x <= areas[j].p2.x &&
+               fe_m->barycenter.y >= areas[j].p1.y && fe_m->barycenter.y <= areas[j].p2.y &&
+               fe_m->barycenter.z >= areas[j].p1.z && fe_m->barycenter.z <= areas[j].p2.z)
             {
                 if(areas[j].included)
                     flag = true;
                 else
+                {
+                    flag = false;
                     break;
+                }
             }
         }
         // Если нужно - обработаем
@@ -124,7 +134,7 @@ void compare_complex(VFEM & master, VFEM & slave, const vector<diff_area> & area
 // Чтение конфигурационного файла для сравнения
 bool input_diff(const string & filename, vector<diff_area> & areas)
 {
-    cout << "Reading compare config ..." << endl;
+    cout << "Reading compare config file ..." << endl;
 
     // Чтение параметров сравнения областей
     ifstream ifs;
