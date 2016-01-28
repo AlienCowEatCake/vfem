@@ -41,33 +41,37 @@ void sighup_handler(int)
 }
 #endif
 
+// Распечатка затраченного времени
 void print_time(unsigned long msec, const string & descr)
 {
+    cout << descr << ": \t" << msec << " msec \t(";
     unsigned long seconds = msec / 1000;
     if(seconds > 3600)
     {
         unsigned long h = seconds / 3600;
         unsigned long m = (seconds - h * 3600) / 60;
         unsigned long s = seconds - h * 3600 - m * 60;
-        cout << descr << ": \t" << h << " hr " << m << " min " << s << " sec." << endl;
+        cout << h << " hr " << m << " min " << s << " sec";
     }
     else if(seconds > 60)
     {
         unsigned long m = seconds / 60;
         unsigned long s = seconds - m * 60;
-        cout << descr << ": \t" << m << " min " << s << " sec." << endl;
+        cout << m << " min " << s << " sec";
     }
     else if(seconds > 0)
     {
         unsigned long ms = msec - seconds * 1000;
-        cout << descr << ": \t" << seconds << " sec " << ms << " msec." << endl;
+        cout << seconds << " sec " << ms << " msec";
     }
     else
     {
-        cout << descr << ": \t" << msec << " msec." << endl;
+        cout << msec << " msec";
     }
+    cout << ")." << endl;
 }
 
+// Пауза, если это необходимо и поддерживаемо системой
 int paused(int ret)
 {
 #if defined _WIN32
@@ -78,6 +82,52 @@ int paused(int ret)
     return ret;
 }
 
+// Решение одной задачи
+bool vfem_solve(VFEM & v, const string & config, bool nosolve, bool nopost, const char * timebuf)
+{
+    unsigned long time_exec = mtime();
+    unsigned long time_solve = 0;
+
+    string config_dir = "";
+    size_t delim_pos = config.find_last_of("/");
+#if defined _WIN32
+    size_t delim_pos_w = config.find_last_of("\\");
+    if(delim_pos == string::npos || (delim_pos_w != string::npos && delim_pos_w > delim_pos))
+        delim_pos = delim_pos_w;
+#endif
+    if(delim_pos != string::npos)
+        config_dir = config.substr(0, delim_pos + 1);
+
+    if(!v.config.load(config)) return false;
+#if defined VFEM_USE_PML
+    if(!v.config.load_pml(v.config.filename_pml)) return false;
+#endif
+    if(!v.input_phys(config_dir + v.config.filename_phys)) return false;
+    if(!v.input_mesh(config_dir + v.config.filename_mesh)) return false;
+    v.make_struct();
+    time_solve = mtime();
+    if(!nosolve)
+    {
+        v.make_data();
+        v.solve();
+    }
+    else
+    {
+        cout << "Restoring solution ..." << endl;
+        if(!(v.config.filename_slae != "" && v.slae.restore_x(v.config.filename_slae)))
+            return false;
+    }
+    time_solve = mtime() - time_solve;
+    if(!nopost)
+        postprocessing(v, timebuf);
+
+    print_time(time_solve, "Solve time");
+    time_exec = mtime() - time_exec;
+    print_time(time_exec, "All time");
+    return true;
+}
+
+// Main
 int main(int argc, char * argv [])
 {
 #if !defined _WIN32 && defined USE_NOSIGHUP
@@ -102,55 +152,100 @@ int main(int argc, char * argv [])
     time_t seconds = time(NULL);
     char timebuf[24];
     strftime(timebuf, 24, "%Y-%m-%d_%H-%M-%S", localtime(&seconds));
-    unsigned long time_exec = mtime();
-    unsigned long time_solve = 0;
 
     bool nosolve = false;
     bool nopost = false;
     string config = "config.ini";
-    string config_dir = "";
+    enum
+    {
+        DIFF_NO,
+        DIFF_SIMPLE,
+        DIFF_COMPLEX
+    };
+    int diff_type = DIFF_NO;
+
+    VFEM master;
+    VFEM slave;
+    bool master_complete = false;
+    bool slave_complete = false;
+
     for(int i = 1; i < argc; i++)
     {
-        if(strcmp(argv[i], "-nosolve") == 0)        nosolve = true;
-        else if(strcmp(argv[i], "-nopost") == 0)    nopost = true;
-        else if(argv[i][0] != '-')
+        if(strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "-help") == 0 || strcmp(argv[i], "--help") == 0)
         {
-            config = argv[i];
-            size_t delim_pos = config.find_last_of("/");
+            string name(argv[0]);
+            size_t delim_pos = name.find_last_of("/");
 #if defined _WIN32
-            size_t delim_pos_w = config.find_last_of("\\");
+            size_t delim_pos_w = name.find_last_of("\\");
             if(delim_pos == string::npos || (delim_pos_w != string::npos && delim_pos_w > delim_pos))
                 delim_pos = delim_pos_w;
 #endif
             if(delim_pos != string::npos)
-                config_dir = config.substr(0, delim_pos + 1);
+                name = name.substr(delim_pos + 1);
+            cout << name << " [-nosolve] [-nopost] [config.ini]" << endl;
+            cout << name << " -diff [-nosolve] [-nopost] master.ini [-nosolve] [-nopost] slave.ini diff.ini" << endl;
+            cout << name << " -diff_simple [-nosolve] [-nopost] master.ini [-nosolve] [-nopost] slave.ini diff.ini" << endl;
+            cout << name << " -help" << endl;
+            return paused(0);
         }
-        else cerr << "[Main] Unknown argument \"" << argv[i] << "\"" << endl;
-    }
-
-    VFEM v;
-    if(!v.config.load(config)) return paused(1);
-#if defined VFEM_USE_PML
-    if(!v.config.load_pml(v.config.filename_pml)) return paused(1);
-#endif
-    if(!v.input_phys(config_dir + v.config.filename_phys)) return paused(1);
-    if(!v.input_mesh(config_dir + v.config.filename_mesh)) return paused(1);
-    v.make_struct();
-    time_solve = mtime();
-    if(!nosolve)
-    {
-        v.make_data();
-        v.solve();
-    }
-    else
-        if(!(v.config.filename_slae != "" && v.slae.restore_x(v.config.filename_slae)))
+        else if(strcmp(argv[i], "-diff") == 0 || strcmp(argv[i], "--diff") == 0)
+            diff_type = DIFF_COMPLEX;
+        else if(strcmp(argv[i], "-diff_simple") == 0 || strcmp(argv[i], "--diff_simple") == 0)
+            diff_type = DIFF_SIMPLE;
+        else if(strcmp(argv[i], "-nosolve") == 0 || strcmp(argv[i], "--nosolve") == 0)
+            nosolve = true;
+        else if(strcmp(argv[i], "-nopost") == 0 || strcmp(argv[i], "--nopost") == 0)
+            nopost = true;
+        else if(argv[i][0] != '-')
+        {
+            config = argv[i];
+            if(!master_complete)
+            {
+                if(!vfem_solve(master, config, nosolve, nopost, timebuf))
+                    return paused(1);
+                nosolve = false;
+                nopost = false;
+                config = "config.ini";
+                master_complete = true;
+            }
+            else if(!slave_complete && diff_type != DIFF_NO)
+            {
+                if(!vfem_solve(slave, config, nosolve, nopost, timebuf))
+                    return paused(1);
+                nosolve = false;
+                nopost = false;
+                config = "config.ini";
+                slave_complete = true;
+            }
+            else if(diff_type != DIFF_NO)
+            {
+                vector<diff_area> areas;
+                if(!input_diff(config, areas))
+                    return paused(1);
+                if(diff_type == DIFF_SIMPLE)
+                    compare_simple(master, slave, areas);
+                else
+                    compare_complex(master, slave, areas);
+                return paused(0);
+            }
+            else
+            {
+                cerr << "[Main] Unknown argument \"" << argv[i] << "\"" << endl;
+                return paused(1);
+            }
+        }
+        else
+        {
+            cerr << "[Main] Unknown argument \"" << argv[i] << "\"" << endl;
             return paused(1);
-    time_solve = mtime() - time_solve;
-    if(!nopost)
-        postprocessing(v, timebuf);
+        }
+    }
 
-    print_time(time_solve, "Solve time");
-    time_exec = mtime() - time_exec;
-    print_time(time_exec, "All time");
+    if(!master_complete)
+    {
+        if(!vfem_solve(master, config, nosolve, nopost, timebuf))
+            return paused(1);
+    }
+
     return paused(0);
 }

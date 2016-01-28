@@ -1,5 +1,6 @@
 #include "problems.h"
 
+// Функция аналитического решения
 cvector3 func_true(const point & p, const phys_area & phys, void * data)
 {
     MAYBE_UNUSED(phys);
@@ -19,6 +20,7 @@ cvector3 func_true(const point & p, const phys_area & phys, void * data)
     return result;
 }
 
+// Правая часть
 cvector3 func_rp(const point & p, const phys_area & phys, void * data)
 {
     MAYBE_UNUSED(phys);
@@ -38,6 +40,7 @@ cvector3 func_rp(const point & p, const phys_area & phys, void * data)
     return result;
 }
 
+// Функция неоднородных первых краевых условий
 cvector3 func_b1(const point & p, const phys_area & phys, void * data)
 {
     MAYBE_UNUSED(phys);
@@ -57,7 +60,8 @@ cvector3 func_b1(const point & p, const phys_area & phys, void * data)
     return result;
 }
 
-void postprocessing(VFEM & v, char * timebuf)
+// Постпроцессор
+void postprocessing(VFEM & v, const char * timebuf)
 {
     if(v.config.filename_slae != "")
         v.slae.dump_x(v.config.filename_slae);

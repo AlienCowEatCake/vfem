@@ -2,6 +2,7 @@
 
 #if defined VFEM_USE_PML
 
+// Проверка, PML или нет
 bool is_pml(const point & p, const finite_element * fe, const phys_pml_area * phys_pml)
 {
     MAYBE_UNUSED(p);
@@ -10,6 +11,7 @@ bool is_pml(const point & p, const finite_element * fe, const phys_pml_area * ph
     return false;
 }
 
+// Коэффициент S для PML
 cvector3 get_s(const point & p, const finite_element * fe, const phys_pml_area * phys_pml)
 {
     if(!is_pml(p, fe, phys_pml))
