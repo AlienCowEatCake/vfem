@@ -56,10 +56,10 @@ public:
 
     bool in_cube(double x0, double x1, double y0, double y1, double z0, double z1) const;
 
-    double diff_normL2(const array_t<complex<double> > & q, eval_func func, void * data) const;
-    double diff_normL2(const array_t<complex<double> > & q, const array_t<complex<double> > & q_true) const;
-    double normL2(eval_func func, void * data) const;
-    double normL2(const array_t<complex<double> > & q_true) const;
+    pair<double, cvector3> diff_normL2(const array_t<complex<double> > & q, eval_func func, void * data) const;
+    pair<double, cvector3> diff_normL2(const array_t<complex<double> > & q, const array_t<complex<double> > & q_true) const;
+    pair<double, cvector3> normL2(eval_func func, void * data) const;
+    pair<double, cvector3> normL2(const array_t<complex<double> > & q_true) const;
 
 protected:
     // Матрица L-координат

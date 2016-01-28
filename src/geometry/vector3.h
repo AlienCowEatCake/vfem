@@ -58,6 +58,7 @@ public:
     friend vector3_t<U> operator * (const U & a, const vector3_t<U> & vec);
     template<typename U, typename V, typename R>
     friend vector3_t<R> operator * (const U & a, const vector3_t<V> & vec);
+    vector3_t<T> & operator *= (const T & a);
     // Умножение матрицы на вектор
     template<typename U, typename V>
     friend vector3_t<U> operator * (const matrix_t<V, 3, 3> & matr, const vector3_t<U> & vec);
@@ -214,6 +215,15 @@ template<typename U>
 vector3_t<U> operator * (const U & a, const vector3_t<U> & vec)
 {
     return vector3_t<U>(a * vec.x, a * vec.y, a * vec.z);
+}
+
+template<typename T>
+vector3_t<T> & vector3_t<T>::operator *= (const T & a)
+{
+    x *= a;
+    y *= a;
+    z *= a;
+    return * this;
 }
 
 // Умножение матрицы на вектор

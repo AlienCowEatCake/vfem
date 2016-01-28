@@ -516,7 +516,8 @@ void VFEM::make()
 
 void VFEM::calculate_diff()
 {
-    double diff = 0.0;
+    double diff = 0.0, norm = 0.0;
+    cvector3 diff_cv3(0.0, 0.0, 0.0), norm_cv3(0.0, 0.0, 0.0);
     for(size_t k = 0; k < fes.size(); k++)
     {
         // Получение физических параметров для заданного КЭ
@@ -548,7 +549,18 @@ void VFEM::calculate_diff()
             q_loc[i] = slae.x[get_tet_dof(&fes[k], i)];
 
         // И считаем разность в норме L2
-        diff += fes[k].diff_normL2(q_loc, func_true, &params_object);
+        pair<double, cvector3> diff_tmp = fes[k].diff_normL2(q_loc, func_true, &params_object);
+        pair<double, cvector3> norm_tmp = fes[k].normL2(func_true, &params_object);
+        diff += diff_tmp.first;
+        diff_cv3 += diff_tmp.second;
+        norm += norm_tmp.first;
+        norm_cv3 += norm_tmp.second;
     }
-    cout << "Diff (L2): \t" << sqrt(diff) << endl;
+    cout << "Diff (L2): \t" << sqrt(diff / norm) << endl;
+    cout << "Diff (L2) [ExR]: \t" << sqrt(diff_cv3.x.real() / norm_cv3.x.real()) << endl;
+    cout << "Diff (L2) [EyR]: \t" << sqrt(diff_cv3.y.real() / norm_cv3.y.real()) << endl;
+    cout << "Diff (L2) [EzR]: \t" << sqrt(diff_cv3.z.real() / norm_cv3.z.real()) << endl;
+    cout << "Diff (L2) [ExI]: \t" << sqrt(diff_cv3.x.imag() / norm_cv3.x.imag()) << endl;
+    cout << "Diff (L2) [EyI]: \t" << sqrt(diff_cv3.y.imag() / norm_cv3.y.imag()) << endl;
+    cout << "Diff (L2) [EzI]: \t" << sqrt(diff_cv3.z.imag() / norm_cv3.z.imag()) << endl;
 }
