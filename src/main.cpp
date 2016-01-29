@@ -105,11 +105,12 @@ bool vfem_solve(VFEM & v, const string & config, bool nosolve, bool nopost, cons
     if(!v.input_phys(config_dir + v.config.filename_phys)) return false;
     if(!v.input_mesh(config_dir + v.config.filename_mesh)) return false;
     v.make_struct();
-    time_solve = mtime();
     if(!nosolve)
     {
         v.make_data();
+        time_solve = mtime();
         v.solve();
+        time_solve = mtime() - time_solve;
     }
     else
     {
@@ -120,10 +121,11 @@ bool vfem_solve(VFEM & v, const string & config, bool nosolve, bool nopost, cons
                  << " empty VFEM::config.filename_slae" << endl;
             return false;
         }
+        time_solve = mtime();
         if(!v.slae.restore_x(v.config.filename_slae))
             return false;
+        time_solve = mtime() - time_solve;
     }
-    time_solve = mtime() - time_solve;
     if(!nopost)
         postprocessing(v, timebuf);
 
