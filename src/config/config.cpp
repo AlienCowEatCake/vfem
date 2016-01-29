@@ -186,7 +186,7 @@ bool config_type::load(const string & filename)
                                 else if(value == "extcall") jit_type = evaluator3::JIT_EXTCALL;
                                 else if(value == "disable") jit_type = evaluator3::JIT_DISABLE;
                                 else cerr << "[Config] Unknown JIT-compiler type \"" << value << "\" in section \""
-                                          << section << (subsection == "" ? string("") : (string(".") + subsection))
+                                          << section << (subsection.empty() ? string("") : (string(".") + subsection))
                                           << "\"" << endl;
                             }
                             else if(param == "v_cycle_enabled")
@@ -198,7 +198,7 @@ bool config_type::load(const string & filename)
                                     v_cycle_enabled = false;
                             }
                             else cerr << "[Config] Unsupported param \"" << param << "\" in section \"" << section
-                                      << (subsection == "" ? string("") : (string(".") + subsection)) << "\"" << endl;
+                                      << (subsection.empty() ? string("") : (string(".") + subsection)) << "\"" << endl;
                             //cout << "  param = " << param << endl;
                             //cout << "  value = " << value << endl;
                         }
@@ -212,7 +212,7 @@ bool config_type::load(const string & filename)
                 array_t<evaluator<complex<double> >, 3> * curr_parser = NULL;
                 if(section == "boundary")
                 {
-                    if(subsection == "")
+                    if(subsection.empty())
                         curr_parser = & boundary.default_value;
                     else
                     {
@@ -224,7 +224,7 @@ bool config_type::load(const string & filename)
                 }
                 else if(section == "right")
                 {
-                    if(subsection == "")
+                    if(subsection.empty())
                         curr_parser = & right.default_value;
                     else
                     {
@@ -236,7 +236,7 @@ bool config_type::load(const string & filename)
                 }
                 else if(section == "analytical")
                 {
-                    if(subsection == "")
+                    if(subsection.empty())
                         curr_parser = & analytical.default_value;
                     else
                     {
@@ -319,7 +319,7 @@ bool config_type::load(const string & filename)
                                 }
                             }
                             else cerr << "[Config] Unsupported param \"" << param << "\" in section \"" << section
-                                      << (subsection == "" ? string("") : (string(".") + subsection)) << "\"" << endl;
+                                      << (subsection.empty() ? string("") : (string(".") + subsection)) << "\"" << endl;
                             //cout << "  param = " << param << endl;
                             //cout << "  value = " << value << endl;
                         }
@@ -383,7 +383,7 @@ bool config_type::load(const string & filename)
                                 if(value == "3d") p->type = 3;
                             }
                             else cerr << "[Config] Unsupported param \"" << param << "\" in section \"" << section
-                                      << (subsection == "" ? string("") : (string(".") + subsection)) << "\"" << endl;
+                                      << (subsection.empty() ? string("") : (string(".") + subsection)) << "\"" << endl;
                             //cout << "  param = " << param << endl;
                             //cout << "  value = " << value << endl;
                         }
@@ -409,7 +409,7 @@ bool config_type::load_pml(const string & filename)
 {
     cout << "Reading PML config file ..." << endl;
 
-    if(filename == "")
+    if(filename.empty())
     {
         cerr << "[PML Config] Warning: \"filename_pml\" parameter is not set" << endl;
         return true;
@@ -453,7 +453,7 @@ bool config_type::load_pml(const string & filename)
 
             if(section == "pml")
             {
-                if(subsection == "")
+                if(subsection.empty())
                 {
                     do
                     {
@@ -482,7 +482,7 @@ bool config_type::load_pml(const string & filename)
                                 else if(param == "z0")          phys_pml.z0 = tmp;
                                 else if(param == "z1")          phys_pml.z1 = tmp;
                                 else cerr << "[PML Config] Unsupported param \"" << param << "\" in section \"" << section
-                                          << (subsection == "" ? string("") : (string(".") + subsection)) << "\"" << endl;
+                                          << (subsection.empty() ? string("") : (string(".") + subsection)) << "\"" << endl;
                                 //cout << "  param = " << param << endl;
                                 //cout << "  value = " << value << endl;
                             }
@@ -529,7 +529,7 @@ bool config_type::load_pml(const string & filename)
                                 else if(param == "m")           curr->m = tmp;
                                 else if(param == "width")       curr->width = tmp;
                                 else cerr << "[PML Config] Unsupported param \"" << param << "\" in section \"" << section
-                                          << (subsection == "" ? string("") : (string(".") + subsection)) << "\"" << endl;
+                                          << (subsection.empty() ? string("") : (string(".") + subsection)) << "\"" << endl;
                                 //cout << "  param = " << param << endl;
                                 //cout << "  value = " << value << endl;
                             }
@@ -558,10 +558,11 @@ bool config_type::load_pml(const string & filename)
     if(width_def < big_num)      def.width = width_def;
     for(map<size_t, pml_config_parameter>::iterator it = phys_pml.params.begin(); it != phys_pml.params.end(); ++it)
     {
-        if(it->second.chi.real() >= big_num) it->second.chi.real(def.chi.real());
-        if(it->second.chi.imag() >= big_num) it->second.chi.imag(def.chi.imag());
-        if(it->second.m >= big_num)          it->second.m = def.m;
-        if(it->second.width >= big_num)      it->second.width = def.width;
+        pml_config_parameter * curr_par = &(it->second);
+        if(curr_par->chi.real() >= big_num) curr_par->chi.real(def.chi.real());
+        if(curr_par->chi.imag() >= big_num) curr_par->chi.imag(def.chi.imag());
+        if(curr_par->m >= big_num)          curr_par->m = def.m;
+        if(curr_par->width >= big_num)      curr_par->width = def.width;
     }
 
     return true;

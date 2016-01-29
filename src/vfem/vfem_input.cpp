@@ -87,7 +87,7 @@ bool VFEM::input_phys(const string & phys_filename)
                             else if(param == "eps")   eps_default = tmp * consts::epsilon0;
                             else if(param == "sigma") sigma_default = tmp;
                             else cerr << "[Phys Config] Unsupported param \"" << param << "\" in section \""
-                                      << section << (subsection == "" ? string("") : (string(".") + subsection))
+                                      << section << (subsection.empty() ? string("") : (string(".") + subsection))
                                       << "\"" << endl;
                             //cout << "  param = " << param << endl;
                             //cout << "  value = " << value << endl;
@@ -98,7 +98,7 @@ bool VFEM::input_phys(const string & phys_filename)
             }
             else if(section == "phys3d")
             {
-                if(subsection != "")
+                if(!subsection.empty())
                 {
                     if(omega_global < 0)
                     {
@@ -141,7 +141,7 @@ bool VFEM::input_phys(const string & phys_filename)
                                 else if(param == "eps")   ph->epsilon = tmp * consts::epsilon0;
                                 else if(param == "sigma") ph->sigma = tmp;
                                 else cerr << "[Phys Config] Unsupported param \"" << param << "\" in section \""
-                                          << section << (subsection == "" ? string("") : (string(".") + subsection))
+                                          << section << (subsection.empty() ? string("") : (string(".") + subsection))
                                           << "\"" << endl;
                                 //cout << "  param = " << param << endl;
                                 //cout << "  value = " << value << endl;
@@ -158,7 +158,7 @@ bool VFEM::input_phys(const string & phys_filename)
             }
             else if(section == "phys2d")
             {
-                if(subsection != "")
+                if(!subsection.empty())
                 {
                     if(omega_global < 0)
                     {
@@ -217,7 +217,7 @@ bool VFEM::input_phys(const string & phys_filename)
                                     }
                                 }
                                 else cerr << "[Phys Config] Unsupported param \"" << param << "\" in section \""
-                                          << section << (subsection == "" ? string("") : (string(".") + subsection))
+                                          << section << (subsection.empty() ? string("") : (string(".") + subsection))
                                           << "\"" << endl;
                                 //cout << "  param = " << param << endl;
                                 //cout << "  value = " << value << endl;
@@ -234,7 +234,7 @@ bool VFEM::input_phys(const string & phys_filename)
             }
             else if(section == "phys1d")
             {
-                if(subsection != "")
+                if(!subsection.empty())
                 {
                     if(omega_global < 0)
                     {
@@ -293,7 +293,7 @@ bool VFEM::input_phys(const string & phys_filename)
                                     }
                                 }
                                 else cerr << "[Phys Config] Unsupported param \"" << param << "\" in section \""
-                                          << section << (subsection == "" ? string("") : (string(".") + subsection))
+                                          << section << (subsection.empty() ? string("") : (string(".") + subsection))
                                           << "\"" << endl;
                                 //cout << "  param = " << param << endl;
                                 //cout << "  value = " << value << endl;
@@ -335,7 +335,7 @@ bool VFEM::input_phys(const string & phys_filename)
                             else if(param == "value_y") pss_value.y = tmp;
                             else if(param == "value_z") pss_value.z = tmp;
                             else cerr << "[Phys Config] Unsupported param \"" << param << "\" in section \""
-                                      << section << (subsection == "" ? string("") : (string(".") + subsection))
+                                      << section << (subsection.empty() ? string("") : (string(".") + subsection))
                                       << "\"" << endl;
                             //cout << "  param = " << param << endl;
                             //cout << "  value = " << value << endl;
@@ -361,25 +361,26 @@ bool VFEM::input_phys(const string & phys_filename)
     for(map<size_t, array_t<evaluator<complex<double> >, 3> >::iterator
         it = config.analytical.values.begin(); it != config.analytical.values.end(); ++it)
     {
-        map<phys_id, phys_area>::const_iterator ph = phys.find(phys_id(MSH_TET_4, it->first));
-        complex<double> k2(- ph->second.omega * ph->second.omega * ph->second.epsilon,
-                           ph->second.omega * ph->second.sigma);
+        phys_area * ph = &(phys.find(phys_id(MSH_TET_4, it->first))->second);
+        complex<double> k2(- ph->omega * ph->omega * ph->epsilon,
+                           ph->omega * ph->sigma);
         for(size_t i = 0; i < 3; i++)
         {
-            it->second[i].set_var("J0", ph->second.J0);
-            it->second[i].set_var("omega", omega_global);
-            it->second[i].set_var("epsilon", ph->second.epsilon);
-            it->second[i].set_var("sigma", ph->second.sigma);
-            it->second[i].set_var("mu", ph->second.mu);
-            it->second[i].set_var("k2", k2);
-            it->second[i].simplify();
+            evaluator<complex<double> > * ev_curr = &(it->second[i]);
+            ev_curr->set_var("J0", ph->J0);
+            ev_curr->set_var("omega", omega_global);
+            ev_curr->set_var("epsilon", ph->epsilon);
+            ev_curr->set_var("sigma", ph->sigma);
+            ev_curr->set_var("mu", ph->mu);
+            ev_curr->set_var("k2", k2);
+            ev_curr->simplify();
             switch(config.jit_type)
             {
             case evaluator3::JIT_EXTCALL:
-                it->second[i].compile_extcall();
+                ev_curr->compile_extcall();
                 break;
             case evaluator3::JIT_INLINE:
-                it->second[i].compile_inline();
+                ev_curr->compile_inline();
                 break;
             default:
                 break;
@@ -389,25 +390,26 @@ bool VFEM::input_phys(const string & phys_filename)
     for(map<size_t, array_t<evaluator<complex<double> >, 3> >::iterator
         it = config.boundary.values.begin(); it != config.boundary.values.end(); ++it)
     {
-        map<phys_id, phys_area>::const_iterator ph = phys.find(phys_id(MSH_TRI_3, it->first));
-        complex<double> k2(- ph->second.omega * ph->second.omega * ph->second.epsilon,
-                           ph->second.omega * ph->second.sigma);
+        phys_area * ph = &(phys.find(phys_id(MSH_TRI_3, it->first))->second);
+        complex<double> k2(- ph->omega * ph->omega * ph->epsilon,
+                           ph->omega * ph->sigma);
         for(size_t i = 0; i < 3; i++)
         {
-            it->second[i].set_var("J0", ph->second.J0);
-            it->second[i].set_var("omega", omega_global);
-            it->second[i].set_var("epsilon", ph->second.epsilon);
-            it->second[i].set_var("sigma", ph->second.sigma);
-            it->second[i].set_var("mu", ph->second.mu);
-            it->second[i].set_var("k2", k2);
-            it->second[i].simplify();
+            evaluator<complex<double> > * ev_curr = &(it->second[i]);
+            ev_curr->set_var("J0", ph->J0);
+            ev_curr->set_var("omega", omega_global);
+            ev_curr->set_var("epsilon", ph->epsilon);
+            ev_curr->set_var("sigma", ph->sigma);
+            ev_curr->set_var("mu", ph->mu);
+            ev_curr->set_var("k2", k2);
+            ev_curr->simplify();
             switch(config.jit_type)
             {
             case evaluator3::JIT_EXTCALL:
-                it->second[i].compile_extcall();
+                ev_curr->compile_extcall();
                 break;
             case evaluator3::JIT_INLINE:
-                it->second[i].compile_inline();
+                ev_curr->compile_inline();
                 break;
             default:
                 break;
@@ -417,25 +419,26 @@ bool VFEM::input_phys(const string & phys_filename)
     for(map<size_t, array_t<evaluator<complex<double> >, 3> >::iterator
         it = config.right.values.begin(); it != config.right.values.end(); ++it)
     {
-        map<phys_id, phys_area>::const_iterator ph = phys.find(phys_id(MSH_TET_4, it->first));
-        complex<double> k2(- ph->second.omega * ph->second.omega * ph->second.epsilon,
-                           ph->second.omega * ph->second.sigma);
+        phys_area * ph = &(phys.find(phys_id(MSH_TET_4, it->first))->second);
+        complex<double> k2(- ph->omega * ph->omega * ph->epsilon,
+                           ph->omega * ph->sigma);
         for(size_t i = 0; i < 3; i++)
         {
-            it->second[i].set_var("J0", ph->second.J0);
-            it->second[i].set_var("omega", omega_global);
-            it->second[i].set_var("epsilon", ph->second.epsilon);
-            it->second[i].set_var("sigma", ph->second.sigma);
-            it->second[i].set_var("mu", ph->second.mu);
-            it->second[i].set_var("k2", k2);
-            it->second[i].simplify();
+            evaluator<complex<double> > * ev_curr = &(it->second[i]);
+            ev_curr->set_var("J0", ph->J0);
+            ev_curr->set_var("omega", omega_global);
+            ev_curr->set_var("epsilon", ph->epsilon);
+            ev_curr->set_var("sigma", ph->sigma);
+            ev_curr->set_var("mu", ph->mu);
+            ev_curr->set_var("k2", k2);
+            ev_curr->simplify();
             switch(config.jit_type)
             {
             case evaluator3::JIT_EXTCALL:
-                it->second[i].compile_extcall();
+                ev_curr->compile_extcall();
                 break;
             case evaluator3::JIT_INLINE:
-                it->second[i].compile_inline();
+                ev_curr->compile_inline();
                 break;
             default:
                 break;
@@ -1035,8 +1038,9 @@ void VFEM::input_pml()
         show_progress("replaced points", i++, pml_nodes_cache.size());
 
         point * p = it->first;
-        finite_element * fefe = it->second.second;
-        it->second.first = convert_point_to_pml(p, fefe);
+        pair<cpoint, finite_element *> * cp = &(it->second);
+        finite_element * fefe = cp->second;
+        cp->first = convert_point_to_pml(p, fefe);
     }
 
     for(size_t i = 0; i < fes.size(); i++)

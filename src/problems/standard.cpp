@@ -63,7 +63,7 @@ cvector3 func_b1(const point & p, const phys_area & phys, void * data)
 // Постпроцессор
 void postprocessing(VFEM & v, const char * timebuf)
 {
-    if(v.config.filename_slae != "")
+    if(!v.config.filename_slae.empty())
         v.slae.dump_x(v.config.filename_slae);
 
     if(v.config.analytical_enabled)

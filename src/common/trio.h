@@ -15,6 +15,9 @@ struct trio
     trio(const T1 & a = T1(), const T2 & b = T2(), const T3 & c = T3())
     : first(a), second(b), third(c) { }
 
+    trio(const trio & t)
+    : first(t.first), second(t.second), third(t.third) { }
+
     template<typename U1, typename U2, typename U3>
     trio(const trio<U1, U2, U3> & t)
     : first(t.first), second(t.second), third(t.third) { }

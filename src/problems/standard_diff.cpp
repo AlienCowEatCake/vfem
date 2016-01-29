@@ -14,9 +14,10 @@ void compare_simple(VFEM & master, VFEM & slave, const vector<diff_area> & areas
         finite_element * fe_m = &(master.fes[i]);
         for(size_t j = 0; j < areas.size(); j++)
         {
-            if(fe_m->barycenter.x >= areas[j].p1.x && fe_m->barycenter.x <= areas[j].p2.x &&
-               fe_m->barycenter.y >= areas[j].p1.y && fe_m->barycenter.y <= areas[j].p2.y &&
-               fe_m->barycenter.z >= areas[j].p1.z && fe_m->barycenter.z <= areas[j].p2.z)
+            const point * p1 = &(areas[j].p1), * p2 = &(areas[j].p2);
+            if(fe_m->barycenter.x >= p1->x && fe_m->barycenter.x <= p2->x &&
+               fe_m->barycenter.y >= p1->y && fe_m->barycenter.y <= p2->y &&
+               fe_m->barycenter.z >= p1->z && fe_m->barycenter.z <= p2->z)
             {
                 if(areas[j].included)
                     flag = true;
@@ -87,9 +88,10 @@ void compare_complex(VFEM & master, VFEM & slave, const vector<diff_area> & area
         finite_element * fe_m = &(master.fes[i]);
         for(size_t j = 0; j < areas.size(); j++)
         {
-            if(fe_m->barycenter.x >= areas[j].p1.x && fe_m->barycenter.x <= areas[j].p2.x &&
-               fe_m->barycenter.y >= areas[j].p1.y && fe_m->barycenter.y <= areas[j].p2.y &&
-               fe_m->barycenter.z >= areas[j].p1.z && fe_m->barycenter.z <= areas[j].p2.z)
+            const point * p1 = &(areas[j].p1), *p2 = &(areas[j].p2);
+            if (fe_m->barycenter.x >= p1->x && fe_m->barycenter.x <= p2->x &&
+                fe_m->barycenter.y >= p1->y && fe_m->barycenter.y <= p2->y &&
+                fe_m->barycenter.z >= p1->z && fe_m->barycenter.z <= p2->z)
             {
                 if(areas[j].included)
                     flag = true;
@@ -197,7 +199,7 @@ bool input_diff(const string & filename, vector<diff_area> & areas)
                             else if(param == "z0") sst >> area.p1.z;
                             else if(param == "z1") sst >> area.p2.z;
                             else cerr << "[Diff Config] Unsupported param \"" << param << "\" in section \""
-                                      << section << (subsection == "" ? string("") : (string(".") + subsection))
+                                      << section << (subsection.empty() ? string("") : (string(".") + subsection))
                                       << "\"" << endl;
                             //cout << "  param = " << param << endl;
                             //cout << "  value = " << value << endl;

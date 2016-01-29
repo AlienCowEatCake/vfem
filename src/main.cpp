@@ -114,7 +114,7 @@ bool vfem_solve(VFEM & v, const string & config, bool nosolve, bool nopost, cons
     else
     {
         cout << "Restoring solution ..." << endl;
-        if(v.config.filename_slae == "")
+        if(v.config.filename_slae.empty())
         {
             cerr << "Error in " << __FILE__ << ":" << __LINE__
                  << " empty VFEM::config.filename_slae" << endl;

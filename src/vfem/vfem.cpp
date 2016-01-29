@@ -244,12 +244,13 @@ void VFEM::assemble_matrix()
             else
                 for(size_t i = 0; i < 3; i++)
                 {
-                    params_object.second[i] = &(config.right.default_value[i]);
-                    params_object.second[i]->set_var("epsilon", ph.epsilon);
-                    params_object.second[i]->set_var("sigma", ph.sigma);
-                    params_object.second[i]->set_var("mu", ph.mu);
-                    params_object.second[i]->set_var("J0", ph.J0);
-                    params_object.second[i]->set_var("k2", k2);
+                    evaluator<complex<double> > * ev_curr = &(config.right.default_value[i]);
+                    params_object.second[i] = ev_curr;
+                    ev_curr->set_var("epsilon", ph.epsilon);
+                    ev_curr->set_var("sigma", ph.sigma);
+                    ev_curr->set_var("mu", ph.mu);
+                    ev_curr->set_var("J0", ph.J0);
+                    ev_curr->set_var("k2", k2);
                 }
         }
 
@@ -330,12 +331,13 @@ void VFEM::applying_bound()
                     else
                         for(size_t i = 0; i < 3; i++)
                         {
-                            params_object.second[i] = &(config.boundary.default_value[i]);
-                            params_object.second[i]->set_var("epsilon", ph.epsilon);
-                            params_object.second[i]->set_var("sigma", ph.sigma);
-                            params_object.second[i]->set_var("mu", ph.mu);
-                            params_object.second[i]->set_var("J0", ph.J0);
-                            params_object.second[i]->set_var("k2", k2);
+                            evaluator<complex<double> > * ev_curr = &(config.boundary.default_value[i]);
+                            params_object.second[i] = ev_curr;
+                            ev_curr->set_var("epsilon", ph.epsilon);
+                            ev_curr->set_var("sigma", ph.sigma);
+                            ev_curr->set_var("mu", ph.mu);
+                            ev_curr->set_var("J0", ph.J0);
+                            ev_curr->set_var("k2", k2);
                         }
 
                     // Получение степеней свободы
@@ -548,12 +550,13 @@ void VFEM::calculate_diff()
         else
             for(size_t i = 0; i < 3; i++)
             {
-                params_object.second[i] = &(config.analytical.default_value[i]);
-                params_object.second[i]->set_var("epsilon", ph.epsilon);
-                params_object.second[i]->set_var("sigma", ph.sigma);
-                params_object.second[i]->set_var("mu", ph.mu);
-                params_object.second[i]->set_var("J0", ph.J0);
-                params_object.second[i]->set_var("k2", k2);
+                evaluator<complex<double> > * ev_curr = &(config.analytical.default_value[i]);
+                params_object.second[i] = ev_curr;
+                ev_curr->set_var("epsilon", ph.epsilon);
+                ev_curr->set_var("sigma", ph.sigma);
+                ev_curr->set_var("mu", ph.mu);
+                ev_curr->set_var("J0", ph.J0);
+                ev_curr->set_var("k2", k2);
             }
 
         // Находим локальные веса, связанные с этим КЭ
