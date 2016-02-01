@@ -423,7 +423,11 @@ bool config_type::load_pml(const string & filename)
 
     if(filename.empty())
     {
+        cout << flush;
+        cerr << flush;
         cerr << "[PML Config] Warning: \"filename_pml\" parameter is not set" << endl;
+        cout << flush;
+        cerr << flush;
         return true;
     }
 

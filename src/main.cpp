@@ -171,6 +171,9 @@ int main(int argc, char * argv [])
 #if defined USE_NOSIGHUP
     cout << " # USE_NOSIGHUP" << endl;
 #endif
+#if defined USE_MKL
+    cout << " # USE_MKL" << endl;
+#endif
 
     time_t seconds = time(NULL);
     char timebuf[24];
@@ -217,6 +220,7 @@ int main(int argc, char * argv [])
         {
             cl_param_curr.config = argv[i];
             cl_params.push_back(cl_param_curr);
+            cl_param_curr = cl_param();
         }
         else
         {
