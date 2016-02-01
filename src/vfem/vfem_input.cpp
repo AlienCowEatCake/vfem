@@ -579,6 +579,10 @@ bool VFEM::input_mesh(const string & gmsh_filename)
                 fake_element.faces[3] = (face *) add_face(face(fake_element.nodes[1], fake_element.nodes[2], fake_element.nodes[3]), faces);
             }
 
+            // Грязный хак
+            if(fes.capacity() == fes.size())
+                fes.reserve((size_t)((double)(fes.capacity()) * 1.5));
+
             fes.push_back(fake_element);
         }
         else if(type_of_elem == MSH_TRI_3)
