@@ -5,6 +5,24 @@
 #define MSH_TRI_3    2  // 3-node triangle.
 #define MSH_TET_4    4  // 4-node tetrahedron.
 
+template<typename U, typename V>
+void push_back_wrapper(vector<U> & v, const V & e)
+{
+    size_t size = v.size();
+    size_t capacity = v.capacity();
+    size_t danger = 268435456 / sizeof(U); // 256 MiB
+    // Грязный хак
+    if(capacity == size)
+    {
+        if(size > danger)
+            v.reserve((size_t)((double)capacity * 1.5));
+        else
+            v.reserve(capacity * 2);
+    }
+    // А теперь уже и добавим
+    v.push_back(e);
+}
+
 size_t VFEM::add_edge(edge ed, set<edge> & edges_set)
 {
     set<edge>::iterator r = edges_set.find(ed);
@@ -343,7 +361,7 @@ bool VFEM::input_phys(const string & phys_filename)
                     }
                 }
                 while(phys_param.good() && !(line.length() > 1 && line[0] == '['));
-                pss.push_back(make_pair(pss_point, pss_value));
+                push_back_wrapper(pss, make_pair(pss_point, pss_value));
             }
         }
         else
@@ -579,11 +597,7 @@ bool VFEM::input_mesh(const string & gmsh_filename)
                 fake_element.faces[3] = (face *) add_face(face(fake_element.nodes[1], fake_element.nodes[2], fake_element.nodes[3]), faces);
             }
 
-            // Грязный хак
-            if(fes.capacity() == fes.size())
-                fes.reserve((size_t)((double)(fes.capacity()) * 1.5));
-
-            fes.push_back(fake_element);
+            push_back_wrapper(fes, fake_element);
         }
         else if(type_of_elem == MSH_TRI_3)
         {
@@ -625,9 +639,9 @@ bool VFEM::input_mesh(const string & gmsh_filename)
                     add_face(face(fake_triangle.nodes[0], fake_triangle.nodes[1], fake_triangle.nodes[2]), faces_surf_temp);
             }
             if(config.boundary_enabled)
-                trs_full.push_back(triangle_full(fake_triangle));
+                push_back_wrapper(trs_full, triangle_full(fake_triangle));
             else
-                trs_base.push_back(fake_triangle);
+                push_back_wrapper(trs_base, fake_triangle);
         }
         else if(type_of_elem == MSH_LIN_2)
         {
@@ -661,7 +675,7 @@ bool VFEM::input_mesh(const string & gmsh_filename)
 
             fake_edge_src.num = add_edge(edge(fake_edge_src.nodes[0], fake_edge_src.nodes[1]), edges);
             fake_edge_src.edge_main = NULL;
-            edges_src.push_back(fake_edge_src);
+            push_back_wrapper(edges_src, fake_edge_src);
         }
         else
         {
@@ -743,9 +757,9 @@ bool VFEM::input_mesh(const string & gmsh_filename)
     // Разбираемся с треугольниками
     trs.reserve(trs_base.size() + trs_full.size());
     for(size_t i = 0; i < trs_base.size(); i++)
-        trs.push_back(&trs_base[i]);
+        push_back_wrapper(trs, &trs_base[i]);
     for(size_t i = 0; i < trs_full.size(); i++)
-        trs.push_back(&trs_full[i]);
+        push_back_wrapper(trs, &trs_full[i]);
     if(trs.size() == 0)
     {
         cerr << "Error: 0 triangles detected, breaking..." << endl;

@@ -204,6 +204,7 @@ void tetrahedron_base::init()
     jacobian = fabs(D_det);
 
     // Перевод точек Гаусса с мастер-элемента на текущий тетраэдр
+    gauss_points.resize(gauss_num);
     for(size_t i = 0; i < 3; i++)
     {
         for(size_t j = 0 ; j < gauss_num; j++)
@@ -225,6 +226,8 @@ void tetrahedron_base::init()
 
     // Представление прямых тетраэдра в параметрическом виде a*t + b
     // Само ребо получается при 0<=t<=1
+    edges_a.resize(6, 3);
+    edges_b.resize(6, 3);
     for(size_t i = 0; i < 3; i++)
     {
         edges_a[0][i] = get_node(1)[i] - get_node(0)[i];

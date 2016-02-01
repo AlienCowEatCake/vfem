@@ -123,6 +123,7 @@ void triangle_full::init(const basis_type * basis)
     }
 
     // Точки Гаусса в глобальной системе координат
+    gauss_points.resize(gauss_num);
     for(size_t i = 0; i < gauss_num; i++)
         gauss_points[i] = to_global(gauss_points_local[i]);
 

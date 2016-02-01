@@ -68,19 +68,19 @@ public:
 
 protected:
     // Матрица L-координат
-    matrix_t<double, 4, 4> L;
+    matrix_t<double> L;
     // Градиент L-координаты
     vector3 grad_lambda(size_t i) const;
     // L-координаты
     double lambda(size_t i, const point & p) const;
 
     // Точки Гаусса
-    point gauss_points[tet_integration::gauss_num];
+    array_t<point> gauss_points;
     // Якобиан
     double jacobian;
 
     // Параметры прямых для дерева
-    double edges_a[6][3], edges_b[6][3];
+    matrix_t<double> edges_a, edges_b;
 };
 
 // Класс тетраэдр (обычный)
@@ -126,14 +126,14 @@ protected:
     const phys_pml_area * phys_pml;
 
     // Матрица L-координат (в PML)
-    matrix_t<complex<double>, 4, 4> L_pml;
+    matrix_t<complex<double> > L_pml;
     // Градиент L-координаты (в PML)
     cvector3 grad_lambda_pml(size_t i) const;
     // L-координаты (в PML)
     complex<double> lambda_pml(size_t i, const cpoint & p) const;
 
     // Точки Гаусса (в PML)
-    cpoint gauss_points_pml[tet_integration::gauss_num];
+    array_t<cpoint> gauss_points_pml;
     // Якобиан (в PML)
     complex<double> jacobian_pml;
 

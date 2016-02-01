@@ -57,7 +57,7 @@ public:
 
 protected:
     // Матрица L-координат
-    matrix_t<double, 3, 3> L;
+    matrix_t<double> L;
     // L-координаты
     double lambda(size_t i, const point & p) const;
     // Градиент L-координат в глобальных координатах
@@ -75,7 +75,7 @@ protected:
     vector3 to_global(const vector3 & v) const;
 
     // Точки Гаусса
-    point gauss_points[tr_integration::gauss_num];
+    array_t<point> gauss_points;
     // Якобиан
     double jacobian;
 

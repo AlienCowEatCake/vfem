@@ -19,6 +19,7 @@ void tetrahedron_pml::init_pml(cvector3(* get_s)(const point &, const tetrahedro
     jacobian_pml = abs(D_det);
 
     // Перевод точек Гаусса с мастер-элемента на текущий тетраэдр
+    gauss_points_pml.resize(gauss_num);
     for(size_t i = 0; i < 3; i++)
     {
         for(size_t j = 0 ; j < gauss_num; j++)
