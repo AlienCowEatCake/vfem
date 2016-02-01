@@ -77,6 +77,11 @@ public:
             a[i] = type();
     }
 
+    size_t size()
+    {
+        return dimension;
+    }
+
     array_t(size_t dimension = 0)
     {
         a = NULL;

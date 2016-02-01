@@ -2,7 +2,7 @@
 
 void tetrahedron_pml::init_pml(cvector3(* get_s)(const point &, const tetrahedron_pml *, const phys_pml_area *), const phys_pml_area * phys_pml, const cpoint * nodes_pml)
 {
-    using namespace tet_integration;
+    const tet_integration_config * tet_integration = &(basis->tet_int);
 
     this->get_s = get_s;
     this->phys_pml = phys_pml;
@@ -19,14 +19,14 @@ void tetrahedron_pml::init_pml(cvector3(* get_s)(const point &, const tetrahedro
     jacobian_pml = abs(D_det);
 
     // Перевод точек Гаусса с мастер-элемента на текущий тетраэдр
-    gauss_points_pml.resize(gauss_num);
+    gauss_points_pml.resize(tet_integration->gauss_num);
     for(size_t i = 0; i < 3; i++)
     {
-        for(size_t j = 0 ; j < gauss_num; j++)
+        for(size_t j = 0 ; j < tet_integration->gauss_num; j++)
         {
             gauss_points_pml[j][i] = 0;
             for(size_t k = 0; k < 4; k++)
-                gauss_points_pml[j][i] += D[i][k] * gauss_points_master[j][k];
+                gauss_points_pml[j][i] += D[i][k] * tet_integration->gauss_points_master[j][k];
         }
     }
 }
@@ -193,10 +193,10 @@ complex<double> tetrahedron_pml::integrate_w(size_t i, size_t j) const
 //#if defined __GNUC__
 //#warning conjugate
 //#endif
-    using namespace tet_integration;
+    const tet_integration_config * tet_integration = &(basis->tet_int);
     complex<double> result = 0.0;
-    for(size_t k = 0; k < gauss_num; k++)
-        result += gauss_weights[k] *
+    for(size_t k = 0; k < tet_integration->gauss_num; k++)
+        result += tet_integration->gauss_weights[k] *
                   w_pml(i, gauss_points_pml[k]).cj() *
                   w_pml(j, gauss_points_pml[k]).cj();
     return result * jacobian_pml;
@@ -207,10 +207,10 @@ complex<double> tetrahedron_pml::integrate_rotw(size_t i, size_t j) const
 //#if defined __GNUC__
 //#warning conjugate
 //#endif
-    using namespace tet_integration;
+    const tet_integration_config * tet_integration = &(basis->tet_int);
     complex<double> result = 0.0;
-    for(size_t k = 0; k < gauss_num; k++)
-        result += gauss_weights[k] *
+    for(size_t k = 0; k < tet_integration->gauss_num; k++)
+        result += tet_integration->gauss_weights[k] *
                   rotw_pml(i, gauss_points_pml[k], gauss_points[k]).cj() *
                   rotw_pml(j, gauss_points_pml[k], gauss_points[k]).cj();
     return result * jacobian_pml;
@@ -221,10 +221,10 @@ complex<double> tetrahedron_pml::integrate_fw(eval_func func, size_t i, void * d
 //#if defined __GNUC__
 //#warning conjugate
 //#endif
-    using namespace tet_integration;
+    const tet_integration_config * tet_integration = &(basis->tet_int);
     complex<double> result = 0.0;
-    for(size_t k = 0; k < gauss_num; k++)
-        result += gauss_weights[k] *
+    for(size_t k = 0; k < tet_integration->gauss_num; k++)
+        result += tet_integration->gauss_weights[k] *
                   func(gauss_points[k], get_phys_area(), data) *
                   w_pml(i, gauss_points_pml[k]).cj();
     return result * jacobian_pml;
@@ -235,10 +235,10 @@ complex<double> tetrahedron_pml::integrate_kerw(size_t i, size_t j) const
 //#if defined __GNUC__
 //#warning conjugate
 //#endif
-    using namespace tet_integration;
+    const tet_integration_config * tet_integration = &(basis->tet_int);
     complex<double> result = 0.0;
-    for(size_t k = 0; k < gauss_num; k++)
-        result += gauss_weights[k] *
+    for(size_t k = 0; k < tet_integration->gauss_num; k++)
+        result += tet_integration->gauss_weights[k] *
                   kerw_pml(i, gauss_points_pml[k], gauss_points[k]).cj() *
                   kerw_pml(j, gauss_points_pml[k], gauss_points[k]).cj();
     return result * jacobian;

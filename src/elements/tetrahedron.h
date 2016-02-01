@@ -12,8 +12,6 @@
 #include "../elements/face.h"
 #include "../vfem/phys.h"
 
-using namespace tet_integration_8;
-
 typedef cvector3(* eval_func)(const point &, const phys_area &, void *);
 
 // Индексы для построения базисных функций на тетраэдрах
@@ -30,7 +28,7 @@ class tetrahedron_base
 {
 public:
     tetrahedron_base();
-    void init();
+    void init(const basis_type * basis);
     bool inside(const point & p) const;
     bool inside(double x, double y, double z) const;
 

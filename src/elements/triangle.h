@@ -11,8 +11,6 @@
 #include "../elements/face.h"
 #include "../vfem/phys.h"
 
-using namespace tr_integration_8;
-
 typedef cvector3(* eval_func)(const point &, const phys_area &, void *);
 
 // Индексы для построения базисных функций на треугольниках

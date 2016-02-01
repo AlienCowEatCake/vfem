@@ -9,6 +9,7 @@
 #include "../geometry/point.h"
 #include "../geometry/vector3.h"
 #include "../common/matrix.h"
+#include "../common/cubatures.h"
 
 using namespace std;
 
@@ -17,6 +18,32 @@ using namespace std;
 // Первый порядок II типа (полный)       1           2
 // Второй порядок I типа (неполный)      2           1
 // Второй порядок II типа (полный)       2           2
+
+// Конфигурация для интегрирования тетраэдров
+class tet_integration_config
+{
+public:
+    tet_integration_config();
+    size_t gauss_num;
+    array_t<double> gauss_weights;
+    matrix_t<double> gauss_points_master;
+    void init(size_t order);
+protected:
+    void set(size_t num, const double weights[], const double points[][4]);
+};
+
+// Конфигурация для интегрирования треугольников
+class tr_integration_config
+{
+public:
+    tr_integration_config();
+    size_t gauss_num;
+    array_t<double> gauss_weights;
+    matrix_t<double> gauss_points_master;
+    void init(size_t order);
+protected:
+    void set(size_t num, const double weights[], const double points[][3]);
+};
 
 // Конфигурация базиса
 struct basis_type
@@ -32,6 +59,9 @@ struct basis_type
     // Порядок базиса
     size_t order;
     size_t type;
+    // Интегрирование
+    tet_integration_config tet_int;
+    tr_integration_config tr_int;
 };
 
 // Вычислитель для вычисляемых значений

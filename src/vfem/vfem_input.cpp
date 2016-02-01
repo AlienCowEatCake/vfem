@@ -750,8 +750,7 @@ bool VFEM::input_mesh(const string & gmsh_filename)
             for(size_t j = 0; j < 4; j++)
                 fes[i].faces[j] = faces_ind[(size_t)fes[i].faces[j]];
         // Инициализируем
-        fes[i].init();
-        fes[i].basis = & config.basis;
+        fes[i].init(& config.basis);
     }
 
     // Разбираемся с треугольниками
