@@ -5,8 +5,8 @@
 #include <cstdio>
 #include <cmath>
 
-void COCG_LLT_Smooth::init(size_t * gi_s, size_t * gj_s, complex<double> * di_s,
-                          complex<double> * gg_s, size_t n_s)
+void COCG_LLT_Smooth::init(const size_t * gi_s, const size_t * gj_s, const complex<double> * di_s,
+                           const complex<double> * gg_s, size_t n_s)
 {
     gi = gi_s;
     gj = gj_s;
@@ -160,7 +160,8 @@ bool COCG_LLT_Smooth::is_fpu_error(double x) const
     return x != x || y != y;
 }
 
-void COCG_LLT_Smooth::solve(complex<double> * solution, complex<double> * rp_s, double eps, size_t max_iter)
+void COCG_LLT_Smooth::solve(complex<double> * solution, const complex<double> * rp_s,
+                            double eps, size_t max_iter)
 {
     eps *= eps;
 

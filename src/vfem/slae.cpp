@@ -1,22 +1,38 @@
 #include "slae.h"
+//#include "../solvers/BiCGComplex_VC.h"
+//#include "../solvers/BiCGStabComplex_VC.h"
+//#include "../solvers/CGMComplex_VC.h"
+//#include "../solvers/CGMComplex_LLT.h"
+#include "../solvers/COCG_LLT_Smooth.h"
+#include "../solvers/COCG_LLT_Smooth_MKL.h"
 
 SLAE::SLAE()
 {
     gg = di = rp = x = NULL;
     ig = jg = NULL;
     n = 0;
+    solver = NULL;
 }
 
 SLAE::~SLAE()
 {
     dealloc_all();
+    delete solver;
 }
 
-void SLAE::solve(double eps, size_t max_iter)
+void SLAE::step_init(const string & name)
+{
+    delete solver;
+    if(name == "COCG_LLT_Smooth")
+        solver = new COCG_LLT_Smooth;
+    solver->init(ig, jg, di, gg, n);
+}
+
+void SLAE::solve(const string & name, double eps, size_t max_iter)
 {
     cout << "Solving SLAE ..." << endl;
-    solver.init(ig, jg, di, gg, n);
-    solver.solve(x, rp, eps, max_iter);
+    step_init(name);
+    step_solve(x, rp, eps, max_iter);
 }
 
 void SLAE::alloc_all(size_t n_size, size_t gg_size)
