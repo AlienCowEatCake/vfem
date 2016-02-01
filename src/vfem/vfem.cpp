@@ -1,7 +1,7 @@
 #include "vfem.h"
 
 // Получение степеней свободы тетраэдра в глобальной матрице
-size_t VFEM::get_tet_dof(const finite_element * fe, size_t i) const
+size_t VFEM::get_tet_dof(const tetrahedron_base * fe, size_t i) const
 {
     assert(i < config.basis.tet_bf_num);
     if(i < 6)       return fe->edges[i]->num;
@@ -14,7 +14,7 @@ size_t VFEM::get_tet_dof(const finite_element * fe, size_t i) const
 }
 
 // Получение степеней свободы тетраэдра в матрице ядра
-size_t VFEM::get_tet_ker_dof(const finite_element * fe, size_t i) const
+size_t VFEM::get_tet_ker_dof(const tetrahedron_base * fe, size_t i) const
 {
     assert(i < config.basis.tet_ker_bf_num);
     if(i < 4)   return fe->nodes[i]->num;
@@ -217,6 +217,82 @@ void VFEM::generate_surf_portrait()
     delete [] portrait;
 }
 
+// Добавление локальных матриц от одного КЭ в глобальную
+template<typename U, typename V>
+void VFEM::process_fe(const U * curr_fe, const V *)
+{
+    // Получение физических параметров для заданного КЭ
+    phys_area ph = curr_fe->get_phys_area();
+    complex<double> k2(- ph.epsilon * ph.omega * ph.omega, ph.omega * ph.sigma);
+
+    // Инициализация параметров вычислителей для правой части
+    pair<const config_type *, array_t<evaluator<complex<double> > *, 3> >
+            params_object(& config, array_t<evaluator<complex<double> > *, 3>());
+    if(config.right_enabled)
+    {
+        map<size_t, array_t<evaluator<complex<double> >, 3> >::iterator
+                it = config.right.values.find(ph.gmsh_num);
+        if(it != config.right.values.end())
+            for(size_t i = 0; i < 3; i++)
+                params_object.second[i] = &(it->second[i]);
+        else
+            for(size_t i = 0; i < 3; i++)
+            {
+                evaluator<complex<double> > * ev_curr = &(config.right.default_value[i]);
+                params_object.second[i] = ev_curr;
+                ev_curr->set_var("epsilon", ph.epsilon);
+                ev_curr->set_var("sigma", ph.sigma);
+                ev_curr->set_var("mu", ph.mu);
+                ev_curr->set_var("J0", ph.J0);
+                ev_curr->set_var("k2", k2);
+            }
+    }
+
+    // Получение степеней свободы
+    array_t<size_t> dof(config.basis.tet_bf_num);
+    for(size_t i = 0; i < config.basis.tet_bf_num; i++)
+        dof[i] = get_tet_dof(curr_fe, i);
+
+    // Получение локальных матриц и правой части
+    V matrix_G = curr_fe->G();
+    V matrix_M = curr_fe->M();
+    array_t<complex<double> > array_rp = curr_fe->rp(func_rp, &params_object);
+
+    // Основная матрица
+    for(size_t i = 0; i < config.basis.tet_bf_num; i++)
+    {
+        complex<double> add;
+        size_t i_num = dof[i];
+        for(size_t j = 0; j < i; j++)
+        {
+            size_t j_num = dof[j];
+            add = matrix_G[i][j] / ph.mu + matrix_M[i][j] * k2;
+            slae.add(i_num, j_num, add);
+        }
+        add = matrix_G[i][i] / ph.mu + matrix_M[i][i] * k2;
+        slae.di[i_num] += add;
+        add = array_rp[i];
+        slae.rp[i_num] += add;
+    }
+
+    // Матрица ядра
+    if(config.v_cycle_enabled)
+    {
+        array_t<size_t> ker_dof(config.basis.tet_ker_bf_num);
+        for(size_t i = 0; i < config.basis.tet_ker_bf_num; i++)
+            ker_dof[i] = get_tet_ker_dof(curr_fe, i);
+
+        V matrix_K = curr_fe->K();
+        for(size_t i = 0; i < config.basis.tet_ker_bf_num; i++)
+        {
+            size_t i_num = ker_dof[i];
+            for(size_t j = 0; j < i; j++)
+                ker_slae.add(i_num, ker_dof[j], matrix_K[i][j] * k2);
+            ker_slae.di[i_num] += matrix_K[i][i] * k2;
+        }
+    }
+}
+
 void VFEM::assemble_matrix()
 {
     cout << "Assembling matrix ..." << endl;
@@ -226,77 +302,19 @@ void VFEM::assemble_matrix()
     for(size_t k = 0; k < fes.size(); k++)
     {
         show_progress("", k, fes.size());
-
-        // Получение физических параметров для заданного КЭ
-        phys_area ph = fes[k].get_phys_area();
-        complex<double> k2(- ph.epsilon * ph.omega * ph.omega, ph.omega * ph.sigma);
-
-        // Инициализация параметров вычислителей для правой части
-        pair<const config_type *, array_t<evaluator<complex<double> > *, 3> >
-                params_object(& config, array_t<evaluator<complex<double> > *, 3>());
-        if(config.right_enabled)
+#if defined VFEM_USE_PML
+        if(!is_pml(fes[k].barycenter, &fes[k], &phys_pml))
         {
-            map<size_t, array_t<evaluator<complex<double> >, 3> >::iterator
-                    it = config.right.values.find(ph.gmsh_num);
-            if(it != config.right.values.end())
-                for(size_t i = 0; i < 3; i++)
-                    params_object.second[i] = &(it->second[i]);
-            else
-                for(size_t i = 0; i < 3; i++)
-                {
-                    evaluator<complex<double> > * ev_curr = &(config.right.default_value[i]);
-                    params_object.second[i] = ev_curr;
-                    ev_curr->set_var("epsilon", ph.epsilon);
-                    ev_curr->set_var("sigma", ph.sigma);
-                    ev_curr->set_var("mu", ph.mu);
-                    ev_curr->set_var("J0", ph.J0);
-                    ev_curr->set_var("k2", k2);
-                }
+            tetrahedron_base * base = &fes[k];
+            tetrahedron * tet = static_cast<tetrahedron *>(base);
+            process_fe(tet, (matrix_t<double> *)NULL);
+        }
+        else
+#endif
+        {
+            process_fe(&fes[k], (l_matrix *)NULL);
         }
 
-        // Получение степеней свободы
-        array_t<size_t> dof(config.basis.tet_bf_num);
-        for(size_t i = 0; i < config.basis.tet_bf_num; i++)
-            dof[i] = get_tet_dof(&fes[k], i);
-
-        // Получение локальных матриц и правой части
-        l_matrix matrix_G = fes[k].G();
-        l_matrix matrix_M = fes[k].M();
-        array_t<complex<double> > array_rp = fes[k].rp(func_rp, &params_object);
-
-        // Основная матрица
-        for(size_t i = 0; i < config.basis.tet_bf_num; i++)
-        {
-            complex<double> add;
-            size_t i_num = dof[i];
-            for(size_t j = 0; j < i; j++)
-            {
-                size_t j_num = dof[j];
-                add = matrix_G[i][j] / ph.mu + matrix_M[i][j] * k2;
-                slae.add(i_num, j_num, add);
-            }
-            add = matrix_G[i][i] / ph.mu + matrix_M[i][i] * k2;
-            slae.di[i_num] += add;
-            add = array_rp[i];
-            slae.rp[i_num] += add;
-        }
-
-        // Матрица ядра
-        if(config.v_cycle_enabled)
-        {
-            array_t<size_t> ker_dof(config.basis.tet_ker_bf_num);
-            for(size_t i = 0; i < config.basis.tet_ker_bf_num; i++)
-                ker_dof[i] = get_tet_ker_dof(&fes[k], i);
-
-            ker_l_matrix matrix_K = fes[k].K();
-            for(size_t i = 0; i < config.basis.tet_ker_bf_num; i++)
-            {
-                size_t i_num = ker_dof[i];
-                for(size_t j = 0; j < i; j++)
-                    ker_slae.add(i_num, ker_dof[j], matrix_K[i][j] * k2);
-                ker_slae.di[i_num] += matrix_K[i][i] * k2;
-            }
-        }
     }
 }
 

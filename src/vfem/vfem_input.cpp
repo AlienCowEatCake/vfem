@@ -1006,6 +1006,19 @@ void VFEM::input_pml()
 
     phys_pml = config.phys_pml;
 
+    if(phys_pml.params.size() == 0)
+    {
+        for(size_t i = 0; i < fes.size(); i++)
+        {
+            show_progress("re-init tetrahedrons", i, fes.size());
+            cpoint cp[4];
+            for(size_t j = 0; j < 4; j++)
+                cp[j] = cpoint(* (fes[i].nodes[j]));
+            fes[i].init_pml(get_s, & phys_pml, cp);
+        }
+        return;
+    }
+
     // Границы не PML точек
     double x0 = DBL_MAX;
     double x1 = -DBL_MAX;

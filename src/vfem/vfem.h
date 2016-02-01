@@ -19,11 +19,9 @@
 #if defined VFEM_USE_PML
 typedef tetrahedron_pml finite_element;
 typedef matrix_t<complex<double> > l_matrix;
-typedef matrix_t<complex<double> > ker_l_matrix;
 #else
 typedef tetrahedron finite_element;
 typedef matrix_t<double> l_matrix;
-typedef matrix_t<double> ker_l_matrix;
 #endif
 
 // Правая часть
@@ -128,9 +126,9 @@ public:
     octree<finite_element> tree;
 
     // Получение степеней свободы тетраэдра в глобальной матрице
-    size_t get_tet_dof(const finite_element * fe, size_t i) const;
+    size_t get_tet_dof(const tetrahedron_base * fe, size_t i) const;
     // Получение степеней свободы тетраэдра в матрице ядра
-    size_t get_tet_ker_dof(const finite_element * fe, size_t i) const;
+    size_t get_tet_ker_dof(const tetrahedron_base * fe, size_t i) const;
     // Получение степеней свободы треугольника в глобальной матрице
     size_t get_tr_dof(const triangle * tr, size_t i) const;
     // Получение степеней свободы треугольника в матрице ядра
@@ -154,6 +152,10 @@ public:
     void apply_point_sources();
 
 protected:
+    // Добавление локальных матриц от одного КЭ в глобальную
+    template<typename U, typename V>
+    void process_fe(const U * fe, const V *);
+
     // Добавление ребра в множество ребер
     size_t add_edge(edge ed, set<edge> & edges_set);
     // Добавление грани в множество граней
