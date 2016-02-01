@@ -117,7 +117,7 @@ bool vfem_solve(VFEM & v, const string & config, bool nosolve, bool nopost, cons
         cout << "Restoring solution ..." << endl;
         if(v.config.filename_slae.empty())
         {
-            cerr << "Error in " << __FILE__ << ":" << __LINE__
+            cout << "Error in " << __FILE__ << ":" << __LINE__
                  << " empty VFEM::config.filename_slae" << endl;
             return false;
         }
@@ -224,14 +224,14 @@ int main(int argc, char * argv [])
         }
         else
         {
-            cerr << "[Main] Unknown argument \"" << argv[i] << "\"" << endl;
+            cout << "[Main] Unknown argument \"" << argv[i] << "\"" << endl;
             return paused(1);
         }
     }
 
     if(diff_type != DIFF_NO && cl_params.size() != 3)
     {
-        cerr << "[Main] Incorrect command line arguments" << endl;
+        cout << "[Main] Incorrect command line arguments" << endl;
         return paused(1);
     }
     if(cl_params.size() == 0)

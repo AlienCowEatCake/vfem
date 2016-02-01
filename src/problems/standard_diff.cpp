@@ -143,7 +143,7 @@ bool input_diff(const string & filename, vector<diff_area> & areas)
     ifs.open(filename.c_str(), ios::in);
     if(!ifs.good())
     {
-        cerr << "[Diff Config] Error in " << __FILE__ << ":" << __LINE__
+        cout << "[Diff Config] Error in " << __FILE__ << ":" << __LINE__
              << " while reading file " << filename << endl;
         return false;
     }
@@ -198,7 +198,7 @@ bool input_diff(const string & filename, vector<diff_area> & areas)
                             else if(param == "y1") sst >> area.p2.y;
                             else if(param == "z0") sst >> area.p1.z;
                             else if(param == "z1") sst >> area.p2.z;
-                            else cerr << "[Diff Config] Unsupported param \"" << param << "\" in section \""
+                            else cout << "[Diff Config] Unsupported param \"" << param << "\" in section \""
                                       << section << (subsection.empty() ? string("") : (string(".") + subsection))
                                       << "\"" << endl;
                             //cout << "  param = " << param << endl;

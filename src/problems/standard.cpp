@@ -15,7 +15,7 @@ cvector3 func_true(const point & p, const phys_area & phys, void * data)
         e->set_var("y", p.y);
         e->set_var("z", p.z);
         bool status = e->calculate(result[i]);
-        if(!status) cerr << "[Parser] " << e->get_error() << endl;
+        if(!status) cout << "[Parser] " << e->get_error() << endl;
     }
     return result;
 }
@@ -35,7 +35,7 @@ cvector3 func_rp(const point & p, const phys_area & phys, void * data)
         e->set_var("y", p.y);
         e->set_var("z", p.z);
         bool status = e->calculate(result[i]);
-        if(!status) cerr << "[Parser] " << e->get_error() << endl;
+        if(!status) cout << "[Parser] " << e->get_error() << endl;
     }
     return result;
 }
@@ -55,7 +55,7 @@ cvector3 func_b1(const point & p, const phys_area & phys, void * data)
         e->set_var("y", p.y);
         e->set_var("z", p.z);
         bool status = e->calculate(result[i]);
-        if(!status) cerr << "[Parser] " << e->get_error() << endl;
+        if(!status) cout << "[Parser] " << e->get_error() << endl;
     }
     return result;
 }

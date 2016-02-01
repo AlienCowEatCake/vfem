@@ -16,7 +16,7 @@ bool VFEM::output(const string & tecplot_filename)
 
     if(!tecplot_file.good())
     {
-        cerr << "Error in " << __FILE__ << ":" << __LINE__
+        cout << "Error in " << __FILE__ << ":" << __LINE__
              << " while writing file " << tecplot_filename << endl;
         return false;
     }
@@ -83,7 +83,7 @@ bool VFEM::output_slice(const string & tecplot_filename, char slice_var, double 
     else if (slice_var == 'z' || slice_var == 'Z') index_slice = 2;
     else
     {
-        cerr << "Unknown variable, breaking ..." << endl;
+        cout << "Unknown variable, breaking ..." << endl;
         return false;
     }
 
@@ -93,7 +93,7 @@ bool VFEM::output_slice(const string & tecplot_filename, char slice_var, double 
     else if (var1 == 'z' || var1 == 'Z') index_1 = 2;
     else
     {
-        cerr << "Unknown variable, breaking ..." << endl;
+        cout << "Unknown variable, breaking ..." << endl;
         return false;
     }
 
@@ -103,7 +103,7 @@ bool VFEM::output_slice(const string & tecplot_filename, char slice_var, double 
     else if (var2 == 'z' || var2 == 'Z') index_2 = 2;
     else
     {
-        cerr << "Unknown variable, breaking ..." << endl;
+        cout << "Unknown variable, breaking ..." << endl;
         return false;
     }
 
@@ -114,7 +114,7 @@ bool VFEM::output_slice(const string & tecplot_filename, char slice_var, double 
 
     if(!tecplot_file.good())
     {
-        cerr << "Error in " << __FILE__ << ":" << __LINE__
+        cout << "Error in " << __FILE__ << ":" << __LINE__
              << " while writing file " << tecplot_filename << endl;
         return false;
     }
@@ -164,7 +164,7 @@ bool VFEM::output_line(const string & tecplot_filename, char line_var1, double l
     else if (line_var1 == 'z' || line_var1 == 'Z') index1 = 2;
     else
     {
-        cerr << "Unknown variable, breaking ..." << endl;
+        cout << "Unknown variable, breaking ..." << endl;
         return false;
     }
 
@@ -173,7 +173,7 @@ bool VFEM::output_line(const string & tecplot_filename, char line_var1, double l
     else if (line_var2 == 'z' || line_var2 == 'Z') index2 = 2;
     else
     {
-        cerr << "Unknown variable, breaking ..." << endl;
+        cout << "Unknown variable, breaking ..." << endl;
         return false;
     }
 
@@ -182,7 +182,7 @@ bool VFEM::output_line(const string & tecplot_filename, char line_var1, double l
     else if (var3 == 'z' || var3 == 'Z') index_3 = 2;
     else
     {
-        cerr << "Unknown variable, breaking ..." << endl;
+        cout << "Unknown variable, breaking ..." << endl;
         return false;
     }
 
@@ -193,7 +193,7 @@ bool VFEM::output_line(const string & tecplot_filename, char line_var1, double l
 
     if(!tecplot_file.good())
     {
-        cerr << "Error in " << __FILE__ << ":" << __LINE__
+        cout << "Error in " << __FILE__ << ":" << __LINE__
              << " while writing file " << tecplot_filename << endl;
         return false;
     }

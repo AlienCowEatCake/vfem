@@ -52,7 +52,7 @@ bool VFEM::input_phys(const string & phys_filename)
     phys_param.open(phys_filename.c_str(), ios::in);
     if(!phys_param.good())
     {
-        cerr << "[Phys Config] Error in " << __FILE__ << ":" << __LINE__
+        cout << "[Phys Config] Error in " << __FILE__ << ":" << __LINE__
              << " while reading file " << phys_filename << endl;
         return false;
     }
@@ -104,7 +104,7 @@ bool VFEM::input_phys(const string & phys_filename)
                             else if(param == "mu")    mu_default = tmp * consts::mu0;
                             else if(param == "eps")   eps_default = tmp * consts::epsilon0;
                             else if(param == "sigma") sigma_default = tmp;
-                            else cerr << "[Phys Config] Unsupported param \"" << param << "\" in section \""
+                            else cout << "[Phys Config] Unsupported param \"" << param << "\" in section \""
                                       << section << (subsection.empty() ? string("") : (string(".") + subsection))
                                       << "\"" << endl;
                             //cout << "  param = " << param << endl;
@@ -120,7 +120,7 @@ bool VFEM::input_phys(const string & phys_filename)
                 {
                     if(omega_global < 0)
                     {
-                        cerr << "[Phys Config] Unknown frequency in section \"" << section
+                        cout << "[Phys Config] Unknown frequency in section \"" << section
                              << "." << subsection << "\"" << endl;
                         return false;
                     }
@@ -158,7 +158,7 @@ bool VFEM::input_phys(const string & phys_filename)
                                 if(param == "mu")         ph->mu = tmp * consts::mu0;
                                 else if(param == "eps")   ph->epsilon = tmp * consts::epsilon0;
                                 else if(param == "sigma") ph->sigma = tmp;
-                                else cerr << "[Phys Config] Unsupported param \"" << param << "\" in section \""
+                                else cout << "[Phys Config] Unsupported param \"" << param << "\" in section \""
                                           << section << (subsection.empty() ? string("") : (string(".") + subsection))
                                           << "\"" << endl;
                                 //cout << "  param = " << param << endl;
@@ -170,7 +170,7 @@ bool VFEM::input_phys(const string & phys_filename)
                 }
                 else
                 {
-                    cerr << "[Phys Config] No subsection in section \"" << section << "\"" << endl;
+                    cout << "[Phys Config] No subsection in section \"" << section << "\"" << endl;
                     return false;
                 }
             }
@@ -180,7 +180,7 @@ bool VFEM::input_phys(const string & phys_filename)
                 {
                     if(omega_global < 0)
                     {
-                        cerr << "[Phys Config] Unknown frequency in section \"" << section
+                        cout << "[Phys Config] Unknown frequency in section \"" << section
                              << "." << subsection << "\"" << endl;
                         return false;
                     }
@@ -229,12 +229,12 @@ bool VFEM::input_phys(const string & phys_filename)
                                     }
                                     else
                                     {
-                                        cerr << "[Phys Config] Warning: unaccounted parent \""
+                                        cout << "[Phys Config] Warning: unaccounted parent \""
                                              << tmp << "\" of phys area \"" << ph->gmsh_num
                                              << "\" (2 - MSH_TRI_3), skipping..." << endl;
                                     }
                                 }
-                                else cerr << "[Phys Config] Unsupported param \"" << param << "\" in section \""
+                                else cout << "[Phys Config] Unsupported param \"" << param << "\" in section \""
                                           << section << (subsection.empty() ? string("") : (string(".") + subsection))
                                           << "\"" << endl;
                                 //cout << "  param = " << param << endl;
@@ -246,7 +246,7 @@ bool VFEM::input_phys(const string & phys_filename)
                 }
                 else
                 {
-                    cerr << "[Phys Config] No subsection in section \"" << section << "\"" << endl;
+                    cout << "[Phys Config] No subsection in section \"" << section << "\"" << endl;
                     return false;
                 }
             }
@@ -256,7 +256,7 @@ bool VFEM::input_phys(const string & phys_filename)
                 {
                     if(omega_global < 0)
                     {
-                        cerr << "[Phys Config] Unknown frequency in section \"" << section
+                        cout << "[Phys Config] Unknown frequency in section \"" << section
                              << "." << subsection << "\"" << endl;
                         return false;
                     }
@@ -305,12 +305,12 @@ bool VFEM::input_phys(const string & phys_filename)
                                     }
                                     else
                                     {
-                                        cerr << "[Phys Config] Warning: unaccounted parent \""
+                                        cout << "[Phys Config] Warning: unaccounted parent \""
                                              << parent_phys << "\" of phys area \"" << ph->gmsh_num
                                              << "\" (1 - MSH_LIN_2), skipping..." << endl;
                                     }
                                 }
-                                else cerr << "[Phys Config] Unsupported param \"" << param << "\" in section \""
+                                else cout << "[Phys Config] Unsupported param \"" << param << "\" in section \""
                                           << section << (subsection.empty() ? string("") : (string(".") + subsection))
                                           << "\"" << endl;
                                 //cout << "  param = " << param << endl;
@@ -322,7 +322,7 @@ bool VFEM::input_phys(const string & phys_filename)
                 }
                 else
                 {
-                    cerr << "[Phys Config] No subsection in section \"" << section << "\"" << endl;
+                    cout << "[Phys Config] No subsection in section \"" << section << "\"" << endl;
                     return false;
                 }
             }
@@ -352,7 +352,7 @@ bool VFEM::input_phys(const string & phys_filename)
                             else if(param == "value_x") pss_value.x = tmp;
                             else if(param == "value_y") pss_value.y = tmp;
                             else if(param == "value_z") pss_value.z = tmp;
-                            else cerr << "[Phys Config] Unsupported param \"" << param << "\" in section \""
+                            else cout << "[Phys Config] Unsupported param \"" << param << "\" in section \""
                                       << section << (subsection.empty() ? string("") : (string(".") + subsection))
                                       << "\"" << endl;
                             //cout << "  param = " << param << endl;
@@ -490,7 +490,7 @@ bool VFEM::input_mesh(const string & gmsh_filename)
 
     if(!gmsh_file.good())
     {
-        cerr << "Error in " << __FILE__ << ":" << __LINE__
+        cout << "Error in " << __FILE__ << ":" << __LINE__
              << " while reading file " << gmsh_filename << endl;
         return false;
     }
@@ -527,7 +527,7 @@ bool VFEM::input_mesh(const string & gmsh_filename)
 
     if(!gmsh_file.good())
     {
-        cerr << "Error in " << __FILE__ << ":" << __LINE__
+        cout << "Error in " << __FILE__ << ":" << __LINE__
              << " while reading file " << gmsh_filename << endl;
         return false;
     }
@@ -558,7 +558,7 @@ bool VFEM::input_mesh(const string & gmsh_filename)
             gmsh_file >> phys_num >> fake_number;
         else
         {
-            cerr << "Warning: unaccounted number of tags, skipping..." << endl;
+            cout << "Warning: unaccounted number of tags, skipping..." << endl;
             for(size_t j = 0; j < tags_num; j++)
                 gmsh_file >> fake_number;
         }
@@ -570,9 +570,9 @@ bool VFEM::input_mesh(const string & gmsh_filename)
                 fake_element.phys = &(ph->second);
             else
             {
-                cerr << "Error in " << __FILE__ << ":" << __LINE__
+                cout << "Error in " << __FILE__ << ":" << __LINE__
                      << " while reading file " << gmsh_filename << endl;
-                cerr << "Can`t detect physical id " << phys_num << " in 4 - MSH_TET_4 (tetrahedron)" << endl;
+                cout << "Can`t detect physical id " << phys_num << " in 4 - MSH_TET_4 (tetrahedron)" << endl;
                 return false;
             }
 
@@ -606,16 +606,16 @@ bool VFEM::input_mesh(const string & gmsh_filename)
                 fake_triangle.phys = &(ph->second);
             else
             {
-                cerr << "Error in " << __FILE__ << ":" << __LINE__
+                cout << "Error in " << __FILE__ << ":" << __LINE__
                      << " while reading file " << gmsh_filename << endl;
-                cerr << "Can`t detect physical id " << phys_num << " in 2 - MSH_TRI_3 (triangle)" << endl;
+                cout << "Can`t detect physical id " << phys_num << " in 2 - MSH_TRI_3 (triangle)" << endl;
                 return false;
             }
 
             size_t bound_type = fake_triangle.phys->type_of_bounds;
             if(bound_type != 1 && bound_type != 2)
             {
-                cerr << "Error: unaccounted bound, breaking..." << endl;
+                cout << "Error: unaccounted bound, breaking..." << endl;
                 return false;
             }
 
@@ -650,9 +650,9 @@ bool VFEM::input_mesh(const string & gmsh_filename)
                 fake_edge_src.phys = &(ph->second);
             else
             {
-                cerr << "Error in " << __FILE__ << ":" << __LINE__
+                cout << "Error in " << __FILE__ << ":" << __LINE__
                      << " while reading file " << gmsh_filename << endl;
-                cerr << "Can`t detect physical id " << phys_num << " in 1 - MSH_LIN_2 (edge)" << endl;
+                cout << "Can`t detect physical id " << phys_num << " in 1 - MSH_LIN_2 (edge)" << endl;
                 return false;
             }
 
@@ -737,7 +737,7 @@ bool VFEM::input_mesh(const string & gmsh_filename)
     // Разбираемся с тетраэдрами
     if(fes.size() == 0)
     {
-        cerr << "Error: 0 tetrahedrons detected, breaking..." << endl;
+        cout << "Error: 0 tetrahedrons detected, breaking..." << endl;
         return false;
     }
     for(size_t i = 0; i < fes.size(); i++)
@@ -761,7 +761,7 @@ bool VFEM::input_mesh(const string & gmsh_filename)
         push_back_wrapper(trs, &trs_full[i]);
     if(trs.size() == 0)
     {
-        cerr << "Error: 0 triangles detected, breaking..." << endl;
+        cout << "Error: 0 triangles detected, breaking..." << endl;
         return false;
     }
     for(size_t i = 0; i < trs.size(); i++)

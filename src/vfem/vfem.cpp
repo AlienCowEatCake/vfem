@@ -493,7 +493,7 @@ finite_element * VFEM::get_fe(const point & p) const
     finite_element * fe = NULL;
     fe = tree.find(p.x, p.y, p.z);
     if(!fe)
-        cerr << "Warning: Point " << p << " is outside area!" << endl;
+        cout << "Warning: Point " << p << " is outside area!" << endl;
     return fe;
 }
 

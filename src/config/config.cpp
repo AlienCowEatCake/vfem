@@ -128,7 +128,7 @@ bool config_type::load(const string & filename)
     ifstream ifs(filename.c_str());
     if(!ifs.good())
     {
-        cerr << "[Config] Error in " << __FILE__ << ":" << __LINE__
+        cout << "[Config] Error in " << __FILE__ << ":" << __LINE__
              << " while reading file " << filename << endl;
         return init(false);
     }
@@ -185,7 +185,7 @@ bool config_type::load(const string & filename)
                                 if     (value == "inline")  jit_type = evaluator3::JIT_INLINE;
                                 else if(value == "extcall") jit_type = evaluator3::JIT_EXTCALL;
                                 else if(value == "disable") jit_type = evaluator3::JIT_DISABLE;
-                                else cerr << "[Config] Unknown JIT-compiler type \"" << value << "\" in section \""
+                                else cout << "[Config] Unknown JIT-compiler type \"" << value << "\" in section \""
                                           << section << (subsection.empty() ? string("") : (string(".") + subsection))
                                           << "\"" << endl;
                             }
@@ -209,7 +209,7 @@ bool config_type::load(const string & filename)
                                 sst >> order;
                                 basis.tr_int.init(order);
                             }
-                            else cerr << "[Config] Unsupported param \"" << param << "\" in section \"" << section
+                            else cout << "[Config] Unsupported param \"" << param << "\" in section \"" << section
                                       << (subsection.empty() ? string("") : (string(".") + subsection)) << "\"" << endl;
                             //cout << "  param = " << param << endl;
                             //cout << "  value = " << value << endl;
@@ -280,7 +280,7 @@ bool config_type::load(const string & filename)
                                 else if(param == "z") curr_parser_var = & ((* curr_parser)[2]);
                                 if(!curr_parser_var->parse(value) || !curr_parser_var->simplify())
                                 {
-                                    cerr << "Error in " << __FILE__ << ":" << __LINE__
+                                    cout << "Error in " << __FILE__ << ":" << __LINE__
                                          << " while parsing " << value << " ("
                                          << curr_parser_var->get_error() << ")" << endl;
                                     return init(false);
@@ -289,13 +289,13 @@ bool config_type::load(const string & filename)
                                 {
                                 case evaluator3::JIT_EXTCALL:
                                     if(!curr_parser_var->compile_extcall())
-                                        cerr << "Error in " << __FILE__ << ":" << __LINE__
+                                        cout << "Error in " << __FILE__ << ":" << __LINE__
                                              << " while compiling (extcall) " << value << " ("
                                              << curr_parser_var->get_error() << ")" << endl;
                                     break;
                                 case evaluator3::JIT_INLINE:
                                     if(!curr_parser_var->compile_inline())
-                                        cerr << "Error in " << __FILE__ << ":" << __LINE__
+                                        cout << "Error in " << __FILE__ << ":" << __LINE__
                                              << " while compiling (inline) " << value << " ("
                                              << curr_parser_var->get_error() << ")" << endl;
                                     break;
@@ -330,7 +330,7 @@ bool config_type::load(const string & filename)
                                         right_enabled = false;
                                 }
                             }
-                            else cerr << "[Config] Unsupported param \"" << param << "\" in section \"" << section
+                            else cout << "[Config] Unsupported param \"" << param << "\" in section \"" << section
                                       << (subsection.empty() ? string("") : (string(".") + subsection)) << "\"" << endl;
                             //cout << "  param = " << param << endl;
                             //cout << "  value = " << value << endl;
@@ -394,7 +394,7 @@ bool config_type::load(const string & filename)
                                 if(value == "2d") p->type = 2;
                                 if(value == "3d") p->type = 3;
                             }
-                            else cerr << "[Config] Unsupported param \"" << param << "\" in section \"" << section
+                            else cout << "[Config] Unsupported param \"" << param << "\" in section \"" << section
                                       << (subsection.empty() ? string("") : (string(".") + subsection)) << "\"" << endl;
                             //cout << "  param = " << param << endl;
                             //cout << "  value = " << value << endl;
@@ -423,18 +423,14 @@ bool config_type::load_pml(const string & filename)
 
     if(filename.empty())
     {
-        cout << flush;
-        cerr << flush;
-        cerr << "[PML Config] Warning: \"filename_pml\" parameter is not set" << endl;
-        cout << flush;
-        cerr << flush;
+        cout << "[PML Config] Warning: \"filename_pml\" parameter is not set" << endl;
         return true;
     }
 
     ifstream ifs(filename.c_str());
     if(!ifs.good())
     {
-        cerr << "[PML Config] Error in " << __FILE__ << ":" << __LINE__
+        cout << "[PML Config] Error in " << __FILE__ << ":" << __LINE__
              << " while reading file " << filename << endl;
         return false;
     }
@@ -497,7 +493,7 @@ bool config_type::load_pml(const string & filename)
                                 else if(param == "y1")          phys_pml.y1 = tmp;
                                 else if(param == "z0")          phys_pml.z0 = tmp;
                                 else if(param == "z1")          phys_pml.z1 = tmp;
-                                else cerr << "[PML Config] Unsupported param \"" << param << "\" in section \"" << section
+                                else cout << "[PML Config] Unsupported param \"" << param << "\" in section \"" << section
                                           << (subsection.empty() ? string("") : (string(".") + subsection)) << "\"" << endl;
                                 //cout << "  param = " << param << endl;
                                 //cout << "  value = " << value << endl;
@@ -544,7 +540,7 @@ bool config_type::load_pml(const string & filename)
                                 else if(param == "chi_imag")    curr->chi.imag(tmp);
                                 else if(param == "m")           curr->m = tmp;
                                 else if(param == "width")       curr->width = tmp;
-                                else cerr << "[PML Config] Unsupported param \"" << param << "\" in section \"" << section
+                                else cout << "[PML Config] Unsupported param \"" << param << "\" in section \"" << section
                                           << (subsection.empty() ? string("") : (string(".") + subsection)) << "\"" << endl;
                                 //cout << "  param = " << param << endl;
                                 //cout << "  value = " << value << endl;
