@@ -304,17 +304,10 @@ void VFEM::assemble_matrix()
         show_progress("", k, fes.size());
 #if defined VFEM_USE_PML
         if(!is_pml(fes[k].barycenter, &fes[k], &phys_pml))
-        {
-            tetrahedron_base * base = &fes[k];
-            tetrahedron * tet = static_cast<tetrahedron *>(base);
-            process_fe(tet, (matrix_t<double> *)NULL);
-        }
+            process_fe(fes[k].to_std(), (matrix_t<double> *)NULL);
         else
 #endif
-        {
             process_fe(&fes[k], (l_matrix *)NULL);
-        }
-
     }
 }
 

@@ -99,6 +99,7 @@ protected:
     double integrate_w(size_t i, size_t j) const;
     // Интеграл от ротора бф
     double integrate_rotw(size_t i, size_t j) const;
+    // Интеграл от ф-и правой части на бф
     complex<double> integrate_fw(eval_func func, size_t i, void * data) const;
     // Интегралы от базисных функций ядра
     double integrate_kerw(size_t i, size_t j) const;
@@ -108,6 +109,8 @@ protected:
 class tetrahedron_pml : public tetrahedron_base
 {
 public:
+    tetrahedron_pml();
+    // Инициализация PML-координат
     void init_pml(cvector3(* get_s)(const point &, const tetrahedron_pml *, const phys_pml_area *), const phys_pml_area * phys_pml, const cpoint * nodes_pml);
 
     // Локальная матрица жескости
@@ -118,6 +121,9 @@ public:
     array_t<complex<double> > rp(eval_func func, void * data) const;
     // Локальная матрица ядра
     matrix_t<complex<double> > K() const;
+
+    // Получить указатель на обычный тетраэдр
+    const tetrahedron * to_std() const;
 
 protected:
     cvector3(* get_s)(const point &, const tetrahedron_pml *, const phys_pml_area *);
@@ -146,6 +152,7 @@ protected:
     complex<double> integrate_w(size_t i, size_t j) const;
     // Интеграл от ротора бф
     complex<double> integrate_rotw(size_t i, size_t j) const;
+    // Интеграл от ф-и правой части на бф
     complex<double> integrate_fw(eval_func func, size_t i, void * data) const;
     // Интегралы от базисных функций ядра
     complex<double> integrate_kerw(size_t i, size_t j) const;

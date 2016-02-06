@@ -1002,22 +1002,12 @@ cpoint VFEM::convert_point_to_pml(const point * p, const finite_element * fefe) 
 
 void VFEM::input_pml()
 {
+    if(phys_pml.params.size() == 0)
+        return;
+
     cout << " > Building PML-bound coordinates ..." << endl;
 
     phys_pml = config.phys_pml;
-
-    if(phys_pml.params.size() == 0)
-    {
-        for(size_t i = 0; i < fes.size(); i++)
-        {
-            show_progress("re-init tetrahedrons", i, fes.size());
-            cpoint cp[4];
-            for(size_t j = 0; j < 4; j++)
-                cp[j] = cpoint(* (fes[i].nodes[j]));
-            fes[i].init_pml(get_s, & phys_pml, cp);
-        }
-        return;
-    }
 
     // Границы не PML точек
     double x0 = DBL_MAX;
@@ -1078,9 +1068,9 @@ void VFEM::input_pml()
         show_progress("re-init tetrahedrons", i, fes.size());
         cpoint cp[4];
         size_t ph_curr = fes[i].phys->gmsh_num;
-        for(size_t j = 0; j < 4; j++)
+        if(is_pml(fes[i].barycenter, & (fes[i]), & phys_pml))
         {
-            if(is_pml(fes[i].barycenter, & (fes[i]), & phys_pml))
+            for(size_t j = 0; j < 4; j++)
             {
                 map<point *, pair<cpoint, finite_element *> >::iterator it = pml_nodes_cache.find(fes[i].nodes[j]);
                 // Если есть в кэше, то возьмем из него
@@ -1090,12 +1080,8 @@ void VFEM::input_pml()
                 else
                     cp[j] = convert_point_to_pml(fes[i].nodes[j], &(fes[i]));
             }
-            else
-            {
-                cp[j] = cpoint(* (fes[i].nodes[j]));
-            }
+            fes[i].init_pml(get_s, & phys_pml, cp);
         }
-        fes[i].init_pml(get_s, & phys_pml, cp);
     }
 }
 #endif

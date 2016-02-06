@@ -1,5 +1,13 @@
 #include "tetrahedron.h"
 
+tetrahedron_pml::tetrahedron_pml()
+{
+    phys_pml = NULL;
+    get_s = NULL;
+    jacobian_pml = 0.0;
+}
+
+// Инициализация PML-координат
 void tetrahedron_pml::init_pml(cvector3(* get_s)(const point &, const tetrahedron_pml *, const phys_pml_area *), const phys_pml_area * phys_pml, const cpoint * nodes_pml)
 {
     const tet_integration_config * tet_integration = &(basis->tet_int);
@@ -31,18 +39,29 @@ void tetrahedron_pml::init_pml(cvector3(* get_s)(const point &, const tetrahedro
     }
 }
 
+// Получить указатель на обычный тетраэдр
+const tetrahedron * tetrahedron_pml::to_std() const
+{
+    const tetrahedron_base * base = this;
+    const tetrahedron * tet = static_cast<const tetrahedron *>(base);
+    return tet;
+}
+
+// L-координаты (в PML)
 complex<double> tetrahedron_pml::lambda_pml(size_t i, const cpoint & p) const
 {
     assert(i < 4); // Если i = 4, то явно где-то косяк
     return L_pml[i][3] + L_pml[i][0] * p.x + L_pml[i][1] * p.y + L_pml[i][2] * p.z;
 }
 
+// Градиент L-координаты (в PML)
 cvector3 tetrahedron_pml::grad_lambda_pml(size_t i) const
 {
     assert(i < 4); // Если i = 4, то явно где-то косяк
     return cvector3(L_pml[i][0], L_pml[i][1], L_pml[i][2]);
 }
 
+// Базисные функции (в PML)
 cvector3 tetrahedron_pml::w_pml(size_t i, const cpoint & p) const
 {
     using namespace tet_basis_indexes;
@@ -94,10 +113,13 @@ cvector3 tetrahedron_pml::w_pml(size_t i, const cpoint & p) const
     return cvector3();
 }
 
+// Роторы базисных функций (в PML)
 cvector3 tetrahedron_pml::rotw_pml(size_t i, const cpoint & p, const point & p_non_PML) const
 {
     using namespace tet_basis_indexes;
     assert(i < basis->tet_bf_num);
+    assert(phys_pml);
+    assert(get_s);
 
     // Первый неполный
     if(i < 6)
@@ -172,9 +194,12 @@ cvector3 tetrahedron_pml::rotw_pml(size_t i, const cpoint & p, const point & p_n
     return cvector3();
 }
 
+// Базисные функции ядра (в PML)
 cvector3 tetrahedron_pml::kerw_pml(size_t i, const cpoint & p, const point & p_non_PML) const
 {
     assert(i < basis->tet_ker_bf_num);
+    assert(phys_pml);
+    assert(get_s);
     if(i < 4)
     {
         cvector3 s = get_s(p_non_PML, this, phys_pml);
@@ -188,6 +213,7 @@ cvector3 tetrahedron_pml::kerw_pml(size_t i, const cpoint & p, const point & p_n
     return cvector3();
 }
 
+// Интеграл от бф
 complex<double> tetrahedron_pml::integrate_w(size_t i, size_t j) const
 {
 //#if defined __GNUC__
@@ -202,6 +228,7 @@ complex<double> tetrahedron_pml::integrate_w(size_t i, size_t j) const
     return result * jacobian_pml;
 }
 
+// Интеграл от ротора бф
 complex<double> tetrahedron_pml::integrate_rotw(size_t i, size_t j) const
 {
 //#if defined __GNUC__
@@ -216,6 +243,7 @@ complex<double> tetrahedron_pml::integrate_rotw(size_t i, size_t j) const
     return result * jacobian_pml;
 }
 
+// Интеграл от ф-и правой части на бф
 complex<double> tetrahedron_pml::integrate_fw(eval_func func, size_t i, void * data) const
 {
 //#if defined __GNUC__
@@ -230,6 +258,7 @@ complex<double> tetrahedron_pml::integrate_fw(eval_func func, size_t i, void * d
     return result * jacobian_pml;
 }
 
+// Интегралы от базисных функций ядра
 complex<double> tetrahedron_pml::integrate_kerw(size_t i, size_t j) const
 {
 //#if defined __GNUC__
@@ -244,6 +273,7 @@ complex<double> tetrahedron_pml::integrate_kerw(size_t i, size_t j) const
     return result * jacobian;
 }
 
+// Локальная матрица жескости
 matrix_t<complex<double> >
 tetrahedron_pml::G() const
 {
@@ -254,6 +284,7 @@ tetrahedron_pml::G() const
     return matr;
 }
 
+// Локальная матрица массы
 matrix_t<complex<double> >
 tetrahedron_pml::M() const
 {
@@ -264,6 +295,7 @@ tetrahedron_pml::M() const
     return matr;
 }
 
+// Локальная правая часть
 array_t<complex<double> >
 tetrahedron_pml::rp(eval_func func, void * data) const
 {
@@ -273,6 +305,7 @@ tetrahedron_pml::rp(eval_func func, void * data) const
     return arr;
 }
 
+// Локальная матрица ядра
 matrix_t<complex<double> >
 tetrahedron_pml::K() const
 {
