@@ -49,7 +49,7 @@ inline void show_progress(const char * message, size_t index, size_t num_all)
     MAYBE_UNUSED(message);
     MAYBE_UNUSED(index);
     MAYBE_UNUSED(num_all);
-/**/
+/*
     const size_t tick = 1000;
     const char progress[4] = {'|', '/', '-', '\\'};
     index++;
@@ -66,6 +66,41 @@ inline void show_progress(const char * message, size_t index, size_t num_all)
         if(strlen(message))
             cout << message << ": ";
         cout << num_all << progress[1] << num_all << endl;
+    }
+*/
+/**/
+    static size_t perc_old = 100;
+    static size_t diez_old = 72;
+
+    if(index == 0 && strlen(message) > 0)
+    {
+        cout << "  " << message << endl;
+    }
+
+    if(num_all > 1 && index < num_all - 1)
+    {
+        size_t norm = num_all - 1;
+        size_t perc = (index * 100) / norm;
+        size_t diez = (index * 72) / norm;
+
+        if(perc_old != perc || diez_old != diez)
+        {
+            cout << '[';
+            for(size_t i = 0; i < diez; i++)
+                cout << '#';
+            for(size_t i = diez; i < 72; i++)
+                cout << ' ';
+            cout << "] " << perc << "%\r" << flush;
+
+            perc_old = perc;
+            diez_old = diez;
+        }
+    }
+    else
+    {
+        for(size_t i = 0; i < 79; i++)
+            cout << ' ';
+        cout << '\r' << flush;
     }
 /**/
 }
