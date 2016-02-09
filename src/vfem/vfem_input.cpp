@@ -890,15 +890,18 @@ bool VFEM::input_mesh(const string & gmsh_filename)
     }
 
     cout << "Statistics:" << endl;
-    cout << " # Tetrehedrons: " << fes.size() << endl;
-    cout << " # Nodes:        " << nodes.size() << endl;
-    cout << " # Edges:        " << edges.size() << endl;
+    cout << " # Tetrehedrons:    " << fes.size() << endl;
+    cout << " # Triangles:       " << trs.size() << endl;
+    cout << " # Nodes:           " << nodes.size() << endl;
+    cout << " # Edges:           " << edges.size() << endl;
     if(config.basis.order >= 2)
-        cout << " # Faces:        " << faces.size() << endl;
-    cout << " # SLAE size:    " << dof_num << endl;
-    cout << " # SLAE ker:     " << ker_dof_num << endl;
+        cout << " # Faces:           " << faces.size() << endl;
+    cout << " # Point sources:   " << pss.size() << endl;
+    cout << " # Edge sources:    " << edges_src.size() << endl;
+    cout << " # Main SLAE size:  " << dof_num << endl;
+    cout << " # Ker. SLAE size:  " << ker_dof_num << endl;
     if(config.boundary_enabled)
-        cout << " # SLAE surf:    " << global_to_local.size() << endl;
+        cout << " # Surf. SLAE size: " << global_to_local.size() << endl;
 
     return true;
 }

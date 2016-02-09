@@ -74,7 +74,7 @@ inline void show_progress(const char * message, size_t index, size_t num_all)
 
     if(index == 0 && strlen(message) > 0)
     {
-        cout << "  " << message << endl;
+        cout << "  * " << message << endl;
     }
 
     if(num_all > 1 && index < num_all - 1)

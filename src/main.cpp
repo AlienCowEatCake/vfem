@@ -76,7 +76,7 @@ int paused(int ret)
 {
 #if defined _WIN32
     char * session = getenv("SESSIONNAME");
-    if(!session || stricmp(session, "Console"))
+    if(!session || _stricmp(session, "Console"))
         system("pause");
 #endif
     return ret;
