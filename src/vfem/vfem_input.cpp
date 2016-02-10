@@ -1005,12 +1005,12 @@ cpoint VFEM::convert_point_to_pml(const point * p, const finite_element * fefe) 
 
 void VFEM::input_pml()
 {
+    phys_pml = config.phys_pml;
+
     if(phys_pml.params.size() == 0)
         return;
 
     cout << " > Building PML-bound coordinates ..." << endl;
-
-    phys_pml = config.phys_pml;
 
     // Границы не PML точек
     double x0 = DBL_MAX;
