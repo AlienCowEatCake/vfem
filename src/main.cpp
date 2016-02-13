@@ -162,18 +162,58 @@ int main(int argc, char * argv [])
     sigaction(SIGHUP, & sigact, 0);
 #endif
 
+    string build_conf;
 #if defined VFEM_USE_PML
-    cout << " # VFEM_USE_PML" << endl;
+    build_conf.append(" # VFEM_USE_PML\n");
 #endif
 #if defined USE_CXX11
-    cout << " # USE_CXX11" << endl;
+    build_conf.append(" # USE_CXX11\n");
 #endif
 #if defined USE_NOSIGHUP
-    cout << " # USE_NOSIGHUP" << endl;
+    build_conf.append(" # USE_NOSIGHUP\n");
 #endif
 #if defined USE_MKL
-    cout << " # USE_MKL" << endl;
+    build_conf.append(" # USE_MKL\n");
 #endif
+    if(!build_conf.empty())
+        cout << "Build configuration:" << endl << build_conf << flush;
+
+    string env_conf;
+    char * env_curr;
+    env_curr = getenv("NO_PROGRESS");
+    if(env_curr)
+    {
+        env_conf.append(" # NO_PROGRESS = ");
+        env_conf.append(env_curr);
+        env_conf.append("\n");
+    }
+    env_curr = getenv("OMP_NUM_THREADS");
+    if(env_curr)
+    {
+        env_conf.append(" # OMP_NUM_THREADS = ");
+        env_conf.append(env_curr);
+        env_conf.append("\n");
+    }
+#if defined USE_MKL
+    env_curr = getenv("MKL_NUM_THREADS");
+    if(env_curr)
+    {
+        env_conf.append(" # MKL_NUM_THREADS = ");
+        env_conf.append(env_curr);
+        env_conf.append("\n");
+    }
+#endif
+#if defined _WIN32
+    env_curr = getenv("SESSIONNAME");
+    if(env_curr)
+    {
+        env_conf.append(" # SESSIONNAME = ");
+        env_conf.append(env_curr);
+        env_conf.append("\n");
+    }
+#endif
+    if(!env_conf.empty())
+        cout << "Environment configuration:" << endl << env_conf << flush;
 
     time_t seconds = time(NULL);
     char timebuf[24];
