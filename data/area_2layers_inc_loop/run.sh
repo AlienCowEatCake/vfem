@@ -14,7 +14,7 @@ ln -s ../area_2layers_inc_loop_slae.txt ./area_2layers_inc_loop_slae.txt
 echo -e "[PML]\nm = 3\nwidth = 100\n" > pml.ini
 echo -e "[PML.21]\nchi_real = ${PML_CHI_AIR_RE}\nchi_imag = ${PML_CHI_AIR_IM}\n" >> pml.ini
 echo -e "[PML.22]\nchi_real = ${PML_CHI_GROUND_RE}\nchi_imag = ${PML_CHI_GROUND_IM}\n" >> pml.ini
-../vfem -diff_simple -nosolve -nopost ../config_std.ini config_pml.ini ../diff.ini | tee out-pml.txt
+NO_PROGRESS=1 ../vfem -diff_simple -nosolve -nopost ../config_std.ini config_pml.ini ../diff.ini | tee out-pml.txt
 cd ..
 done
 done
