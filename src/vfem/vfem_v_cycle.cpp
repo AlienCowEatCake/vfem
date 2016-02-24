@@ -74,15 +74,26 @@ double VFEM::dot_prod_self(const complex<double> * a) const
 // Умножение матрицы с полного пространства на вектор
 void VFEM::mul_matrix(const complex<double> * f, complex<double> * x) const
 {
-    for(size_t i = 0; i < dof_num; i++)
+//    for(size_t i = 0; i < dof_num; i++)
+//    {
+//        complex<double> v_el = f[i];
+//        x[i] = slae.di[i] * v_el;
+//        for(size_t k = slae.ig[i], k1 = slae.ig[i + 1]; k < k1; k++)
+//        {
+//            size_t j = slae.jg[k];
+//            x[i] += slae.gg[k] * f[j];
+//            x[j] += slae.gg[k] * v_el;
+//        }
+//    }
+    for(size_t i=0; i < dof_num; i++)
     {
         complex<double> v_el = f[i];
-        x[i] = slae.di[i] * v_el;
+        x[i] = v_el * slae.di[i];
         for(size_t k = slae.ig[i], k1 = slae.ig[i + 1]; k < k1; k++)
         {
             size_t j = slae.jg[k];
-            x[i] += slae.gg[k] * f[j];
-            x[j] += slae.gg[k] * v_el;
+            x[i] += f[j] * slae.gl[k];
+            x[j] += v_el * slae.gu[k];
         }
     }
 }
@@ -114,12 +125,12 @@ void VFEM::solve()
     // Локальное число итераций обычно небольшое
     size_t max_iter_local = config.max_iter_v_cycle_local;
 
-    slae.inline_init();
-    ker_slae.inline_init();
+    slae.init();
+    ker_slae.init();
 
     // Уточнение начального приближения на полном пространстве
     complex<double> * x_old = new complex<double> [dof_num];
-    slae.inline_solve(x_old, slae.rp, gamma0, max_iter_local);
+    slae.solve(x_old, slae.rp, gamma0, max_iter_local);
     printf("\n");
 
     double rp_norm2 = dot_prod_self(slae.rp);
@@ -154,7 +165,7 @@ void VFEM::solve()
 
         // z = (PAPt)^-1 g или z = solve1(PAPt, g)
         for(size_t i = 0; i < ker_dof_num; i++) ker_slae.x[i] = 0.0;
-        ker_slae.inline_solve(ker_slae.x, g, gamma_ker, max_iter_local);
+        ker_slae.solve(ker_slae.x, g, gamma_ker, max_iter_local);
 
         // Уточнение на градиентном пространсте
         // x = x + Ptz
@@ -176,7 +187,7 @@ void VFEM::solve()
 
         // y = solve2(A, r)
         for(size_t i = 0; i < dof_num; i++) y[i] = 0.0;
-        slae.inline_solve(y, r, gamma_full, max_iter_local);
+        slae.solve(y, r, gamma_full, max_iter_local);
 
         //Уточненение на всём пространстве
         // x = x + y

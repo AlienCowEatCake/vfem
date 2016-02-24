@@ -83,9 +83,9 @@ public:
     void calculate_diff();
 
     // Основная СЛАУ
-    SLAE slae;
+    SLAE_ns slae;
     // СЛАУ на ядре
-    SLAE ker_slae;
+    SLAE_ns ker_slae;
     // СЛАУ по границе
     SLAE surf_slae;
 

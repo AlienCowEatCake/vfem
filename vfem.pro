@@ -32,7 +32,8 @@ SOURCES += \
 #    src/solvers/CGMComplex_LLT.cpp \
 #    src/solvers/CGMComplex_VC.cpp \
     src/solvers/COCG_LLT_Smooth.cpp \
-    src/solvers/COCG_LLT_Smooth_MKL.cpp
+    src/solvers/COCG_LLT_Smooth_MKL.cpp \
+    src/solvers/Gauss.cpp
 
 HEADERS += \
     src/config/config.h \
@@ -73,7 +74,8 @@ HEADERS += \
 #    src/solvers/CGMComplex_LLT.h \
 #    src/solvers/CGMComplex_VC.h \
     src/solvers/COCG_LLT_Smooth.h \
-    src/solvers/COCG_LLT_Smooth_MKL.h
+    src/solvers/COCG_LLT_Smooth_MKL.h \
+    src/solvers/Gauss.h
 
 unix:QMAKE_LIBS += -lrt
 

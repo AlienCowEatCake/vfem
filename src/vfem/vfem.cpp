@@ -263,14 +263,12 @@ void VFEM::process_fe(const U * curr_fe, const V *)
     {
         complex<double> add;
         size_t i_num = dof[i];
-        for(size_t j = 0; j < i; j++)
+        for(size_t j = 0; j < config.basis.tet_bf_num; j++)
         {
             size_t j_num = dof[j];
             add = matrix_G[i][j] / ph.mu + matrix_M[i][j] * k2;
             slae.add(i_num, j_num, add);
         }
-        add = matrix_G[i][i] / ph.mu + matrix_M[i][i] * k2;
-        slae.di[i_num] += add;
         add = array_rp[i];
         slae.rp[i_num] += add;
     }
@@ -286,9 +284,8 @@ void VFEM::process_fe(const U * curr_fe, const V *)
         for(size_t i = 0; i < config.basis.tet_ker_bf_num; i++)
         {
             size_t i_num = ker_dof[i];
-            for(size_t j = 0; j < i; j++)
+            for(size_t j = 0; j < config.basis.tet_ker_bf_num; j++)
                 ker_slae.add(i_num, ker_dof[j], matrix_K[i][j] * k2);
-            ker_slae.di[i_num] += matrix_K[i][i] * k2;
         }
     }
 }
@@ -387,21 +384,26 @@ void VFEM::applying_bound()
 
                 for(size_t i = slae.ig[k]; i < slae.ig[k + 1]; i++)
                 {
-                    if(global_to_local.find(slae.jg[i]) == global_to_local.end())
-                        slae.rp[slae.jg[i]] -= slae.gg[i] * val;
-                    slae.gg[i] = 0.0;
+//                    if(global_to_local.find(slae.jg[i]) == global_to_local.end())
+//                        slae.rp[slae.jg[i]] -= slae.gg[i] * val;
+//                    slae.gg[i] = 0.0;
+                    if(global_to_local.find(slae.jg[i]) != global_to_local.end())
+                        slae.gu[i] = 0.0;
+                    slae.gl[i] = 0.0;
                 }
             }
             else
             {
                 for(size_t i = slae.ig[k]; i < slae.ig[k + 1]; i++)
                 {
+//                    if(global_to_local.find(slae.jg[i]) != global_to_local.end())
+//                    {
+//                        complex<double> val = surf_slae.x[global_to_local[slae.jg[i]]];
+//                        slae.rp[k] -= slae.gg[i] * val;
+//                        slae.gg[i] = 0.0;
+//                    }
                     if(global_to_local.find(slae.jg[i]) != global_to_local.end())
-                    {
-                        complex<double> val = surf_slae.x[global_to_local[slae.jg[i]]];
-                        slae.rp[k] -= slae.gg[i] * val;
-                        slae.gg[i] = 0.0;
-                    }
+                        slae.gu[i] = 0.0;
                 }
             }
         }
@@ -419,15 +421,23 @@ void VFEM::applying_bound()
                 slae.rp[k] = 0.0;
                 slae.di[k] = 1.0;
 
+//                for(size_t i = slae.ig[k]; i < slae.ig[k + 1]; i++)
+//                    slae.gg[i] = 0.0;
                 for(size_t i = slae.ig[k]; i < slae.ig[k + 1]; i++)
-                    slae.gg[i] = 0.0;
+                {
+                    if(dof_first.find(slae.jg[i]) != dof_first.end())
+                        slae.gu[i] = 0.0;
+                    slae.gl[i] = 0.0;
+                }
             }
             else
             {
                 for(size_t i = slae.ig[k]; i < slae.ig[k + 1]; i++)
                 {
+//                    if(dof_first.find(slae.jg[i]) != dof_first.end())
+//                        slae.gg[i] = 0.0;
                     if(dof_first.find(slae.jg[i]) != dof_first.end())
-                        slae.gg[i] = 0.0;
+                        slae.gu[i] = 0.0;
                 }
             }
         }
@@ -443,15 +453,23 @@ void VFEM::applying_bound()
             if(ker_dof_first.find(k) != ker_dof_first.end())
             {
                 ker_slae.di[k] = 1.0;
-                for(size_t i = ker_slae.ig[k]; i < ker_slae.ig[k + 1]; i++)
-                    ker_slae.gg[i] = 0.0;
+//                for(size_t i = ker_slae.ig[k]; i < ker_slae.ig[k + 1]; i++)
+//                    ker_slae.gg[i] = 0.0;
+                for(size_t i = slae.ig[k]; i < slae.ig[k + 1]; i++)
+                {
+                    if(dof_first.find(slae.jg[i]) != dof_first.end())
+                        ker_slae.gu[i] = 0.0;
+                    ker_slae.gl[i] = 0.0;
+                }
             }
             else
             {
                 for(size_t i = ker_slae.ig[k]; i < ker_slae.ig[k + 1]; i++)
                 {
-                    if(ker_dof_first.find(ker_slae.jg[i]) != ker_dof_first.end())
-                        ker_slae.gg[i] = 0.0;
+//                    if(ker_dof_first.find(ker_slae.jg[i]) != ker_dof_first.end())
+//                        ker_slae.gg[i] = 0.0;
+                    if(dof_first.find(slae.jg[i]) != dof_first.end())
+                        ker_slae.gu[i] = 0.0;
                 }
             }
         }
