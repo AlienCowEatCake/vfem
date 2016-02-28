@@ -64,6 +64,18 @@ struct basis_type
     tr_integration_config tr_int;
 };
 
+// Конфигурация DG
+struct dg_config
+{
+    // Ведущая граница
+    size_t master_surface;
+    // Ведомая граница
+    size_t slave_surface;
+    // Параметры численных потоков
+    double a;
+    double b;
+};
+
 // Вычислитель для вычисляемых значений
 class evaluator3
 {
@@ -181,6 +193,10 @@ public:
 
     evaluator3 analytical;
     bool analytical_enabled;
+
+    // ===== DG =====
+
+    vector<dg_config> dg;
 
     // ===== Postprocessing =====
 

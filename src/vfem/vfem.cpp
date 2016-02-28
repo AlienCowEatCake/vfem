@@ -375,9 +375,10 @@ void VFEM::applying_bound()
         {
             show_progress("applying", k, slae.n);
 
-            if(global_to_local.find(k) != global_to_local.end())
+            map<size_t, size_t>::iterator g2l_k = global_to_local.find(k);
+            if(g2l_k != global_to_local.end())
             {
-                complex<double> val = surf_slae.x[global_to_local[k]];
+                complex<double> val = surf_slae.x[g2l_k->second];
                 slae.rp[k] = val;
                 slae.di[k] = 1.0;
                 slae.x[k] = val; // Начальное приближение сразу знаем
@@ -554,6 +555,7 @@ void VFEM::make_data()
     assemble_matrix();
     apply_point_sources();
     apply_edges_sources();
+    applying_dg_fluxes();
     applying_bound();
 }
 

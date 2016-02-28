@@ -340,6 +340,39 @@ bool config_type::load(const string & filename)
                 while(ifs.good() && !(line.length() > 1 && line[0] == '['));
             }
 
+            else if(section == "dg")
+            {
+                dg_config p;
+                memset(&p, 0, sizeof(dg_config));
+                do
+                {
+                    getline(ifs, line);
+                    line = trim(line);
+                    if(line.length() > 1 && line[0] != ';')
+                    {
+                        size_t eq_pos = line.find_first_of("=");
+                        if(eq_pos != string::npos)
+                        {
+                            string param = to_lowercase(trim(line.substr(0, eq_pos)));
+                            string value = trim(line.substr(eq_pos + 1));
+                            if(value.length() > 1 && value[0] == '\"')
+                                value = trim(value.substr(1, value.length() - 2));
+                            stringstream sst(value);
+                            if(param == "master")       sst >> p.master_surface;
+                            else if(param == "slave")   sst >> p.slave_surface;
+                            else if(param == "a")       sst >> p.a;
+                            else if(param == "b")       sst >> p.b;
+                            else cout << "[Config] Unsupported param \"" << param << "\" in section \"" << section
+                                      << (subsection.empty() ? string("") : (string(".") + subsection)) << "\"" << endl;
+                            //cout << "  param = " << param << endl;
+                            //cout << "  value = " << value << endl;
+                        }
+                    }
+                }
+                while(ifs.good() && !(line.length() > 1 && line[0] == '['));
+                dg.push_back(p);
+            }
+
             else if(section == "postprocessing")
             {
                 stringstream sst(subsection);

@@ -105,6 +105,8 @@ public:
     // Треугольники полные, для первых краевых
     // (не используется при config.boundary_enabled == false)
     vector<triangle_full> trs_full;
+    // Треугольники для DG, сгруппированные по границам
+    map<size_t, vector<triangle_base> > trs_dg;
     // Точечные источники
     vector<pair<point, cvector3> > pss;
     // Физические области
@@ -142,6 +144,8 @@ public:
     void generate_ker_portrait();
     // Сборка глобальной матрицы
     void assemble_matrix();
+    // Применение численных потоков в DG
+    void applying_dg_fluxes();
     // Применение краевых условий
     void applying_bound();
     // Генерация портрета по границе

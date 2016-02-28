@@ -613,7 +613,7 @@ bool VFEM::input_mesh(const string & gmsh_filename)
             }
 
             size_t bound_type = fake_triangle.phys->type_of_bounds;
-            if(bound_type != 1 && bound_type != 2)
+            if(bound_type != 1 && bound_type != 2 && bound_type != 4)
             {
                 cout << "Error: unaccounted bound, breaking..." << endl;
                 return false;
@@ -638,10 +638,17 @@ bool VFEM::input_mesh(const string & gmsh_filename)
                 if(config.basis.order >= 2)
                     add_face(face(fake_triangle.nodes[0], fake_triangle.nodes[1], fake_triangle.nodes[2]), faces_surf_temp);
             }
-            if(config.boundary_enabled)
-                push_back_wrapper(trs_full, triangle_full(fake_triangle));
+            if(bound_type == 4)
+            {
+                push_back_wrapper(trs_dg[phys_num], fake_triangle);
+            }
             else
-                push_back_wrapper(trs_base, fake_triangle);
+            {
+                if(config.boundary_enabled)
+                    push_back_wrapper(trs_full, triangle_full(fake_triangle));
+                else
+                    push_back_wrapper(trs_base, fake_triangle);
+            }
         }
         else if(type_of_elem == MSH_LIN_2)
         {
@@ -837,6 +844,24 @@ bool VFEM::input_mesh(const string & gmsh_filename)
 
         // Инициализируем
         trs[i]->init(& config.basis);
+    }
+
+    // Также разберемся с треугольниками для DG
+    for(map<size_t, vector<triangle_base> >::iterator it = trs_dg.begin(); it != trs_dg.end(); ++it)
+    {
+        stringstream sst;
+        sst << "triangles DG[" << it->first << "]";
+        const char * text = sst.str().c_str();
+
+        for(size_t i = 0; i < it->second.size(); i++)
+        {
+            show_progress(text, i, it->second.size());
+            for(size_t j = 0; j < 3; j++)
+                it->second[i].edges[j] = edges_ind[(size_t)it->second[i].edges[j]];
+            if(config.basis.order >= 2)
+                it->second[i].faces = faces_ind[(size_t)it->second[i].faces];
+            it->second[i].init(& config.basis);
+        }
     }
 
     cout << " > Building tree ..." << endl;

@@ -24,6 +24,7 @@ SOURCES += \
     src/vfem/vfem_input.cpp \
     src/vfem/vfem_output.cpp \
     src/vfem/vfem_v_cycle.cpp \
+    src/vfem/vfem_dg.cpp \
     src/problems/standard.cpp \
     src/problems/standard_diff.cpp \
     src/problems/standard_pml.cpp \

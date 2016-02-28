@@ -81,6 +81,12 @@ protected:
     complex<double> integrate_fw(eval_func func, size_t i, void * data) const;
 };
 
+// Класс треугольник (полный, для работы с численными потками в DG)
+class triangle_full_dg : public triangle_full
+{
+
+};
+
 typedef triangle_base triangle;
 
 #endif // TRIANGLE_H_INCLUDED
