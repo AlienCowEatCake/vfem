@@ -141,6 +141,8 @@ bool vfem_solve(VFEM & v, const string & config, solve_mode mode, bool nopost, c
     }
     else
     {
+        if(mode == MODE_CONTINUE)
+            v.make_data();
         cout << "Restoring solution ..." << endl;
         if(v.config.filename_slae.empty())
         {
