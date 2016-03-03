@@ -82,9 +82,36 @@ int paused(int ret)
     return ret;
 }
 
-// Решение одной задачи
-bool vfem_solve(VFEM & v, const string & config, bool nosolve, bool nopost, const char * timebuf)
+// Режимы решения
+enum solve_mode
 {
+    MODE_NORMAL,
+    MODE_NOSOLVE,
+    MODE_CONTINUE
+};
+
+// Решение одной задачи
+bool vfem_solve(VFEM & v, const string & config, solve_mode mode, bool nopost, const char * timebuf)
+{
+    cout << "Task configuration:" << endl;
+    cout << " # mode = ";
+    switch(mode)
+    {
+    case MODE_NORMAL:
+        cout << "normal" << endl;
+        break;
+    case MODE_NOSOLVE:
+        cout << "nosolve" << endl;
+        break;
+    case MODE_CONTINUE:
+        cout << "continue" << endl;
+        break;
+    default:
+        cout << "unknown" << endl;
+        break;
+    }
+    cout << " # nopost = " << (nopost ? "true" : "false") << endl;
+
     unsigned long time_exec = mtime();
     unsigned long time_solve = 0;
 
@@ -105,7 +132,7 @@ bool vfem_solve(VFEM & v, const string & config, bool nosolve, bool nopost, cons
     if(!v.input_phys(config_dir + v.config.filename_phys)) return false;
     if(!v.input_mesh(config_dir + v.config.filename_mesh)) return false;
     v.make_struct();
-    if(!nosolve)
+    if(mode == MODE_NORMAL)
     {
         v.make_data();
         time_solve = mtime();
@@ -124,6 +151,8 @@ bool vfem_solve(VFEM & v, const string & config, bool nosolve, bool nopost, cons
         time_solve = mtime();
         if(!v.slae.restore_x(v.config.filename_slae))
             return false;
+        if(mode == MODE_CONTINUE)
+            v.solve();
         time_solve = mtime() - time_solve;
     }
     if(!nopost)
@@ -139,12 +168,12 @@ bool vfem_solve(VFEM & v, const string & config, bool nosolve, bool nopost, cons
 class cl_param
 {
 public:
-    bool nosolve;
+    solve_mode mode;
     bool nopost;
     string config;
     cl_param()
     {
-        nosolve = false;
+        mode = MODE_NORMAL;
         nopost = false;
         config = "config.ini";
     }
@@ -242,9 +271,9 @@ int main(int argc, char * argv [])
 #endif
             if(delim_pos != string::npos)
                 name = name.substr(delim_pos + 1);
-            cout << name << " [-nosolve] [-nopost] [config.ini]" << endl;
-            cout << name << " -diff [-nosolve] [-nopost] master.ini [-nosolve] [-nopost] slave.ini diff.ini" << endl;
-            cout << name << " -diff_simple [-nosolve] [-nopost] master.ini [-nosolve] [-nopost] slave.ini diff.ini" << endl;
+            cout << name << " [-nosolve|-continue] [-nopost] [config.ini]" << endl;
+            cout << name << " -diff [-nosolve|-continue] [-nopost] master.ini [-nosolve|-continue] [-nopost] slave.ini diff.ini" << endl;
+            cout << name << " -diff_simple [-nosolve|-continue] [-nopost] master.ini [-nosolve|-continue] [-nopost] slave.ini diff.ini" << endl;
             cout << name << " -help" << endl;
             return paused(0);
         }
@@ -253,7 +282,9 @@ int main(int argc, char * argv [])
         else if(strcmp(argv[i], "-diff_simple") == 0 || strcmp(argv[i], "--diff_simple") == 0)
             diff_type = DIFF_SIMPLE;
         else if(strcmp(argv[i], "-nosolve") == 0 || strcmp(argv[i], "--nosolve") == 0)
-            cl_param_curr.nosolve = true;
+            cl_param_curr.mode = MODE_NOSOLVE;
+        else if(strcmp(argv[i], "-continue") == 0 || strcmp(argv[i], "--continue") == 0)
+            cl_param_curr.mode = MODE_CONTINUE;
         else if(strcmp(argv[i], "-nopost") == 0 || strcmp(argv[i], "--nopost") == 0)
             cl_param_curr.nopost = true;
         else if(argv[i][0] != '-')
@@ -282,7 +313,7 @@ int main(int argc, char * argv [])
     if(diff_type == DIFF_NO)
     {
         VFEM v;
-        if(!vfem_solve(v, cl_params[0].config, cl_params[0].nosolve, cl_params[0].nopost, timebuf))
+        if(!vfem_solve(v, cl_params[0].config, cl_params[0].mode, cl_params[0].nopost, timebuf))
             return paused(1);
     }
     else
@@ -291,9 +322,9 @@ int main(int argc, char * argv [])
         if(!input_diff(cl_params[2].config, areas))
             return paused(1);
         VFEM master, slave;
-        if(!vfem_solve(master, cl_params[0].config, cl_params[0].nosolve, cl_params[0].nopost, timebuf))
+        if(!vfem_solve(master, cl_params[0].config, cl_params[0].mode, cl_params[0].nopost, timebuf))
             return paused(1);
-        if(!vfem_solve(slave, cl_params[1].config, cl_params[1].nosolve, cl_params[1].nopost, timebuf))
+        if(!vfem_solve(slave, cl_params[1].config, cl_params[1].mode, cl_params[1].nopost, timebuf))
             return paused(1);
         if(diff_type == DIFF_SIMPLE)
             compare_simple(master, slave, areas);
