@@ -46,7 +46,24 @@ void print_time(unsigned long msec, const string & descr)
 {
     cout << descr << ": \t" << msec << " msec \t(";
     unsigned long seconds = msec / 1000;
-    if(seconds > 3600)
+    if(seconds > 604800)
+    {
+        unsigned long w = seconds / 604800;
+        unsigned long d = (seconds - w * 604800) / 86400;
+        unsigned long h = (seconds - w * 604800 - d * 86400) / 3600;
+        unsigned long m = (seconds - w * 604800 - d * 86400 - h * 3600) / 60;
+        unsigned long s = seconds - w * 604800 - d * 86400 - h * 3600 - m * 60;
+        cout << w << " weeks " << d << " days " << h << " hr " << m << " min " << s << " sec";
+    }
+    else if(seconds > 86400)
+    {
+        unsigned long d = seconds / 86400;
+        unsigned long h = (seconds - d * 86400) / 3600;
+        unsigned long m = (seconds - d * 86400 - h * 3600) / 60;
+        unsigned long s = seconds - d * 86400 - h * 3600 - m * 60;
+        cout << d << " days " << h << " hr " << m << " min " << s << " sec";
+    }
+    else if(seconds > 3600)
     {
         unsigned long h = seconds / 3600;
         unsigned long m = (seconds - h * 3600) / 60;
