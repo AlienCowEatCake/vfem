@@ -1,15 +1,13 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#include <cstdlib>
-#include <string>
-#include <map>
+#include "../common/common.h"
+#include "../common/matrix.h"
+#include "../common/cubatures.h"
 #include "../config/evaluator/evaluator.h"
 #include "../vfem/phys.h"
 #include "../geometry/point.h"
 #include "../geometry/vector3.h"
-#include "../common/matrix.h"
-#include "../common/cubatures.h"
 
 using namespace std;
 

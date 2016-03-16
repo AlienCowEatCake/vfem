@@ -39,6 +39,7 @@
 #include <map>
 #include <utility>
 #include <cassert>
+#include <cctype>
 
 using namespace std;
 

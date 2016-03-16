@@ -1,8 +1,7 @@
 #ifndef CUBATURES_H_INCLUDED
 #define CUBATURES_H_INCLUDED
 
-#include <cstring>
-#include <cmath>
+#include "../common/common.h"
 
 // ============================================================================
 

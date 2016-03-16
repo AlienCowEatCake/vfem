@@ -1,6 +1,7 @@
 #if !defined PROBLEMS_H_INCLUDED
 #define PROBLEMS_H_INCLUDED
 
+#include "../common/common.h"
 #include "../vfem/vfem.h"
 
 // Контейнер области для сравнения

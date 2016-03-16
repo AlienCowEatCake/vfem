@@ -1,8 +1,4 @@
 #include "config.h"
-#include <fstream>
-#include <cassert>
-#include <cctype>
-#include <algorithm>
 
 // ============================================================================
 
