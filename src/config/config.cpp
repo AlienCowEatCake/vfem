@@ -30,6 +30,9 @@ evaluator3::evaluator3()
 
 config_type::config_type()
 {
+    jit_types_table[evaluator3::JIT_DISABLE] = "disable";
+    jit_types_table[evaluator3::JIT_INLINE]  = "inline";
+    jit_types_table[evaluator3::JIT_EXTCALL] = "extcall";
     load_defaults();
 }
 
@@ -121,103 +124,70 @@ bool config_type::load(const string & filename)
 {
     cout << "Reading config file ..." << endl;
 
-    ifstream ifs(filename.c_str());
-    if(!ifs.good())
+    inifile cfg_file(filename);
+    if(!cfg_file.good())
     {
         cout << "[Config] Error in " << __FILE__ << ":" << __LINE__
              << " while reading file " << filename << endl;
         return init(false);
     }
 
-    string line;
-    getline(ifs, line);
-    line = trim(line);
-    do
-    {
-        if(line.length() > 1 && line[0] == '[')
-        {
-            line = to_lowercase(line.substr(1, line.length() - 2));
-            string section = line, subsection;
-            size_t dot_pos = line.find_first_of(".");
-            if(dot_pos != string::npos)
-            {
-                section = line.substr(0, dot_pos);
-                subsection = line.substr(dot_pos + 1);
-            }
-            //cout << "section: " << section << "\nsubsection: " << subsection << endl;
+    // Секция VFEM
 
-            if(section == "vfem")
-            {
-                do
-                {
-                    getline(ifs, line);
-                    line = trim(line);
-                    if(line.length() > 1 && line[0] != ';')
-                    {
-                        size_t eq_pos = line.find_first_of("=");
-                        if(eq_pos != string::npos)
-                        {
-                            string param = to_lowercase(trim(line.substr(0, eq_pos)));
-                            string value = trim(line.substr(eq_pos + 1));
-                            if(value.length() > 1 && value[0] == '\"')
-                                value = trim(value.substr(1, value.length() - 2));
-                            stringstream sst(value);
-                            if(param == "basis_order")                  sst >> basis.order;
-                            else if(param == "basis_type")              sst >> basis.type;
-                            else if(param == "eps_slae")                sst >> eps_slae;
-                            else if(param == "eps_slae_bound")          sst >> eps_slae_bound;
-                            else if(param == "gamma_v_cycle_full")      sst >> gamma_v_cycle_full;
-                            else if(param == "gamma_v_cycle_ker")       sst >> gamma_v_cycle_ker;
-                            else if(param == "gamma_v_cycle_0")         sst >> gamma_v_cycle_0;
-                            else if(param == "max_iter_v_cycle_local")  sst >> max_iter_v_cycle_local;
-                            else if(param == "max_iter")                sst >> max_iter;
-                            else if(param == "filename_mesh")           sst >> filename_mesh;
-                            else if(param == "filename_phys")           sst >> filename_phys;
-                            else if(param == "filename_slae")           sst >> filename_slae;
-                            else if(param == "filename_pml")            sst >> filename_pml;
-                            else if(param == "jit_type")
-                            {
-                                value = to_lowercase(value);
-                                if     (value == "inline")  jit_type = evaluator3::JIT_INLINE;
-                                else if(value == "extcall") jit_type = evaluator3::JIT_EXTCALL;
-                                else if(value == "disable") jit_type = evaluator3::JIT_DISABLE;
-                                else cout << "[Config] Unknown JIT-compiler type \"" << value << "\" in section \""
-                                          << section << (subsection.empty() ? string("") : (string(".") + subsection))
-                                          << "\"" << endl;
-                            }
-                            else if(param == "v_cycle_enabled")
-                            {
-                                value = to_lowercase(value);
-                                if(value == "yes" || value == "true" || value == "1")
-                                    v_cycle_enabled = true;
-                                else
-                                    v_cycle_enabled = false;
-                            }
-                            else if(param == "tet_integration_order")
-                            {
-                                size_t order = 0;
-                                sst >> order;
-                                basis.tet_int.init(order);
-                            }
-                            else if(param == "tr_integration_order")
-                            {
-                                size_t order = 0;
-                                sst >> order;
-                                basis.tr_int.init(order);
-                            }
-                            else cout << "[Config] Unsupported param \"" << param << "\" in section \"" << section
-                                      << (subsection.empty() ? string("") : (string(".") + subsection)) << "\"" << endl;
-                            //cout << "  param = " << param << endl;
-                            //cout << "  value = " << value << endl;
-                        }
-                    }
-                }
-                while(ifs.good() && !(line.length() > 1 && line[0] == '['));
-            }
+    basis.order             = cfg_file.get("vfem", "", "basis_order",            basis.order);
+    basis.type              = cfg_file.get("vfem", "", "basis_type",             basis.type);
+    eps_slae                = cfg_file.get("vfem", "", "eps_slae",               eps_slae);
+    eps_slae_bound          = cfg_file.get("vfem", "", "eps_slae_bound",         eps_slae_bound);
+    gamma_v_cycle_full      = cfg_file.get("vfem", "", "gamma_v_cycle_full",     gamma_v_cycle_full);
+    gamma_v_cycle_ker       = cfg_file.get("vfem", "", "gamma_v_cycle_ker",      gamma_v_cycle_ker);
+    gamma_v_cycle_0         = cfg_file.get("vfem", "", "gamma_v_cycle_0",        gamma_v_cycle_0);
+    max_iter_v_cycle_local  = cfg_file.get("vfem", "", "max_iter_v_cycle_local", max_iter_v_cycle_local);
+    max_iter                = cfg_file.get("vfem", "", "max_iter",               max_iter);
+    filename_mesh           = cfg_file.get("vfem", "", "filename_mesh",          filename_mesh);
+    filename_phys           = cfg_file.get("vfem", "", "filename_phys",          filename_phys);
+    filename_slae           = cfg_file.get("vfem", "", "filename_slae",          filename_slae);
+    filename_pml            = cfg_file.get("vfem", "", "filename_pml",           filename_pml);
+    string jit_type_str     = cfg_file.get("vfem", "", "jit_type",               jit_types_table[jit_type]);
+    v_cycle_enabled         = cfg_file.get("vfem", "", "v_cycle_enabled",        v_cycle_enabled);
+
+    int tet_order           = cfg_file.get("vfem", "", "tet_integration_order",  (int)-1);
+    if(tet_order > 0)
+        basis.tet_int.init((size_t)tet_order);
+
+    int tr_order            = cfg_file.get("vfem", "", "tr_integration_order",   (int)-1);
+    if(tr_order > 0)
+        basis.tr_int.init((size_t)tr_order);
+
+    jit_type_str = to_lowercase(jit_type_str);
+    for(map<evaluator3::jit_types, string>::iterator it = jit_types_table.begin(); it != jit_types_table.end(); ++it)
+    {
+        if(it->second == jit_type_str)
+            jit_type = it->first;
+    }
+
+    // Секция Boundary
+
+    list<size_t> boundaries = cfg_file.enumerate("boundary", (size_t)1);
+    for(list<size_t>::iterator it = boundaries.begin(); it != boundaries.end(); ++it)
+    {
+        size_t subsection = * it;
+        array_t<evaluator<complex<double> >, 3> * curr_parser = NULL;
+        if(subsection == 0)
+            curr_parser = & boundary.default_value;
+        else
+            curr_parser = & boundary.values[subsection];
+
+        curr_parser[0] = cfg_file.get("boundary", subsection, )
+    }
+
+
+
+
+
 
             else if(section == "boundary" || section == "right" || section == "analytical")
             {
-                array_t<evaluator<complex<double> >, 3> * curr_parser = NULL;
+
                 if(section == "boundary")
                 {
                     if(subsection.empty())

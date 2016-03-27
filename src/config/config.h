@@ -4,6 +4,7 @@
 #include "../common/common.h"
 #include "../common/matrix.h"
 #include "../common/cubatures.h"
+#include "../config/inifile.h"
 #include "../config/evaluator/evaluator.h"
 #include "../vfem/phys.h"
 #include "../geometry/point.h"
@@ -164,6 +165,8 @@ public:
     string filename_slae;
     // Тип JIT-компилятора в вычислителях
     evaluator3::jit_types jit_type;
+    // Перевод типа JIT-компилятора из enum в string
+    map<evaluator3::jit_types, string> jit_types_table;
 
     // ===== Boundary =====
 

@@ -6,6 +6,7 @@ CONFIG += warn_on
 
 SOURCES += \
     src/main.cpp \
+    src/config/inifile.cpp \
     src/config/config.cpp \
     src/config/evaluator/evaluator_internal/transition_table.cpp \
     src/config/evaluator/evaluator_internal/jit/common.cpp \
@@ -35,6 +36,7 @@ SOURCES += \
     src/solvers/COCG_LLT_Smooth_MKL.cpp
 
 HEADERS += \
+    src/config/inifile.h \
     src/config/config.h \
     src/config/evaluator/evaluator.h \
     src/config/evaluator/evaluator_operations.h \
