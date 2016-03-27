@@ -98,3 +98,9 @@ unix:QMAKE_LIBS += -lrt
     QMAKE_CXXFLAGS_RELEASE -= -GS
     QMAKE_CXXFLAGS_RELEASE *= -GS-
 }
+
+DESTDIR = .
+OBJECTS_DIR = build
+MOC_DIR = build
+RCC_DIR = build
+UI_DIR = build

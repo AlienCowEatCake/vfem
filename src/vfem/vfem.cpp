@@ -218,8 +218,8 @@ void VFEM::generate_surf_portrait()
 }
 
 // Добавление локальных матриц от одного КЭ в глобальную
-template<typename U, typename V>
-void VFEM::process_fe(const U * curr_fe, const V *)
+template<typename T>
+void VFEM::process_fe(const T * curr_fe)
 {
     // Получение физических параметров для заданного КЭ
     phys_area ph = curr_fe->get_phys_area();
@@ -254,25 +254,20 @@ void VFEM::process_fe(const U * curr_fe, const V *)
         dof[i] = get_tet_dof(curr_fe, i);
 
     // Получение локальных матриц и правой части
-    V matrix_G = curr_fe->G();
-    V matrix_M = curr_fe->M();
+    matrix_t<complex<double> > matrix_MpG = curr_fe->MpG();
     array_t<complex<double> > array_rp = curr_fe->rp(func_rp, &params_object);
 
     // Основная матрица
     for(size_t i = 0; i < config.basis.tet_bf_num; i++)
     {
-        complex<double> add;
         size_t i_num = dof[i];
         for(size_t j = 0; j < i; j++)
         {
             size_t j_num = dof[j];
-            add = matrix_G[i][j] / ph.mu + matrix_M[i][j] * k2;
-            slae.add(i_num, j_num, add);
+            slae.add(i_num, j_num, matrix_MpG[i][j]);
         }
-        add = matrix_G[i][i] / ph.mu + matrix_M[i][i] * k2;
-        slae.di[i_num] += add;
-        add = array_rp[i];
-        slae.rp[i_num] += add;
+        slae.di[i_num] += matrix_MpG[i][i];
+        slae.rp[i_num] += array_rp[i];
     }
 
     // Матрица ядра
@@ -282,13 +277,13 @@ void VFEM::process_fe(const U * curr_fe, const V *)
         for(size_t i = 0; i < config.basis.tet_ker_bf_num; i++)
             ker_dof[i] = get_tet_ker_dof(curr_fe, i);
 
-        V matrix_K = curr_fe->K();
+        matrix_t<complex<double> > matrix_K = curr_fe->K();
         for(size_t i = 0; i < config.basis.tet_ker_bf_num; i++)
         {
             size_t i_num = ker_dof[i];
             for(size_t j = 0; j < i; j++)
-                ker_slae.add(i_num, ker_dof[j], matrix_K[i][j] * k2);
-            ker_slae.di[i_num] += matrix_K[i][i] * k2;
+                ker_slae.add(i_num, ker_dof[j], matrix_K[i][j]);
+            ker_slae.di[i_num] += matrix_K[i][i];
         }
     }
 }
@@ -304,10 +299,10 @@ void VFEM::assemble_matrix()
         show_progress("", k, fes.size());
 #if defined VFEM_USE_PML
         if(!is_pml(fes[k].barycenter, &fes[k], &phys_pml))
-            process_fe(fes[k].to_std(), (matrix_t<double> *)NULL);
+            process_fe(fes[k].to_std());
         else
 #endif
-            process_fe(&fes[k], (l_matrix *)NULL);
+            process_fe(&fes[k]);
     }
 }
 

@@ -435,86 +435,80 @@ tetrahedron_base::normL2(const array_t<complex<double> > & q_true) const
 
 // ============================================================================
 
-double tetrahedron::integrate_w(size_t i, size_t j) const
+// Локальная матрица полного пространства
+matrix_t<complex<double> >
+tetrahedron::MpG() const
 {
     const tet_integration_config * tet_integration = &(basis->tet_int);
-    double result = 0.0;
-    for(size_t k = 0; k < tet_integration->gauss_num; k++)
-        result += tet_integration->gauss_weights[k] *
-                  w(i, gauss_points[k]) *
-                  w(j, gauss_points[k]);
-    return result * jacobian;
-}
-
-double tetrahedron::integrate_rotw(size_t i, size_t j) const
-{
-    const tet_integration_config * tet_integration = &(basis->tet_int);
-    double result = 0.0;
-    for(size_t k = 0; k < tet_integration->gauss_num; k++)
-        result += tet_integration->gauss_weights[k] *
-                  rotw(i, gauss_points[k]) *
-                  rotw(j, gauss_points[k]);
-    return result * jacobian;
-}
-
-complex<double> tetrahedron::integrate_fw(eval_func func, size_t i, void * data) const
-{
-    const tet_integration_config * tet_integration = &(basis->tet_int);
-    complex<double> result = 0.0;
-    for(size_t k = 0; k < tet_integration->gauss_num; k++)
-        result += tet_integration->gauss_weights[k] *
-                  func(gauss_points[k], get_phys_area(), data) *
-                  w(i, gauss_points[k]);
-    return result * jacobian;
-}
-
-double tetrahedron::integrate_kerw(size_t i, size_t j) const
-{
-    const tet_integration_config * tet_integration = &(basis->tet_int);
-    double result = 0.0;
-    for(size_t k = 0; k < tet_integration->gauss_num; k++)
-        result += tet_integration->gauss_weights[k] *
-                  kerw(i, gauss_points[k]) *
-                  kerw(j, gauss_points[k]);
-    return result * jacobian;
-}
-
-matrix_t<double>
-tetrahedron::G() const
-{
-    matrix_t<double> matr(basis->tet_bf_num, basis->tet_bf_num);
+    matrix_t<complex<double> > matr(basis->tet_bf_num, basis->tet_bf_num);
     for(size_t i = 0; i < basis->tet_bf_num; i++)
+    {
         for(size_t j = 0; j <= i; j++)
-            matr[j][i] = matr[i][j] = integrate_rotw(i, j);
+        {
+            complex<double> value(0, 0);
+            for(size_t k = 0; k < tet_integration->gauss_num; k++)
+            {
+                complex<double> k2(- phys->epsilon * phys->omega * phys->omega, phys->omega * phys->sigma);
+                // Интеграл от бф
+                vector3 wi = w(i, gauss_points[k]);
+                vector3 wj = w(j, gauss_points[k]);
+                // Интеграл от ротора бф
+                vector3 curlwi = rotw(i, gauss_points[k]);
+                vector3 curlwj = rotw(j, gauss_points[k]);
+                // Почти элемент локальной матрицы
+                value += tet_integration->gauss_weights[k] * (wi * wj * k2 + curlwi * curlwj / phys->mu);
+            }
+            matr[j][i] = matr[i][j] = value * jacobian;
+        }
+    }
     return matr;
 }
 
-matrix_t<double>
-tetrahedron::M() const
-{
-    matrix_t<double> matr(basis->tet_bf_num, basis->tet_bf_num);
-    for(size_t i = 0; i < basis->tet_bf_num; i++)
-        for(size_t j = 0; j <= i; j++)
-            matr[j][i] = matr[i][j] = integrate_w(i, j);
-    return matr;
-}
-
+// Локальная правая часть
 array_t<complex<double> >
 tetrahedron::rp(eval_func func, void * data) const
 {
+    const tet_integration_config * tet_integration = &(basis->tet_int);
     array_t<complex<double> > arr(basis->tet_bf_num);
     for(size_t i = 0; i < basis->tet_bf_num; i++)
-        arr[i] = integrate_fw(func, i, data);
+    {
+        complex<double> value(0, 0);
+        for(size_t k = 0; k < tet_integration->gauss_num; k++)
+        {
+            // Интеграл от ф-и правой части на бф
+            vector3 wi = w(i, gauss_points[k]);
+            cvector3 f = func(gauss_points[k], get_phys_area(), data);
+            // Почти элемент локальной правой части
+            value += tet_integration->gauss_weights[k] * f * wi;
+        }
+        arr[i] = value * jacobian;
+    }
     return arr;
 }
 
-matrix_t<double>
+// Локальная матрица ядра
+matrix_t<complex<double> >
 tetrahedron::K() const
 {
-    matrix_t<double> matr(basis->tet_ker_bf_num, basis->tet_ker_bf_num);
+    const tet_integration_config * tet_integration = &(basis->tet_int);
+    matrix_t<complex<double> > matr(basis->tet_ker_bf_num, basis->tet_ker_bf_num);
     for(size_t i = 0; i < basis->tet_ker_bf_num; i++)
+    {
         for(size_t j = 0; j <= i; j++)
-            matr[j][i] = matr[i][j] = integrate_kerw(i, j);
+        {
+            complex<double> value(0, 0);
+            for(size_t k = 0; k < tet_integration->gauss_num; k++)
+            {
+                complex<double> k2(- phys->epsilon * phys->omega * phys->omega, phys->omega * phys->sigma);
+                // Интегралы от базисных функций ядра
+                vector3 kerwi = kerw(i, gauss_points[k]);
+                vector3 kerwj = kerw(j, gauss_points[k]);
+                // Почти элемент локальной матрицы
+                value += tet_integration->gauss_weights[k] * kerwi * kerwj * k2;
+            }
+            matr[j][i] = matr[i][j] = value * jacobian;
+        }
+    }
     return matr;
 }
 

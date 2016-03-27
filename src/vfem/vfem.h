@@ -18,10 +18,8 @@
 
 #if defined VFEM_USE_PML
 typedef tetrahedron_pml finite_element;
-typedef matrix_t<complex<double> > l_matrix;
 #else
 typedef tetrahedron finite_element;
-typedef matrix_t<double> l_matrix;
 #endif
 
 // Правая часть
@@ -153,8 +151,8 @@ public:
 
 protected:
     // Добавление локальных матриц от одного КЭ в глобальную
-    template<typename U, typename V>
-    void process_fe(const U * fe, const V *);
+    template<typename T>
+    void process_fe(const T * fe);
 
     // Добавление ребра в множество ребер
     size_t add_edge(edge ed, set<edge> & edges_set);
