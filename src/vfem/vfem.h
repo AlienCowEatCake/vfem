@@ -148,6 +148,8 @@ public:
     void apply_edges_sources();
     // Применение точечных источников
     void apply_point_sources();
+    // Применение электродов
+    void apply_electrodes();
 
 protected:
     // Добавление локальных матриц от одного КЭ в глобальную

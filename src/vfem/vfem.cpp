@@ -472,8 +472,114 @@ void VFEM::apply_edges_sources()
     for(size_t k = 0; k < edges_src.size(); k++)
     {
         show_progress("", k, edges_src.size());
-        size_t pos = edges_src[k].num; // Заносим только в роторные функции!
-        slae.rp[pos] += complex<double>(0.0, -1.0) * edges_src[k].phys->J0 * edges_src[k].phys->omega * edges_src[k].direction;
+        if(edges_src[k].phys->type_of_bounds == 0)
+        {
+            size_t pos = edges_src[k].num; // Заносим только в роторные функции!
+            slae.rp[pos] += complex<double>(0.0, -1.0) * edges_src[k].phys->J0 * edges_src[k].phys->omega * edges_src[k].direction;
+        }
+    }
+}
+
+void VFEM::apply_electrodes()
+{
+    cout << " > Applying electrodes ..." << endl;
+    map<size_t, complex<double> > dof_first_val;
+    set<size_t> ker_dof_first_temp;
+    for(size_t k = 0; k < edges_src.size(); k++)
+    {
+        show_progress("generating", k, edges_src.size());
+        if(edges_src[k].phys->type_of_bounds == 1)
+        {
+            vector<size_t> dof, ker_dof;
+            dof.push_back(edges_src[k].num);
+            ker_dof.push_back(edges_src[k].edge_main->nodes[0]->num);
+            ker_dof.push_back(edges_src[k].edge_main->nodes[1]->num);
+            // TODO: Нужно ли учитывать остальные степени свободы - большой вопрос
+            if(config.basis.order > 1 || (config.basis.order == 1 && config.basis.type == 2))
+            {
+                dof.push_back(edges_src[k].num + edges.size());
+                ker_dof.push_back(edges_src[k].num + nodes.size());
+            }
+            if(config.basis.order > 2 || (config.basis.order == 2 && config.basis.type == 2))
+            {
+                dof.push_back(edges_src[k].num + 2 * edges.size() + 3 * faces.size());
+                ker_dof.push_back(edges_src[k].num + faces.size() + edges.size() + nodes.size());
+            }
+
+            dof_first_val[dof[0]] = edges_src[k].phys->E0 * edges_src[k].direction * edges_src[k].length();
+            for(size_t i = 1; i < dof.size(); i++)
+                dof_first_val[dof[i]] = 0.0;
+
+            for(size_t i = 0; i < ker_dof.size(); i++)
+                ker_dof_first_temp.insert(ker_dof[i]);
+        }
+    }
+
+    if(dof_first_val.size() > 0)
+    {
+        // Учет первых краевых
+        for(size_t k = 0; k < slae.n; k++)
+        {
+            show_progress("applying", k, slae.n);
+            if(dof_first_val.find(k) != dof_first_val.end())
+            {
+                complex<double> val = dof_first_val[k];
+                slae.x[k] = slae.rp[k] = val;
+                slae.di[k] = 1.0;
+                for(size_t i = slae.ig[k]; i < slae.ig[k + 1]; i++)
+                {
+                    if(dof_first_val.find(slae.jg[i]) == dof_first_val.end())
+                        slae.rp[slae.jg[i]] -= slae.gg[i] * val;
+                    slae.gg[i] = 0.0;
+                }
+            }
+            else
+            {
+                for(size_t i = slae.ig[k]; i < slae.ig[k + 1]; i++)
+                {
+                    if(dof_first_val.find(slae.jg[i]) != dof_first_val.end())
+                    {
+                        complex<double> val = dof_first_val[slae.jg[i]];
+                        slae.rp[k] -= slae.gg[i] * val;
+                        slae.gg[i] = 0.0;
+                    }
+                }
+            }
+        }
+
+        if(config.v_cycle_enabled)
+        {
+            // Первые краевые для матрицы ядра
+            for(size_t k = 0; k < ker_slae.n; k++)
+            {
+                // Пробегаем по всей матрице
+                if(ker_dof_first_temp.find(k) != ker_dof_first_temp.end())
+                {
+                    ker_slae.di[k] = 1.0;
+                    for(size_t i = ker_slae.ig[k]; i < ker_slae.ig[k + 1]; i++)
+                        ker_slae.gg[i] = 0.0;
+                }
+                else
+                {
+                    for(size_t i = ker_slae.ig[k]; i < ker_slae.ig[k + 1]; i++)
+                    {
+                        if(ker_dof_first_temp.find(ker_slae.jg[i]) != ker_dof_first_temp.end())
+                            ker_slae.gg[i] = 0.0;
+                    }
+                }
+            }
+        }
+
+        // Переносим степени свободы в основной массив
+        for(map<size_t, complex<double> >::iterator it = dof_first_val.begin(); it != dof_first_val.end(); ++it)
+        {
+            if(config.boundary_enabled)
+                global_to_local[it->first] = numeric_limits<size_t>::max();
+            else
+                dof_first.insert(it->first);
+        }
+        for(set<size_t>::iterator it = ker_dof_first_temp.begin(); it != ker_dof_first_temp.end(); ++it)
+            ker_dof_first.insert(*it);
     }
 }
 
@@ -533,6 +639,7 @@ void VFEM::make_data()
     apply_point_sources();
     apply_edges_sources();
     applying_bound();
+    apply_electrodes();
 }
 
 void VFEM::calculate_diff()
