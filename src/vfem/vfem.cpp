@@ -624,12 +624,12 @@ cvector3 VFEM::rotor(const point & p, const finite_element * fe) const
     return result;
 }
 
-complex<double> VFEM::div(const point & p) const
+complex<double> VFEM::divergence(const point & p) const
 {
-    return div(p, get_fe(p));
+    return divergence(p, get_fe(p));
 }
 
-complex<double> VFEM::div(const point & p, const finite_element * fe) const
+complex<double> VFEM::divergence(const point & p, const finite_element * fe) const
 {
     complex<double> result;
     if(fe)

@@ -25,6 +25,13 @@ namespace tet_basis_indexes
     };
 }
 
+// Константы для тетраэдров
+namespace tet_common
+{
+    // Шаг дифференцирования сигмы
+    const double dsigma_h = 1e-5;
+}
+
 // ============================================================================
 
 tetrahedron_base::tetrahedron_base()
@@ -497,6 +504,12 @@ tetrahedron::MpG() const
                 phys_editable->sigma.set_var("z", gauss_points[k].z);
                 double sigma = 0.0;
                 phys_editable->sigma.calculate(sigma);
+
+                // TODO: Хз, что с этим делать
+//                phys_editable->sigma.set_var("z", gauss_points[k].z + tet_common::dsigma_h);
+//                double dsigma_dz = 0.0;
+//                phys_editable->sigma.calculate(dsigma_dz);
+//                dsigma_dz = (dsigma_dz - sigma) / tet_common::dsigma_h;
 
                 complex<double> k2(- phys->epsilon * phys->omega * phys->omega, phys->omega * sigma);
                 // Интеграл от бф
