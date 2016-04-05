@@ -75,8 +75,8 @@ public:
     cvector3 rotor(const point & p) const;
     cvector3 rotor(const point & p, const finite_element * fe) const;
     // Дивергенция решения в точке
-    complex<double> div(const point & p) const;
-    complex<double> div(const point & p, const finite_element * fe) const;
+    complex<double> divergence(const point & p) const;
+    complex<double> divergence(const point & p, const finite_element * fe) const;
 
     // Конечные элементы (тетраэдры)
     vector<finite_element> fes;
