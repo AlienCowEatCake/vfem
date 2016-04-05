@@ -228,7 +228,13 @@ tetrahedron_pml::MpG() const
             complex<double> value(0, 0);
             for(size_t k = 0; k < tet_integration->gauss_num; k++)
             {
-                complex<double> k2(- phys->epsilon * phys->omega * phys->omega, phys->omega * phys->sigma);
+                // TODO: Костыль
+                phys_area * phys_editable = const_cast<phys_area *>(phys);
+                phys_editable->sigma.set_var("z", gauss_points[k].z);
+                double sigma = 0.0;
+                phys_editable->sigma.calculate(sigma);
+
+                complex<double> k2(- phys->epsilon * phys->omega * phys->omega, phys->omega * sigma);
                 // Интеграл от бф
                 cvector3 wi = w_pml(i, gauss_points_pml[k]).cj();
                 cvector3 wj = w_pml(j, gauss_points_pml[k]).cj();
@@ -285,7 +291,13 @@ tetrahedron_pml::K() const
             complex<double> value(0, 0);
             for(size_t k = 0; k < tet_integration->gauss_num; k++)
             {
-                complex<double> k2(- phys->epsilon * phys->omega * phys->omega, phys->omega * phys->sigma);
+                // TODO: Костыль
+                phys_area * phys_editable = const_cast<phys_area *>(phys);
+                phys_editable->sigma.set_var("z", gauss_points[k].z);
+                double sigma = 0.0;
+                phys_editable->sigma.calculate(sigma);
+
+                complex<double> k2(- phys->epsilon * phys->omega * phys->omega, phys->omega * sigma);
                 // Интегралы от базисных функций ядра
                 cvector3 kerwi = kerw_pml(i, gauss_points_pml[k], gauss_points[k]).cj();
                 cvector3 kerwj = kerw_pml(j, gauss_points_pml[k], gauss_points[k]).cj();

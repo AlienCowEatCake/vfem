@@ -59,7 +59,7 @@ bool VFEM::input_phys(const string & phys_filename)
 
     double mu_default    = consts::mu0;
     double eps_default   = consts::epsilon0;
-    double sigma_default = 0.0;
+    evaluator<double> sigma_default("0.0");
     double omega_global  = -1.0 * 2.0 * M_PI;
 
     string to_lowercase(const string & str);
@@ -103,7 +103,7 @@ bool VFEM::input_phys(const string & phys_filename)
                             if(param == "frequency")  omega_global = tmp * 2.0 * M_PI;
                             else if(param == "mu")    mu_default = tmp * consts::mu0;
                             else if(param == "eps")   eps_default = tmp * consts::epsilon0;
-                            else if(param == "sigma") sigma_default = tmp;
+                            else if(param == "sigma") sigma_default.parse(value);
                             else cout << "[Phys Config] Unsupported param \"" << param << "\" in section \""
                                       << section << (subsection.empty() ? string("") : (string(".") + subsection))
                                       << "\"" << endl;
@@ -134,7 +134,7 @@ bool VFEM::input_phys(const string & phys_filename)
                     ph->type_of_elem = MSH_TET_4;
                     ph->mu = mu_default;
                     ph->epsilon = eps_default;
-                    ph->sigma = sigma_default;
+                    //ph->sigma = sigma_default;
                     ph->omega = omega_global;
                     ph->type_of_bounds = 0;
                     ph->J0 = 0.0;
@@ -158,7 +158,7 @@ bool VFEM::input_phys(const string & phys_filename)
                                 sst >> tmp;
                                 if(param == "mu")         ph->mu = tmp * consts::mu0;
                                 else if(param == "eps")   ph->epsilon = tmp * consts::epsilon0;
-                                else if(param == "sigma") ph->sigma = tmp;
+                                else if(param == "sigma") ph->sigma.parse(value);
                                 else cout << "[Phys Config] Unsupported param \"" << param << "\" in section \""
                                           << section << (subsection.empty() ? string("") : (string(".") + subsection))
                                           << "\"" << endl;
@@ -466,23 +466,41 @@ bool VFEM::input_phys(const string & phys_filename)
 
     phys_param.close();
 
+    for(map<phys_id, phys_area>::iterator it = phys.begin(); it != phys.end(); ++it)
+    {
+        if(!it->second.sigma.is_parsed())
+        {
+            cout << "[Phys Config] Bad sigma in phys area \"" << it->first.gmsh_num << "\"" << endl;
+            return false;
+        }
+        switch(config.jit_type)
+        {
+        case evaluator3::JIT_EXTCALL:
+            it->second.sigma.compile_extcall();
+            break;
+        case evaluator3::JIT_INLINE:
+            it->second.sigma.compile_inline();
+            break;
+        default:
+            break;
+        }
+    }
 
     // Заполним данные и в вычисляемых функциях
     for(map<size_t, array_t<evaluator<complex<double> >, 3> >::iterator
         it = config.analytical.values.begin(); it != config.analytical.values.end(); ++it)
     {
         phys_area * ph = &(phys.find(phys_id(MSH_TET_4, it->first))->second);
-        complex<double> k2(- ph->omega * ph->omega * ph->epsilon,
-                           ph->omega * ph->sigma);
+        //complex<double> k2(- ph->omega * ph->omega * ph->epsilon, ph->omega * ph->sigma);
         for(size_t i = 0; i < 3; i++)
         {
             evaluator<complex<double> > * ev_curr = &(it->second[i]);
             ev_curr->set_var("J0", ph->J0);
             ev_curr->set_var("omega", omega_global);
             ev_curr->set_var("epsilon", ph->epsilon);
-            ev_curr->set_var("sigma", ph->sigma);
+            //ev_curr->set_var("sigma", ph->sigma);
             ev_curr->set_var("mu", ph->mu);
-            ev_curr->set_var("k2", k2);
+            //ev_curr->set_var("k2", k2);
             ev_curr->simplify();
             switch(config.jit_type)
             {
@@ -501,17 +519,16 @@ bool VFEM::input_phys(const string & phys_filename)
         it = config.boundary.values.begin(); it != config.boundary.values.end(); ++it)
     {
         phys_area * ph = &(phys.find(phys_id(MSH_TRI_3, it->first))->second);
-        complex<double> k2(- ph->omega * ph->omega * ph->epsilon,
-                           ph->omega * ph->sigma);
+        //complex<double> k2(- ph->omega * ph->omega * ph->epsilon, ph->omega * ph->sigma);
         for(size_t i = 0; i < 3; i++)
         {
             evaluator<complex<double> > * ev_curr = &(it->second[i]);
             ev_curr->set_var("J0", ph->J0);
             ev_curr->set_var("omega", omega_global);
             ev_curr->set_var("epsilon", ph->epsilon);
-            ev_curr->set_var("sigma", ph->sigma);
+            //ev_curr->set_var("sigma", ph->sigma);
             ev_curr->set_var("mu", ph->mu);
-            ev_curr->set_var("k2", k2);
+            //ev_curr->set_var("k2", k2);
             ev_curr->simplify();
             switch(config.jit_type)
             {
@@ -530,17 +547,16 @@ bool VFEM::input_phys(const string & phys_filename)
         it = config.right.values.begin(); it != config.right.values.end(); ++it)
     {
         phys_area * ph = &(phys.find(phys_id(MSH_TET_4, it->first))->second);
-        complex<double> k2(- ph->omega * ph->omega * ph->epsilon,
-                           ph->omega * ph->sigma);
+        //complex<double> k2(- ph->omega * ph->omega * ph->epsilon, ph->omega * ph->sigma);
         for(size_t i = 0; i < 3; i++)
         {
             evaluator<complex<double> > * ev_curr = &(it->second[i]);
             ev_curr->set_var("J0", ph->J0);
             ev_curr->set_var("omega", omega_global);
             ev_curr->set_var("epsilon", ph->epsilon);
-            ev_curr->set_var("sigma", ph->sigma);
+            //ev_curr->set_var("sigma", ph->sigma);
             ev_curr->set_var("mu", ph->mu);
-            ev_curr->set_var("k2", k2);
+            //ev_curr->set_var("k2", k2);
             ev_curr->simplify();
             switch(config.jit_type)
             {

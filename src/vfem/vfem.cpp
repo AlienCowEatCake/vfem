@@ -223,7 +223,7 @@ void VFEM::process_fe(const T * curr_fe)
 {
     // Получение физических параметров для заданного КЭ
     phys_area ph = curr_fe->get_phys_area();
-    complex<double> k2(- ph.epsilon * ph.omega * ph.omega, ph.omega * ph.sigma);
+    //complex<double> k2(- ph.epsilon * ph.omega * ph.omega, ph.omega * ph.sigma);
 
     // Инициализация параметров вычислителей для правой части
     pair<const config_type *, array_t<evaluator<complex<double> > *, 3> >
@@ -241,10 +241,10 @@ void VFEM::process_fe(const T * curr_fe)
                 evaluator<complex<double> > * ev_curr = &(config.right.default_value[i]);
                 params_object.second[i] = ev_curr;
                 ev_curr->set_var("epsilon", ph.epsilon);
-                ev_curr->set_var("sigma", ph.sigma);
+                //ev_curr->set_var("sigma", ph.sigma);
                 ev_curr->set_var("mu", ph.mu);
                 ev_curr->set_var("J0", ph.J0);
-                ev_curr->set_var("k2", k2);
+                //ev_curr->set_var("k2", k2);
             }
     }
 
@@ -324,7 +324,7 @@ void VFEM::applying_bound()
                 if(ph.type_of_bounds == 1)
                 {
                     // Получение физических параметров для текущего треугольника границы
-                    complex<double> k2(- ph.epsilon * ph.omega * ph.omega, ph.omega * ph.sigma);
+                    //complex<double> k2(- ph.epsilon * ph.omega * ph.omega, ph.omega * ph.sigma);
 
                     // Инициализация параметров вычислителей для первого краевого
                     pair<const config_type *, array_t<evaluator<complex<double> > *, 3> >
@@ -340,10 +340,10 @@ void VFEM::applying_bound()
                             evaluator<complex<double> > * ev_curr = &(config.boundary.default_value[i]);
                             params_object.second[i] = ev_curr;
                             ev_curr->set_var("epsilon", ph.epsilon);
-                            ev_curr->set_var("sigma", ph.sigma);
+                            //ev_curr->set_var("sigma", ph.sigma);
                             ev_curr->set_var("mu", ph.mu);
                             ev_curr->set_var("J0", ph.J0);
-                            ev_curr->set_var("k2", k2);
+                            //ev_curr->set_var("k2", k2);
                         }
 
                     // Получение степеней свободы
@@ -651,7 +651,7 @@ void VFEM::calculate_diff()
     {
         // Получение физических параметров для заданного КЭ
         phys_area ph = fes[k].get_phys_area();
-        complex<double> k2(- ph.epsilon * ph.omega * ph.omega, ph.omega * ph.sigma);
+        //complex<double> k2(- ph.epsilon * ph.omega * ph.omega, ph.omega * ph.sigma);
 
         // Инициализация параметров вычислителей для аналитики
         pair<const config_type *, array_t<evaluator<complex<double> > *, 3> >
@@ -667,10 +667,10 @@ void VFEM::calculate_diff()
                 evaluator<complex<double> > * ev_curr = &(config.analytical.default_value[i]);
                 params_object.second[i] = ev_curr;
                 ev_curr->set_var("epsilon", ph.epsilon);
-                ev_curr->set_var("sigma", ph.sigma);
+                //ev_curr->set_var("sigma", ph.sigma);
                 ev_curr->set_var("mu", ph.mu);
                 ev_curr->set_var("J0", ph.J0);
-                ev_curr->set_var("k2", k2);
+                //ev_curr->set_var("k2", k2);
             }
 
         // Находим локальные веса, связанные с этим КЭ

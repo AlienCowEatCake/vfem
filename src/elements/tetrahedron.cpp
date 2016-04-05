@@ -448,7 +448,13 @@ tetrahedron::MpG() const
             complex<double> value(0, 0);
             for(size_t k = 0; k < tet_integration->gauss_num; k++)
             {
-                complex<double> k2(- phys->epsilon * phys->omega * phys->omega, phys->omega * phys->sigma);
+                // TODO: Костыль
+                phys_area * phys_editable = const_cast<phys_area *>(phys);
+                phys_editable->sigma.set_var("z", gauss_points[k].z);
+                double sigma = 0.0;
+                phys_editable->sigma.calculate(sigma);
+
+                complex<double> k2(- phys->epsilon * phys->omega * phys->omega, phys->omega * sigma);
                 // Интеграл от бф
                 vector3 wi = w(i, gauss_points[k]);
                 vector3 wj = w(j, gauss_points[k]);
@@ -499,7 +505,13 @@ tetrahedron::K() const
             complex<double> value(0, 0);
             for(size_t k = 0; k < tet_integration->gauss_num; k++)
             {
-                complex<double> k2(- phys->epsilon * phys->omega * phys->omega, phys->omega * phys->sigma);
+                // TODO: Костыль
+                phys_area * phys_editable = const_cast<phys_area *>(phys);
+                phys_editable->sigma.set_var("z", gauss_points[k].z);
+                double sigma = 0.0;
+                phys_editable->sigma.calculate(sigma);
+
+                complex<double> k2(- phys->epsilon * phys->omega * phys->omega, phys->omega * sigma);
                 // Интегралы от базисных функций ядра
                 vector3 kerwi = kerw(i, gauss_points[k]);
                 vector3 kerwj = kerw(j, gauss_points[k]);
