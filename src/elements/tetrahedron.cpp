@@ -492,25 +492,29 @@ tetrahedron::MpG() const
 {
     const tet_integration_config * tet_integration = &(basis->tet_int);
     matrix_t<complex<double> > matr(basis->tet_bf_num, basis->tet_bf_num);
+
     for(size_t i = 0; i < basis->tet_bf_num; i++)
+        for(size_t j = 0; j < basis->tet_bf_num; j++)
+            matr[i][j] = 0.0;
+
+    for(size_t k = 0; k < tet_integration->gauss_num; k++)
     {
-        for(size_t j = 0; j <= i; j++)
+        // TODO: Костыль
+        phys_area * phys_editable = const_cast<phys_area *>(phys);
+        phys_editable->sigma.set_var("z", gauss_points[k].z);
+        double sigma = 0.0;
+        phys_editable->sigma.calculate(sigma);
+
+        // TODO: Хз, что с этим делать
+//        phys_editable->sigma.set_var("z", gauss_points[k].z + tet_common::dsigma_h);
+//        double dsigma_dz = 0.0;
+//        phys_editable->sigma.calculate(dsigma_dz);
+//        dsigma_dz = (dsigma_dz - sigma) / tet_common::dsigma_h;
+
+        for(size_t i = 0; i < basis->tet_bf_num; i++)
         {
-            complex<double> value(0, 0);
-            for(size_t k = 0; k < tet_integration->gauss_num; k++)
+            for(size_t j = 0; j <= i; j++)
             {
-                // TODO: Костыль
-                phys_area * phys_editable = const_cast<phys_area *>(phys);
-                phys_editable->sigma.set_var("z", gauss_points[k].z);
-                double sigma = 0.0;
-                phys_editable->sigma.calculate(sigma);
-
-                // TODO: Хз, что с этим делать
-//                phys_editable->sigma.set_var("z", gauss_points[k].z + tet_common::dsigma_h);
-//                double dsigma_dz = 0.0;
-//                phys_editable->sigma.calculate(dsigma_dz);
-//                dsigma_dz = (dsigma_dz - sigma) / tet_common::dsigma_h;
-
                 complex<double> k2(- phys->epsilon * phys->omega * phys->omega, phys->omega * sigma);
                 // Интеграл от бф
                 vector3 wi = w(i, gauss_points[k]);
@@ -519,9 +523,17 @@ tetrahedron::MpG() const
                 vector3 curlwi = rotw(i, gauss_points[k]);
                 vector3 curlwj = rotw(j, gauss_points[k]);
                 // Почти элемент локальной матрицы
-                value += tet_integration->gauss_weights[k] * (wi * wj * k2 + curlwi * curlwj / phys->mu);
+                matr[i][j] += tet_integration->gauss_weights[k] * (wi * wj * k2 + curlwi * curlwj / phys->mu);
             }
-            matr[j][i] = matr[i][j] = value * jacobian;
+        }
+    }
+
+    for(size_t i = 0; i < basis->tet_bf_num; i++)
+    {
+        for(size_t j = 0; j <= i; j++)
+        {
+            matr[i][j] *= jacobian;
+            matr[j][i] = matr[i][j];
         }
     }
     return matr;
@@ -555,27 +567,39 @@ tetrahedron::K() const
 {
     const tet_integration_config * tet_integration = &(basis->tet_int);
     matrix_t<complex<double> > matr(basis->tet_ker_bf_num, basis->tet_ker_bf_num);
-    for(size_t i = 0; i < basis->tet_ker_bf_num; i++)
-    {
-        for(size_t j = 0; j <= i; j++)
-        {
-            complex<double> value(0, 0);
-            for(size_t k = 0; k < tet_integration->gauss_num; k++)
-            {
-                // TODO: Костыль
-                phys_area * phys_editable = const_cast<phys_area *>(phys);
-                phys_editable->sigma.set_var("z", gauss_points[k].z);
-                double sigma = 0.0;
-                phys_editable->sigma.calculate(sigma);
 
+    for(size_t i = 0; i < basis->tet_ker_bf_num; i++)
+        for(size_t j = 0; j < basis->tet_ker_bf_num; j++)
+            matr[i][j] = 0.0;
+
+    for(size_t k = 0; k < tet_integration->gauss_num; k++)
+    {
+        // TODO: Костыль
+        phys_area * phys_editable = const_cast<phys_area *>(phys);
+        phys_editable->sigma.set_var("z", gauss_points[k].z);
+        double sigma = 0.0;
+        phys_editable->sigma.calculate(sigma);
+
+        for(size_t i = 0; i < basis->tet_ker_bf_num; i++)
+        {
+            for(size_t j = 0; j <= i; j++)
+            {
                 complex<double> k2(- phys->epsilon * phys->omega * phys->omega, phys->omega * sigma);
                 // Интегралы от базисных функций ядра
                 vector3 kerwi = kerw(i, gauss_points[k]);
                 vector3 kerwj = kerw(j, gauss_points[k]);
                 // Почти элемент локальной матрицы
-                value += tet_integration->gauss_weights[k] * kerwi * kerwj * k2;
+                matr[i][j] += tet_integration->gauss_weights[k] * kerwi * kerwj * k2;
             }
-            matr[j][i] = matr[i][j] = value * jacobian;
+        }
+    }
+
+    for(size_t i = 0; i < basis->tet_ker_bf_num; i++)
+    {
+        for(size_t j = 0; j <= i; j++)
+        {
+            matr[i][j] *= jacobian;
+            matr[j][i] = matr[i][j];
         }
     }
     return matr;
