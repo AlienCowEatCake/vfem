@@ -137,8 +137,8 @@ bool VFEM::output_slice(const string & tecplot_filename, char slice_var, double 
             p[index_1] = v1;
             p[index_2] = v2;
             const finite_element * fe = get_fe(p);
-            cvector3 sol = solution(p, fe);
-            complex<double> div_sol = divergence(p, fe) * complex<double>(0, 1) / fe->phys->omega;
+            cvector3 sol = fe ? solution(p, fe) : cvector3();
+            complex<double> div_sol = fe ? (divergence(p, fe) * complex<double>(0, 1) / fe->phys->omega) : 0.0;
             tecplot_file << v1 << " " << v2 << " "
                          << sol.x.real() << " " << sol.y.real() << " " << sol.z.real() << " "
                          << sol.x.imag() << " " << sol.y.imag() << " " << sol.z.imag() << " "
