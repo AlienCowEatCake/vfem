@@ -624,6 +624,22 @@ cvector3 VFEM::rotor(const point & p, const finite_element * fe) const
     return result;
 }
 
+complex<double> VFEM::div(const point & p) const
+{
+    return div(p, get_fe(p));
+}
+
+complex<double> VFEM::div(const point & p, const finite_element * fe) const
+{
+    complex<double> result;
+    if(fe)
+    {
+        for(size_t i = 0; i < config.basis.tet_bf_num; i++)
+            result = result + slae.x[get_tet_dof(fe, i)] * fe->divw(i, p);
+    }
+    return result;
+}
+
 void VFEM::make_struct()
 {
     if(config.boundary_enabled && global_to_local.size() > 0)

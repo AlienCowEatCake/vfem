@@ -128,6 +128,50 @@ vector3 tetrahedron_base::w(size_t i, const point & p) const
     return vector3();
 }
 
+double tetrahedron_base::divw(size_t i, const point & p) const
+{
+    using namespace tet_basis_indexes;
+    assert(i < basis->tet_bf_num);
+
+    // Первый неполный
+    if(i < 6)
+    {
+        return 0.0;
+    }
+    // Первый полный
+    else if(i < 12)
+    {
+        size_t ii = i - 6;
+        return 2.0 * grad_lambda(ind_e[ii][0]) * grad_lambda(ind_e[ii][1]);
+    }
+    // Второй неполный
+    else if(i < 20)
+    {
+        return 0.0;
+    }
+    // Второй полный
+    else if(i < 24)
+    {
+        size_t ii = i - 20;
+        return lambda(ind_f[ii][2], p) * grad_lambda(ind_f[ii][1]) * grad_lambda(ind_f[ii][0]) +
+               lambda(ind_f[ii][1], p) * grad_lambda(ind_f[ii][2]) * grad_lambda(ind_f[ii][0]) +
+               lambda(ind_f[ii][2], p) * grad_lambda(ind_f[ii][0]) * grad_lambda(ind_f[ii][1]) +
+               lambda(ind_f[ii][0], p) * grad_lambda(ind_f[ii][2]) * grad_lambda(ind_f[ii][1]) +
+               lambda(ind_f[ii][1], p) * grad_lambda(ind_f[ii][0]) * grad_lambda(ind_f[ii][2]) +
+               lambda(ind_f[ii][0], p) * grad_lambda(ind_f[ii][1]) * grad_lambda(ind_f[ii][2]);
+    }
+    else if(i < 30)
+    {
+        size_t ii = i - 24;
+        return (2.0 * lambda(ind_e[ii][0], p) - lambda(ind_e[ii][1], p)) * grad_lambda(ind_e[ii][1]) * grad_lambda(ind_e[ii][0]) +
+               lambda(ind_e[ii][1], p) * (2.0 * grad_lambda(ind_e[ii][0]) - grad_lambda(ind_e[ii][1])) * grad_lambda(ind_e[ii][0]) -
+               (2.0 * lambda(ind_e[ii][1], p) - lambda(ind_e[ii][0], p)) * grad_lambda(ind_e[ii][0]) * grad_lambda(ind_e[ii][1]) -
+               lambda(ind_e[ii][0], p) * (2.0 * grad_lambda(ind_e[ii][1]) - grad_lambda(ind_e[ii][0])) * grad_lambda(ind_e[ii][1]);
+    }
+
+    return 0.0;
+}
+
 vector3 tetrahedron_base::rotw(size_t i, const point & p) const
 {
     using namespace tet_basis_indexes;

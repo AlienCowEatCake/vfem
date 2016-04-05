@@ -46,6 +46,8 @@ public:
 
     // Базисные функции
     vector3 w(size_t i, const point & p) const;
+    // Дивергенции базисных функций
+    double divw(size_t i, const point & p) const;
     // Роторы базисных функций
     vector3 rotw(size_t i, const point & p) const;
     // Базисные функции ядра
