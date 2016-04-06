@@ -126,8 +126,12 @@ public:
     // Восьмиричное дерево поиска
     octree<finite_element> tree;
 
+    // Получение количества степеней свободы тетраэдра
+    size_t get_tet_dof_num(const tetrahedron_base * fe) const;
     // Получение степеней свободы тетраэдра в глобальной матрице
     size_t get_tet_dof(const tetrahedron_base * fe, size_t i) const;
+    // Получение количества степеней свободы ядра тетраэдра
+    size_t get_tet_ker_dof_num(const tetrahedron_base * fe) const;
     // Получение степеней свободы тетраэдра в матрице ядра
     size_t get_tet_ker_dof(const tetrahedron_base * fe, size_t i) const;
     // Получение степеней свободы треугольника в глобальной матрице
@@ -158,6 +162,11 @@ protected:
     // Добавление локальных матриц от одного КЭ в глобальную
     template<typename T>
     void process_fe(const T * fe);
+    // Генерация абстрактного портрета
+    template<typename U, typename V>
+    void generate_abstract_portrait(size_t all_dof_num, const vector<U> & elems, SLAE & slae_curr,
+                                    size_t (VFEM::*get_dof_num)(const V *) const,
+                                    size_t (VFEM::*get_dof)(const V *, size_t) const) const;
 
     // Добавление ребра в множество ребер
     size_t add_edge(edge ed, set<edge> & edges_set);

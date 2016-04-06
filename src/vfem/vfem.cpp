@@ -1,5 +1,12 @@
 #include "vfem.h"
 
+// Получение количества степеней свободы тетраэдра
+size_t VFEM::get_tet_dof_num(const tetrahedron_base * fe) const
+{
+    MAYBE_UNUSED(fe);
+    return config.basis.tet_bf_num;
+}
+
 // Получение степеней свободы тетраэдра в глобальной матрице
 size_t VFEM::get_tet_dof(const tetrahedron_base * fe, size_t i) const
 {
@@ -11,6 +18,13 @@ size_t VFEM::get_tet_dof(const tetrahedron_base * fe, size_t i) const
     else if(i < 24) return fe->faces[i-20]->num + 2 * edges.size() + 2 * faces.size();
     else if(i < 30) return fe->edges[i-24]->num + 2 * edges.size() + 3 * faces.size();
     return 0;
+}
+
+// Получение количества степеней свободы ядра тетраэдра
+size_t VFEM::get_tet_ker_dof_num(const tetrahedron_base * fe) const
+{
+    MAYBE_UNUSED(fe);
+    return config.basis.tet_ker_bf_num;
 }
 
 // Получение степеней свободы тетраэдра в матрице ядра
@@ -54,20 +68,23 @@ size_t VFEM::get_tr_surf_dof(const triangle * tr, size_t i) const
     return global_to_local.find(get_tr_dof(tr, i))->second;
 }
 
-void VFEM::generate_portrait()
+// Генерация абстрактного портрета
+template<typename U, typename V>
+void VFEM::generate_abstract_portrait(size_t all_dof_num, const vector<U> & elems, SLAE & slae_curr,
+                                      size_t (VFEM::*get_dof_num)(const V *) const,
+                                      size_t (VFEM::*get_dof)(const V *, size_t) const) const
 {
-    cout << "Generating portrait ..." << endl;
-
-    set<size_t> * portrait = new set<size_t> [dof_num];
-    for(size_t k = 0; k < fes.size(); k++)
+    set<size_t> * portrait = new set<size_t> [all_dof_num];
+    for(size_t k = 0; k < elems.size(); k++)
     {
-        show_progress("step 1", k, fes.size());
+        show_progress("step 1", k, elems.size());
 
-        array_t<size_t> dof(config.basis.tet_bf_num);
-        for(size_t i = 0; i < config.basis.tet_bf_num; i++)
-            dof[i] = get_tet_dof(&fes[k], i);
+        size_t dof_num_elem = (this->*get_dof_num)(&elems[k]);
+        array_t<size_t> dof(dof_num_elem);
+        for(size_t i = 0; i < dof_num_elem; i++)
+            dof[i] = (this->*get_dof)(&elems[k], i);
 
-        for(size_t i = 0; i < config.basis.tet_bf_num; i++)
+        for(size_t i = 0; i < dof_num_elem; i++)
         {
             size_t a = dof[i];
             for(size_t j = 0; j < i; j++)
@@ -82,24 +99,24 @@ void VFEM::generate_portrait()
     }
 
     size_t gg_size = 0;
-    for(size_t i = 0; i < dof_num; i++)
+    for(size_t i = 0; i < all_dof_num; i++)
         gg_size += portrait[i].size();
 
-    slae.alloc_all(dof_num, gg_size);
+    slae_curr.alloc_all(all_dof_num, gg_size);
 
-    slae.ig[0] = 0;
-    slae.ig[1] = 0;
+    slae_curr.ig[0] = 0;
+    slae_curr.ig[1] = 0;
     size_t tmp = 0;
-    for(size_t i = 0; i < dof_num; i++)
+    for(size_t i = 0; i < all_dof_num; i++)
     {
-        show_progress("step 2", i, dof_num);
+        show_progress("step 2", i, all_dof_num);
 
         for(set<size_t>::iterator j = portrait[i].begin(); j != portrait[i].end(); ++j)
         {
-            slae.jg[tmp] = *j;
+            slae_curr.jg[tmp] = *j;
             tmp++;
         }
-        slae.ig[i + 1] = slae.ig[i] + portrait[i].size();
+        slae_curr.ig[i + 1] = slae_curr.ig[i] + portrait[i].size();
 
         portrait[i].clear();
     }
@@ -107,57 +124,17 @@ void VFEM::generate_portrait()
     delete [] portrait;
 }
 
+
+void VFEM::generate_portrait()
+{
+    cout << "Generating portrait ..." << endl;
+    generate_abstract_portrait(dof_num, fes, slae, &VFEM::get_tet_dof_num, &VFEM::get_tet_dof);
+}
+
 void VFEM::generate_ker_portrait()
 {
     cout << "Generating kernel portrait ..." << endl;
-
-    set<size_t> * portrait = new set<size_t> [ker_dof_num];
-    for(size_t k = 0; k < fes.size(); k++)
-    {
-        show_progress("step 1", k, fes.size());
-
-        array_t<size_t> ker_dof(config.basis.tet_ker_bf_num);
-        for(size_t i = 0; i < config.basis.tet_ker_bf_num; i++)
-            ker_dof[i] = get_tet_ker_dof(&fes[k], i);
-
-        for(size_t i = 0; i < config.basis.tet_ker_bf_num; i++)
-        {
-            size_t a = ker_dof[i];
-            for(size_t j = 0; j < i; j++)
-            {
-                size_t b = ker_dof[j];
-                if(b > a)
-                    portrait[b].insert(a);
-                else
-                    portrait[a].insert(b);
-            }
-        }
-    }
-
-    size_t gg_size = 0;
-    for(size_t i = 0; i < ker_dof_num; i++)
-        gg_size += portrait[i].size();
-
-    ker_slae.alloc_all(ker_dof_num, gg_size);
-
-    ker_slae.ig[0] = 0;
-    ker_slae.ig[1] = 0;
-    size_t tmp = 0;
-    for(size_t i = 0; i < ker_dof_num; i++)
-    {
-        show_progress("step 2", i, ker_dof_num);
-
-        for(set<size_t>::iterator j = portrait[i].begin(); j != portrait[i].end(); ++j)
-        {
-            ker_slae.jg[tmp] = *j;
-            tmp++;
-        }
-        ker_slae.ig[i + 1] = ker_slae.ig[i] + portrait[i].size();
-
-        portrait[i].clear();
-    }
-
-    delete [] portrait;
+    generate_abstract_portrait(ker_dof_num, fes, ker_slae, &VFEM::get_tet_ker_dof_num, &VFEM::get_tet_ker_dof);
 }
 
 void VFEM::generate_surf_portrait()
