@@ -90,10 +90,16 @@
     <ClInclude Include="..\..\..\src\config\config.h">
       <Filter>Header Files\config</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\config\evaluator_helmholtz.h">
+      <Filter>Header Files\config</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\src\config\evaluator\evaluator.h">
       <Filter>Header Files\config\evaluator</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\config\evaluator\evaluator_operations.h">
+      <Filter>Header Files\config\evaluator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\config\evaluator\evaluator_xyz.h">
       <Filter>Header Files\config\evaluator</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\config\evaluator\evaluator_internal\calculate.h">
@@ -112,6 +118,9 @@
       <Filter>Header Files\config\evaluator\evaluator_internal</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\config\evaluator\evaluator_internal\transition_table.h">
+      <Filter>Header Files\config\evaluator\evaluator_internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\config\evaluator\evaluator_internal\type_detection.h">
       <Filter>Header Files\config\evaluator\evaluator_internal</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\config\evaluator\evaluator_internal\var_container.h">

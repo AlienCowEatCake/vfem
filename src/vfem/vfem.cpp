@@ -203,11 +203,11 @@ void VFEM::process_fe(const T * curr_fe)
     complex<double> k2(- ph.epsilon * ph.omega * ph.omega, ph.omega * ph.sigma);
 
     // Инициализация параметров вычислителей для правой части
-    pair<const config_type *, array_t<evaluator<complex<double> > *, 3> >
-            params_object(& config, array_t<evaluator<complex<double> > *, 3>());
+    pair<const config_type *, array_t<evaluator_helmholtz *, 3> >
+            params_object(& config, array_t<evaluator_helmholtz *, 3>());
     if(config.right_enabled)
     {
-        map<size_t, array_t<evaluator<complex<double> >, 3> >::iterator
+        map<size_t, array_t<evaluator_helmholtz, 3> >::iterator
                 it = config.right.values.find(ph.gmsh_num);
         if(it != config.right.values.end())
             for(size_t i = 0; i < 3; i++)
@@ -215,13 +215,13 @@ void VFEM::process_fe(const T * curr_fe)
         else
             for(size_t i = 0; i < 3; i++)
             {
-                evaluator<complex<double> > * ev_curr = &(config.right.default_value[i]);
+                evaluator_helmholtz * ev_curr = &(config.right.default_value[i]);
                 params_object.second[i] = ev_curr;
-                ev_curr->set_var("epsilon", ph.epsilon);
-                ev_curr->set_var("sigma", ph.sigma);
-                ev_curr->set_var("mu", ph.mu);
-                ev_curr->set_var("J0", ph.J0);
-                ev_curr->set_var("k2", k2);
+                ev_curr->set_epsilon(ph.epsilon);
+                ev_curr->set_sigma(ph.sigma);
+                ev_curr->set_mu(ph.mu);
+                ev_curr->set_J0(ph.J0);
+                ev_curr->set_k2(k2);
             }
     }
 
@@ -304,9 +304,9 @@ void VFEM::applying_bound()
                     complex<double> k2(- ph.epsilon * ph.omega * ph.omega, ph.omega * ph.sigma);
 
                     // Инициализация параметров вычислителей для первого краевого
-                    pair<const config_type *, array_t<evaluator<complex<double> > *, 3> >
-                            params_object(& config, array_t<evaluator<complex<double> > *, 3>());
-                    map<size_t, array_t<evaluator<complex<double> >, 3> >::iterator
+                    pair<const config_type *, array_t<evaluator_helmholtz *, 3> >
+                            params_object(& config, array_t<evaluator_helmholtz *, 3>());
+                    map<size_t, array_t<evaluator_helmholtz, 3> >::iterator
                             it = config.boundary.values.find(ph.gmsh_num);
                     if(it != config.boundary.values.end())
                         for(size_t i = 0; i < 3; i++)
@@ -314,13 +314,13 @@ void VFEM::applying_bound()
                     else
                         for(size_t i = 0; i < 3; i++)
                         {
-                            evaluator<complex<double> > * ev_curr = &(config.boundary.default_value[i]);
+                            evaluator_helmholtz * ev_curr = &(config.boundary.default_value[i]);
                             params_object.second[i] = ev_curr;
-                            ev_curr->set_var("epsilon", ph.epsilon);
-                            ev_curr->set_var("sigma", ph.sigma);
-                            ev_curr->set_var("mu", ph.mu);
-                            ev_curr->set_var("J0", ph.J0);
-                            ev_curr->set_var("k2", k2);
+                            ev_curr->set_epsilon(ph.epsilon);
+                            ev_curr->set_sigma(ph.sigma);
+                            ev_curr->set_mu(ph.mu);
+                            ev_curr->set_J0(ph.J0);
+                            ev_curr->set_k2(k2);
                         }
 
                     // Получение степеней свободы
@@ -647,9 +647,9 @@ void VFEM::calculate_diff()
         complex<double> k2(- ph.epsilon * ph.omega * ph.omega, ph.omega * ph.sigma);
 
         // Инициализация параметров вычислителей для аналитики
-        pair<const config_type *, array_t<evaluator<complex<double> > *, 3> >
-                params_object(& config, array_t<evaluator<complex<double> > *, 3>());
-        map<size_t, array_t<evaluator<complex<double> >, 3> >::iterator
+        pair<const config_type *, array_t<evaluator_helmholtz *, 3> >
+                params_object(& config, array_t<evaluator_helmholtz *, 3>());
+        map<size_t, array_t<evaluator_helmholtz, 3> >::iterator
                 it = config.analytical.values.find(ph.gmsh_num);
         if(it != config.analytical.values.end())
             for(size_t i = 0; i < 3; i++)
@@ -657,13 +657,13 @@ void VFEM::calculate_diff()
         else
             for(size_t i = 0; i < 3; i++)
             {
-                evaluator<complex<double> > * ev_curr = &(config.analytical.default_value[i]);
+                evaluator_helmholtz * ev_curr = &(config.analytical.default_value[i]);
                 params_object.second[i] = ev_curr;
-                ev_curr->set_var("epsilon", ph.epsilon);
-                ev_curr->set_var("sigma", ph.sigma);
-                ev_curr->set_var("mu", ph.mu);
-                ev_curr->set_var("J0", ph.J0);
-                ev_curr->set_var("k2", k2);
+                ev_curr->set_epsilon(ph.epsilon);
+                ev_curr->set_sigma(ph.sigma);
+                ev_curr->set_mu(ph.mu);
+                ev_curr->set_J0(ph.J0);
+                ev_curr->set_k2(k2);
             }
 
         // Находим локальные веса, связанные с этим КЭ

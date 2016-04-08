@@ -1,5 +1,5 @@
-#ifndef MISC_H
-#define MISC_H
+#ifndef EVALUATOR_MISC_H
+#define EVALUATOR_MISC_H
 
 #include <vector>
 #include <complex>
@@ -48,70 +48,70 @@ void evaluator<T>::init()
 {
     using namespace std;
     using namespace evaluator_internal;
-    status = false;
+    m_status = false;
 #if !defined(EVALUATOR_JIT_DISABLE)
-    is_compiled = false;
-    jit_code = NULL;
-    jit_code_size = 0;
-    jit_stack = NULL;
-    jit_stack_size = 0;
-    jit_func = NULL;
+    m_is_compiled = false;
+    m_jit_code = NULL;
+    m_jit_code_size = 0;
+    m_jit_stack = NULL;
+    m_jit_stack_size = 0;
+    m_jit_func = NULL;
 #endif
-    init_functions(functions);
-    init_operators(operators);
-    init_constants(constants);
+    init_functions(m_functions);
+    init_operators(m_operators);
+    init_constants(m_constants);
 
-    transition_table.resize(29);
-    transition_table[ 0].set_values("func var const sign (",  1, false, false, false, true );
-    transition_table[ 1].set_values("func var const sign (",  2, false, false, false, true );
-    transition_table[ 2].set_values("sign",                   4, false, false, false, false);
-    transition_table[ 3].set_values("func var const (",       6, false, false, false, true );
-    transition_table[ 4].set_values("sign",                   5, true,  false, false, true );
-    transition_table[ 5].set_values("func var const (",       7, false, false, false, true );
-    transition_table[ 6].set_values("func var const (",       7, false, false, false, true );
-    transition_table[ 7].set_values("var",                   11, false, false, false, false);
-    transition_table[ 8].set_values("const",                 13, false, false, false, false);
-    transition_table[ 9].set_values("(",                     15, false, false, false, false);
-    transition_table[10].set_values("func",                  19, false, false, false, true );
-    transition_table[11].set_values("var",                   12, true,  false, false, true );
-    transition_table[12].set_values("oper eps",              24, false, false, false, true );
-    transition_table[13].set_values("const",                 14, true,  false, false, true );
-    transition_table[14].set_values("oper eps",              24, false, false, false, true );
-    transition_table[15].set_values("(",                     16, true,  false, false, true );
-    transition_table[16].set_values("func var const sign (",  2, false, true,  false, true );
-    transition_table[17].set_values(")",                     18, true,  false, false, true );
-    transition_table[18].set_values("oper eps",              24, false, false, false, true );
-    transition_table[19].set_values("func",                  20, true,  false, false, true );
-    transition_table[20].set_values("(",                     21, true,  false, false, true );
-    transition_table[21].set_values("func var const sign (",  2, false, true,  false, true );
-    transition_table[22].set_values(")",                     23, true,  false, false, true );
-    transition_table[23].set_values("oper eps",              24, false, false, false, true );
-    transition_table[24].set_values("oper",                  27, false, false, false, false);
-    transition_table[25].set_values("eps",                   26, false, false, false, true );
-    transition_table[26].set_values("eps",                   -1, false, false, true,  true );
-    transition_table[27].set_values("oper",                  28, true,  false, false, true );
-    transition_table[28].set_values("func var const (",       7, false, false, false, true );
+    m_transition_table.resize(29);
+    m_transition_table[ 0].set_values("func var const sign (",  1, false, false, false, true );
+    m_transition_table[ 1].set_values("func var const sign (",  2, false, false, false, true );
+    m_transition_table[ 2].set_values("sign",                   4, false, false, false, false);
+    m_transition_table[ 3].set_values("func var const (",       6, false, false, false, true );
+    m_transition_table[ 4].set_values("sign",                   5, true,  false, false, true );
+    m_transition_table[ 5].set_values("func var const (",       7, false, false, false, true );
+    m_transition_table[ 6].set_values("func var const (",       7, false, false, false, true );
+    m_transition_table[ 7].set_values("var",                   11, false, false, false, false);
+    m_transition_table[ 8].set_values("const",                 13, false, false, false, false);
+    m_transition_table[ 9].set_values("(",                     15, false, false, false, false);
+    m_transition_table[10].set_values("func",                  19, false, false, false, true );
+    m_transition_table[11].set_values("var",                   12, true,  false, false, true );
+    m_transition_table[12].set_values("oper eps",              24, false, false, false, true );
+    m_transition_table[13].set_values("const",                 14, true,  false, false, true );
+    m_transition_table[14].set_values("oper eps",              24, false, false, false, true );
+    m_transition_table[15].set_values("(",                     16, true,  false, false, true );
+    m_transition_table[16].set_values("func var const sign (",  2, false, true,  false, true );
+    m_transition_table[17].set_values(")",                     18, true,  false, false, true );
+    m_transition_table[18].set_values("oper eps",              24, false, false, false, true );
+    m_transition_table[19].set_values("func",                  20, true,  false, false, true );
+    m_transition_table[20].set_values("(",                     21, true,  false, false, true );
+    m_transition_table[21].set_values("func var const sign (",  2, false, true,  false, true );
+    m_transition_table[22].set_values(")",                     23, true,  false, false, true );
+    m_transition_table[23].set_values("oper eps",              24, false, false, false, true );
+    m_transition_table[24].set_values("oper",                  27, false, false, false, false);
+    m_transition_table[25].set_values("eps",                   26, false, false, false, true );
+    m_transition_table[26].set_values("eps",                   -1, false, false, true,  true );
+    m_transition_table[27].set_values("oper",                  28, true,  false, false, true );
+    m_transition_table[28].set_values("func var const (",       7, false, false, false, true );
 }
 
 // Copying from another evaluator
 template<typename T>
 void evaluator<T>::copy_from_other(const evaluator & other)
 {
-    expression = other.expression;
-    functions = other.functions;
-    variables = other.variables;
-    constants = other.constants;
-    operators = other.operators;
-    status = other.status;
-    error_string = other.error_string;
-    transition_table = other.transition_table;
+    m_expression = other.m_expression;
+    m_functions = other.m_functions;
+    m_variables = other.m_variables;
+    m_constants = other.m_constants;
+    m_operators = other.m_operators;
+    m_status = other.m_status;
+    m_error_string = other.m_error_string;
+    m_transition_table = other.m_transition_table;
 #if !defined(EVALUATOR_JIT_DISABLE)
-    is_compiled = false;
-    jit_code = NULL;
-    jit_code_size = 0;
-    jit_stack = NULL;
-    jit_stack_size = 0;
-    jit_func = NULL;
+    m_is_compiled = false;
+    m_jit_code = NULL;
+    m_jit_code_size = 0;
+    m_jit_stack = NULL;
+    m_jit_stack_size = 0;
+    m_jit_func = NULL;
 #endif
 }
 
@@ -121,14 +121,14 @@ void evaluator<T>::reset_vars()
 {
     using namespace std;
     using namespace evaluator_internal;
-    variables.clear();
+    m_variables.clear();
     if(is_parsed())
         for(typename vector<evaluator_object<T> >::iterator
-            it = expression.begin(); it != expression.end(); ++it)
+            it = m_expression.begin(), it_end = m_expression.end(); it != it_end; ++it)
             if(it->is_variable())
             {
-                variables[it->str()].value() = incorrect_number(T());
-                *it = evaluator_object<T>(it->str(), variables[it->str()].pointer());
+                m_variables[it->str()].value() = incorrect_number(T());
+                *it = evaluator_object<T>(it->str(), m_variables[it->str()].pointer());
             }
 }
 
@@ -156,13 +156,13 @@ template<typename T>
 evaluator<T>::~evaluator()
 {
 #if !defined(EVALUATOR_JIT_DISABLE)
-    if(jit_code && jit_code_size)
+    if(m_jit_code && m_jit_code_size)
     {
-        evaluator_internal_jit::exec_dealloc(jit_code, jit_code_size);
+        evaluator_internal_jit::exec_dealloc(m_jit_code, m_jit_code_size);
     }
-    if(jit_stack && jit_stack_size)
+    if(m_jit_stack && m_jit_stack_size)
     {
-        delete [] jit_stack;
+        delete [] m_jit_stack;
     }
 #endif
 }
@@ -183,7 +183,7 @@ void evaluator<T>::debug_print() const
     using namespace std;
     using namespace evaluator_internal;
     for(typename vector<evaluator_object<T> >::const_iterator
-        it = expression.begin(); it != expression.end(); ++it)
+        it = m_expression.begin(), it_end = m_expression.end(); it != it_end; ++it)
     {
         cout << it->str();
         if(it->is_variable())
@@ -194,5 +194,5 @@ void evaluator<T>::debug_print() const
     cout << endl;
 }
 
-#endif // MISC_H
+#endif // EVALUATOR_MISC_H
 

@@ -157,6 +157,7 @@
     <ClInclude Include="..\..\..\src\common\matrix.h" />
     <ClInclude Include="..\..\..\src\common\trio.h" />
     <ClInclude Include="..\..\..\src\config\config.h" />
+    <ClInclude Include="..\..\..\src\config\evaluator_helmholtz.h" />
     <ClInclude Include="..\..\..\src\config\evaluator\evaluator.h" />
     <ClInclude Include="..\..\..\src\config\evaluator\evaluator_internal\calculate.h" />
     <ClInclude Include="..\..\..\src\config\evaluator\evaluator_internal\evaluator_object.h" />
@@ -172,8 +173,10 @@
     <ClInclude Include="..\..\..\src\config\evaluator\evaluator_internal\parse.h" />
     <ClInclude Include="..\..\..\src\config\evaluator\evaluator_internal\simplify.h" />
     <ClInclude Include="..\..\..\src\config\evaluator\evaluator_internal\transition_table.h" />
+    <ClInclude Include="..\..\..\src\config\evaluator\evaluator_internal\type_detection.h" />
     <ClInclude Include="..\..\..\src\config\evaluator\evaluator_internal\var_container.h" />
     <ClInclude Include="..\..\..\src\config\evaluator\evaluator_operations.h" />
+    <ClInclude Include="..\..\..\src\config\evaluator\evaluator_xyz.h" />
     <ClInclude Include="..\..\..\src\elements\edge.h" />
     <ClInclude Include="..\..\..\src\elements\face.h" />
     <ClInclude Include="..\..\..\src\elements\octree.h" />

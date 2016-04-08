@@ -217,7 +217,7 @@ bool config_type::load(const string & filename)
 
             else if(section == "boundary" || section == "right" || section == "analytical")
             {
-                array_t<evaluator<complex<double> >, 3> * curr_parser = NULL;
+                array_t<evaluator_helmholtz, 3> * curr_parser = NULL;
                 if(section == "boundary")
                 {
                     if(subsection.empty())
@@ -270,7 +270,7 @@ bool config_type::load(const string & filename)
                                 value = trim(value.substr(1, value.length() - 2));
                             if(param == "x" || param == "y" || param == "z")
                             {
-                                evaluator<complex<double> > * curr_parser_var = NULL;
+                                evaluator_helmholtz * curr_parser_var = NULL;
                                 if(param == "x")      curr_parser_var = & ((* curr_parser)[0]);
                                 else if(param == "y") curr_parser_var = & ((* curr_parser)[1]);
                                 else if(param == "z") curr_parser_var = & ((* curr_parser)[2]);
