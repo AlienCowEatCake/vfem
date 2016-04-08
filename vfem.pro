@@ -38,8 +38,11 @@ SOURCES += \
 HEADERS += \
     src/config/inifile.h \
     src/config/config.h \
+    src/config/evaluator_helmholtz.h \
     src/config/evaluator/evaluator.h \
+    src/config/evaluator/evaluator_xyz.h \
     src/config/evaluator/evaluator_operations.h \
+    src/config/evaluator/evaluator_internal/type_detection.h \
     src/config/evaluator/evaluator_internal/evaluator_object.h \
     src/config/evaluator/evaluator_internal/var_container.h \
     src/config/evaluator/evaluator_internal/transition_table.h \
@@ -77,7 +80,7 @@ HEADERS += \
     src/solvers/COCG_LLT_Smooth.h \
     src/solvers/COCG_LLT_Smooth_MKL.h
 
-unix:QMAKE_LIBS += -lrt
+unix:!macx:QMAKE_LIBS += -lrt
 
 *g++*|*clang* {
     QMAKE_CXXFLAGS += -fopenmp
@@ -100,3 +103,9 @@ unix:QMAKE_LIBS += -lrt
     QMAKE_CXXFLAGS_RELEASE -= -GS
     QMAKE_CXXFLAGS_RELEASE *= -GS-
 }
+
+DESTDIR = .
+OBJECTS_DIR = build
+MOC_DIR = build
+RCC_DIR = build
+UI_DIR = build

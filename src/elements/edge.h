@@ -23,6 +23,7 @@ public:
     bool operator == (const edge & t) const;
     edge & operator = (const edge & other);
     friend ostream & operator << (ostream & os, const edge & a);
+    double length();
 };
 
 // Класс ребро с источником

@@ -138,6 +138,7 @@ bool VFEM::input_phys(const string & phys_filename)
                     ph->omega = omega_global;
                     ph->type_of_bounds = 0;
                     ph->J0 = 0.0;
+                    ph->E0 = 0.0;
 
                     do
                     {
@@ -198,6 +199,7 @@ bool VFEM::input_phys(const string & phys_filename)
                     ph->omega = omega_global;
                     ph->type_of_bounds = 2;
                     ph->J0 = 0.0;
+                    ph->E0 = 0.0;
 
                     do
                     {
@@ -274,6 +276,7 @@ bool VFEM::input_phys(const string & phys_filename)
                     ph->omega = omega_global;
                     ph->type_of_bounds = 0;
                     ph->J0 = 0.0;
+                    ph->E0 = 0.0;
 
                     do
                     {
@@ -363,6 +366,95 @@ bool VFEM::input_phys(const string & phys_filename)
                 while(phys_param.good() && !(line.length() > 1 && line[0] == '['));
                 push_back_wrapper(pss, make_pair(pss_point, pss_value));
             }
+            else if(section == "electrode")
+            {
+                if(!subsection.empty())
+                {
+                    if(omega_global < 0)
+                    {
+                        cout << "[Phys Config] Unknown frequency in section \"" << section
+                             << "." << subsection << "\"" << endl;
+                        return false;
+                    }
+
+                    stringstream sst(subsection);
+                    size_t gmsh_num;
+                    sst >> gmsh_num;
+                    phys_area * ph = &(phys[phys_id(MSH_LIN_2, gmsh_num)]);
+
+                    ph->gmsh_num = gmsh_num;
+                    ph->type_of_elem = MSH_LIN_2;
+                    ph->mu = mu_default;
+                    ph->epsilon = eps_default;
+                    ph->sigma = sigma_default;
+                    ph->omega = omega_global;
+                    ph->type_of_bounds = 1;
+                    ph->J0 = 0.0;
+                    ph->E0 = 0.0;
+
+                    double I = 1.0;
+                    double l = 1.0;
+                    double rho = 1.0;
+                    double S = 1.0;
+
+                    do
+                    {
+                        getline(phys_param, line);
+                        line = trim(line);
+                        if(line.length() > 1 && line[0] != ';')
+                        {
+                            size_t eq_pos = line.find_first_of("=");
+                            if(eq_pos != string::npos)
+                            {
+                                string param = to_lowercase(trim(line.substr(0, eq_pos)));
+                                string value = trim(line.substr(eq_pos + 1));
+                                if(value.length() > 1 && value[0] == '\"')
+                                    value = trim(value.substr(1, value.length() - 2));
+                                stringstream sst(value);
+                                if     (param == "i")   sst >> I;
+                                else if(param == "l")   sst >> l;
+                                else if(param == "rho") sst >> rho;
+                                else if(param == "s")   sst >> S;
+                                else if(param == "parent")
+                                {
+                                    size_t parent_phys;
+                                    sst >> parent_phys;
+                                    map<phys_id, phys_area>::const_iterator parent =
+                                            phys.find(phys_id(MSH_TET_4, parent_phys));
+                                    if(parent != phys.end())
+                                    {
+                                        const phys_area * par = &(parent->second);
+                                        ph->mu = par->mu;
+                                        ph->epsilon = par->epsilon;
+                                        ph->sigma = par->sigma;
+                                    }
+                                    else
+                                    {
+                                        cout << "[Phys Config] Warning: unaccounted parent \""
+                                             << parent_phys << "\" of phys area \"" << ph->gmsh_num
+                                             << "\" (1 - MSH_LIN_2), skipping..." << endl;
+                                    }
+                                }
+                                else cout << "[Phys Config] Unsupported param \"" << param << "\" in section \""
+                                          << section << (subsection.empty() ? string("") : (string(".") + subsection))
+                                          << "\"" << endl;
+                                //cout << "  param = " << param << endl;
+                                //cout << "  value = " << value << endl;
+                            }
+                        }
+                    }
+                    while(phys_param.good() && !(line.length() > 1 && line[0] == '['));
+
+                    double R = rho * l / S;
+                    double U = I * R;
+                    ph->E0 = U / l;
+                }
+                else
+                {
+                    cout << "[Phys Config] No subsection in section \"" << section << "\"" << endl;
+                    return false;
+                }
+            }
         }
         else
         {
@@ -376,7 +468,7 @@ bool VFEM::input_phys(const string & phys_filename)
 
 
     // Заполним данные и в вычисляемых функциях
-    for(map<size_t, array_t<evaluator<complex<double> >, 3> >::iterator
+    for(map<size_t, array_t<evaluator_helmholtz, 3> >::iterator
         it = config.analytical.values.begin(); it != config.analytical.values.end(); ++it)
     {
         phys_area * ph = &(phys.find(phys_id(MSH_TET_4, it->first))->second);
@@ -384,13 +476,13 @@ bool VFEM::input_phys(const string & phys_filename)
                            ph->omega * ph->sigma);
         for(size_t i = 0; i < 3; i++)
         {
-            evaluator<complex<double> > * ev_curr = &(it->second[i]);
-            ev_curr->set_var("J0", ph->J0);
-            ev_curr->set_var("omega", omega_global);
-            ev_curr->set_var("epsilon", ph->epsilon);
-            ev_curr->set_var("sigma", ph->sigma);
-            ev_curr->set_var("mu", ph->mu);
-            ev_curr->set_var("k2", k2);
+            evaluator_helmholtz * ev_curr = &(it->second[i]);
+            ev_curr->set_J0(ph->J0);
+            ev_curr->set_omega(omega_global);
+            ev_curr->set_epsilon(ph->epsilon);
+            ev_curr->set_sigma(ph->sigma);
+            ev_curr->set_mu(ph->mu);
+            ev_curr->set_k2(k2);
             ev_curr->simplify();
             switch(config.jit_type)
             {
@@ -405,7 +497,7 @@ bool VFEM::input_phys(const string & phys_filename)
             }
         }
     }
-    for(map<size_t, array_t<evaluator<complex<double> >, 3> >::iterator
+    for(map<size_t, array_t<evaluator_helmholtz, 3> >::iterator
         it = config.boundary.values.begin(); it != config.boundary.values.end(); ++it)
     {
         phys_area * ph = &(phys.find(phys_id(MSH_TRI_3, it->first))->second);
@@ -413,13 +505,13 @@ bool VFEM::input_phys(const string & phys_filename)
                            ph->omega * ph->sigma);
         for(size_t i = 0; i < 3; i++)
         {
-            evaluator<complex<double> > * ev_curr = &(it->second[i]);
-            ev_curr->set_var("J0", ph->J0);
-            ev_curr->set_var("omega", omega_global);
-            ev_curr->set_var("epsilon", ph->epsilon);
-            ev_curr->set_var("sigma", ph->sigma);
-            ev_curr->set_var("mu", ph->mu);
-            ev_curr->set_var("k2", k2);
+            evaluator_helmholtz * ev_curr = &(it->second[i]);
+            ev_curr->set_J0(ph->J0);
+            ev_curr->set_omega(omega_global);
+            ev_curr->set_epsilon(ph->epsilon);
+            ev_curr->set_sigma(ph->sigma);
+            ev_curr->set_mu(ph->mu);
+            ev_curr->set_k2(k2);
             ev_curr->simplify();
             switch(config.jit_type)
             {
@@ -434,7 +526,7 @@ bool VFEM::input_phys(const string & phys_filename)
             }
         }
     }
-    for(map<size_t, array_t<evaluator<complex<double> >, 3> >::iterator
+    for(map<size_t, array_t<evaluator_helmholtz, 3> >::iterator
         it = config.right.values.begin(); it != config.right.values.end(); ++it)
     {
         phys_area * ph = &(phys.find(phys_id(MSH_TET_4, it->first))->second);
@@ -442,13 +534,13 @@ bool VFEM::input_phys(const string & phys_filename)
                            ph->omega * ph->sigma);
         for(size_t i = 0; i < 3; i++)
         {
-            evaluator<complex<double> > * ev_curr = &(it->second[i]);
-            ev_curr->set_var("J0", ph->J0);
-            ev_curr->set_var("omega", omega_global);
-            ev_curr->set_var("epsilon", ph->epsilon);
-            ev_curr->set_var("sigma", ph->sigma);
-            ev_curr->set_var("mu", ph->mu);
-            ev_curr->set_var("k2", k2);
+            evaluator_helmholtz * ev_curr = &(it->second[i]);
+            ev_curr->set_J0(ph->J0);
+            ev_curr->set_omega(omega_global);
+            ev_curr->set_epsilon(ph->epsilon);
+            ev_curr->set_sigma(ph->sigma);
+            ev_curr->set_mu(ph->mu);
+            ev_curr->set_k2(k2);
             ev_curr->simplify();
             switch(config.jit_type)
             {
@@ -465,9 +557,9 @@ bool VFEM::input_phys(const string & phys_filename)
     }
     for(size_t i = 0; i < 3; i++)
     {
-        config.analytical.default_value[i].set_var("omega", omega_global);
-        config.boundary.default_value[i].set_var("omega", omega_global);
-        config.right.default_value[i].set_var("omega", omega_global);
+        config.analytical.default_value[i].set_omega(omega_global);
+        config.boundary.default_value[i].set_omega(omega_global);
+        config.right.default_value[i].set_omega(omega_global);
     }
 
     return true;

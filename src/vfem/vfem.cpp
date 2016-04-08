@@ -1,5 +1,12 @@
 #include "vfem.h"
 
+// Получение количества степеней свободы тетраэдра
+size_t VFEM::get_tet_dof_num(const tetrahedron_base * fe) const
+{
+    MAYBE_UNUSED(fe);
+    return config.basis.tet_bf_num;
+}
+
 // Получение степеней свободы тетраэдра в глобальной матрице
 size_t VFEM::get_tet_dof(const tetrahedron_base * fe, size_t i) const
 {
@@ -11,6 +18,13 @@ size_t VFEM::get_tet_dof(const tetrahedron_base * fe, size_t i) const
     else if(i < 24) return fe->faces[i-20]->num + 2 * edges.size() + 2 * faces.size();
     else if(i < 30) return fe->edges[i-24]->num + 2 * edges.size() + 3 * faces.size();
     return 0;
+}
+
+// Получение количества степеней свободы ядра тетраэдра
+size_t VFEM::get_tet_ker_dof_num(const tetrahedron_base * fe) const
+{
+    MAYBE_UNUSED(fe);
+    return config.basis.tet_ker_bf_num;
 }
 
 // Получение степеней свободы тетраэдра в матрице ядра
@@ -54,20 +68,23 @@ size_t VFEM::get_tr_surf_dof(const triangle * tr, size_t i) const
     return global_to_local.find(get_tr_dof(tr, i))->second;
 }
 
-void VFEM::generate_portrait()
+// Генерация абстрактного портрета
+template<typename U, typename V>
+void VFEM::generate_abstract_portrait(size_t all_dof_num, const vector<U> & elems, SLAE & slae_curr,
+                                      size_t (VFEM::*get_dof_num)(const V *) const,
+                                      size_t (VFEM::*get_dof)(const V *, size_t) const) const
 {
-    cout << "Generating portrait ..." << endl;
-
-    set<size_t> * portrait = new set<size_t> [dof_num];
-    for(size_t k = 0; k < fes.size(); k++)
+    set<size_t> * portrait = new set<size_t> [all_dof_num];
+    for(size_t k = 0; k < elems.size(); k++)
     {
-        show_progress("step 1", k, fes.size());
+        show_progress("step 1", k, elems.size());
 
-        array_t<size_t> dof(config.basis.tet_bf_num);
-        for(size_t i = 0; i < config.basis.tet_bf_num; i++)
-            dof[i] = get_tet_dof(&fes[k], i);
+        size_t dof_num_elem = (this->*get_dof_num)(&elems[k]);
+        array_t<size_t> dof(dof_num_elem);
+        for(size_t i = 0; i < dof_num_elem; i++)
+            dof[i] = (this->*get_dof)(&elems[k], i);
 
-        for(size_t i = 0; i < config.basis.tet_bf_num; i++)
+        for(size_t i = 0; i < dof_num_elem; i++)
         {
             size_t a = dof[i];
             for(size_t j = 0; j < i; j++)
@@ -82,24 +99,24 @@ void VFEM::generate_portrait()
     }
 
     size_t gg_size = 0;
-    for(size_t i = 0; i < dof_num; i++)
+    for(size_t i = 0; i < all_dof_num; i++)
         gg_size += portrait[i].size();
 
-    slae.alloc_all(dof_num, gg_size);
+    slae_curr.alloc_all(all_dof_num, gg_size);
 
-    slae.ig[0] = 0;
-    slae.ig[1] = 0;
+    slae_curr.ig[0] = 0;
+    slae_curr.ig[1] = 0;
     size_t tmp = 0;
-    for(size_t i = 0; i < dof_num; i++)
+    for(size_t i = 0; i < all_dof_num; i++)
     {
-        show_progress("step 2", i, dof_num);
+        show_progress("step 2", i, all_dof_num);
 
         for(set<size_t>::iterator j = portrait[i].begin(); j != portrait[i].end(); ++j)
         {
-            slae.jg[tmp] = *j;
+            slae_curr.jg[tmp] = *j;
             tmp++;
         }
-        slae.ig[i + 1] = slae.ig[i] + portrait[i].size();
+        slae_curr.ig[i + 1] = slae_curr.ig[i] + portrait[i].size();
 
         portrait[i].clear();
     }
@@ -107,57 +124,17 @@ void VFEM::generate_portrait()
     delete [] portrait;
 }
 
+
+void VFEM::generate_portrait()
+{
+    cout << "Generating portrait ..." << endl;
+    generate_abstract_portrait(dof_num, fes, slae, &VFEM::get_tet_dof_num, &VFEM::get_tet_dof);
+}
+
 void VFEM::generate_ker_portrait()
 {
     cout << "Generating kernel portrait ..." << endl;
-
-    set<size_t> * portrait = new set<size_t> [ker_dof_num];
-    for(size_t k = 0; k < fes.size(); k++)
-    {
-        show_progress("step 1", k, fes.size());
-
-        array_t<size_t> ker_dof(config.basis.tet_ker_bf_num);
-        for(size_t i = 0; i < config.basis.tet_ker_bf_num; i++)
-            ker_dof[i] = get_tet_ker_dof(&fes[k], i);
-
-        for(size_t i = 0; i < config.basis.tet_ker_bf_num; i++)
-        {
-            size_t a = ker_dof[i];
-            for(size_t j = 0; j < i; j++)
-            {
-                size_t b = ker_dof[j];
-                if(b > a)
-                    portrait[b].insert(a);
-                else
-                    portrait[a].insert(b);
-            }
-        }
-    }
-
-    size_t gg_size = 0;
-    for(size_t i = 0; i < ker_dof_num; i++)
-        gg_size += portrait[i].size();
-
-    ker_slae.alloc_all(ker_dof_num, gg_size);
-
-    ker_slae.ig[0] = 0;
-    ker_slae.ig[1] = 0;
-    size_t tmp = 0;
-    for(size_t i = 0; i < ker_dof_num; i++)
-    {
-        show_progress("step 2", i, ker_dof_num);
-
-        for(set<size_t>::iterator j = portrait[i].begin(); j != portrait[i].end(); ++j)
-        {
-            ker_slae.jg[tmp] = *j;
-            tmp++;
-        }
-        ker_slae.ig[i + 1] = ker_slae.ig[i] + portrait[i].size();
-
-        portrait[i].clear();
-    }
-
-    delete [] portrait;
+    generate_abstract_portrait(ker_dof_num, fes, ker_slae, &VFEM::get_tet_ker_dof_num, &VFEM::get_tet_ker_dof);
 }
 
 void VFEM::generate_surf_portrait()
@@ -218,19 +195,19 @@ void VFEM::generate_surf_portrait()
 }
 
 // Добавление локальных матриц от одного КЭ в глобальную
-template<typename U, typename V>
-void VFEM::process_fe(const U * curr_fe, const V *)
+template<typename T>
+void VFEM::process_fe(const T * curr_fe)
 {
     // Получение физических параметров для заданного КЭ
     phys_area ph = curr_fe->get_phys_area();
     complex<double> k2(- ph.epsilon * ph.omega * ph.omega, ph.omega * ph.sigma);
 
     // Инициализация параметров вычислителей для правой части
-    pair<const config_type *, array_t<evaluator<complex<double> > *, 3> >
-            params_object(& config, array_t<evaluator<complex<double> > *, 3>());
+    pair<const config_type *, array_t<evaluator_helmholtz *, 3> >
+            params_object(& config, array_t<evaluator_helmholtz *, 3>());
     if(config.right_enabled)
     {
-        map<size_t, array_t<evaluator<complex<double> >, 3> >::iterator
+        map<size_t, array_t<evaluator_helmholtz, 3> >::iterator
                 it = config.right.values.find(ph.gmsh_num);
         if(it != config.right.values.end())
             for(size_t i = 0; i < 3; i++)
@@ -238,13 +215,13 @@ void VFEM::process_fe(const U * curr_fe, const V *)
         else
             for(size_t i = 0; i < 3; i++)
             {
-                evaluator<complex<double> > * ev_curr = &(config.right.default_value[i]);
+                evaluator_helmholtz * ev_curr = &(config.right.default_value[i]);
                 params_object.second[i] = ev_curr;
-                ev_curr->set_var("epsilon", ph.epsilon);
-                ev_curr->set_var("sigma", ph.sigma);
-                ev_curr->set_var("mu", ph.mu);
-                ev_curr->set_var("J0", ph.J0);
-                ev_curr->set_var("k2", k2);
+                ev_curr->set_epsilon(ph.epsilon);
+                ev_curr->set_sigma(ph.sigma);
+                ev_curr->set_mu(ph.mu);
+                ev_curr->set_J0(ph.J0);
+                ev_curr->set_k2(k2);
             }
     }
 
@@ -254,25 +231,20 @@ void VFEM::process_fe(const U * curr_fe, const V *)
         dof[i] = get_tet_dof(curr_fe, i);
 
     // Получение локальных матриц и правой части
-    V matrix_G = curr_fe->G();
-    V matrix_M = curr_fe->M();
+    matrix_t<complex<double> > matrix_MpG = curr_fe->MpG();
     array_t<complex<double> > array_rp = curr_fe->rp(func_rp, &params_object);
 
     // Основная матрица
     for(size_t i = 0; i < config.basis.tet_bf_num; i++)
     {
-        complex<double> add;
         size_t i_num = dof[i];
         for(size_t j = 0; j < i; j++)
         {
             size_t j_num = dof[j];
-            add = matrix_G[i][j] / ph.mu + matrix_M[i][j] * k2;
-            slae.add(i_num, j_num, add);
+            slae.add(i_num, j_num, matrix_MpG[i][j]);
         }
-        add = matrix_G[i][i] / ph.mu + matrix_M[i][i] * k2;
-        slae.di[i_num] += add;
-        add = array_rp[i];
-        slae.rp[i_num] += add;
+        slae.di[i_num] += matrix_MpG[i][i];
+        slae.rp[i_num] += array_rp[i];
     }
 
     // Матрица ядра
@@ -282,13 +254,13 @@ void VFEM::process_fe(const U * curr_fe, const V *)
         for(size_t i = 0; i < config.basis.tet_ker_bf_num; i++)
             ker_dof[i] = get_tet_ker_dof(curr_fe, i);
 
-        V matrix_K = curr_fe->K();
+        matrix_t<complex<double> > matrix_K = curr_fe->K();
         for(size_t i = 0; i < config.basis.tet_ker_bf_num; i++)
         {
             size_t i_num = ker_dof[i];
             for(size_t j = 0; j < i; j++)
-                ker_slae.add(i_num, ker_dof[j], matrix_K[i][j] * k2);
-            ker_slae.di[i_num] += matrix_K[i][i] * k2;
+                ker_slae.add(i_num, ker_dof[j], matrix_K[i][j]);
+            ker_slae.di[i_num] += matrix_K[i][i];
         }
     }
 }
@@ -304,10 +276,10 @@ void VFEM::assemble_matrix()
         show_progress("", k, fes.size());
 #if defined VFEM_USE_PML
         if(!is_pml(fes[k].barycenter, &fes[k], &phys_pml))
-            process_fe(fes[k].to_std(), (matrix_t<double> *)NULL);
+            process_fe(fes[k].to_std());
         else
 #endif
-            process_fe(&fes[k], (l_matrix *)NULL);
+            process_fe(&fes[k]);
     }
 }
 
@@ -332,9 +304,9 @@ void VFEM::applying_bound()
                     complex<double> k2(- ph.epsilon * ph.omega * ph.omega, ph.omega * ph.sigma);
 
                     // Инициализация параметров вычислителей для первого краевого
-                    pair<const config_type *, array_t<evaluator<complex<double> > *, 3> >
-                            params_object(& config, array_t<evaluator<complex<double> > *, 3>());
-                    map<size_t, array_t<evaluator<complex<double> >, 3> >::iterator
+                    pair<const config_type *, array_t<evaluator_helmholtz *, 3> >
+                            params_object(& config, array_t<evaluator_helmholtz *, 3>());
+                    map<size_t, array_t<evaluator_helmholtz, 3> >::iterator
                             it = config.boundary.values.find(ph.gmsh_num);
                     if(it != config.boundary.values.end())
                         for(size_t i = 0; i < 3; i++)
@@ -342,13 +314,13 @@ void VFEM::applying_bound()
                     else
                         for(size_t i = 0; i < 3; i++)
                         {
-                            evaluator<complex<double> > * ev_curr = &(config.boundary.default_value[i]);
+                            evaluator_helmholtz * ev_curr = &(config.boundary.default_value[i]);
                             params_object.second[i] = ev_curr;
-                            ev_curr->set_var("epsilon", ph.epsilon);
-                            ev_curr->set_var("sigma", ph.sigma);
-                            ev_curr->set_var("mu", ph.mu);
-                            ev_curr->set_var("J0", ph.J0);
-                            ev_curr->set_var("k2", k2);
+                            ev_curr->set_epsilon(ph.epsilon);
+                            ev_curr->set_sigma(ph.sigma);
+                            ev_curr->set_mu(ph.mu);
+                            ev_curr->set_J0(ph.J0);
+                            ev_curr->set_k2(k2);
                         }
 
                     // Получение степеней свободы
@@ -477,8 +449,114 @@ void VFEM::apply_edges_sources()
     for(size_t k = 0; k < edges_src.size(); k++)
     {
         show_progress("", k, edges_src.size());
-        size_t pos = edges_src[k].num; // Заносим только в роторные функции!
-        slae.rp[pos] += complex<double>(0.0, -1.0) * edges_src[k].phys->J0 * edges_src[k].phys->omega * edges_src[k].direction;
+        if(edges_src[k].phys->type_of_bounds == 0)
+        {
+            size_t pos = edges_src[k].num; // Заносим только в роторные функции!
+            slae.rp[pos] += complex<double>(0.0, -1.0) * edges_src[k].phys->J0 * edges_src[k].phys->omega * edges_src[k].direction;
+        }
+    }
+}
+
+void VFEM::apply_electrodes()
+{
+    cout << " > Applying electrodes ..." << endl;
+    map<size_t, complex<double> > dof_first_val;
+    set<size_t> ker_dof_first_temp;
+    for(size_t k = 0; k < edges_src.size(); k++)
+    {
+        show_progress("generating", k, edges_src.size());
+        if(edges_src[k].phys->type_of_bounds == 1)
+        {
+            vector<size_t> dof, ker_dof;
+            dof.push_back(edges_src[k].num);
+            ker_dof.push_back(edges_src[k].edge_main->nodes[0]->num);
+            ker_dof.push_back(edges_src[k].edge_main->nodes[1]->num);
+            // TODO: Нужно ли учитывать остальные степени свободы - большой вопрос
+            if(config.basis.order > 1 || (config.basis.order == 1 && config.basis.type == 2))
+            {
+                dof.push_back(edges_src[k].num + edges.size());
+                ker_dof.push_back(edges_src[k].num + nodes.size());
+            }
+            if(config.basis.order > 2 || (config.basis.order == 2 && config.basis.type == 2))
+            {
+                dof.push_back(edges_src[k].num + 2 * edges.size() + 3 * faces.size());
+                ker_dof.push_back(edges_src[k].num + faces.size() + edges.size() + nodes.size());
+            }
+
+            dof_first_val[dof[0]] = edges_src[k].phys->E0 * edges_src[k].direction * edges_src[k].length();
+            for(size_t i = 1; i < dof.size(); i++)
+                dof_first_val[dof[i]] = 0.0;
+
+            for(size_t i = 0; i < ker_dof.size(); i++)
+                ker_dof_first_temp.insert(ker_dof[i]);
+        }
+    }
+
+    if(dof_first_val.size() > 0)
+    {
+        // Учет первых краевых
+        for(size_t k = 0; k < slae.n; k++)
+        {
+            show_progress("applying", k, slae.n);
+            if(dof_first_val.find(k) != dof_first_val.end())
+            {
+                complex<double> val = dof_first_val[k];
+                slae.x[k] = slae.rp[k] = val;
+                slae.di[k] = 1.0;
+                for(size_t i = slae.ig[k]; i < slae.ig[k + 1]; i++)
+                {
+                    if(dof_first_val.find(slae.jg[i]) == dof_first_val.end())
+                        slae.rp[slae.jg[i]] -= slae.gg[i] * val;
+                    slae.gg[i] = 0.0;
+                }
+            }
+            else
+            {
+                for(size_t i = slae.ig[k]; i < slae.ig[k + 1]; i++)
+                {
+                    if(dof_first_val.find(slae.jg[i]) != dof_first_val.end())
+                    {
+                        complex<double> val = dof_first_val[slae.jg[i]];
+                        slae.rp[k] -= slae.gg[i] * val;
+                        slae.gg[i] = 0.0;
+                    }
+                }
+            }
+        }
+
+        if(config.v_cycle_enabled)
+        {
+            // Первые краевые для матрицы ядра
+            for(size_t k = 0; k < ker_slae.n; k++)
+            {
+                // Пробегаем по всей матрице
+                if(ker_dof_first_temp.find(k) != ker_dof_first_temp.end())
+                {
+                    ker_slae.di[k] = 1.0;
+                    for(size_t i = ker_slae.ig[k]; i < ker_slae.ig[k + 1]; i++)
+                        ker_slae.gg[i] = 0.0;
+                }
+                else
+                {
+                    for(size_t i = ker_slae.ig[k]; i < ker_slae.ig[k + 1]; i++)
+                    {
+                        if(ker_dof_first_temp.find(ker_slae.jg[i]) != ker_dof_first_temp.end())
+                            ker_slae.gg[i] = 0.0;
+                    }
+                }
+            }
+        }
+
+        // Переносим степени свободы в основной массив
+        for(map<size_t, complex<double> >::iterator it = dof_first_val.begin(); it != dof_first_val.end(); ++it)
+        {
+            if(config.boundary_enabled)
+                global_to_local[it->first] = numeric_limits<size_t>::max();
+            else
+                dof_first.insert(it->first);
+        }
+        for(set<size_t>::iterator it = ker_dof_first_temp.begin(); it != ker_dof_first_temp.end(); ++it)
+            ker_dof_first.insert(*it);
     }
 }
 
@@ -523,6 +601,22 @@ cvector3 VFEM::rotor(const point & p, const finite_element * fe) const
     return result;
 }
 
+complex<double> VFEM::divergence(const point & p) const
+{
+    return divergence(p, get_fe(p));
+}
+
+complex<double> VFEM::divergence(const point & p, const finite_element * fe) const
+{
+    complex<double> result;
+    if(fe)
+    {
+        for(size_t i = 0; i < config.basis.tet_bf_num; i++)
+            result = result + slae.x[get_tet_dof(fe, i)] * fe->divw(i, p);
+    }
+    return result;
+}
+
 void VFEM::make_struct()
 {
     if(config.boundary_enabled && global_to_local.size() > 0)
@@ -538,6 +632,7 @@ void VFEM::make_data()
     apply_point_sources();
     apply_edges_sources();
     applying_bound();
+    apply_electrodes();
 }
 
 void VFEM::calculate_diff()
@@ -552,9 +647,9 @@ void VFEM::calculate_diff()
         complex<double> k2(- ph.epsilon * ph.omega * ph.omega, ph.omega * ph.sigma);
 
         // Инициализация параметров вычислителей для аналитики
-        pair<const config_type *, array_t<evaluator<complex<double> > *, 3> >
-                params_object(& config, array_t<evaluator<complex<double> > *, 3>());
-        map<size_t, array_t<evaluator<complex<double> >, 3> >::iterator
+        pair<const config_type *, array_t<evaluator_helmholtz *, 3> >
+                params_object(& config, array_t<evaluator_helmholtz *, 3>());
+        map<size_t, array_t<evaluator_helmholtz, 3> >::iterator
                 it = config.analytical.values.find(ph.gmsh_num);
         if(it != config.analytical.values.end())
             for(size_t i = 0; i < 3; i++)
@@ -562,13 +657,13 @@ void VFEM::calculate_diff()
         else
             for(size_t i = 0; i < 3; i++)
             {
-                evaluator<complex<double> > * ev_curr = &(config.analytical.default_value[i]);
+                evaluator_helmholtz * ev_curr = &(config.analytical.default_value[i]);
                 params_object.second[i] = ev_curr;
-                ev_curr->set_var("epsilon", ph.epsilon);
-                ev_curr->set_var("sigma", ph.sigma);
-                ev_curr->set_var("mu", ph.mu);
-                ev_curr->set_var("J0", ph.J0);
-                ev_curr->set_var("k2", k2);
+                ev_curr->set_epsilon(ph.epsilon);
+                ev_curr->set_sigma(ph.sigma);
+                ev_curr->set_mu(ph.mu);
+                ev_curr->set_J0(ph.J0);
+                ev_curr->set_k2(k2);
             }
 
         // Находим локальные веса, связанные с этим КЭ

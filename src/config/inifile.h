@@ -74,7 +74,7 @@ public:
     }
 
     template<typename T>
-    std::list<T> enumerate(const std::string & section, const T & type) const
+    std::list<T> enumerate(const std::string & section, const T * type) const
     {
         (void)(type);
         std::list<std::string> result;

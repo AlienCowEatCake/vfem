@@ -6,6 +6,8 @@
 #include "../common/cubatures.h"
 #include "../config/inifile.h"
 #include "../config/evaluator/evaluator.h"
+#include "../config/evaluator/evaluator_xyz.h"
+#include "../config/evaluator_helmholtz.h"
 #include "../vfem/phys.h"
 #include "../geometry/point.h"
 #include "../geometry/vector3.h"
@@ -69,9 +71,9 @@ class evaluator3
 public:
     evaluator3();
     // Вычислители по физическим областям
-    map<size_t, array_t<evaluator<complex<double> >, 3> > values;
+    map<size_t, array_t<evaluator_helmholtz, 3> > values;
     // Вычислители по умолчанию
-    array_t<evaluator<complex<double> >, 3> default_value;
+    array_t<evaluator_helmholtz, 3> default_value;
     // Тип JIT-компилятора в вычислителях
     enum jit_types
     {

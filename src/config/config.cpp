@@ -167,11 +167,11 @@ bool config_type::load(const string & filename)
 
     // Секция Boundary
 
-    list<size_t> boundaries = cfg_file.enumerate("boundary", (size_t)1);
+    list<size_t> boundaries = cfg_file.enumerate("boundary", (size_t*)NULL);
     for(list<size_t>::iterator it = boundaries.begin(); it != boundaries.end(); ++it)
     {
         size_t subsection = * it;
-        array_t<evaluator<complex<double> >, 3> * curr_parser = NULL;
+        array_t<evaluator_helmholtz, 3> * curr_parser = NULL;
         if(subsection == 0)
             curr_parser = & boundary.default_value;
         else
@@ -187,7 +187,11 @@ bool config_type::load(const string & filename)
 
             else if(section == "boundary" || section == "right" || section == "analytical")
             {
+//<<<<<<< HEAD
 
+//=======
+                array_t<evaluator_helmholtz, 3> * curr_parser = NULL;
+//>>>>>>> master
                 if(section == "boundary")
                 {
                     if(subsection.empty())
@@ -240,7 +244,7 @@ bool config_type::load(const string & filename)
                                 value = trim(value.substr(1, value.length() - 2));
                             if(param == "x" || param == "y" || param == "z")
                             {
-                                evaluator<complex<double> > * curr_parser_var = NULL;
+                                evaluator_helmholtz * curr_parser_var = NULL;
                                 if(param == "x")      curr_parser_var = & ((* curr_parser)[0]);
                                 else if(param == "y") curr_parser_var = & ((* curr_parser)[1]);
                                 else if(param == "z") curr_parser_var = & ((* curr_parser)[2]);

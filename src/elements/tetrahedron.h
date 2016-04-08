@@ -46,6 +46,8 @@ public:
 
     // Базисные функции
     vector3 w(size_t i, const point & p) const;
+    // Дивергенции базисных функций
+    double divw(size_t i, const point & p) const;
     // Роторы базисных функций
     vector3 rotw(size_t i, const point & p) const;
     // Базисные функции ядра
@@ -85,40 +87,26 @@ protected:
 class tetrahedron : public tetrahedron_base
 {
 public:
-    // Локальная матрица жескости
-    matrix_t<double> G() const;
-    // Локальная матрица массы
-    matrix_t<double> M() const;
     // Локальная правая часть
     array_t<complex<double> > rp(eval_func func, void * data) const;
+    // Локальная матрица полного пространства
+    matrix_t<complex<double> > MpG() const;
     // Локальная матрица ядра
-    matrix_t<double> K() const;
-
-protected:
-    // Интеграл от бф
-    double integrate_w(size_t i, size_t j) const;
-    // Интеграл от ротора бф
-    double integrate_rotw(size_t i, size_t j) const;
-    // Интеграл от ф-и правой части на бф
-    complex<double> integrate_fw(eval_func func, size_t i, void * data) const;
-    // Интегралы от базисных функций ядра
-    double integrate_kerw(size_t i, size_t j) const;
+    matrix_t<complex<double> > K() const;
 };
 
 // Класс тетраэдр (для работы с PML-краевыми)
-class tetrahedron_pml : public tetrahedron_base
+class tetrahedron_pml : public tetrahedron
 {
 public:
     tetrahedron_pml();
     // Инициализация PML-координат
     void init_pml(cvector3(* get_s)(const point &, const tetrahedron_pml *, const phys_pml_area *), const phys_pml_area * phys_pml, const cpoint * nodes_pml);
 
-    // Локальная матрица жескости
-    matrix_t<complex<double> > G() const;
-    // Локальная матрица массы
-    matrix_t<complex<double> > M() const;
     // Локальная правая часть
     array_t<complex<double> > rp(eval_func func, void * data) const;
+    // Локальная матрица полного пространства
+    matrix_t<complex<double> > MpG() const;
     // Локальная матрица ядра
     matrix_t<complex<double> > K() const;
 
@@ -147,15 +135,6 @@ protected:
     cvector3 rotw_pml(size_t i, const cpoint & p, const point & p_non_PML) const;
     // Базисные функции ядра (в PML)
     cvector3 kerw_pml(size_t i, const cpoint & p, const point & p_non_PML) const;
-
-    // Интеграл от бф
-    complex<double> integrate_w(size_t i, size_t j) const;
-    // Интеграл от ротора бф
-    complex<double> integrate_rotw(size_t i, size_t j) const;
-    // Интеграл от ф-и правой части на бф
-    complex<double> integrate_fw(eval_func func, size_t i, void * data) const;
-    // Интегралы от базисных функций ядра
-    complex<double> integrate_kerw(size_t i, size_t j) const;
 };
 
 #endif // TETRAHEDRON_H_INCLUDED
