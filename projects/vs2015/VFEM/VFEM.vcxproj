@@ -177,6 +177,7 @@
     <ClInclude Include="..\..\..\src\config\evaluator\evaluator_internal\var_container.h" />
     <ClInclude Include="..\..\..\src\config\evaluator\evaluator_operations.h" />
     <ClInclude Include="..\..\..\src\config\evaluator\evaluator_xyz.h" />
+    <ClInclude Include="..\..\..\src\config\inifile.h" />
     <ClInclude Include="..\..\..\src\elements\edge.h" />
     <ClInclude Include="..\..\..\src\elements\face.h" />
     <ClInclude Include="..\..\..\src\elements\octree.h" />
@@ -203,6 +204,7 @@
     <ClCompile Include="..\..\..\src\config\evaluator\evaluator_internal\jit\oper_templates.cpp" />
     <ClCompile Include="..\..\..\src\config\evaluator\evaluator_internal\jit\real_templates.cpp" />
     <ClCompile Include="..\..\..\src\config\evaluator\evaluator_internal\transition_table.cpp" />
+    <ClCompile Include="..\..\..\src\config\inifile.cpp" />
     <ClCompile Include="..\..\..\src\elements\edge.cpp" />
     <ClCompile Include="..\..\..\src\elements\face.cpp" />
     <ClCompile Include="..\..\..\src\elements\tetrahedron.cpp" />

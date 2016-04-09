@@ -208,57 +208,69 @@ bool config_type::load(const string & filename)
 
     trio<string, evaluator3 *, bool *> evaluators_and_sections[3] =
     {
-        make_trio(string("boundary"),   & boundary,     & boundary_enabled),
-        make_trio(string("right"),      & right,        & right_enabled),
-        make_trio(string("analytical"), & analytical,   & analytical_enabled)
+        make_trio(string("Boundary"),   & boundary,     & boundary_enabled),
+        make_trio(string("Right"),      & right,        & right_enabled),
+        make_trio(string("Analytical"), & analytical,   & analytical_enabled)
     };
 
     for(size_t k = 0; k < 3; k++)
     {
-        list<size_t> subsections = cfg_file.enumerate(evaluators_and_sections[k].first, (size_t*)NULL);
-        for(list<size_t>::iterator it = subsections.begin(); it != subsections.end(); ++it)
+        *(evaluators_and_sections[k].third) = cfg_file.get(evaluators_and_sections[k].first,
+                "", "enabled", *(evaluators_and_sections[k].third));
+        // Если секция отключена, то рассматривать дальнейшие параметры нет смысла
+        if(*(evaluators_and_sections[k].third))
         {
-            size_t subsection = * it;
-            array_t<evaluator_helmholtz, 3> * curr_parser = NULL;
-            if(subsection == 0)
-                curr_parser = & evaluators_and_sections[k].second->default_value;
-            else
-                curr_parser = & evaluators_and_sections[k].second->values[subsection];
-            string values[3] =
+            // Умолчательные значения следует взять из пустой подсекции
+            string def_values[3] =
             {
-                cfg_file.get(evaluators_and_sections[k].first, subsection, "x", string("0.0")),
-                cfg_file.get(evaluators_and_sections[k].first, subsection, "y", string("0.0")),
-                cfg_file.get(evaluators_and_sections[k].first, subsection, "z", string("0.0"))
+                cfg_file.get(evaluators_and_sections[k].first, "", "x", string("0.0")),
+                cfg_file.get(evaluators_and_sections[k].first, "", "y", string("0.0")),
+                cfg_file.get(evaluators_and_sections[k].first, "", "z", string("0.0"))
             };
-            for(size_t i = 0; i < 3; i++)
+            // А теперь уже можно пройтись по всем подсекциям
+            list<size_t> subsections = cfg_file.enumerate(evaluators_and_sections[k].first, (size_t*)NULL);
+            for(list<size_t>::iterator it = subsections.begin(); it != subsections.end(); ++it)
             {
-                if(!((*curr_parser)[i].parse(values[i]) && (*curr_parser)[i].simplify()))
+                size_t subsection = * it;
+                array_t<evaluator_helmholtz, 3> * curr_parser = NULL;
+                if(subsection == 0)
+                    curr_parser = & evaluators_and_sections[k].second->default_value;
+                else
+                    curr_parser = & evaluators_and_sections[k].second->values[subsection];
+                string values[3] =
                 {
-                    cout << "Error in " << __FILE__ << ":" << __LINE__
-                         << " while parsing " << values[i] << " ("
-                         << (*curr_parser)[i].get_error() << ")" << endl;
-                    return init(false);
-                }
-                switch(jit_type)
+                    cfg_file.get(evaluators_and_sections[k].first, subsection, "x", string(def_values[0])),
+                    cfg_file.get(evaluators_and_sections[k].first, subsection, "y", string(def_values[1])),
+                    cfg_file.get(evaluators_and_sections[k].first, subsection, "z", string(def_values[2]))
+                };
+                for(size_t i = 0; i < 3; i++)
                 {
-                case evaluator3::JIT_EXTCALL:
-                    if(!(*curr_parser)[i].compile_extcall())
+                    if(!((*curr_parser)[i].parse(values[i]) && (*curr_parser)[i].simplify()))
+                    {
                         cout << "Error in " << __FILE__ << ":" << __LINE__
-                             << " while compiling (extcall) " << values[i] << " ("
+                             << " while parsing " << values[i] << " ("
                              << (*curr_parser)[i].get_error() << ")" << endl;
-                    break;
-                case evaluator3::JIT_INLINE:
-                    if(!(*curr_parser)[i].compile_inline())
-                        cout << "Error in " << __FILE__ << ":" << __LINE__
-                             << " while compiling (inline) " << values[i] << " ("
-                             << (*curr_parser)[i].get_error() << ")" << endl;
-                    break;
-                default:
-                    break;
+                        return init(false);
+                    }
+                    switch(jit_type)
+                    {
+                    case evaluator3::JIT_EXTCALL:
+                        if(!(*curr_parser)[i].compile_extcall())
+                            cout << "Error in " << __FILE__ << ":" << __LINE__
+                                 << " while compiling (extcall) " << values[i] << " ("
+                                 << (*curr_parser)[i].get_error() << ")" << endl;
+                        break;
+                    case evaluator3::JIT_INLINE:
+                        if(!(*curr_parser)[i].compile_inline())
+                            cout << "Error in " << __FILE__ << ":" << __LINE__
+                                 << " while compiling (inline) " << values[i] << " ("
+                                 << (*curr_parser)[i].get_error() << ")" << endl;
+                        break;
+                    default:
+                        break;
+                    }
                 }
             }
-            *(evaluators_and_sections[k].third) = cfg_file.get(evaluators_and_sections[k].first,
-                    subsection, "enabled", *(evaluators_and_sections[k].third));
         }
     }
 
@@ -298,7 +310,7 @@ bool config_type::load(const string & filename)
     post_types_table[2] = "2d";
     post_types_table[3] = "3d";
 
-    list<size_t> post_subsections = cfg_file.enumerate("postprocessing", (size_t*)NULL);
+    list<size_t> post_subsections = cfg_file.enumerate("Postprocessing", (size_t*)NULL);
     for(list<size_t>::iterator it = post_subsections.begin(); it != post_subsections.end(); ++it)
     {
         size_t subsection = * it;
@@ -346,139 +358,68 @@ bool config_type::load_pml(const string & filename)
         return true;
     }
 
-    ifstream ifs(filename.c_str());
-    if(!ifs.good())
+    inifile cfg_file(filename);
+    if(!cfg_file.good())
     {
         cout << "[PML Config] Error in " << __FILE__ << ":" << __LINE__
              << " while reading file " << filename << endl;
         return false;
     }
 
-    // Умолчательные значения зададим пока огромными числами
-    complex<double> chi_def(DBL_MAX, DBL_MAX);
-    double m_def = DBL_MAX;
-    double width_def = DBL_MAX;
-    phys_pml.x0 = DBL_MAX;
-    phys_pml.x1 = -DBL_MAX;
-    phys_pml.y0 = DBL_MAX;
-    phys_pml.y1 = -DBL_MAX;
-    phys_pml.z0 = DBL_MAX;
-    phys_pml.z1 = -DBL_MAX;
-
-    string line;
-    getline(ifs, line);
-    line = trim(line);
-    do
+    list<string> whitelist;
+    whitelist.push_back("PML");
+    if(!cfg_file.check_sections(whitelist))
     {
-        if(line.length() > 1 && line[0] == '[')
-        {
-            line = to_lowercase(line.substr(1, line.length() - 2));
-            string section = line, subsection;
-            size_t dot_pos = line.find_first_of(".");
-            if(dot_pos != string::npos)
-            {
-                section = line.substr(0, dot_pos);
-                subsection = line.substr(dot_pos + 1);
-            }
-            //cout << "section: " << section << "\nsubsection: " << subsection << endl;
+        cout << "[PML Config] Error in " << __FILE__ << ":" << __LINE__
+             << " while reading file " << filename << endl;
+        return init(false);
+    }
+    whitelist.clear();
 
-            if(section == "pml")
-            {
-                if(subsection.empty())
-                {
-                    do
-                    {
-                        getline(ifs, line);
-                        line = trim(line);
-                        if(line.length() > 1 && line[0] != ';')
-                        {
-                            size_t eq_pos = line.find_first_of("=");
-                            if(eq_pos != string::npos)
-                            {
-                                string param = to_lowercase(trim(line.substr(0, eq_pos)));
-                                string value = trim(line.substr(eq_pos + 1));
-                                if(value.length() > 1 && value[0] == '\"')
-                                    value = trim(value.substr(1, value.length() - 2));
-                                stringstream sst(value);
-                                double tmp;
-                                sst >> tmp;
-                                if(param == "chi_real")         chi_def.real(tmp);
-                                else if(param == "chi_imag")    chi_def.imag(tmp);
-                                else if(param == "m")           m_def = tmp;
-                                else if(param == "width")       width_def = tmp;
-                                else if(param == "x0")          phys_pml.x0 = tmp;
-                                else if(param == "x1")          phys_pml.x1 = tmp;
-                                else if(param == "y0")          phys_pml.y0 = tmp;
-                                else if(param == "y1")          phys_pml.y1 = tmp;
-                                else if(param == "z0")          phys_pml.z0 = tmp;
-                                else if(param == "z1")          phys_pml.z1 = tmp;
-                                else cout << "[PML Config] Unsupported param \"" << param << "\" in section \"" << section
-                                          << (subsection.empty() ? string("") : (string(".") + subsection)) << "\"" << endl;
-                                //cout << "  param = " << param << endl;
-                                //cout << "  value = " << value << endl;
-                            }
-                        }
-                    }
-                    while(ifs.good() && !(line.length() > 1 && line[0] == '['));
-                }
-                else
-                {
-                    stringstream sst(subsection);
-                    size_t pml_phys;
-                    sst >> pml_phys;
-                    pml_config_parameter * curr = NULL;
-                    if(phys_pml.params.find(pml_phys) != phys_pml.params.end())
-                    {
-                        curr = & (phys_pml.params[pml_phys]);
-                    }
-                    else
-                    {
-                        curr = & (phys_pml.params[pml_phys]);
-                        curr->chi = chi_def;
-                        curr->m = m_def;
-                        curr->width = width_def;
-                    }
+    // Секция PML
 
-                    do
-                    {
-                        getline(ifs, line);
-                        line = trim(line);
-                        if(line.length() > 1 && line[0] != ';')
-                        {
-                            size_t eq_pos = line.find_first_of("=");
-                            if(eq_pos != string::npos)
-                            {
-                                string param = to_lowercase(trim(line.substr(0, eq_pos)));
-                                string value = trim(line.substr(eq_pos + 1));
-                                if(value.length() > 1 && value[0] == '\"')
-                                    value = trim(value.substr(1, value.length() - 2));
-                                stringstream sst(value);
-                                double tmp;
-                                sst >> tmp;
-                                if(param == "chi_real")         curr->chi.real(tmp);
-                                else if(param == "chi_imag")    curr->chi.imag(tmp);
-                                else if(param == "m")           curr->m = tmp;
-                                else if(param == "width")       curr->width = tmp;
-                                else cout << "[PML Config] Unsupported param \"" << param << "\" in section \"" << section
-                                          << (subsection.empty() ? string("") : (string(".") + subsection)) << "\"" << endl;
-                                //cout << "  param = " << param << endl;
-                                //cout << "  value = " << value << endl;
-                            }
-                        }
-                    }
-                    while(ifs.good() && !(line.length() > 1 && line[0] == '['));
-                }
-            }
-        }
-        else
+    whitelist.push_back("chi_imag");
+    whitelist.push_back("chi_real");
+    whitelist.push_back("m");
+    whitelist.push_back("width");
+    whitelist.push_back("x0");
+    whitelist.push_back("x1");
+    whitelist.push_back("y0");
+    whitelist.push_back("y1");
+    whitelist.push_back("z0");
+    whitelist.push_back("z1");
+    if(!cfg_file.check_parameters("PML", whitelist))
+    {
+        cout << "[PML Config] Error in " << __FILE__ << ":" << __LINE__
+             << " while reading file " << filename << endl;
+        return init(false);
+    }
+    whitelist.clear();
+
+    // Умолчательные значения зададим пока огромными числами
+    complex<double> chi_def(cfg_file.get("PML", "", "chi_real", DBL_MAX), cfg_file.get("PML", "", "chi_imag", DBL_MAX));
+    double m_def     = cfg_file.get("PML", "", "m",     DBL_MAX);
+    double width_def = cfg_file.get("PML", "", "width", DBL_MAX);
+    phys_pml.x0      = cfg_file.get("PML", "", "x0",    DBL_MAX);
+    phys_pml.x1      = cfg_file.get("PML", "", "x1",   -DBL_MAX);
+    phys_pml.y0      = cfg_file.get("PML", "", "y0",    DBL_MAX);
+    phys_pml.y1      = cfg_file.get("PML", "", "y1",   -DBL_MAX);
+    phys_pml.z0      = cfg_file.get("PML", "", "z0",    DBL_MAX);
+    phys_pml.z1      = cfg_file.get("PML", "", "z1",   -DBL_MAX);
+
+    list<size_t> pml_subsections = cfg_file.enumerate("PML", (size_t*)NULL);
+    for(list<size_t>::iterator it = pml_subsections.begin(), it_end = pml_subsections.end(); it != it_end; ++it)
+    {
+        size_t pml_phys = * it;
+        if(pml_phys != 0)
         {
-            getline(ifs, line);
-            line = trim(line);
+            pml_config_parameter * curr = & (phys_pml.params[pml_phys]);
+            curr->chi.real(cfg_file.get("PML", pml_phys, "chi_real", chi_def.real()));
+            curr->chi.imag(cfg_file.get("PML", pml_phys, "chi_imag", chi_def.imag()));
+            curr->m     = cfg_file.get("PML", pml_phys, "m",     m_def);
+            curr->width = cfg_file.get("PML", pml_phys, "width", width_def);
         }
     }
-    while(ifs.good());
-
-    ifs.close();
 
     // Проверим введенное на адекватность
     pml_config_parameter def;

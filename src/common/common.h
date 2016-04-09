@@ -40,6 +40,7 @@
 #include <utility>
 #include <cassert>
 #include <cctype>
+#include <list>
 
 using namespace std;
 
