@@ -96,6 +96,14 @@ ostream & operator << (ostream & os, const edge & a)
     return os;
 }
 
+double edge::length()
+{
+    double dx = nodes[1]->x - nodes[0]->x;
+    double dy = nodes[1]->y - nodes[0]->y;
+    double dz = nodes[1]->z - nodes[0]->z;
+    return sqrt(dx * dx + dy * dy + dz * dz);
+}
+
 // ============================================================================
 
 edge_src::edge_src()

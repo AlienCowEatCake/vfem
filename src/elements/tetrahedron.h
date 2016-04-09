@@ -12,8 +12,6 @@
 #include "../elements/face.h"
 #include "../vfem/phys.h"
 
-using namespace tet_integration_8;
-
 typedef cvector3(* eval_func)(const point &, const phys_area &, void *);
 
 // Индексы для построения базисных функций на тетраэдрах
@@ -30,7 +28,7 @@ class tetrahedron_base
 {
 public:
     tetrahedron_base();
-    void init();
+    void init(const basis_type * basis);
     bool inside(const point & p) const;
     bool inside(double x, double y, double z) const;
 
@@ -48,6 +46,8 @@ public:
 
     // Базисные функции
     vector3 w(size_t i, const point & p) const;
+    // Дивергенции базисных функций
+    double divw(size_t i, const point & p) const;
     // Роторы базисных функций
     vector3 rotw(size_t i, const point & p) const;
     // Базисные функции ядра
@@ -68,72 +68,64 @@ public:
 
 protected:
     // Матрица L-координат
-    matrix_t<double, 4, 4> L;
+    matrix_t<double> L;
     // Градиент L-координаты
     vector3 grad_lambda(size_t i) const;
     // L-координаты
     double lambda(size_t i, const point & p) const;
 
     // Точки Гаусса
-    point gauss_points[tet_integration::gauss_num];
+    array_t<point> gauss_points;
     // Якобиан
     double jacobian;
 
     // Параметры прямых для дерева
-    double edges_a[6][3], edges_b[6][3];
+    matrix_t<double> edges_a, edges_b;
 };
 
 // Класс тетраэдр (обычный)
 class tetrahedron : public tetrahedron_base
 {
 public:
-    // Локальная матрица жескости
-    matrix_t<double> G() const;
-    // Локальная матрица массы
-    matrix_t<double> M() const;
     // Локальная правая часть
     array_t<complex<double> > rp(eval_func func, void * data) const;
+    // Локальная матрица полного пространства
+    matrix_t<complex<double> > MpG() const;
     // Локальная матрица ядра
-    matrix_t<double> K() const;
-
-protected:
-    // Интеграл от бф
-    double integrate_w(size_t i, size_t j) const;
-    // Интеграл от ротора бф
-    double integrate_rotw(size_t i, size_t j) const;
-    complex<double> integrate_fw(eval_func func, size_t i, void * data) const;
-    // Интегралы от базисных функций ядра
-    double integrate_kerw(size_t i, size_t j) const;
+    matrix_t<complex<double> > K() const;
 };
 
 // Класс тетраэдр (для работы с PML-краевыми)
-class tetrahedron_pml : public tetrahedron_base
+class tetrahedron_pml : public tetrahedron
 {
 public:
+    tetrahedron_pml();
+    // Инициализация PML-координат
     void init_pml(cvector3(* get_s)(const point &, const tetrahedron_pml *, const phys_pml_area *), const phys_pml_area * phys_pml, const cpoint * nodes_pml);
 
-    // Локальная матрица жескости
-    matrix_t<complex<double> > G() const;
-    // Локальная матрица массы
-    matrix_t<complex<double> > M() const;
     // Локальная правая часть
     array_t<complex<double> > rp(eval_func func, void * data) const;
+    // Локальная матрица полного пространства
+    matrix_t<complex<double> > MpG() const;
     // Локальная матрица ядра
     matrix_t<complex<double> > K() const;
+
+    // Получить указатель на обычный тетраэдр
+    const tetrahedron * to_std() const;
 
 protected:
     cvector3(* get_s)(const point &, const tetrahedron_pml *, const phys_pml_area *);
     const phys_pml_area * phys_pml;
 
     // Матрица L-координат (в PML)
-    matrix_t<complex<double>, 4, 4> L_pml;
+    matrix_t<complex<double> > L_pml;
     // Градиент L-координаты (в PML)
     cvector3 grad_lambda_pml(size_t i) const;
     // L-координаты (в PML)
     complex<double> lambda_pml(size_t i, const cpoint & p) const;
 
     // Точки Гаусса (в PML)
-    cpoint gauss_points_pml[tet_integration::gauss_num];
+    array_t<cpoint> gauss_points_pml;
     // Якобиан (в PML)
     complex<double> jacobian_pml;
 
@@ -143,14 +135,6 @@ protected:
     cvector3 rotw_pml(size_t i, const cpoint & p, const point & p_non_PML) const;
     // Базисные функции ядра (в PML)
     cvector3 kerw_pml(size_t i, const cpoint & p, const point & p_non_PML) const;
-
-    // Интеграл от бф
-    complex<double> integrate_w(size_t i, size_t j) const;
-    // Интеграл от ротора бф
-    complex<double> integrate_rotw(size_t i, size_t j) const;
-    complex<double> integrate_fw(eval_func func, size_t i, void * data) const;
-    // Интегралы от базисных функций ядра
-    complex<double> integrate_kerw(size_t i, size_t j) const;
 };
 
 #endif // TETRAHEDRON_H_INCLUDED

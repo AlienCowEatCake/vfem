@@ -18,12 +18,8 @@
 
 #if defined VFEM_USE_PML
 typedef tetrahedron_pml finite_element;
-typedef matrix_t<complex<double> > l_matrix;
-typedef matrix_t<complex<double> > ker_l_matrix;
 #else
 typedef tetrahedron finite_element;
-typedef matrix_t<double> l_matrix;
-typedef matrix_t<double> ker_l_matrix;
 #endif
 
 // Правая часть
@@ -78,6 +74,9 @@ public:
     // Ротор решения в точке
     cvector3 rotor(const point & p) const;
     cvector3 rotor(const point & p, const finite_element * fe) const;
+    // Дивергенция решения в точке
+    complex<double> divergence(const point & p) const;
+    complex<double> divergence(const point & p, const finite_element * fe) const;
 
     // Конечные элементы (тетраэдры)
     vector<finite_element> fes;
@@ -127,10 +126,14 @@ public:
     // Восьмиричное дерево поиска
     octree<finite_element> tree;
 
+    // Получение количества степеней свободы тетраэдра
+    size_t get_tet_dof_num(const tetrahedron_base * fe) const;
     // Получение степеней свободы тетраэдра в глобальной матрице
-    size_t get_tet_dof(const finite_element * fe, size_t i) const;
+    size_t get_tet_dof(const tetrahedron_base * fe, size_t i) const;
+    // Получение количества степеней свободы ядра тетраэдра
+    size_t get_tet_ker_dof_num(const tetrahedron_base * fe) const;
     // Получение степеней свободы тетраэдра в матрице ядра
-    size_t get_tet_ker_dof(const finite_element * fe, size_t i) const;
+    size_t get_tet_ker_dof(const tetrahedron_base * fe, size_t i) const;
     // Получение степеней свободы треугольника в глобальной матрице
     size_t get_tr_dof(const triangle * tr, size_t i) const;
     // Получение степеней свободы треугольника в матрице ядра
@@ -152,8 +155,19 @@ public:
     void apply_edges_sources();
     // Применение точечных источников
     void apply_point_sources();
+    // Применение электродов
+    void apply_electrodes();
 
 protected:
+    // Добавление локальных матриц от одного КЭ в глобальную
+    template<typename T>
+    void process_fe(const T * fe);
+    // Генерация абстрактного портрета
+    template<typename U, typename V>
+    void generate_abstract_portrait(size_t all_dof_num, const vector<U> & elems, SLAE & slae_curr,
+                                    size_t (VFEM::*get_dof_num)(const V *) const,
+                                    size_t (VFEM::*get_dof)(const V *, size_t) const) const;
+
     // Добавление ребра в множество ребер
     size_t add_edge(edge ed, set<edge> & edges_set);
     // Добавление грани в множество граней

@@ -10,6 +10,7 @@ LDFLAGS += $(LDFLAGS_EXTRA) -lrt
 
 SOURCES = \
 	src/main.cpp \
+	src/config/inifile.cpp \
 	src/config/config.cpp \
 	src/config/evaluator/evaluator_internal/transition_table.cpp \
 	src/config/evaluator/evaluator_internal/jit/common.cpp \

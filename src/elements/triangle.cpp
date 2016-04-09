@@ -72,7 +72,7 @@ triangle_full::triangle_full(const triangle_base & other) : triangle_base(other)
 
 void triangle_full::init(const basis_type * basis)
 {
-    using namespace tr_integration;
+    const tr_integration_config * tr_integration = &(basis->tr_int);
 
     // Построение локальной системы координат
     vector3 g1(get_node(0), get_node(1));
@@ -110,20 +110,21 @@ void triangle_full::init(const basis_type * basis)
     jacobian = fabs(D_det);
 
     // Точки Гаусса в локальной системе координат
-    point gauss_points_local[gauss_num];
-    for(size_t j = 0 ; j < gauss_num; j++)
+    array_t<point> gauss_points_local(tr_integration->gauss_num);
+    for(size_t j = 0 ; j < tr_integration->gauss_num; j++)
     {
         for(size_t i = 0; i < 2; i++)
         {
             gauss_points_local[j][i] = 0.0;
             for(size_t k = 0; k < 3; k++)
-                gauss_points_local[j][i] += D[i][k] * gauss_points_master[j][k];
+                gauss_points_local[j][i] += D[i][k] * tr_integration->gauss_points_master[j][k];
         }
         gauss_points_local[j][2] = 0.0;
     }
 
     // Точки Гаусса в глобальной системе координат
-    for(size_t i = 0; i < gauss_num; i++)
+    gauss_points.resize(tr_integration->gauss_num);
+    for(size_t i = 0; i < tr_integration->gauss_num; i++)
         gauss_points[i] = to_global(gauss_points_local[i]);
 
     // Инициализируем параметры базиса
@@ -244,10 +245,10 @@ vector3 triangle_full::w(size_t i, const point & p) const
 
 double triangle_full::integrate_w(size_t i, size_t j) const
 {
-    using namespace tr_integration;
+    const tr_integration_config * tr_integration = &(basis->tr_int);
     double result = 0.0;
-    for(size_t k = 0; k < gauss_num; k++)
-        result += gauss_weights[k] *
+    for(size_t k = 0; k < tr_integration->gauss_num; k++)
+        result += tr_integration->gauss_weights[k] *
                   w(i, gauss_points[k]) *
                   w(j, gauss_points[k]);
     return result * jacobian;
@@ -255,10 +256,10 @@ double triangle_full::integrate_w(size_t i, size_t j) const
 
 complex<double> triangle_full::integrate_fw(eval_func func, size_t i, void * data) const
 {
-    using namespace tr_integration;
+    const tr_integration_config * tr_integration = &(basis->tr_int);
     complex<double> result(0.0, 0.0);
-    for(size_t k = 0; k < gauss_num; k++)
-        result += gauss_weights[k] *
+    for(size_t k = 0; k < tr_integration->gauss_num; k++)
+        result += tr_integration->gauss_weights[k] *
                   func(gauss_points[k], get_phys_area(), data) *
                   w(i, gauss_points[k]);
     return result * jacobian;

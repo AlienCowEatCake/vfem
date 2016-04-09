@@ -1,0 +1,233 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{DC017D0B-338F-4F40-8FFC-C7354A95A3BD}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>VFEM</RootNamespace>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <OpenMPSupport>true</OpenMPSupport>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <OpenMPSupport>true</OpenMPSupport>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <OpenMPSupport>true</OpenMPSupport>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <OpenMPSupport>true</OpenMPSupport>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\src\common\common.h" />
+    <ClInclude Include="..\..\..\src\common\cubatures.h" />
+    <ClInclude Include="..\..\..\src\common\matrix.h" />
+    <ClInclude Include="..\..\..\src\common\trio.h" />
+    <ClInclude Include="..\..\..\src\config\config.h" />
+    <ClInclude Include="..\..\..\src\config\evaluator_helmholtz.h" />
+    <ClInclude Include="..\..\..\src\config\evaluator\evaluator.h" />
+    <ClInclude Include="..\..\..\src\config\evaluator\evaluator_internal\calculate.h" />
+    <ClInclude Include="..\..\..\src\config\evaluator\evaluator_internal\evaluator_object.h" />
+    <ClInclude Include="..\..\..\src\config\evaluator\evaluator_internal\jit\common.h" />
+    <ClInclude Include="..\..\..\src\config\evaluator\evaluator_internal\jit\compile_extcall.h" />
+    <ClInclude Include="..\..\..\src\config\evaluator\evaluator_internal\jit\compile_inline.h" />
+    <ClInclude Include="..\..\..\src\config\evaluator\evaluator_internal\jit\complex_templates.h" />
+    <ClInclude Include="..\..\..\src\config\evaluator\evaluator_internal\jit\func_templates.h" />
+    <ClInclude Include="..\..\..\src\config\evaluator\evaluator_internal\jit\opcodes.h" />
+    <ClInclude Include="..\..\..\src\config\evaluator\evaluator_internal\jit\oper_templates.h" />
+    <ClInclude Include="..\..\..\src\config\evaluator\evaluator_internal\jit\real_templates.h" />
+    <ClInclude Include="..\..\..\src\config\evaluator\evaluator_internal\misc.h" />
+    <ClInclude Include="..\..\..\src\config\evaluator\evaluator_internal\parse.h" />
+    <ClInclude Include="..\..\..\src\config\evaluator\evaluator_internal\simplify.h" />
+    <ClInclude Include="..\..\..\src\config\evaluator\evaluator_internal\transition_table.h" />
+    <ClInclude Include="..\..\..\src\config\evaluator\evaluator_internal\type_detection.h" />
+    <ClInclude Include="..\..\..\src\config\evaluator\evaluator_internal\var_container.h" />
+    <ClInclude Include="..\..\..\src\config\evaluator\evaluator_operations.h" />
+    <ClInclude Include="..\..\..\src\config\evaluator\evaluator_xyz.h" />
+    <ClInclude Include="..\..\..\src\config\inifile.h" />
+    <ClInclude Include="..\..\..\src\elements\edge.h" />
+    <ClInclude Include="..\..\..\src\elements\face.h" />
+    <ClInclude Include="..\..\..\src\elements\octree.h" />
+    <ClInclude Include="..\..\..\src\elements\tetrahedron.h" />
+    <ClInclude Include="..\..\..\src\elements\triangle.h" />
+    <ClInclude Include="..\..\..\src\geometry\point.h" />
+    <ClInclude Include="..\..\..\src\geometry\vector3.h" />
+    <ClInclude Include="..\..\..\src\problems\problems.h" />
+    <ClInclude Include="..\..\..\src\solvers\BiCGComplex_VC.h" />
+    <ClInclude Include="..\..\..\src\solvers\BiCGStabComplex_VC.h" />
+    <ClInclude Include="..\..\..\src\solvers\CGMComplex_LLT.h" />
+    <ClInclude Include="..\..\..\src\solvers\CGMComplex_VC.h" />
+    <ClInclude Include="..\..\..\src\solvers\COCG_LLT_Smooth.h" />
+    <ClInclude Include="..\..\..\src\solvers\COCG_LLT_Smooth_MKL.h" />
+    <ClInclude Include="..\..\..\src\vfem\phys.h" />
+    <ClInclude Include="..\..\..\src\vfem\slae.h" />
+    <ClInclude Include="..\..\..\src\vfem\vfem.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\common\cubatures.cpp" />
+    <ClCompile Include="..\..\..\src\config\config.cpp" />
+    <ClCompile Include="..\..\..\src\config\evaluator\evaluator_internal\jit\common.cpp" />
+    <ClCompile Include="..\..\..\src\config\evaluator\evaluator_internal\jit\func_templates.cpp" />
+    <ClCompile Include="..\..\..\src\config\evaluator\evaluator_internal\jit\oper_templates.cpp" />
+    <ClCompile Include="..\..\..\src\config\evaluator\evaluator_internal\jit\real_templates.cpp" />
+    <ClCompile Include="..\..\..\src\config\evaluator\evaluator_internal\transition_table.cpp" />
+    <ClCompile Include="..\..\..\src\config\inifile.cpp" />
+    <ClCompile Include="..\..\..\src\elements\edge.cpp" />
+    <ClCompile Include="..\..\..\src\elements\face.cpp" />
+    <ClCompile Include="..\..\..\src\elements\tetrahedron.cpp" />
+    <ClCompile Include="..\..\..\src\elements\tetrahedron_pml.cpp" />
+    <ClCompile Include="..\..\..\src\elements\triangle.cpp" />
+    <ClCompile Include="..\..\..\src\geometry\vector3.cpp" />
+    <ClCompile Include="..\..\..\src\main.cpp" />
+    <ClCompile Include="..\..\..\src\problems\standard.cpp" />
+    <ClCompile Include="..\..\..\src\problems\standard_diff.cpp" />
+    <ClCompile Include="..\..\..\src\problems\standard_pml.cpp" />
+    <ClCompile Include="..\..\..\src\solvers\BiCGComplex_VC.cpp" />
+    <ClCompile Include="..\..\..\src\solvers\BiCGStabComplex_VC.cpp" />
+    <ClCompile Include="..\..\..\src\solvers\CGMComplex_LLT.cpp" />
+    <ClCompile Include="..\..\..\src\solvers\CGMComplex_VC.cpp" />
+    <ClCompile Include="..\..\..\src\solvers\COCG_LLT_Smooth.cpp" />
+    <ClCompile Include="..\..\..\src\solvers\COCG_LLT_Smooth_MKL.cpp" />
+    <ClCompile Include="..\..\..\src\vfem\slae.cpp" />
+    <ClCompile Include="..\..\..\src\vfem\vfem.cpp" />
+    <ClCompile Include="..\..\..\src\vfem\vfem_input.cpp" />
+    <ClCompile Include="..\..\..\src\vfem\vfem_output.cpp" />
+    <ClCompile Include="..\..\..\src\vfem\vfem_v_cycle.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

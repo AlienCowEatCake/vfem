@@ -22,9 +22,10 @@ public:
     size_t type_of_elem;    // Тип элементов
     size_t type_of_bounds;  // Тип краевого условия
     double J0;              // Мощность источника
+    double E0;              // Электрическое поле от электрода
     phys_area()             // Конструктор по умолчанию
     {
-        omega = mu = sigma = epsilon = J0 = 0.0;
+        omega = mu = sigma = epsilon = J0 = E0 = 0.0;
         gmsh_num = type_of_elem = type_of_bounds = 0;
     }
 };

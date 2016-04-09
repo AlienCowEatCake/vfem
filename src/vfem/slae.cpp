@@ -97,7 +97,7 @@ bool SLAE::dump(const string & filename) const
 
     if(!slae_file.good())
     {
-        cerr << "Error in " << __FILE__ << ":" << __LINE__
+        cout << "Error in " << __FILE__ << ":" << __LINE__
              << " while writing file " << filename << endl;
         return false;
     }
@@ -132,7 +132,7 @@ bool SLAE::restore(const string & filename)
     slae_file.open(filename.c_str(), ios::in);
     if(!slae_file.good())
     {
-        cerr << "Error in " << __FILE__ << ":" << __LINE__
+        cout << "Error in " << __FILE__ << ":" << __LINE__
              << " while reading file " << filename << endl;
         return false;
     }
@@ -156,7 +156,7 @@ bool SLAE::restore(const string & filename)
 
     if(!slae_file.good())
     {
-        cerr << "Error in " << __FILE__ << ":" << __LINE__
+        cout << "Error in " << __FILE__ << ":" << __LINE__
              << " while reading file " << filename << endl;
         return false;
     }
@@ -172,7 +172,7 @@ bool SLAE::dump_x(const string & filename) const
 
     if(!slae_file.good())
     {
-        cerr << "Error in " << __FILE__ << ":" << __LINE__
+        cout << "Error in " << __FILE__ << ":" << __LINE__
              << " while writing file " << filename << endl;
         return false;
     }
@@ -195,7 +195,7 @@ bool SLAE::restore_x(const string & filename)
     slae_file.open(filename.c_str(), ios::in);
     if(!slae_file.good())
     {
-        cerr << "Error in " << __FILE__ << ":" << __LINE__
+        cout << "Error in " << __FILE__ << ":" << __LINE__
              << " while reading file " << filename << endl;
         return false;
     }
@@ -205,7 +205,7 @@ bool SLAE::restore_x(const string & filename)
 
     if(!slae_file.good())
     {
-        cerr << "Error in " << __FILE__ << ":" << __LINE__
+        cout << "Error in " << __FILE__ << ":" << __LINE__
              << " while reading file " << filename << endl;
         return false;
     }

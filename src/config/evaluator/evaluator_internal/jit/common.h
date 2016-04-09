@@ -1,5 +1,5 @@
-#ifndef COMMON_H
-#define COMMON_H
+#ifndef EVALUATOR_COMMON_H
+#define EVALUATOR_COMMON_H
 
 //#define EVALUATOR_JIT_DISABLE
 
@@ -19,8 +19,14 @@
     #define EVALUATOR_JIT_X64
 #endif
 
+// x32 arch
+#if (defined(__ILP32__) && defined(__x86_64__))
+    #define EVALUATOR_JIT_X32
+    #undef EVALUATOR_JIT_X64
+#endif
+
 // Unknown arch
-#if !defined(EVALUATOR_JIT_X86) && !defined(EVALUATOR_JIT_X64)
+#if !defined(EVALUATOR_JIT_X86) && !defined(EVALUATOR_JIT_X64) && !defined(EVALUATOR_JIT_X32)
     #define EVALUATOR_JIT_DISABLE
 #endif
 
@@ -33,7 +39,7 @@
     // System V ABI
     #if (defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))) && \
         !(defined(__CYGWIN__) || defined(__MINGW32__)) && \
-        (defined(EVALUATOR_JIT_X86) || defined(EVALUATOR_JIT_X64))
+        (defined(EVALUATOR_JIT_X86) || defined(EVALUATOR_JIT_X64) || defined(EVALUATOR_JIT_X32))
         #define EVALUATOR_JIT_SYSV_ABI
     #endif
 
@@ -100,8 +106,8 @@ namespace evaluator_internal_jit
 void * exec_alloc(size_t size);
 void exec_dealloc(void * data, size_t size);
 
-}
+} // namespace evaluator_internal_jit
 
 
-#endif // COMMON_H
+#endif // EVALUATOR_COMMON_H
 

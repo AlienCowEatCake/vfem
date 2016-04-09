@@ -1,0 +1,297 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\common">
+      <UniqueIdentifier>{0aa32b90-3182-45a8-9284-2249d7797f8e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\common">
+      <UniqueIdentifier>{400ee5da-004b-48fb-9d67-d0fc71000cde}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\config">
+      <UniqueIdentifier>{9043073b-e168-496c-9ef3-173e1db4cfe3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\config">
+      <UniqueIdentifier>{fd12d16e-8c20-4bff-99ea-ad213c451267}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\config\evaluator">
+      <UniqueIdentifier>{516bb8a1-1688-4085-abf4-0cf17f7e5e36}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\config\evaluator">
+      <UniqueIdentifier>{e56258aa-459a-439b-9c44-4b48871263a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\config\evaluator\evaluator_internal">
+      <UniqueIdentifier>{b5354e7e-2efc-43aa-9c66-ce9567094373}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\config\evaluator\evaluator_internal">
+      <UniqueIdentifier>{711f4589-205c-4d98-9d85-ab20df9901ee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\config\evaluator\evaluator_internal\jit">
+      <UniqueIdentifier>{7712c6fa-8831-4dab-99d8-179ec71d0004}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\config\evaluator\evaluator_internal\jit">
+      <UniqueIdentifier>{c6ec21e4-4b77-49eb-91a4-0cd97e04a3ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\elements">
+      <UniqueIdentifier>{876b5c9d-3e9e-4779-b28a-39813f7c2548}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\elements">
+      <UniqueIdentifier>{6fbb0b4c-61fb-472c-aebb-4414e37fdf94}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\geometry">
+      <UniqueIdentifier>{e75563fc-fd8a-4ae4-af72-db6a25f65b36}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\geometry">
+      <UniqueIdentifier>{96032319-d210-4c0f-8e33-6943dce45c14}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\problems">
+      <UniqueIdentifier>{ef9ccd21-9583-4787-a375-83f34ac98a48}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\problems">
+      <UniqueIdentifier>{06382147-4f52-49b8-b0be-39c81d93431a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\solvers">
+      <UniqueIdentifier>{9f68dafa-a4f5-4b97-91f4-890094000548}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\solvers">
+      <UniqueIdentifier>{2eb2db58-5eda-4c0d-b2fe-37d036d4b180}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\vfem">
+      <UniqueIdentifier>{5466628d-57cd-47ba-a895-a78d2cd6649b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\vfem">
+      <UniqueIdentifier>{7cc95a25-c786-4031-b218-27930ab68492}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\src\common\trio.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\common\common.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\common\cubatures.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\common\matrix.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\config\config.h">
+      <Filter>Header Files\config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\config\evaluator_helmholtz.h">
+      <Filter>Header Files\config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\config\evaluator\evaluator.h">
+      <Filter>Header Files\config\evaluator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\config\evaluator\evaluator_operations.h">
+      <Filter>Header Files\config\evaluator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\config\evaluator\evaluator_xyz.h">
+      <Filter>Header Files\config\evaluator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\config\evaluator\evaluator_internal\calculate.h">
+      <Filter>Header Files\config\evaluator\evaluator_internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\config\evaluator\evaluator_internal\evaluator_object.h">
+      <Filter>Header Files\config\evaluator\evaluator_internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\config\evaluator\evaluator_internal\misc.h">
+      <Filter>Header Files\config\evaluator\evaluator_internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\config\evaluator\evaluator_internal\parse.h">
+      <Filter>Header Files\config\evaluator\evaluator_internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\config\evaluator\evaluator_internal\simplify.h">
+      <Filter>Header Files\config\evaluator\evaluator_internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\config\evaluator\evaluator_internal\transition_table.h">
+      <Filter>Header Files\config\evaluator\evaluator_internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\config\evaluator\evaluator_internal\type_detection.h">
+      <Filter>Header Files\config\evaluator\evaluator_internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\config\evaluator\evaluator_internal\var_container.h">
+      <Filter>Header Files\config\evaluator\evaluator_internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\config\evaluator\evaluator_internal\jit\common.h">
+      <Filter>Header Files\config\evaluator\evaluator_internal\jit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\config\evaluator\evaluator_internal\jit\compile_extcall.h">
+      <Filter>Header Files\config\evaluator\evaluator_internal\jit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\config\evaluator\evaluator_internal\jit\compile_inline.h">
+      <Filter>Header Files\config\evaluator\evaluator_internal\jit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\config\evaluator\evaluator_internal\jit\complex_templates.h">
+      <Filter>Header Files\config\evaluator\evaluator_internal\jit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\config\evaluator\evaluator_internal\jit\func_templates.h">
+      <Filter>Header Files\config\evaluator\evaluator_internal\jit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\config\evaluator\evaluator_internal\jit\opcodes.h">
+      <Filter>Header Files\config\evaluator\evaluator_internal\jit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\config\evaluator\evaluator_internal\jit\oper_templates.h">
+      <Filter>Header Files\config\evaluator\evaluator_internal\jit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\config\evaluator\evaluator_internal\jit\real_templates.h">
+      <Filter>Header Files\config\evaluator\evaluator_internal\jit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\config\inifile.h">
+      <Filter>Header Files\config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\elements\edge.h">
+      <Filter>Header Files\elements</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\elements\face.h">
+      <Filter>Header Files\elements</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\elements\octree.h">
+      <Filter>Header Files\elements</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\elements\tetrahedron.h">
+      <Filter>Header Files\elements</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\elements\triangle.h">
+      <Filter>Header Files\elements</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\geometry\point.h">
+      <Filter>Header Files\geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\geometry\vector3.h">
+      <Filter>Header Files\geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\problems\problems.h">
+      <Filter>Header Files\problems</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\solvers\BiCGComplex_VC.h">
+      <Filter>Header Files\solvers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\solvers\BiCGStabComplex_VC.h">
+      <Filter>Header Files\solvers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\solvers\CGMComplex_LLT.h">
+      <Filter>Header Files\solvers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\solvers\CGMComplex_VC.h">
+      <Filter>Header Files\solvers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\solvers\COCG_LLT_Smooth.h">
+      <Filter>Header Files\solvers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\solvers\COCG_LLT_Smooth_MKL.h">
+      <Filter>Header Files\solvers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vfem\phys.h">
+      <Filter>Header Files\vfem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vfem\slae.h">
+      <Filter>Header Files\vfem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\vfem\vfem.h">
+      <Filter>Header Files\vfem</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\common\cubatures.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\config\config.cpp">
+      <Filter>Source Files\config</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\config\evaluator\evaluator_internal\transition_table.cpp">
+      <Filter>Source Files\config\evaluator\evaluator_internal</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\config\evaluator\evaluator_internal\jit\common.cpp">
+      <Filter>Source Files\config\evaluator\evaluator_internal\jit</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\config\evaluator\evaluator_internal\jit\func_templates.cpp">
+      <Filter>Source Files\config\evaluator\evaluator_internal\jit</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\config\evaluator\evaluator_internal\jit\oper_templates.cpp">
+      <Filter>Source Files\config\evaluator\evaluator_internal\jit</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\config\evaluator\evaluator_internal\jit\real_templates.cpp">
+      <Filter>Source Files\config\evaluator\evaluator_internal\jit</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\config\inifile.cpp">
+      <Filter>Source Files\config</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\elements\edge.cpp">
+      <Filter>Source Files\elements</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\elements\face.cpp">
+      <Filter>Source Files\elements</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\elements\tetrahedron.cpp">
+      <Filter>Source Files\elements</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\elements\tetrahedron_pml.cpp">
+      <Filter>Source Files\elements</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\elements\triangle.cpp">
+      <Filter>Source Files\elements</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\geometry\vector3.cpp">
+      <Filter>Source Files\geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\problems\standard.cpp">
+      <Filter>Source Files\problems</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\problems\standard_diff.cpp">
+      <Filter>Source Files\problems</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\problems\standard_pml.cpp">
+      <Filter>Source Files\problems</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\solvers\BiCGComplex_VC.cpp">
+      <Filter>Source Files\solvers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\solvers\BiCGStabComplex_VC.cpp">
+      <Filter>Source Files\solvers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\solvers\CGMComplex_LLT.cpp">
+      <Filter>Source Files\solvers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\solvers\CGMComplex_VC.cpp">
+      <Filter>Source Files\solvers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\solvers\COCG_LLT_Smooth.cpp">
+      <Filter>Source Files\solvers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\solvers\COCG_LLT_Smooth_MKL.cpp">
+      <Filter>Source Files\solvers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\vfem\slae.cpp">
+      <Filter>Source Files\vfem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\vfem\vfem.cpp">
+      <Filter>Source Files\vfem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\vfem\vfem_input.cpp">
+      <Filter>Source Files\vfem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\vfem\vfem_output.cpp">
+      <Filter>Source Files\vfem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\vfem\vfem_v_cycle.cpp">
+      <Filter>Source Files\vfem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
