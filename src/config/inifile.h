@@ -6,28 +6,61 @@
 #include <sstream>
 #include <iostream>
 #include <list>
-#include <set>
 
-// Обрезка whitespace символов по краям строки
+/**
+ * @brief Обрезка whitespace символов по краям строки
+ * @param str входная строка
+ * @return обрезанная строка
+ */
 std::string trim(const std::string & str);
 
-// Переобразование к нижнему регистру (только для символов US-ASCII)
+/**
+ * @brief Переобразование к нижнему регистру (только для символов US-ASCII)
+ * @param str входная строка
+ * @return строка в нижнем регистре
+ */
 std::string to_lowercase(const std::string & str);
 
+
+/**
+ * @brief Класс для работы с ini-файлами
+ */
 class inifile
 {
 public:
-    // Немного конструкторов
+    /**
+     * @brief Конструктор по-умолчанию
+     */
     inifile() : status(false) {}
+
+    /**
+     * @brief Конструктор с именем входного файла
+     * @param filename имя входного файла
+     */
     inifile(const std::string & filename) { status = load(filename); }
-    // Загрузка ini-файла с именем "filename"
+
+    /**
+     * @brief Загрузка ini-файла
+     * @param filename имя входного файла
+     * @return true - файл успешно считан, false - возникли ошибки
+     */
     bool load(const std::string & filename);
-    // Статус, разобран ли ini-файл
+
+    /**
+     * @brief Статус, разобран ли ini-файл
+     * @return true - файл успешно разобран, false - возникли ошибки
+     */
     inline bool good() const { return status; }
 
-    // Функция для типа string, string не стоит получать с помощью stringstream, так как может многое потеряться
-    // Получить значение параметра с именем "parameter" в секции "section" подсекции "subsection".
-    // Если такой параметр не найден, вернуть значение по-умолчанию "fallback".
+    /**
+     * @brief Получить значение параметра с именем "parameter" в секции "section" подсекции "subsection"
+     * @param section секция, в которой нужно искать
+     * @param subsection подсекция, в которой нужно искать
+     * @param parameter параметр, который нужно искать
+     * @param fallback значение по-умолчанию, которое возвращается, если искомый параметр не найден
+     * @return значение параметра или fallback, если параметр не найден
+     * Функция для типа string, string не стоит получать с помощью stringstream, так как может многое потеряться
+     */
     template<typename U>
     std::string get(const std::string & section, const U & subsection, const std::string & parameter, const std::string & fallback) const
     {
@@ -43,9 +76,15 @@ public:
         return fallback;
     }
 
-    // Функция для типа bool, у него нужно сделать дополнительное преобразование yes|true|1 -> true
-    // Получить значение параметра с именем "parameter" в секции "section" подсекции "subsection".
-    // Если такой параметр не найден, вернуть значение по-умолчанию "fallback".
+    /**
+     * @brief Получить значение параметра с именем "parameter" в секции "section" подсекции "subsection"
+     * @param section секция, в которой нужно искать
+     * @param subsection подсекция, в которой нужно искать
+     * @param parameter параметр, который нужно искать
+     * @param fallback значение по-умолчанию, которое возвращается, если искомый параметр не найден
+     * @return значение параметра или fallback, если параметр не найден
+     * Функция для типа bool, у него нужно сделать дополнительное преобразование yes|true|1 -> true
+     */
     template<typename U>
     bool get(const std::string & section, const U & subsection, const std::string & parameter, const bool & fallback) const
     {
@@ -66,9 +105,15 @@ public:
         return fallback;
     }
 
-    // Обобщенная функция для типов, которые не являются типами bool или string
-    // Получить значение параметра с именем "parameter" в секции "section" подсекции "subsection".
-    // Если такой параметр не найден, вернуть значение по-умолчанию "fallback".
+    /**
+     * @brief Получить значение параметра с именем "parameter" в секции "section" подсекции "subsection"
+     * @param section секция, в которой нужно искать
+     * @param subsection подсекция, в которой нужно искать
+     * @param parameter параметр, который нужно искать
+     * @param fallback значение по-умолчанию, которое возвращается, если искомый параметр не найден
+     * @return значение параметра или fallback, если параметр не найден
+     * Обобщенная функция для типов, которые не являются типами bool или string
+     */
     template<typename T, typename U>
     T get(const std::string & section, const U & subsection, const std::string & parameter, const T & fallback) const
     {
@@ -86,9 +131,13 @@ public:
         return fallback;
     }
 
-    // Получть список из всех подсекций секции "section". Тип возвращаемого результата определяется
-    // типом указателя "type". Сам указатель является фиктивным и нигде не используется, то есть
-    // можно туда передавать что угодно, хоть (size_t)(NULL), например.
+    /**
+     * @brief Получть список из всех подсекций секции "section"
+     * @param section секция, в которой нужно искать подсекции
+     * @param type фиктивный указатель, из которого определяется тип возвращаемого результата
+     * @return список из всех подсекций секции "section"
+     * Указатель type нигде не используется, то есть можно туда передавать что угодно, например (size_t)(NULL)
+     */
     template<typename T>
     std::list<T> enumerate(const std::string & section, const T * type) const
     {
@@ -109,40 +158,72 @@ public:
         return result;
     }
 
-    // Проверить, что в файле нет никаких секций, кроме секций из списка "whitelist"
-    // Полезно для контроля опечаток, так как в остальных местах это штатная ситуация
+    /**
+     * @brief Проверить, что в файле нет никаких секций, кроме секций из списка "whitelist"
+     * @param whitelist список разрешенных секций
+     * @return true - все секции присутствуют в "whitelist", false - есть неразрешенная секция
+     * Полезно для контроля опечаток, так как в остальных местах это штатная ситуация
+     */
     bool check_sections(const std::list<std::string> & whitelist) const;
 
-    // Проверить, что в секции "section" во всех подсекциях нет никаких параметров, кроме параметров из списка "whitelist"
-    // Полезно для контроля опечаток, так как в остальных местах это штатная ситуация
+    /**
+     * @brief Проверить, что в секции "section" во всех подсекциях нет никаких параметров, кроме параметров из списка "whitelist"
+     * @param section секция, для которой будет выполнена проверка
+     * @param whitelist список разрешенных параметров
+     * @return true - все параметры присутствуют в "whitelist", false - есть неразрешенный параметр
+     * Полезно для контроля опечаток, так как в остальных местах это штатная ситуация
+     */
     bool check_parameters(const std::string & section, const std::list<std::string> & whitelist) const;
 
 protected:
 
-    // Статус, разобран ли входной конфиг
+    /**
+     * @brief Статус, разобран ли входной конфиг
+     */
     bool status;
 
-    // Конетейнер значений параметров, сгруппированных в подсекции, сгруппированные в секции
+    /**
+     * @brief Конетейнер значений параметров, сгруппированных в подсекции, сгруппированные в секции
+     */
     std::map<std::string, std::map<std::string, std::map<std::string, std::string> > > values;
 
-    // Получить значение параметра с именем "parameter" в секции "section" подсекции "subsection".
+    /**
+     * @brief Получить значение параметра с именем "parameter" в секции "section" подсекции "subsection"
+     * @param section секция
+     * @param subsection подсекция
+     * @param parameter параметр
+     * @return значение параметра или NULL, если такого параметра нет
+     */
     const std::string * get_internal(const std::string & section, const std::string & subsection, const std::string & parameter) const;
 
-    // Преобразование подсекции в строковое представление
-    // Если это строка, то она уже итак задана как надо
+    /**
+     * @brief Преобразование подсекции в строковое представление
+     * @param subsection подсекция
+     * @return строковое представление подсекции
+     * Если это строка, то она уже итак задана как надо
+     */
     inline std::string subsection_to_str(const std::string & subsection) const
     {
         return subsection;
     }
 
-    // Преобразование подсекции в строковое представление
-    // Если это char *, то просто соберем из него строку
+    /**
+     * @brief Преобразование подсекции в строковое представление
+     * @param subsection подсекция
+     * @return строковое представление подсекции
+     * Если это char *, то просто соберем из него строку
+     */
     inline std::string subsection_to_str(const char * subsection) const
     {
         return std::string(subsection);
     }
 
-    // Преобразование подсекции в строковое представление
+    /**
+     * @brief Преобразование подсекции в строковое представление
+     * @param subsection подсекция
+     * @return строковое представление подсекции
+     * Если это char *, то просто соберем из него строку
+     */
     template<typename T>
     std::string subsection_to_str(const T & subsection) const
     {
