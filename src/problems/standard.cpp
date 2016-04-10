@@ -4,16 +4,16 @@
 cvector3 func_true(const point & p, const phys_area & phys, void * data)
 {
     MAYBE_UNUSED(phys);
-    pair<const config_type *, array_t<evaluator<complex<double> > *, 3> > * params =
-            (pair<const config_type *, array_t<evaluator<complex<double> > *, 3> > *)(data);
+    pair<const config_type *, array_t<evaluator_helmholtz *, 3> > * params =
+            (pair<const config_type *, array_t<evaluator_helmholtz *, 3> > *)(data);
     cvector3 result(0, 0, 0);
     if(!params->first->analytical_enabled) return result;
     for(size_t i = 0; i < 3; i++)
     {
-        evaluator<complex<double> > * e = params->second[i];
-        e->set_var("x", p.x);
-        e->set_var("y", p.y);
-        e->set_var("z", p.z);
+        evaluator_helmholtz * e = params->second[i];
+        e->set_x(p.x);
+        e->set_y(p.y);
+        e->set_z(p.z);
         bool status = e->calculate(result[i]);
         if(!status) cout << "[Parser] " << e->get_error() << endl;
     }
@@ -24,16 +24,16 @@ cvector3 func_true(const point & p, const phys_area & phys, void * data)
 cvector3 func_rp(const point & p, const phys_area & phys, void * data)
 {
     MAYBE_UNUSED(phys);
-    pair<const config_type *, array_t<evaluator<complex<double> > *, 3> > * params =
-            (pair<const config_type *, array_t<evaluator<complex<double> > *, 3> > *)(data);
+    pair<const config_type *, array_t<evaluator_helmholtz *, 3> > * params =
+            (pair<const config_type *, array_t<evaluator_helmholtz *, 3> > *)(data);
     cvector3 result(0, 0, 0);
     if(!params->first->right_enabled) return result;
     for(size_t i = 0; i < 3; i++)
     {
-        evaluator<complex<double> > * e = params->second[i];
-        e->set_var("x", p.x);
-        e->set_var("y", p.y);
-        e->set_var("z", p.z);
+        evaluator_helmholtz * e = params->second[i];
+        e->set_x(p.x);
+        e->set_y(p.y);
+        e->set_z(p.z);
         bool status = e->calculate(result[i]);
         if(!status) cout << "[Parser] " << e->get_error() << endl;
     }
@@ -44,16 +44,16 @@ cvector3 func_rp(const point & p, const phys_area & phys, void * data)
 cvector3 func_b1(const point & p, const phys_area & phys, void * data)
 {
     MAYBE_UNUSED(phys);
-    pair<const config_type *, array_t<evaluator<complex<double> > *, 3> > * params =
-            (pair<const config_type *, array_t<evaluator<complex<double> > *, 3> > *)(data);
+    pair<const config_type *, array_t<evaluator_helmholtz *, 3> > * params =
+            (pair<const config_type *, array_t<evaluator_helmholtz *, 3> > *)(data);
     cvector3 result(0, 0, 0);
     if(!params->first->boundary_enabled) return result;
     for(size_t i = 0; i < 3; i++)
     {
-        evaluator<complex<double> > * e = params->second[i];
-        e->set_var("x", p.x);
-        e->set_var("y", p.y);
-        e->set_var("z", p.z);
+        evaluator_helmholtz * e = params->second[i];
+        e->set_x(p.x);
+        e->set_y(p.y);
+        e->set_z(p.z);
         bool status = e->calculate(result[i]);
         if(!status) cout << "[Parser] " << e->get_error() << endl;
     }

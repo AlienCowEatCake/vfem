@@ -1,4 +1,5 @@
 #include "vfem.h"
+#include "../config/inifile.h"
 
 // gmsh-2.11.0-source/Common/GmshDefines.h
 #define MSH_LIN_2    1  // 2-node line.
@@ -48,423 +49,313 @@ bool VFEM::input_phys(const string & phys_filename)
     cout << "Reading physical parameters ..." << endl;
 
     // Чтение параметров физических областей
-    ifstream phys_param;
-    phys_param.open(phys_filename.c_str(), ios::in);
-    if(!phys_param.good())
+    inifile cfg_file(phys_filename);
+    if(!cfg_file.good())
     {
         cout << "[Phys Config] Error in " << __FILE__ << ":" << __LINE__
              << " while reading file " << phys_filename << endl;
         return false;
     }
 
-    double mu_default    = consts::mu0;
-    double eps_default   = consts::epsilon0;
-    evaluator<double> sigma_default("0.0");
-    double omega_global  = -1.0 * 2.0 * M_PI;
-
-    string to_lowercase(const string & str);
-    string trim(const string & str);
-
-    string line;
-    getline(phys_param, line);
-    line = trim(line);
-    do
+    list<string> whitelist;
+    whitelist.push_back("Global");
+    whitelist.push_back("Phys3D");
+    whitelist.push_back("Phys2D");
+    whitelist.push_back("Phys1D");
+    whitelist.push_back("Phys0D");
+    whitelist.push_back("Electrode");
+    if(!cfg_file.check_sections(whitelist))
     {
-        if(line.length() > 1 && line[0] == '[')
+        cout << "[Phys Config] Error in " << __FILE__ << ":" << __LINE__
+             << " while reading file " << phys_filename << endl;
+        return false;
+    }
+    whitelist.clear();
+
+    // Секция Global
+
+    whitelist.push_back("frequency");
+    whitelist.push_back("mu");
+    whitelist.push_back("eps");
+    whitelist.push_back("sigma");
+    if(!cfg_file.check_parameters("Global", whitelist))
+    {
+        cout << "[Phys Config] Error in " << __FILE__ << ":" << __LINE__
+             << " while reading file " << phys_filename << endl;
+        return false;
+    }
+    whitelist.clear();
+
+    double mu_default    = cfg_file.get("Global", "", "mu",         1.0);
+    double eps_default   = cfg_file.get("Global", "", "eps",        1.0);
+    string sigma_default = cfg_file.get("Global", "", "sigma",      "0.0");
+    double omega_global  = cfg_file.get("Global", "", "frequency",  -1.0) * 2.0 * M_PI;
+
+    if(omega_global < 0)
+    {
+        cout << "[Phys Config] Error in " << __FILE__ << ":" << __LINE__
+             << " while reading file " << phys_filename << endl;
+        return false;
+    }
+
+    // Секция Phys3D
+
+    whitelist.push_back("mu");
+    whitelist.push_back("eps");
+    whitelist.push_back("sigma");
+    if(!cfg_file.check_parameters("Phys3D", whitelist))
+    {
+        cout << "[Phys Config] Error in " << __FILE__ << ":" << __LINE__
+             << " while reading file " << phys_filename << endl;
+        return false;
+    }
+    whitelist.clear();
+
+    list<size_t> subsections_3d = cfg_file.enumerate("Phys3D", (size_t*)NULL);
+    for(list<size_t>::iterator it = subsections_3d.begin(); it != subsections_3d.end(); ++it)
+    {
+        size_t gmsh_num = * it;
+        if(gmsh_num == 0)
         {
-            line = to_lowercase(line.substr(1, line.length() - 2));
-            string section = line, subsection;
-            size_t dot_pos = line.find_first_of(".");
-            if(dot_pos != string::npos)
-            {
-                section = line.substr(0, dot_pos);
-                subsection = line.substr(dot_pos + 1);
-            }
-            //cout << "section: " << section << "\nsubsection: " << subsection << endl;
-
-            if(section == "global")
-            {
-                do
-                {
-                    getline(phys_param, line);
-                    line = trim(line);
-                    if(line.length() > 1 && line[0] != ';')
-                    {
-                        size_t eq_pos = line.find_first_of("=");
-                        if(eq_pos != string::npos)
-                        {
-                            string param = to_lowercase(trim(line.substr(0, eq_pos)));
-                            string value = trim(line.substr(eq_pos + 1));
-                            if(value.length() > 1 && value[0] == '\"')
-                                value = trim(value.substr(1, value.length() - 2));
-                            stringstream sst(value);
-                            double tmp;
-                            sst >> tmp;
-                            if(param == "frequency")  omega_global = tmp * 2.0 * M_PI;
-                            else if(param == "mu")    mu_default = tmp * consts::mu0;
-                            else if(param == "eps")   eps_default = tmp * consts::epsilon0;
-                            else if(param == "sigma") sigma_default.parse(value);
-                            else cout << "[Phys Config] Unsupported param \"" << param << "\" in section \""
-                                      << section << (subsection.empty() ? string("") : (string(".") + subsection))
-                                      << "\"" << endl;
-                            //cout << "  param = " << param << endl;
-                            //cout << "  value = " << value << endl;
-                        }
-                    }
-                }
-                while(phys_param.good() && !(line.length() > 1 && line[0] == '['));
-            }
-            else if(section == "phys3d")
-            {
-                if(!subsection.empty())
-                {
-                    if(omega_global < 0)
-                    {
-                        cout << "[Phys Config] Unknown frequency in section \"" << section
-                             << "." << subsection << "\"" << endl;
-                        return false;
-                    }
-
-                    stringstream sst(subsection);
-                    size_t gmsh_num;
-                    sst >> gmsh_num;
-                    phys_area * ph = &(phys[phys_id(MSH_TET_4, gmsh_num)]);
-
-                    ph->gmsh_num = gmsh_num;
-                    ph->type_of_elem = MSH_TET_4;
-                    ph->mu = mu_default;
-                    ph->epsilon = eps_default;
-                    //ph->sigma = sigma_default;
-                    ph->omega = omega_global;
-                    ph->type_of_bounds = 0;
-                    ph->J0 = 0.0;
-                    ph->E0 = 0.0;
-
-                    do
-                    {
-                        getline(phys_param, line);
-                        line = trim(line);
-                        if(line.length() > 1 && line[0] != ';')
-                        {
-                            size_t eq_pos = line.find_first_of("=");
-                            if(eq_pos != string::npos)
-                            {
-                                string param = to_lowercase(trim(line.substr(0, eq_pos)));
-                                string value = trim(line.substr(eq_pos + 1));
-                                if(value.length() > 1 && value[0] == '\"')
-                                    value = trim(value.substr(1, value.length() - 2));
-                                stringstream sst(value);
-                                double tmp;
-                                sst >> tmp;
-                                if(param == "mu")         ph->mu = tmp * consts::mu0;
-                                else if(param == "eps")   ph->epsilon = tmp * consts::epsilon0;
-                                else if(param == "sigma") ph->sigma.parse(value);
-                                else cout << "[Phys Config] Unsupported param \"" << param << "\" in section \""
-                                          << section << (subsection.empty() ? string("") : (string(".") + subsection))
-                                          << "\"" << endl;
-                                //cout << "  param = " << param << endl;
-                                //cout << "  value = " << value << endl;
-                            }
-                        }
-                    }
-                    while(phys_param.good() && !(line.length() > 1 && line[0] == '['));
-                }
-                else
-                {
-                    cout << "[Phys Config] No subsection in section \"" << section << "\"" << endl;
-                    return false;
-                }
-            }
-            else if(section == "phys2d")
-            {
-                if(!subsection.empty())
-                {
-                    if(omega_global < 0)
-                    {
-                        cout << "[Phys Config] Unknown frequency in section \"" << section
-                             << "." << subsection << "\"" << endl;
-                        return false;
-                    }
-
-                    stringstream sst(subsection);
-                    size_t gmsh_num;
-                    sst >> gmsh_num;
-                    phys_area * ph = &(phys[phys_id(MSH_TRI_3, gmsh_num)]);
-
-                    ph->gmsh_num = gmsh_num;
-                    ph->type_of_elem = MSH_TRI_3;
-                    ph->mu = mu_default;
-                    ph->epsilon = eps_default;
-                    ph->sigma = sigma_default;
-                    ph->omega = omega_global;
-                    ph->type_of_bounds = 2;
-                    ph->J0 = 0.0;
-                    ph->E0 = 0.0;
-
-                    do
-                    {
-                        getline(phys_param, line);
-                        line = trim(line);
-                        if(line.length() > 1 && line[0] != ';')
-                        {
-                            size_t eq_pos = line.find_first_of("=");
-                            if(eq_pos != string::npos)
-                            {
-                                string param = to_lowercase(trim(line.substr(0, eq_pos)));
-                                string value = trim(line.substr(eq_pos + 1));
-                                if(value.length() > 1 && value[0] == '\"')
-                                    value = trim(value.substr(1, value.length() - 2));
-                                stringstream sst(value);
-                                size_t tmp;
-                                sst >> tmp;
-                                if(param == "boundary") ph->type_of_bounds = tmp;
-                                else if(param == "parent")
-                                {
-                                    map<phys_id, phys_area>::const_iterator parent =
-                                            phys.find(phys_id(MSH_TET_4, tmp));
-                                    if(parent != phys.end())
-                                    {
-                                        const phys_area * par = &(parent->second);
-                                        ph->mu = par->mu;
-                                        ph->epsilon = par->epsilon;
-                                        ph->sigma = par->sigma;
-                                    }
-                                    else
-                                    {
-                                        cout << "[Phys Config] Warning: unaccounted parent \""
-                                             << tmp << "\" of phys area \"" << ph->gmsh_num
-                                             << "\" (2 - MSH_TRI_3), skipping..." << endl;
-                                    }
-                                }
-                                else cout << "[Phys Config] Unsupported param \"" << param << "\" in section \""
-                                          << section << (subsection.empty() ? string("") : (string(".") + subsection))
-                                          << "\"" << endl;
-                                //cout << "  param = " << param << endl;
-                                //cout << "  value = " << value << endl;
-                            }
-                        }
-                    }
-                    while(phys_param.good() && !(line.length() > 1 && line[0] == '['));
-                }
-                else
-                {
-                    cout << "[Phys Config] No subsection in section \"" << section << "\"" << endl;
-                    return false;
-                }
-            }
-            else if(section == "phys1d")
-            {
-                if(!subsection.empty())
-                {
-                    if(omega_global < 0)
-                    {
-                        cout << "[Phys Config] Unknown frequency in section \"" << section
-                             << "." << subsection << "\"" << endl;
-                        return false;
-                    }
-
-                    stringstream sst(subsection);
-                    size_t gmsh_num;
-                    sst >> gmsh_num;
-                    phys_area * ph = &(phys[phys_id(MSH_LIN_2, gmsh_num)]);
-
-                    ph->gmsh_num = gmsh_num;
-                    ph->type_of_elem = MSH_LIN_2;
-                    ph->mu = mu_default;
-                    ph->epsilon = eps_default;
-                    ph->sigma = sigma_default;
-                    ph->omega = omega_global;
-                    ph->type_of_bounds = 0;
-                    ph->J0 = 0.0;
-                    ph->E0 = 0.0;
-
-                    do
-                    {
-                        getline(phys_param, line);
-                        line = trim(line);
-                        if(line.length() > 1 && line[0] != ';')
-                        {
-                            size_t eq_pos = line.find_first_of("=");
-                            if(eq_pos != string::npos)
-                            {
-                                string param = to_lowercase(trim(line.substr(0, eq_pos)));
-                                string value = trim(line.substr(eq_pos + 1));
-                                if(value.length() > 1 && value[0] == '\"')
-                                    value = trim(value.substr(1, value.length() - 2));
-                                stringstream sst(value);
-                                if(param == "current") sst >> ph->J0;
-                                else if(param == "parent")
-                                {
-                                    size_t parent_phys;
-                                    sst >> parent_phys;
-                                    map<phys_id, phys_area>::const_iterator parent =
-                                            phys.find(phys_id(MSH_TET_4, parent_phys));
-                                    if(parent != phys.end())
-                                    {
-                                        const phys_area * par = &(parent->second);
-                                        ph->mu = par->mu;
-                                        ph->epsilon = par->epsilon;
-                                        ph->sigma = par->sigma;
-                                    }
-                                    else
-                                    {
-                                        cout << "[Phys Config] Warning: unaccounted parent \""
-                                             << parent_phys << "\" of phys area \"" << ph->gmsh_num
-                                             << "\" (1 - MSH_LIN_2), skipping..." << endl;
-                                    }
-                                }
-                                else cout << "[Phys Config] Unsupported param \"" << param << "\" in section \""
-                                          << section << (subsection.empty() ? string("") : (string(".") + subsection))
-                                          << "\"" << endl;
-                                //cout << "  param = " << param << endl;
-                                //cout << "  value = " << value << endl;
-                            }
-                        }
-                    }
-                    while(phys_param.good() && !(line.length() > 1 && line[0] == '['));
-                }
-                else
-                {
-                    cout << "[Phys Config] No subsection in section \"" << section << "\"" << endl;
-                    return false;
-                }
-            }
-            else if(section == "phys0d")
-            {
-                point pss_point;
-                cvector3 pss_value;
-                do
-                {
-                    getline(phys_param, line);
-                    line = trim(line);
-                    if(line.length() > 1 && line[0] != ';')
-                    {
-                        size_t eq_pos = line.find_first_of("=");
-                        if(eq_pos != string::npos)
-                        {
-                            string param = to_lowercase(trim(line.substr(0, eq_pos)));
-                            string value = trim(line.substr(eq_pos + 1));
-                            if(value.length() > 1 && value[0] == '\"')
-                                value = trim(value.substr(1, value.length() - 2));
-                            stringstream sst(value);
-                            double tmp;
-                            sst >> tmp;
-                            if(param == "point_x")      pss_point.x = tmp;
-                            else if(param == "point_y") pss_point.y = tmp;
-                            else if(param == "point_z") pss_point.z = tmp;
-                            else if(param == "value_x") pss_value.x = tmp;
-                            else if(param == "value_y") pss_value.y = tmp;
-                            else if(param == "value_z") pss_value.z = tmp;
-                            else cout << "[Phys Config] Unsupported param \"" << param << "\" in section \""
-                                      << section << (subsection.empty() ? string("") : (string(".") + subsection))
-                                      << "\"" << endl;
-                            //cout << "  param = " << param << endl;
-                            //cout << "  value = " << value << endl;
-                        }
-                    }
-                }
-                while(phys_param.good() && !(line.length() > 1 && line[0] == '['));
-                push_back_wrapper(pss, make_pair(pss_point, pss_value));
-            }
-            else if(section == "electrode")
-            {
-                if(!subsection.empty())
-                {
-                    if(omega_global < 0)
-                    {
-                        cout << "[Phys Config] Unknown frequency in section \"" << section
-                             << "." << subsection << "\"" << endl;
-                        return false;
-                    }
-
-                    stringstream sst(subsection);
-                    size_t gmsh_num;
-                    sst >> gmsh_num;
-                    phys_area * ph = &(phys[phys_id(MSH_LIN_2, gmsh_num)]);
-
-                    ph->gmsh_num = gmsh_num;
-                    ph->type_of_elem = MSH_LIN_2;
-                    ph->mu = mu_default;
-                    ph->epsilon = eps_default;
-                    ph->sigma = sigma_default;
-                    ph->omega = omega_global;
-                    ph->type_of_bounds = 1;
-                    ph->J0 = 0.0;
-                    ph->E0 = 0.0;
-
-                    double I = 1.0;
-                    double l = 1.0;
-                    double rho = 1.0;
-                    double S = 1.0;
-
-                    do
-                    {
-                        getline(phys_param, line);
-                        line = trim(line);
-                        if(line.length() > 1 && line[0] != ';')
-                        {
-                            size_t eq_pos = line.find_first_of("=");
-                            if(eq_pos != string::npos)
-                            {
-                                string param = to_lowercase(trim(line.substr(0, eq_pos)));
-                                string value = trim(line.substr(eq_pos + 1));
-                                if(value.length() > 1 && value[0] == '\"')
-                                    value = trim(value.substr(1, value.length() - 2));
-                                stringstream sst(value);
-                                if     (param == "i")   sst >> I;
-                                else if(param == "l")   sst >> l;
-                                else if(param == "rho") sst >> rho;
-                                else if(param == "s")   sst >> S;
-                                else if(param == "parent")
-                                {
-                                    size_t parent_phys;
-                                    sst >> parent_phys;
-                                    map<phys_id, phys_area>::const_iterator parent =
-                                            phys.find(phys_id(MSH_TET_4, parent_phys));
-                                    if(parent != phys.end())
-                                    {
-                                        const phys_area * par = &(parent->second);
-                                        ph->mu = par->mu;
-                                        ph->epsilon = par->epsilon;
-                                        ph->sigma = par->sigma;
-                                    }
-                                    else
-                                    {
-                                        cout << "[Phys Config] Warning: unaccounted parent \""
-                                             << parent_phys << "\" of phys area \"" << ph->gmsh_num
-                                             << "\" (1 - MSH_LIN_2), skipping..." << endl;
-                                    }
-                                }
-                                else cout << "[Phys Config] Unsupported param \"" << param << "\" in section \""
-                                          << section << (subsection.empty() ? string("") : (string(".") + subsection))
-                                          << "\"" << endl;
-                                //cout << "  param = " << param << endl;
-                                //cout << "  value = " << value << endl;
-                            }
-                        }
-                    }
-                    while(phys_param.good() && !(line.length() > 1 && line[0] == '['));
-
-                    double R = rho * l / S;
-                    double U = I * R;
-                    ph->E0 = U / l;
-                }
-                else
-                {
-                    cout << "[Phys Config] No subsection in section \"" << section << "\"" << endl;
-                    return false;
-                }
-            }
+            cout << "[Phys Config] No subsection in section \"" << "Phys3D" << "\"" << endl;
+            return false;
         }
-        else
+        phys_area * ph = &(phys[phys_id(MSH_TET_4, gmsh_num)]);
+        ph->gmsh_num = gmsh_num;
+        ph->type_of_elem = MSH_TET_4;
+        ph->mu = cfg_file.get("Phys3D", gmsh_num, "mu", mu_default) * consts::mu0;
+        ph->epsilon = cfg_file.get("Phys3D", gmsh_num, "eps", eps_default) * consts::epsilon0;
+        string sigma = cfg_file.get("Phys3D", gmsh_num, "sigma", sigma_default);
+        ph->omega = omega_global;
+        ph->type_of_bounds = 0;
+        ph->J0 = 0.0;
+        ph->E0 = 0.0;
+        if(!ph->sigma.parse(sigma) || !ph->sigma.simplify())
         {
-            getline(phys_param, line);
-            line = trim(line);
+            cout << "Error in " << __FILE__ << ":" << __LINE__
+                 << " while parsing " << sigma << " ("
+                 << ph->sigma.get_error() << ")" << endl;
+            return false;
         }
     }
-    while(phys_param.good());
 
-    phys_param.close();
+    mu_default *= consts::mu0;
+    eps_default *= consts::epsilon0;
+
+    // Секция Phys2D
+
+    whitelist.push_back("parent");
+    whitelist.push_back("boundary");
+    if(!cfg_file.check_parameters("Phys2D", whitelist))
+    {
+        cout << "[Phys Config] Error in " << __FILE__ << ":" << __LINE__
+             << " while reading file " << phys_filename << endl;
+        return false;
+    }
+    whitelist.clear();
+
+    list<size_t> subsections_2d = cfg_file.enumerate("Phys2D", (size_t*)NULL);
+    for(list<size_t>::iterator it = subsections_2d.begin(); it != subsections_2d.end(); ++it)
+    {
+        size_t gmsh_num = * it;
+        if(gmsh_num == 0)
+        {
+            cout << "[Phys Config] No subsection in section \"" << "Phys2D" << "\"" << endl;
+            return false;
+        }
+        phys_area * ph = &(phys[phys_id(MSH_TRI_3, gmsh_num)]);
+        ph->gmsh_num = gmsh_num;
+        ph->type_of_elem = MSH_TRI_3;
+        ph->omega = omega_global;
+        ph->type_of_bounds = cfg_file.get("Phys2D", gmsh_num, "boundary", (size_t)2);
+        ph->J0 = 0.0;
+        ph->E0 = 0.0;
+        size_t parent_num = cfg_file.get("Phys2D", gmsh_num, "parent", (size_t)0);
+        if(parent_num != 0)
+        {
+            map<phys_id, phys_area>::const_iterator parent =
+                    phys.find(phys_id(MSH_TET_4, parent_num));
+            if(parent != phys.end())
+            {
+                const phys_area * par = &(parent->second);
+                ph->mu = par->mu;
+                ph->epsilon = par->epsilon;
+                ph->sigma = par->sigma;
+            }
+            else
+            {
+                cout << "[Phys Config] Warning: unaccounted parent \""
+                     << parent_num << "\" of phys area \"" << ph->gmsh_num
+                     << "\" (2 - MSH_TRI_3), skipping..." << endl;
+                parent_num = 0;
+            }
+        }
+        if(parent_num == 0)
+        {
+            ph->mu = mu_default;
+            ph->epsilon = eps_default;
+            ph->sigma = sigma_default;
+        }
+    }
+
+    // Секция Phys1D
+
+    whitelist.push_back("parent");
+    whitelist.push_back("current");
+    if(!cfg_file.check_parameters("Phys1D", whitelist))
+    {
+        cout << "[Phys Config] Error in " << __FILE__ << ":" << __LINE__
+             << " while reading file " << phys_filename << endl;
+        return false;
+    }
+    whitelist.clear();
+
+    list<size_t> subsections_1d = cfg_file.enumerate("Phys1D", (size_t*)NULL);
+    for(list<size_t>::iterator it = subsections_1d.begin(); it != subsections_1d.end(); ++it)
+    {
+        size_t gmsh_num = * it;
+        if(gmsh_num == 0)
+        {
+            cout << "[Phys Config] No subsection in section \"" << "Phys1D" << "\"" << endl;
+            return false;
+        }
+        phys_area * ph = &(phys[phys_id(MSH_LIN_2, gmsh_num)]);
+        ph->gmsh_num = gmsh_num;
+        ph->type_of_elem = MSH_LIN_2;
+        ph->omega = omega_global;
+        ph->type_of_bounds = 0;
+        ph->J0 = cfg_file.get("Phys1D", gmsh_num, "current", 0.0);
+        ph->E0 = 0.0;
+        size_t parent_num = cfg_file.get("Phys1D", gmsh_num, "parent", (size_t)0);
+        if(parent_num != 0)
+        {
+            map<phys_id, phys_area>::const_iterator parent =
+                    phys.find(phys_id(MSH_TET_4, parent_num));
+            if(parent != phys.end())
+            {
+                const phys_area * par = &(parent->second);
+                ph->mu = par->mu;
+                ph->epsilon = par->epsilon;
+                ph->sigma = par->sigma;
+            }
+            else
+            {
+                cout << "[Phys Config] Warning: unaccounted parent \""
+                     << parent_num << "\" of phys area \"" << ph->gmsh_num
+                     << "\" (1 - MSH_LIN_2), skipping..." << endl;
+                parent_num = 0;
+            }
+        }
+        if(parent_num == 0)
+        {
+            ph->mu = mu_default;
+            ph->epsilon = eps_default;
+            ph->sigma = sigma_default;
+        }
+    }
+
+    // Секция Phys0D
+
+    whitelist.push_back("point_x");
+    whitelist.push_back("point_y");
+    whitelist.push_back("point_z");
+    whitelist.push_back("value_x");
+    whitelist.push_back("value_y");
+    whitelist.push_back("value_z");
+    if(!cfg_file.check_parameters("Phys0D", whitelist))
+    {
+        cout << "[Phys Config] Error in " << __FILE__ << ":" << __LINE__
+             << " while reading file " << phys_filename << endl;
+        return false;
+    }
+    whitelist.clear();
+
+    list<size_t> subsections_0d = cfg_file.enumerate("Phys0D", (size_t*)NULL);
+    for(list<size_t>::iterator it = subsections_0d.begin(); it != subsections_0d.end(); ++it)
+    {
+        size_t gmsh_num = * it;
+        if(gmsh_num == 0)
+        {
+            cout << "[Phys Config] No subsection in section \"" << "Phys1D" << "\"" << endl;
+            return false;
+        }
+        point pss_point(
+                    cfg_file.get("Phys0D", gmsh_num, "point_x", 0.0),
+                    cfg_file.get("Phys0D", gmsh_num, "point_y", 0.0),
+                    cfg_file.get("Phys0D", gmsh_num, "point_z", 0.0)
+                    );
+        cvector3 pss_value(
+                    cfg_file.get("Phys0D", gmsh_num, "value_x", 0.0),
+                    cfg_file.get("Phys0D", gmsh_num, "value_y", 0.0),
+                    cfg_file.get("Phys0D", gmsh_num, "value_z", 0.0)
+                    );
+        push_back_wrapper(pss, make_pair(pss_point, pss_value));
+    }
+
+    // Секция Electrode
+
+    whitelist.push_back("parent");
+    whitelist.push_back("I");
+    whitelist.push_back("l");
+    whitelist.push_back("rho");
+    whitelist.push_back("S");
+    if(!cfg_file.check_parameters("Electrode", whitelist))
+    {
+        cout << "[Phys Config] Error in " << __FILE__ << ":" << __LINE__
+             << " while reading file " << phys_filename << endl;
+        return false;
+    }
+    whitelist.clear();
+
+    list<size_t> subsections_el = cfg_file.enumerate("Electrode", (size_t*)NULL);
+    for(list<size_t>::iterator it = subsections_el.begin(); it != subsections_el.end(); ++it)
+    {
+        size_t gmsh_num = * it;
+        if(gmsh_num == 0)
+        {
+            cout << "[Phys Config] No subsection in section \"" << "Electrode" << "\"" << endl;
+            return false;
+        }
+        phys_area * ph = &(phys[phys_id(MSH_LIN_2, gmsh_num)]);
+        ph->gmsh_num = gmsh_num;
+        ph->type_of_elem = MSH_LIN_2;
+        ph->omega = omega_global;
+        ph->type_of_bounds = 1;
+        ph->J0 = 0.0;
+        size_t parent_num = cfg_file.get("Electrode", gmsh_num, "parent", (size_t)0);
+        if(parent_num != 0)
+        {
+            map<phys_id, phys_area>::const_iterator parent =
+                    phys.find(phys_id(MSH_TET_4, parent_num));
+            if(parent != phys.end())
+            {
+                const phys_area * par = &(parent->second);
+                ph->mu = par->mu;
+                ph->epsilon = par->epsilon;
+                ph->sigma = par->sigma;
+            }
+            else
+            {
+                cout << "[Phys Config] Warning: unaccounted parent \""
+                     << parent_num << "\" of phys area \"" << ph->gmsh_num
+                     << "\" (1 - MSH_LIN_2), skipping..." << endl;
+                parent_num = 0;
+            }
+        }
+        if(parent_num == 0)
+        {
+            ph->mu = mu_default;
+            ph->epsilon = eps_default;
+            ph->sigma = sigma_default;
+        }
+        double I    = cfg_file.get("Electrode", gmsh_num, "I",   1.0);
+        double l    = cfg_file.get("Electrode", gmsh_num, "l",   1.0);
+        double rho  = cfg_file.get("Electrode", gmsh_num, "rho", 1.0);
+        double S    = cfg_file.get("Electrode", gmsh_num, "S",   1.0);
+        double R    = rho * l / S;
+        double U    = I * R;
+        ph->E0 = U / l;
+    }
 
     for(map<phys_id, phys_area>::iterator it = phys.begin(); it != phys.end(); ++it)
     {
@@ -487,20 +378,20 @@ bool VFEM::input_phys(const string & phys_filename)
     }
 
     // Заполним данные и в вычисляемых функциях
-    for(map<size_t, array_t<evaluator<complex<double> >, 3> >::iterator
+    for(map<size_t, array_t<evaluator_helmholtz, 3> >::iterator
         it = config.analytical.values.begin(); it != config.analytical.values.end(); ++it)
     {
         phys_area * ph = &(phys.find(phys_id(MSH_TET_4, it->first))->second);
         //complex<double> k2(- ph->omega * ph->omega * ph->epsilon, ph->omega * ph->sigma);
         for(size_t i = 0; i < 3; i++)
         {
-            evaluator<complex<double> > * ev_curr = &(it->second[i]);
-            ev_curr->set_var("J0", ph->J0);
-            ev_curr->set_var("omega", omega_global);
-            ev_curr->set_var("epsilon", ph->epsilon);
-            //ev_curr->set_var("sigma", ph->sigma);
-            ev_curr->set_var("mu", ph->mu);
-            //ev_curr->set_var("k2", k2);
+            evaluator_helmholtz * ev_curr = &(it->second[i]);
+            ev_curr->set_J0(ph->J0);
+            ev_curr->set_omega(omega_global);
+            ev_curr->set_epsilon(ph->epsilon);
+            //ev_curr->set_sigma(ph->sigma);
+            ev_curr->set_mu(ph->mu);
+            //ev_curr->set_k2(k2);
             ev_curr->simplify();
             switch(config.jit_type)
             {
@@ -515,20 +406,20 @@ bool VFEM::input_phys(const string & phys_filename)
             }
         }
     }
-    for(map<size_t, array_t<evaluator<complex<double> >, 3> >::iterator
+    for(map<size_t, array_t<evaluator_helmholtz, 3> >::iterator
         it = config.boundary.values.begin(); it != config.boundary.values.end(); ++it)
     {
         phys_area * ph = &(phys.find(phys_id(MSH_TRI_3, it->first))->second);
         //complex<double> k2(- ph->omega * ph->omega * ph->epsilon, ph->omega * ph->sigma);
         for(size_t i = 0; i < 3; i++)
         {
-            evaluator<complex<double> > * ev_curr = &(it->second[i]);
-            ev_curr->set_var("J0", ph->J0);
-            ev_curr->set_var("omega", omega_global);
-            ev_curr->set_var("epsilon", ph->epsilon);
-            //ev_curr->set_var("sigma", ph->sigma);
-            ev_curr->set_var("mu", ph->mu);
-            //ev_curr->set_var("k2", k2);
+            evaluator_helmholtz * ev_curr = &(it->second[i]);
+            ev_curr->set_J0(ph->J0);
+            ev_curr->set_omega(omega_global);
+            ev_curr->set_epsilon(ph->epsilon);
+            //ev_curr->set_sigma(ph->sigma);
+            ev_curr->set_mu(ph->mu);
+            //ev_curr->set_k2(k2);
             ev_curr->simplify();
             switch(config.jit_type)
             {
@@ -543,20 +434,20 @@ bool VFEM::input_phys(const string & phys_filename)
             }
         }
     }
-    for(map<size_t, array_t<evaluator<complex<double> >, 3> >::iterator
+    for(map<size_t, array_t<evaluator_helmholtz, 3> >::iterator
         it = config.right.values.begin(); it != config.right.values.end(); ++it)
     {
         phys_area * ph = &(phys.find(phys_id(MSH_TET_4, it->first))->second);
         //complex<double> k2(- ph->omega * ph->omega * ph->epsilon, ph->omega * ph->sigma);
         for(size_t i = 0; i < 3; i++)
         {
-            evaluator<complex<double> > * ev_curr = &(it->second[i]);
-            ev_curr->set_var("J0", ph->J0);
-            ev_curr->set_var("omega", omega_global);
-            ev_curr->set_var("epsilon", ph->epsilon);
-            //ev_curr->set_var("sigma", ph->sigma);
-            ev_curr->set_var("mu", ph->mu);
-            //ev_curr->set_var("k2", k2);
+            evaluator_helmholtz * ev_curr = &(it->second[i]);
+            ev_curr->set_J0(ph->J0);
+            ev_curr->set_omega(omega_global);
+            ev_curr->set_epsilon(ph->epsilon);
+            //ev_curr->set_sigma(ph->sigma);
+            ev_curr->set_mu(ph->mu);
+            //ev_curr->set_k2(k2);
             ev_curr->simplify();
             switch(config.jit_type)
             {
@@ -573,9 +464,9 @@ bool VFEM::input_phys(const string & phys_filename)
     }
     for(size_t i = 0; i < 3; i++)
     {
-        config.analytical.default_value[i].set_var("omega", omega_global);
-        config.boundary.default_value[i].set_var("omega", omega_global);
-        config.right.default_value[i].set_var("omega", omega_global);
+        config.analytical.default_value[i].set_omega(omega_global);
+        config.boundary.default_value[i].set_omega(omega_global);
+        config.right.default_value[i].set_omega(omega_global);
     }
 
     return true;

@@ -25,13 +25,6 @@ namespace tet_basis_indexes
     };
 }
 
-// Константы для тетраэдров
-namespace tet_common
-{
-    // Шаг дифференцирования сигмы
-    const double dsigma_h = 1e-5;
-}
-
 // ============================================================================
 
 tetrahedron_base::tetrahedron_base()
@@ -501,15 +494,11 @@ tetrahedron::MpG() const
     {
         // TODO: Костыль
         phys_area * phys_editable = const_cast<phys_area *>(phys);
-        phys_editable->sigma.set_var("z", gauss_points[k].z);
+        phys_editable->sigma.set_x(gauss_points[k].x);
+        phys_editable->sigma.set_y(gauss_points[k].y);
+        phys_editable->sigma.set_z(gauss_points[k].z);
         double sigma = 0.0;
         phys_editable->sigma.calculate(sigma);
-
-        // TODO: Хз, что с этим делать
-//        phys_editable->sigma.set_var("z", gauss_points[k].z + tet_common::dsigma_h);
-//        double dsigma_dz = 0.0;
-//        phys_editable->sigma.calculate(dsigma_dz);
-//        dsigma_dz = (dsigma_dz - sigma) / tet_common::dsigma_h;
 
         for(size_t i = 0; i < basis->tet_bf_num; i++)
         {
@@ -576,7 +565,9 @@ tetrahedron::K() const
     {
         // TODO: Костыль
         phys_area * phys_editable = const_cast<phys_area *>(phys);
-        phys_editable->sigma.set_var("z", gauss_points[k].z);
+        phys_editable->sigma.set_x(gauss_points[k].x);
+        phys_editable->sigma.set_y(gauss_points[k].y);
+        phys_editable->sigma.set_z(gauss_points[k].z);
         double sigma = 0.0;
         phys_editable->sigma.calculate(sigma);
 

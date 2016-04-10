@@ -23,13 +23,6 @@ namespace tet_basis_indexes
     extern const size_t ind_f[4][3];
 }
 
-// Константы для тетраэдров
-namespace tet_common
-{
-    // Шаг дифференцирования сигмы
-    extern const double dsigma_h;
-}
-
 // Класс тетраэдр (абстрактный)
 class tetrahedron_base
 {

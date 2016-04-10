@@ -2,7 +2,7 @@
 #define PHYS_H_INCLUDED
 
 #include "../common/common.h"
-#include "../config/evaluator/evaluator.h"
+#include "../config/evaluator/evaluator_xyz.h"
 
 namespace consts
 {
@@ -15,16 +15,16 @@ namespace consts
 class phys_area
 {
 public:
-    double omega;           // Циклическая частота
-    double mu;              // Магнитная проницаемость (относительная)
-    evaluator<double> sigma;// Электрическая проводимость
-    double epsilon;         // Диэлектрическая проницаемость (относительная)
-    size_t gmsh_num;        // Номер области в Gmsh
-    size_t type_of_elem;    // Тип элементов
-    size_t type_of_bounds;  // Тип краевого условия
-    double J0;              // Мощность источника
-    double E0;              // Электрическое поле от электрода
-    phys_area()             // Конструктор по умолчанию
+    double omega;                // Циклическая частота
+    double mu;                   // Магнитная проницаемость (относительная)
+    evaluator_xyz<double> sigma; // Электрическая проводимость
+    double epsilon;              // Диэлектрическая проницаемость (относительная)
+    size_t gmsh_num;             // Номер области в Gmsh
+    size_t type_of_elem;         // Тип элементов
+    size_t type_of_bounds;       // Тип краевого условия
+    double J0;                   // Мощность источника
+    double E0;                   // Электрическое поле от электрода
+    phys_area()                  // Конструктор по умолчанию
     {
         sigma.parse("0.0");
         omega = mu = epsilon = J0 = E0 = 0.0;

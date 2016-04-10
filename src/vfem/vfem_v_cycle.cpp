@@ -100,7 +100,7 @@ void VFEM::solve()
 {
     if(!config.v_cycle_enabled)
     {
-        slae.solve(config.eps_slae, config.max_iter);
+        slae.solve(config.solver_name, config.eps_slae, config.max_iter);
         return;
     }
 
@@ -114,12 +114,12 @@ void VFEM::solve()
     // Локальное число итераций обычно небольшое
     size_t max_iter_local = config.max_iter_v_cycle_local;
 
-    slae.inline_init();
-    ker_slae.inline_init();
+    slae.init(config.solver_name_v_cycle_full);
+    ker_slae.init(config.solver_name_v_cycle_ker);
 
     // Уточнение начального приближения на полном пространстве
     complex<double> * x_old = new complex<double> [dof_num];
-    slae.inline_solve(x_old, slae.rp, gamma0, max_iter_local);
+    slae.step_solve(x_old, slae.rp, gamma0, max_iter_local);
     printf("\n");
 
     double rp_norm2 = dot_prod_self(slae.rp);
@@ -154,7 +154,7 @@ void VFEM::solve()
 
         // z = (PAPt)^-1 g или z = solve1(PAPt, g)
         for(size_t i = 0; i < ker_dof_num; i++) ker_slae.x[i] = 0.0;
-        ker_slae.inline_solve(ker_slae.x, g, gamma_ker, max_iter_local);
+        ker_slae.step_solve(ker_slae.x, g, gamma_ker, max_iter_local);
 
         // Уточнение на градиентном пространсте
         // x = x + Ptz
@@ -176,7 +176,7 @@ void VFEM::solve()
 
         // y = solve2(A, r)
         for(size_t i = 0; i < dof_num; i++) y[i] = 0.0;
-        slae.inline_solve(y, r, gamma_full, max_iter_local);
+        slae.step_solve(y, r, gamma_full, max_iter_local);
 
         //Уточненение на всём пространстве
         // x = x + y

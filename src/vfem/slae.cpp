@@ -1,22 +1,164 @@
 #include "slae.h"
 
+// Решатели COCG
+#include "../solvers/COCG/COCG/COCG.h"
+#include "../solvers/COCG/COCG/COCG_Di.h"
+#include "../solvers/COCG/COCG/COCG_GS.h"
+#include "../solvers/COCG/COCG/COCG_LLT.h"
+#include "../solvers/COCG/COCG/COCG_LDLT.h"
+#include "../solvers/COCG/COCG/COCG_Smooth.h"
+#include "../solvers/COCG/COCG/COCG_Di_Smooth.h"
+#include "../solvers/COCG/COCG/COCG_GS_Smooth.h"
+#include "../solvers/COCG/COCG/COCG_LLT_Smooth.h"
+#include "../solvers/COCG/COCG/COCG_LDLT_Smooth.h"
+
+// Решатели COCG с OpenMP
+#include "../solvers/COCG/COCG_OpenMP/COCG_Smooth_OpenMP.h"
+#include "../solvers/COCG/COCG_OpenMP/COCG_Di_Smooth_OpenMP.h"
+
+// Решатели COCG с MKL
+#include "../solvers/COCG/COCG_MKL/COCG_Smooth_MKL.h"
+#include "../solvers/COCG/COCG_MKL/COCG_Di_Smooth_MKL.h"
+#include "../solvers/COCG/COCG_MKL/COCG_LLT_Smooth_MKL.h"
+
+// Решатели GMRES
+#include "../solvers/GMRES_Complex/GMRES_Complex/GMRES_Complex.h"
+#include "../solvers/GMRES_Complex/GMRES_Complex/GMRES_Complex_Di.h"
+#include "../solvers/GMRES_Complex/GMRES_Complex/GMRES_Complex_LLT.h"
+#include "../solvers/GMRES_Complex/GMRES_Complex/GMRES_Complex_LDLT.h"
+
+// Решатели BiCG
+#include "../solvers/BiCG_Complex/BiCG_Complex/BiCG_Complex_Smooth.h"
+
+// Решатели BiCGStab
+#include "../solvers/BiCGStab_Complex/BiCGStab_Complex/BiCGStab_Complex_Smooth.h"
+
+// Решатели COCR
+#include "../solvers/COCR/COCR/COCR.h"
+#include "../solvers/COCR/COCR/COCR_Di.h"
+#include "../solvers/COCR/COCR/COCR_Di_Smooth.h"
+#include "../solvers/COCR/COCR/COCR_LLT.h"
+#include "../solvers/COCR/COCR/COCR_LLT_Smooth.h"
+#include "../solvers/COCR/COCR/COCR_LDLT.h"
+#include "../solvers/COCR/COCR/COCR_LDLT_Smooth.h"
+
+// Legacy решатели
+#include "../solvers/BiCG_Complex/legacy/BiCGComplex_VC.h"
+#include "../solvers/BiCGStab_Complex/legacy/BiCGStabComplex_VC.h"
+#include "../solvers/COCG/legacy/CGMComplex_VC.h"
+#include "../solvers/COCG/legacy/CGMComplex_LLT.h"
+
+#if defined QMAKE_WORKAROUND
+// https://bugreports.qt.io/browse/QTBUG-11923
+// https://bugreports.qt.io/browse/QTBUG-24906
+#include "../solvers/COCG/COCG_OpenMP/COCG_Di_Smooth_OpenMP.cpp"
+#include "../solvers/COCG/COCG_MKL/COCG_LLT_Smooth_MKL.cpp"
+#endif
+
 SLAE::SLAE()
 {
     gg = di = rp = x = NULL;
     ig = jg = NULL;
     n = 0;
+    solver = NULL;
 }
 
 SLAE::~SLAE()
 {
     dealloc_all();
+    delete solver;
 }
 
-void SLAE::solve(double eps, size_t max_iter)
+void SLAE::init(const string & name)
+{
+    delete solver;
+    // Решатели COCG
+    if(name == "COCG")
+        solver = new COCG;
+    else if(name == "COCG_Di")
+        solver = new COCG_Di;
+    else if(name == "COCG_GS")
+        solver = new COCG_GS;
+    else if(name == "COCG_LLT")
+        solver = new COCG_LLT;
+    else if(name == "COCG_LDLT")
+        solver = new COCG_LDLT;
+    else if(name == "COCG_Smooth")
+        solver = new COCG_Smooth;
+    else if(name == "COCG_Di_Smooth")
+        solver = new COCG_Di_Smooth;
+    else if(name == "COCG_GS_Smooth")
+        solver = new COCG_GS_Smooth;
+    else if(name == "COCG_LLT_Smooth")
+        solver = new COCG_LLT_Smooth;
+    else if(name == "COCG_LDLT_Smooth")
+        solver = new COCG_LDLT_Smooth;
+    // Решатели COCG с OpenMP
+    else if(name == "COCG_Smooth_OpenMP")
+        solver = new COCG_Smooth_OpenMP;
+    else if(name == "COCG_Di_Smooth_OpenMP")
+        solver = new COCG_Di_Smooth_OpenMP;
+    // Решатели COCG с MKL
+    else if(name == "COCG_Smooth_MKL")
+        solver = new COCG_Smooth_MKL;
+    else if(name == "COCG_Di_Smooth_MKL")
+        solver = new COCG_Di_Smooth_MKL;
+    else if(name == "COCG_LLT_Smooth_MKL")
+        solver = new COCG_LLT_Smooth_MKL;
+    // Решатели GMRES
+    else if(name == "GMRES_Complex")
+        solver = new GMRES_Complex;
+    else if(name == "GMRES_Complex_Di")
+        solver = new GMRES_Complex_Di;
+    else if(name == "GMRES_Complex_LLT")
+        solver = new GMRES_Complex_LLT;
+    else if(name == "GMRES_Complex_LDLT")
+        solver = new GMRES_Complex_LDLT;
+    // Решатели BiCG
+    else if(name == "BiCG_Complex_Smooth")
+        solver = new BiCG_Complex_Smooth;
+    // Решатели BiCGStab
+    else if(name == "BiCGStab_Complex_Smooth")
+        solver = new BiCGStab_Complex_Smooth;
+    // Решатели COCR
+    else if(name == "COCR")
+        solver = new COCR;
+    else if(name == "COCR_Di")
+        solver = new COCR_Di;
+    else if(name == "COCR_Di_Smooth")
+        solver = new COCR_Di_Smooth;
+    else if(name == "COCR_LLT")
+        solver = new COCR_LLT;
+    else if(name == "COCR_LLT_Smooth")
+        solver = new COCR_LLT_Smooth;
+    else if(name == "COCR_LDLT")
+        solver = new COCR_LDLT;
+    else if(name == "COCR_LDLT_Smooth")
+        solver = new COCR_LDLT_Smooth;
+    // Legacy решатели
+    else if(name == "BiCGComplex_VC")
+        solver = new BiCGComplex_VC;
+    else if(name == "BiCGStabComplex_VC")
+        solver = new BiCGStabComplex_VC;
+    else if(name == "CGMComplex_VC")
+        solver = new CGMComplex_VC;
+    else if(name == "CGMComplex_LLT")
+        solver = new CGMComplex_LLT;
+    // Решатель по умолчанию
+    else
+#if !defined USE_MKL
+        solver = new COCG_LLT_Smooth;
+#else
+        solver = new COCG_LLT_Smooth_MKL;
+#endif
+    solver->init(ig, jg, di, gg, n);
+}
+
+void SLAE::solve(const string & name, double eps, size_t max_iter)
 {
     cout << "Solving SLAE ..." << endl;
-    solver.init(ig, jg, di, gg, n);
-    solver.solve(x, rp, eps, max_iter);
+    init(name);
+    step_solve(x, rp, eps, max_iter);
 }
 
 void SLAE::alloc_all(size_t n_size, size_t gg_size)

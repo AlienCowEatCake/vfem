@@ -4,7 +4,10 @@
 #include "../common/common.h"
 #include "../common/matrix.h"
 #include "../common/cubatures.h"
+#include "../config/inifile.h"
 #include "../config/evaluator/evaluator.h"
+#include "../config/evaluator/evaluator_xyz.h"
+#include "../config/evaluator_helmholtz.h"
 #include "../vfem/phys.h"
 #include "../geometry/point.h"
 #include "../geometry/vector3.h"
@@ -68,9 +71,9 @@ class evaluator3
 public:
     evaluator3();
     // Вычислители по физическим областям
-    map<size_t, array_t<evaluator<complex<double> >, 3> > values;
+    map<size_t, array_t<evaluator_helmholtz, 3> > values;
     // Вычислители по умолчанию
-    array_t<evaluator<complex<double> >, 3> default_value;
+    array_t<evaluator_helmholtz, 3> default_value;
     // Тип JIT-компилятора в вычислителях
     enum jit_types
     {
@@ -156,6 +159,14 @@ public:
     size_t max_iter;
     // Максимальное локальное число итераций V-цикла
     size_t max_iter_v_cycle_local;
+    // Решатель для обычной СЛАУ
+    string solver_name;
+    // Решатель для СЛАУ с краевыми
+    string solver_name_bound;
+    // Решатель для СЛАУ на полном пространстве
+    string solver_name_v_cycle_full;
+    // Решатель для СЛАУ на пространстве ядра
+    string solver_name_v_cycle_ker;
     // Сетка
     string filename_mesh;
     // Параметры физических областей

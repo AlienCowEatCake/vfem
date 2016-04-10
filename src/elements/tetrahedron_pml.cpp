@@ -230,7 +230,9 @@ tetrahedron_pml::MpG() const
     {
         // TODO: Костыль
         phys_area * phys_editable = const_cast<phys_area *>(phys);
-        phys_editable->sigma.set_var("z", gauss_points[k].z);
+        phys_editable->sigma.set_x(gauss_points[k].x);
+        phys_editable->sigma.set_y(gauss_points[k].y);
+        phys_editable->sigma.set_z(gauss_points[k].z);
         double sigma = 0.0;
         phys_editable->sigma.calculate(sigma);
 
@@ -305,7 +307,9 @@ tetrahedron_pml::K() const
     {
         // TODO: Костыль
         phys_area * phys_editable = const_cast<phys_area *>(phys);
-        phys_editable->sigma.set_var("z", gauss_points[k].z);
+        phys_editable->sigma.set_x(gauss_points[k].x);
+        phys_editable->sigma.set_y(gauss_points[k].y);
+        phys_editable->sigma.set_z(gauss_points[k].z);
         double sigma = 0.0;
         phys_editable->sigma.calculate(sigma);
 

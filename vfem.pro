@@ -6,6 +6,7 @@ CONFIG += warn_on
 
 SOURCES += \
     src/main.cpp \
+    src/config/inifile.cpp \
     src/config/config.cpp \
     src/config/evaluator/evaluator_internal/transition_table.cpp \
     src/config/evaluator/evaluator_internal/jit/common.cpp \
@@ -27,17 +28,47 @@ SOURCES += \
     src/problems/standard.cpp \
     src/problems/standard_diff.cpp \
     src/problems/standard_pml.cpp \
-#    src/solvers/BiCGComplex_VC.cpp \
-#    src/solvers/BiCGStabComplex_VC.cpp \
-#    src/solvers/CGMComplex_LLT.cpp \
-#    src/solvers/CGMComplex_VC.cpp \
-    src/solvers/COCG_LLT_Smooth.cpp \
-    src/solvers/COCG_LLT_Smooth_MKL.cpp
+    src/solvers/BiCG_Complex/legacy/BiCGComplex_VC.cpp \
+    src/solvers/BiCGStab_Complex/legacy/BiCGStabComplex_VC.cpp \
+    src/solvers/COCG/legacy/CGMComplex_VC.cpp \
+    src/solvers/COCG/legacy/CGMComplex_LLT.cpp \
+    src/solvers/BiCG_Complex/BiCG_Complex/BiCG_Complex_Smooth.cpp \
+    src/solvers/BiCGStab_Complex/BiCGStab_Complex/BiCGStab_Complex_Smooth.cpp \
+    src/solvers/COCR/COCR/COCR.cpp \
+    src/solvers/COCR/COCR/COCR_Di.cpp \
+    src/solvers/COCR/COCR/COCR_Di_Smooth.cpp \
+    src/solvers/COCR/COCR/COCR_LDLT.cpp \
+    src/solvers/COCR/COCR/COCR_LDLT_Smooth.cpp \
+    src/solvers/COCR/COCR/COCR_LLT.cpp \
+    src/solvers/COCR/COCR/COCR_LLT_Smooth.cpp \
+    src/solvers/GMRES_Complex/GMRES_Complex/GMRES_Complex.cpp \
+    src/solvers/GMRES_Complex/GMRES_Complex/GMRES_Complex_Di.cpp \
+    src/solvers/GMRES_Complex/GMRES_Complex/GMRES_Complex_LDLT.cpp \
+    src/solvers/GMRES_Complex/GMRES_Complex/GMRES_Complex_LLT.cpp \
+    src/solvers/COCG/COCG/COCG.cpp \
+    src/solvers/COCG/COCG/COCG_Di.cpp \
+    src/solvers/COCG/COCG/COCG_GS.cpp \
+    src/solvers/COCG/COCG/COCG_LDLT.cpp \
+    src/solvers/COCG/COCG/COCG_LLT.cpp \
+    src/solvers/COCG/COCG/COCG_Smooth.cpp \
+    src/solvers/COCG/COCG/COCG_Di_Smooth.cpp \
+    src/solvers/COCG/COCG/COCG_GS_Smooth.cpp \
+    src/solvers/COCG/COCG/COCG_LLT_Smooth.cpp \
+    src/solvers/COCG/COCG/COCG_LDLT_Smooth.cpp \
+    src/solvers/COCG/COCG_OpenMP/COCG_Smooth_OpenMP.cpp \
+    src/solvers/COCG/COCG_OpenMP/COCG_Di_Smooth_OpenMP.cpp \
+    src/solvers/COCG/COCG_MKL/COCG_Smooth_MKL.cpp \
+    src/solvers/COCG/COCG_MKL/COCG_Di_Smooth_MKL.cpp \
+    src/solvers/COCG/COCG_MKL/COCG_LLT_Smooth_MKL.cpp
 
 HEADERS += \
+    src/config/inifile.h \
     src/config/config.h \
+    src/config/evaluator_helmholtz.h \
     src/config/evaluator/evaluator.h \
+    src/config/evaluator/evaluator_xyz.h \
     src/config/evaluator/evaluator_operations.h \
+    src/config/evaluator/evaluator_internal/type_detection.h \
     src/config/evaluator/evaluator_internal/evaluator_object.h \
     src/config/evaluator/evaluator_internal/var_container.h \
     src/config/evaluator/evaluator_internal/transition_table.h \
@@ -68,14 +99,43 @@ HEADERS += \
     src/vfem/slae.h \
     src/vfem/vfem.h \
     src/problems/problems.h \
-#    src/solvers/BiCGComplex_VC.h \
-#    src/solvers/BiCGStabComplex_VC.h \
-#    src/solvers/CGMComplex_LLT.h \
-#    src/solvers/CGMComplex_VC.h \
-    src/solvers/COCG_LLT_Smooth.h \
-    src/solvers/COCG_LLT_Smooth_MKL.h
+    src/solvers/solver_interface.h \
+    src/solvers/BiCG_Complex/legacy/BiCGComplex_VC.h \
+    src/solvers/BiCGStab_Complex/legacy/BiCGStabComplex_VC.h \
+    src/solvers/COCG/legacy/CGMComplex_VC.h \
+    src/solvers/COCG/legacy/CGMComplex_LLT.h \
+    src/solvers/BiCG_Complex/BiCG_Complex/BiCG_Complex_Smooth.h \
+    src/solvers/BiCGStab_Complex/BiCGStab_Complex/BiCGStab_Complex_Smooth.h \
+    src/solvers/COCR/COCR/COCR_Di.h \
+    src/solvers/COCR/COCR/COCR_Di_Smooth.h \
+    src/solvers/COCR/COCR/COCR.h \
+    src/solvers/COCR/COCR/COCR_LDLT.h \
+    src/solvers/COCR/COCR/COCR_LDLT_Smooth.h \
+    src/solvers/COCR/COCR/COCR_LLT.h \
+    src/solvers/COCR/COCR/COCR_LLT_Smooth.h \
+    src/solvers/GMRES_Complex/GMRES_Complex/GMRES_Complex.h \
+    src/solvers/GMRES_Complex/GMRES_Complex/GMRES_Complex_Di.h \
+    src/solvers/GMRES_Complex/GMRES_Complex/GMRES_Complex_LDLT.h \
+    src/solvers/GMRES_Complex/GMRES_Complex/GMRES_Complex_LLT.h \
+    src/solvers/COCG/COCG/COCG_Di.h \
+    src/solvers/COCG/COCG/COCG_GS.h \
+    src/solvers/COCG/COCG/COCG.h \
+    src/solvers/COCG/COCG/COCG_LDLT.h \
+    src/solvers/COCG/COCG/COCG_LLT.h \
+    src/solvers/COCG/COCG/COCG_Smooth.h \
+    src/solvers/COCG/COCG/COCG_Di_Smooth.h \
+    src/solvers/COCG/COCG/COCG_GS_Smooth.h \
+    src/solvers/COCG/COCG/COCG_LLT_Smooth.h \
+    src/solvers/COCG/COCG/COCG_LDLT_Smooth.h \
+    src/solvers/COCG/COCG_OpenMP/COCG_Smooth_OpenMP.h \
+    src/solvers/COCG/COCG_OpenMP/COCG_Di_Smooth_OpenMP.h \
+    src/solvers/COCG/COCG_MKL/COCG_Smooth_MKL.h \
+    src/solvers/COCG/COCG_MKL/COCG_Di_Smooth_MKL.h \
+    src/solvers/COCG/COCG_MKL/COCG_LLT_Smooth_MKL.h
 
-unix:QMAKE_LIBS += -lrt
+DEFINES += QMAKE_WORKAROUND
+
+unix:!macx:QMAKE_LIBS += -lrt
 
 *g++*|*clang* {
     QMAKE_CXXFLAGS += -fopenmp
