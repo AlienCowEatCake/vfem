@@ -120,7 +120,7 @@ bool VFEM::output_slice(const string & tecplot_filename, char slice_var, double 
     }
 
     tecplot_file << "TITLE = \"Slice " << slice_var << " = " << slice_val << "\"\n";
-    tecplot_file << "VARIABLES = \"" << var1 <<"\", \"" << var2 << "\", \"ExR\", \"EyR\", \"EzR\", \"ExI\", \"EyI\", \"EzI\", \"abs(E)\", \"div(ER)\", \"div(EI)\"\n";
+    tecplot_file << "VARIABLES = \"" << var1 <<"\", \"" << var2 << "\", \"ExR\", \"EyR\", \"EzR\", \"ExI\", \"EyI\", \"EzI\", \"abs(E)\"\n";
     tecplot_file << "ZONE I= " << num_var_2 << ", J= " << num_var_1 << ", F=POINT\n";
 
     tecplot_file.precision(17);
@@ -136,13 +136,11 @@ bool VFEM::output_slice(const string & tecplot_filename, char slice_var, double 
             double v2 = min_var2 + step_var2 * (double)j;
             p[index_1] = v1;
             p[index_2] = v2;
-            const finite_element * fe = get_fe(p);
-            cvector3 sol = fe ? solution(p, fe) : cvector3();
-            complex<double> div_sol = fe ? (divergence(p, fe) * complex<double>(0, 1) / fe->phys->omega) : 0.0;
+            cvector3 sol = solution(p);
             tecplot_file << v1 << " " << v2 << " "
                          << sol.x.real() << " " << sol.y.real() << " " << sol.z.real() << " "
                          << sol.x.imag() << " " << sol.y.imag() << " " << sol.z.imag() << " "
-                         << sol.norm() << " " << div_sol.real() << " " << div_sol.imag() << "\n";
+                         << sol.norm() << "\n";
         }
     }
 
