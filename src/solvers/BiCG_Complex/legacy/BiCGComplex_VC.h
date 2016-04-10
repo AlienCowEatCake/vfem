@@ -12,7 +12,7 @@ class BiCGComplex_VC : public solver_interface<complex<double>, size_t>
 {
 public:
     void init(const size_t * gi_s, const size_t * gj_s, const complex<double> * di_s,
-              const complex<double> * gg_s, const size_t n_s);
+              const complex<double> * gg_s, size_t n_s);
     void solve(complex<double> * solution, const complex<double> * rp, double gamma, size_t max_iter);
 
     BiCGComplex_VC();

@@ -1,6 +1,11 @@
 #ifndef INIFILE_H
 #define INIFILE_H
 
+#if defined(_MSC_VER)
+// https://msdn.microsoft.com/en-us/library/074af4b6.aspx
+#pragma warning(disable : 4503)
+#endif
+
 #include <map>
 #include <string>
 #include <sstream>

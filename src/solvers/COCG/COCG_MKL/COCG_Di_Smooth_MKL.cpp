@@ -7,7 +7,7 @@
 #define PRECONDITIONER PRECONDITIONER_DI
 #define COCG_LLT_SMOOTH_MKL_H_INCLUDED
 #if !defined USE_MKL
-#define USE_MKL
+#define NO_MKL_STUBS
 #endif
 #include "COCG_LLT_Smooth_MKL.cpp"
 

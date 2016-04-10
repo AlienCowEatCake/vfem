@@ -73,6 +73,96 @@
     <Filter Include="Source Files\vfem">
       <UniqueIdentifier>{7cc95a25-c786-4031-b218-27930ab68492}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\solvers\BiCG_Complex">
+      <UniqueIdentifier>{129c642b-6aec-4255-88e7-12797f37a628}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\solvers\BiCG_Complex\BiCG_Complex">
+      <UniqueIdentifier>{0ee576ab-fc70-4e3a-8ad8-320ee153f160}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\solvers\BiCG_Complex\legacy">
+      <UniqueIdentifier>{c5b2cca1-b48f-4ee9-b8b5-2b629ae16e18}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\solvers\BiCG_Complex">
+      <UniqueIdentifier>{cbe82fa5-2c88-4dd3-9cea-4104d66a2bd7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\solvers\BiCG_Complex\BiCG_Complex">
+      <UniqueIdentifier>{2f436187-6784-46b9-82b9-2b89f25a2e7b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\solvers\BiCG_Complex\legacy">
+      <UniqueIdentifier>{ff5aa920-86a1-4360-b984-6b6027b88a6e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\solvers\BiCGStab_Complex">
+      <UniqueIdentifier>{4a44da17-8a5b-478a-9504-8387f8f371b8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\solvers\BiCGStab_Complex\BiCGStab_Complex">
+      <UniqueIdentifier>{8523f5a5-6448-42d8-a817-0b8e60fbecb8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\solvers\BiCGStab_Complex">
+      <UniqueIdentifier>{0154398b-f664-4ded-9865-8069365a9dd6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\solvers\BiCGStab_Complex\BiCGStab_Complex">
+      <UniqueIdentifier>{e3ec050d-0d2d-451a-8976-8602d6c37284}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\solvers\BiCGStab_Complex\legacy">
+      <UniqueIdentifier>{6a33faa9-26f2-43d0-b2d8-72612b2433a6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\solvers\BiCGStab_Complex\legacy">
+      <UniqueIdentifier>{9bccbc76-a51a-4cd7-bb04-aa90612af045}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\solvers\COCG">
+      <UniqueIdentifier>{eb2fc905-ff80-43d9-9f6b-45bfbf76f3eb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\solvers\COCG\COCG">
+      <UniqueIdentifier>{94a72bd5-a637-49d8-ba8d-e4d0f32f2467}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\solvers\COCG">
+      <UniqueIdentifier>{ee229a16-67c2-4903-a750-1fca9dfd97e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\solvers\COCG\COCG">
+      <UniqueIdentifier>{fb5913c3-2841-4efd-8586-b217105631c9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\solvers\COCG\COCG_MKL">
+      <UniqueIdentifier>{b3e7055b-e5eb-4aee-a3eb-60a775ab0100}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\solvers\COCG\COCG_MKL">
+      <UniqueIdentifier>{601e5698-85e3-455c-a299-5c7495372330}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\solvers\COCG\COCG_OpenMP">
+      <UniqueIdentifier>{582f027c-cde5-4ffa-9c87-b252a8c9f9cf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\solvers\COCG\COCG_OpenMP">
+      <UniqueIdentifier>{af0e0bb8-f544-4cbb-b5fb-7ffced88ca5c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\solvers\COCG\legacy">
+      <UniqueIdentifier>{9edaf66f-bf0a-4c8a-8a47-c4c7553abf36}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\solvers\COCG\legacy">
+      <UniqueIdentifier>{94bbb818-c68b-49c3-a5ce-644c84d83ec0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\solvers\COCR">
+      <UniqueIdentifier>{8d928d14-89fa-43b2-bff1-804c63f9efe5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\solvers\COCR\COCR">
+      <UniqueIdentifier>{39bc6191-368e-43e7-97d5-e1563bb43b77}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\solvers\COCR">
+      <UniqueIdentifier>{5be65084-f515-414a-85d2-22ce112fae3c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\solvers\COCR\COCR">
+      <UniqueIdentifier>{352684f4-248f-4ee2-8f40-1aba1b44f7a7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\solvers\GMRES_Complex">
+      <UniqueIdentifier>{209d5355-d808-4c2a-98f0-7e880de257ca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\solvers\GMRES_Complex\GMRES_Complex">
+      <UniqueIdentifier>{2856dc8c-cf3e-4a9b-a21a-b92611061c36}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\solvers\GMRES_Complex">
+      <UniqueIdentifier>{10816ef0-b844-4d16-b1e5-55f30ac0ab9b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\solvers\GMRES_Complex\GMRES_Complex">
+      <UniqueIdentifier>{9502722b-09e4-459b-86c1-c52aea343e09}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\common\trio.h">
@@ -177,24 +267,6 @@
     <ClInclude Include="..\..\..\src\problems\problems.h">
       <Filter>Header Files\problems</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\solvers\BiCGComplex_VC.h">
-      <Filter>Header Files\solvers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\solvers\BiCGStabComplex_VC.h">
-      <Filter>Header Files\solvers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\solvers\CGMComplex_LLT.h">
-      <Filter>Header Files\solvers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\solvers\CGMComplex_VC.h">
-      <Filter>Header Files\solvers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\solvers\COCG_LLT_Smooth.h">
-      <Filter>Header Files\solvers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\solvers\COCG_LLT_Smooth_MKL.h">
-      <Filter>Header Files\solvers</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\vfem\phys.h">
       <Filter>Header Files\vfem</Filter>
     </ClInclude>
@@ -203,6 +275,105 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\vfem\vfem.h">
       <Filter>Header Files\vfem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\solvers\solver_interface.h">
+      <Filter>Header Files\solvers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\solvers\BiCG_Complex\BiCG_Complex\BiCG_Complex_Smooth.h">
+      <Filter>Header Files\solvers\BiCG_Complex\BiCG_Complex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\solvers\BiCG_Complex\legacy\BiCGComplex_VC.h">
+      <Filter>Header Files\solvers\BiCG_Complex\legacy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\solvers\BiCGStab_Complex\BiCGStab_Complex\BiCGStab_Complex_Smooth.h">
+      <Filter>Header Files\solvers\BiCGStab_Complex\BiCGStab_Complex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\solvers\BiCGStab_Complex\legacy\BiCGStabComplex_VC.h">
+      <Filter>Header Files\solvers\BiCGStab_Complex\legacy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\solvers\COCG\COCG\COCG_Smooth.h">
+      <Filter>Header Files\solvers\COCG\COCG</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\solvers\COCG\COCG\COCG.h">
+      <Filter>Header Files\solvers\COCG\COCG</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\solvers\COCG\COCG\COCG_Di.h">
+      <Filter>Header Files\solvers\COCG\COCG</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\solvers\COCG\COCG\COCG_Di_Smooth.h">
+      <Filter>Header Files\solvers\COCG\COCG</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\solvers\COCG\COCG\COCG_GS.h">
+      <Filter>Header Files\solvers\COCG\COCG</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\solvers\COCG\COCG\COCG_GS_Smooth.h">
+      <Filter>Header Files\solvers\COCG\COCG</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\solvers\COCG\COCG\COCG_LDLT.h">
+      <Filter>Header Files\solvers\COCG\COCG</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\solvers\COCG\COCG\COCG_LDLT_Smooth.h">
+      <Filter>Header Files\solvers\COCG\COCG</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\solvers\COCG\COCG\COCG_LLT.h">
+      <Filter>Header Files\solvers\COCG\COCG</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\solvers\COCG\COCG\COCG_LLT_Smooth.h">
+      <Filter>Header Files\solvers\COCG\COCG</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\solvers\COCG\COCG_MKL\COCG_Smooth_MKL.h">
+      <Filter>Header Files\solvers\COCG\COCG_MKL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\solvers\COCG\COCG_MKL\COCG_LLT_Smooth_MKL.h">
+      <Filter>Header Files\solvers\COCG\COCG_MKL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\solvers\COCG\COCG_MKL\COCG_Di_Smooth_MKL.h">
+      <Filter>Header Files\solvers\COCG\COCG_MKL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\solvers\COCG\COCG_OpenMP\COCG_Smooth_OpenMP.h">
+      <Filter>Header Files\solvers\COCG\COCG_OpenMP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\solvers\COCG\COCG_OpenMP\COCG_Di_Smooth_OpenMP.h">
+      <Filter>Header Files\solvers\COCG\COCG_OpenMP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\solvers\COCG\legacy\CGMComplex_VC.h">
+      <Filter>Header Files\solvers\COCG\legacy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\solvers\COCG\legacy\CGMComplex_LLT.h">
+      <Filter>Header Files\solvers\COCG\legacy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\solvers\COCR\COCR\COCR_LLT_Smooth.h">
+      <Filter>Header Files\solvers\COCR\COCR</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\solvers\COCR\COCR\COCR.h">
+      <Filter>Header Files\solvers\COCR\COCR</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\solvers\COCR\COCR\COCR_Di.h">
+      <Filter>Header Files\solvers\COCR\COCR</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\solvers\COCR\COCR\COCR_Di_Smooth.h">
+      <Filter>Header Files\solvers\COCR\COCR</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\solvers\COCR\COCR\COCR_LDLT.h">
+      <Filter>Header Files\solvers\COCR\COCR</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\solvers\COCR\COCR\COCR_LDLT_Smooth.h">
+      <Filter>Header Files\solvers\COCR\COCR</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\solvers\COCR\COCR\COCR_LLT.h">
+      <Filter>Header Files\solvers\COCR\COCR</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\solvers\GMRES_Complex\GMRES_Complex\GMRES_Complex.h">
+      <Filter>Header Files\solvers\GMRES_Complex\GMRES_Complex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\solvers\GMRES_Complex\GMRES_Complex\GMRES_Complex_Di.h">
+      <Filter>Header Files\solvers\GMRES_Complex\GMRES_Complex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\solvers\GMRES_Complex\GMRES_Complex\GMRES_Complex_LDLT.h">
+      <Filter>Header Files\solvers\GMRES_Complex\GMRES_Complex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\solvers\GMRES_Complex\GMRES_Complex\GMRES_Complex_LLT.h">
+      <Filter>Header Files\solvers\GMRES_Complex\GMRES_Complex</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -257,24 +428,6 @@
     <ClCompile Include="..\..\..\src\problems\standard_pml.cpp">
       <Filter>Source Files\problems</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\solvers\BiCGComplex_VC.cpp">
-      <Filter>Source Files\solvers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\solvers\BiCGStabComplex_VC.cpp">
-      <Filter>Source Files\solvers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\solvers\CGMComplex_LLT.cpp">
-      <Filter>Source Files\solvers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\solvers\CGMComplex_VC.cpp">
-      <Filter>Source Files\solvers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\solvers\COCG_LLT_Smooth.cpp">
-      <Filter>Source Files\solvers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\solvers\COCG_LLT_Smooth_MKL.cpp">
-      <Filter>Source Files\solvers</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\vfem\slae.cpp">
       <Filter>Source Files\vfem</Filter>
     </ClCompile>
@@ -292,6 +445,102 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\main.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\solvers\BiCG_Complex\BiCG_Complex\BiCG_Complex_Smooth.cpp">
+      <Filter>Source Files\solvers\BiCG_Complex\BiCG_Complex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\solvers\BiCG_Complex\legacy\BiCGComplex_VC.cpp">
+      <Filter>Source Files\solvers\BiCG_Complex\legacy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\solvers\BiCGStab_Complex\BiCGStab_Complex\BiCGStab_Complex_Smooth.cpp">
+      <Filter>Source Files\solvers\BiCGStab_Complex\BiCGStab_Complex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\solvers\BiCGStab_Complex\legacy\BiCGStabComplex_VC.cpp">
+      <Filter>Source Files\solvers\BiCGStab_Complex\legacy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\solvers\COCG\COCG\COCG_Smooth.cpp">
+      <Filter>Source Files\solvers\COCG\COCG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\solvers\COCG\COCG\COCG.cpp">
+      <Filter>Source Files\solvers\COCG\COCG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\solvers\COCG\COCG\COCG_Di.cpp">
+      <Filter>Source Files\solvers\COCG\COCG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\solvers\COCG\COCG\COCG_Di_Smooth.cpp">
+      <Filter>Source Files\solvers\COCG\COCG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\solvers\COCG\COCG\COCG_GS.cpp">
+      <Filter>Source Files\solvers\COCG\COCG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\solvers\COCG\COCG\COCG_GS_Smooth.cpp">
+      <Filter>Source Files\solvers\COCG\COCG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\solvers\COCG\COCG\COCG_LDLT.cpp">
+      <Filter>Source Files\solvers\COCG\COCG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\solvers\COCG\COCG\COCG_LDLT_Smooth.cpp">
+      <Filter>Source Files\solvers\COCG\COCG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\solvers\COCG\COCG\COCG_LLT.cpp">
+      <Filter>Source Files\solvers\COCG\COCG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\solvers\COCG\COCG\COCG_LLT_Smooth.cpp">
+      <Filter>Source Files\solvers\COCG\COCG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\solvers\COCG\COCG_MKL\COCG_Smooth_MKL.cpp">
+      <Filter>Source Files\solvers\COCG\COCG_MKL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\solvers\COCG\COCG_MKL\COCG_LLT_Smooth_MKL.cpp">
+      <Filter>Source Files\solvers\COCG\COCG_MKL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\solvers\COCG\COCG_MKL\COCG_Di_Smooth_MKL.cpp">
+      <Filter>Source Files\solvers\COCG\COCG_MKL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\solvers\COCG\COCG_OpenMP\COCG_Di_Smooth_OpenMP.cpp">
+      <Filter>Source Files\solvers\COCG\COCG_OpenMP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\solvers\COCG\COCG_OpenMP\COCG_Smooth_OpenMP.cpp">
+      <Filter>Source Files\solvers\COCG\COCG_OpenMP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\solvers\COCG\legacy\CGMComplex_VC.cpp">
+      <Filter>Source Files\solvers\COCG\legacy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\solvers\COCG\legacy\CGMComplex_LLT.cpp">
+      <Filter>Source Files\solvers\COCG\legacy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\solvers\COCR\COCR\COCR.cpp">
+      <Filter>Source Files\solvers\COCR\COCR</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\solvers\COCR\COCR\COCR_Di.cpp">
+      <Filter>Source Files\solvers\COCR\COCR</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\solvers\COCR\COCR\COCR_Di_Smooth.cpp">
+      <Filter>Source Files\solvers\COCR\COCR</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\solvers\COCR\COCR\COCR_LDLT.cpp">
+      <Filter>Source Files\solvers\COCR\COCR</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\solvers\COCR\COCR\COCR_LDLT_Smooth.cpp">
+      <Filter>Source Files\solvers\COCR\COCR</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\solvers\COCR\COCR\COCR_LLT.cpp">
+      <Filter>Source Files\solvers\COCR\COCR</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\solvers\COCR\COCR\COCR_LLT_Smooth.cpp">
+      <Filter>Source Files\solvers\COCR\COCR</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\solvers\GMRES_Complex\GMRES_Complex\GMRES_Complex.cpp">
+      <Filter>Source Files\solvers\GMRES_Complex\GMRES_Complex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\solvers\GMRES_Complex\GMRES_Complex\GMRES_Complex_Di.cpp">
+      <Filter>Source Files\solvers\GMRES_Complex\GMRES_Complex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\solvers\GMRES_Complex\GMRES_Complex\GMRES_Complex_LDLT.cpp">
+      <Filter>Source Files\solvers\GMRES_Complex\GMRES_Complex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\solvers\GMRES_Complex\GMRES_Complex\GMRES_Complex_LLT.cpp">
+      <Filter>Source Files\solvers\GMRES_Complex\GMRES_Complex</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

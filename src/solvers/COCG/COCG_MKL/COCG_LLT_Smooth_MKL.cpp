@@ -364,7 +364,7 @@ COCG_LLT_Smooth_MKL::~COCG_LLT_Smooth_MKL()
 
 // =================================================================================================
 
-#if !defined USE_MKL
+#if !defined USE_MKL && !defined NO_MKL_STUBS
 
 void cblas_zcopy(const MKL_INT N, const void * X, const MKL_INT incX, void * Y, const MKL_INT incY)
 {
