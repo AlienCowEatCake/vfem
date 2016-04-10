@@ -446,10 +446,11 @@ void VFEM::apply_edges_sources()
     for(size_t k = 0; k < edges_src.size(); k++)
     {
         show_progress("", k, edges_src.size());
-        if(edges_src[k].phys->type_of_bounds == 0)
+        const phys_area * phys_curr = edges_src[k].phys;
+        if(phys_curr->type_of_bounds == 0)
         {
             size_t pos = edges_src[k].num; // Заносим только в роторные функции!
-            slae.rp[pos] += complex<double>(0.0, -1.0) * edges_src[k].phys->J0 * edges_src[k].phys->omega * edges_src[k].direction;
+            slae.rp[pos] += complex<double>(0.0, -1.0) * phys_curr->J0 * phys_curr->omega * edges_src[k].direction;
         }
     }
 }

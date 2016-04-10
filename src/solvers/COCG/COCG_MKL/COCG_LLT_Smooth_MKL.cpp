@@ -584,7 +584,7 @@ void mkl_set_num_threads(int n)
 
 #if defined USE_MKL && defined _MSC_VER
 
-#define MKL_TBB_THREADS
+//#define MKL_TBB_THREADS
 //#define MKL_OMP_THREADS
 
 #if defined _WIN32

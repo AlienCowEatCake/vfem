@@ -20,8 +20,8 @@
 
 #if __cplusplus >= 201103L || \
     (defined __GNUC__ && defined __GNUC_MINOR__ && defined __GXX_EXPERIMENTAL_CXX0X__ && \
-    (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7))) || \
-    (defined _MSC_VER && _MSC_VER >= 1700)
+    (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 8))) || \
+    (defined _MSC_VER && _MSC_VER >= 1800)
 #define USE_CXX11
 #endif
 

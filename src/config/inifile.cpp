@@ -133,7 +133,7 @@ namespace
 std::set<std::string> list_to_set_and_lower(const std::list<std::string> & in)
 {
     std::set<std::string> out;
-    for(typename std::list<std::string>::const_iterator it = in.begin(), it_end = in.end(); it != it_end; ++it)
+    for(std::list<std::string>::const_iterator it = in.begin(), it_end = in.end(); it != it_end; ++it)
         out.insert(to_lowercase(* it));
     return out;
 }

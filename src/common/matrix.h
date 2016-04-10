@@ -11,24 +11,24 @@ class array_t
 
 protected:
 
-    type a[dimension];
+    type m_values[dimension];
 
 public:
 
     type & operator [] (size_t i)
     {
-        return a[i];
+        return m_values[i];
     }
 
     const type & operator [] (size_t i) const
     {
-        return a[i];
+        return m_values[i];
     }
 
     array_t()
     {
         for(size_t i = 0; i < dimension; i++)
-            a[i] = type();
+            m_values[i] = type();
     }
 };
 
@@ -39,33 +39,33 @@ class array_t<type, 0>
 {
 protected:
 
-    type * a;
-    size_t dimension;
+    type * m_values;
+    size_t m_dimension;
 
     void realloc(size_t dimension)
     {
-        this->dimension = dimension;
-        delete [] a;
+        m_dimension = dimension;
+        delete [] m_values;
         if(dimension == 0)
-            a = NULL;
+            m_values = NULL;
         else
-            a = new type [dimension];
+            m_values = new type [dimension];
     }
 
     template<typename type_other>
     void copy_from(const array_t<type_other, 0> & other)
     {
-        realloc(other.dimension);
-        for(size_t i = 0; i < dimension; i++)
-            a[i] = other.a[i];
+        realloc(other.m_dimension);
+        for(size_t i = 0; i < m_dimension; i++)
+            m_values[i] = other.m_values[i];
     }
 
     template<typename type_other, size_t dimension_other>
     void copy_from(const array_t<type_other, dimension_other> & other)
     {
         realloc(dimension_other);
-        for(size_t i = 0; i < dimension; i++)
-            a[i] = other.a[i];
+        for(size_t i = 0; i < m_dimension; i++)
+            m_values[i] = other.m_values[i];
     }
 
 public:
@@ -74,41 +74,41 @@ public:
     {
         realloc(dimension);
         for(size_t i = 0; i < dimension; i++)
-            a[i] = type();
+            m_values[i] = type();
     }
 
     size_t size()
     {
-        return dimension;
+        return m_dimension;
     }
 
     array_t(size_t dimension = 0)
     {
-        a = NULL;
+        m_values = NULL;
         resize(dimension);
     }
 
     array_t(const array_t & other)
     {
-        a = NULL;
+        m_values = NULL;
         copy_from(other);
     }
 
     template<typename type_other, size_t dimension_other>
     array_t(const array_t<type_other, dimension_other> & other)
     {
-        a = NULL;
+        m_values = NULL;
         copy_from(other);
     }
 
     ~array_t()
     {
-        delete [] a;
+        delete [] m_values;
     }
 
     array_t & operator = (const array_t & other)
     {
-        if(this->a != other.a)
+        if(m_values != other.m_values)
             copy_from(other);
         return * this;
     }
@@ -116,7 +116,7 @@ public:
     template<typename type_other>
     array_t & operator = (const array_t<type_other, 0> & other)
     {
-        if(this->a != other.a)
+        if(m_values != other.m_values)
             copy_from(other);
         return * this;
     }
@@ -130,12 +130,12 @@ public:
 
     type & operator [] (size_t i)
     {
-        return a[i];
+        return m_values[i];
     }
 
     const type & operator [] (size_t i) const
     {
-        return a[i];
+        return m_values[i];
     }
 };
 
@@ -148,25 +148,25 @@ class matrix_t
 
 protected:
 
-    type a[dimension_row][dimension_col];
+    type m_values[dimension_row][dimension_col];
 
 public:
 
     type * operator [] (size_t i)
     {
-        return a[i];
+        return m_values[i];
     }
 
     const type * operator [] (size_t i) const
     {
-        return a[i];
+        return m_values[i];
     }
 
     matrix_t()
     {
         for(size_t i = 0; i < dimension_row; i++)
             for(size_t j = 0; j < dimension_col; j++)
-                a[i][j] = type();
+                m_values[i][j] = type();
     }
 };
 
@@ -177,39 +177,39 @@ class matrix_t<type, 0, 0>
 {
 protected:
 
-    type * a;
-    size_t dimension_row, dimension_col;
+    type * m_values;
+    size_t m_dimension_row, m_dimension_col;
 
     void realloc(size_t dimension_row, size_t dimension_col)
     {
-        this->dimension_row = dimension_row;
-        this->dimension_col = dimension_col;
+        m_dimension_row = dimension_row;
+        m_dimension_col = dimension_col;
         size_t len = dimension_row * dimension_col;
-        delete [] a;
+        delete [] m_values;
         if(len == 0)
-            a = NULL;
+            m_values = NULL;
         else
-            a = new type [len];
+            m_values = new type [len];
     }
 
     template<typename type_other>
     void copy_from(const matrix_t<type_other, 0, 0> & other)
     {
-        realloc(other.dimension_row, other.dimension_col);
-        size_t len = dimension_row * dimension_col;
+        realloc(other.m_dimension_row, other.m_dimension_col);
+        size_t len = m_dimension_row * m_dimension_col;
         for(size_t i = 0; i < len; i++)
-            a[i] = other.a[i];
+            m_values[i] = other.m_values[i];
     }
 
     template<typename type_other, size_t dimension_row_other, size_t dimension_col_other>
     void copy_from(const matrix_t<type_other, dimension_row_other, dimension_col_other> & other)
     {
         realloc(dimension_row_other, dimension_col_other);
-        for(size_t i = 0; i < dimension_row; i++)
+        for(size_t i = 0; i < m_dimension_row; i++)
         {
-            type * str = a + dimension_col * i;
-            for(size_t j = 0; j < dimension_col; j++)
-                str[j] = other.a[i][j];
+            type * str = m_values + m_dimension_col * i;
+            for(size_t j = 0; j < m_dimension_col; j++)
+                str[j] = other.m_values[i][j];
         }
     }
 
@@ -220,36 +220,36 @@ public:
         realloc(dimension_row, dimension_col);
         size_t len = dimension_row * dimension_col;
         for(size_t i = 0; i < len; i++)
-            a[i] = type();
+            m_values[i] = type();
     }
 
     matrix_t(size_t dimension_row = 0, size_t dimension_col = 0)
     {
-        a = NULL;
+        m_values = NULL;
         resize(dimension_row, dimension_col);
     }
 
     matrix_t(const matrix_t & other)
     {
-        a = NULL;
+        m_values = NULL;
         copy_from(other);
     }
 
     template<typename type_other, size_t dimension_row_other, size_t dimension_col_other>
     matrix_t(const matrix_t<type_other, dimension_row_other, dimension_col_other> & other)
     {
-        a = NULL;
+        m_values = NULL;
         copy_from(other);
     }
 
     ~matrix_t()
     {
-        delete [] a;
+        delete [] m_values;
     }
 
     matrix_t & operator = (const matrix_t & other)
     {
-        if(this->a != other.a)
+        if(m_values != other.m_values)
             copy_from(other);
         return * this;
     }
@@ -257,7 +257,7 @@ public:
     template<typename type_other>
     matrix_t & operator = (const matrix_t<type_other, 0, 0> & other)
     {
-        if(this->a != other.a)
+        if(m_values != other.m_values)
             copy_from(other);
         return * this;
     }
@@ -271,12 +271,12 @@ public:
 
     type * operator [] (size_t i)
     {
-        return a + dimension_col * i;
+        return m_values + m_dimension_col * i;
     }
 
     const type * operator [] (size_t i) const
     {
-        return a + dimension_col * i;
+        return m_values + m_dimension_col * i;
     }
 };
 
