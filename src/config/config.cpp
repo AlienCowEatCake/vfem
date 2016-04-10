@@ -158,6 +158,8 @@ bool config_type::load(const string & filename)
     whitelist.push_back("filename_pml");
     whitelist.push_back("jit_type");
     whitelist.push_back("v_cycle_enabled");
+    whitelist.push_back("tet_integration_order");
+    whitelist.push_back("tr_integration_order");
     if(!cfg_file.check_parameters("VFEM", whitelist))
     {
         cout << "[Config] Error in " << __FILE__ << ":" << __LINE__
