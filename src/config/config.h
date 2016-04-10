@@ -159,6 +159,14 @@ public:
     size_t max_iter;
     // Максимальное локальное число итераций V-цикла
     size_t max_iter_v_cycle_local;
+    // Решатель для обычной СЛАУ
+    string solver_name;
+    // Решатель для СЛАУ с краевыми
+    string solver_name_bound;
+    // Решатель для СЛАУ на полном пространстве
+    string solver_name_v_cycle_full;
+    // Решатель для СЛАУ на пространстве ядра
+    string solver_name_v_cycle_ker;
     // Сетка
     string filename_mesh;
     // Параметры физических областей

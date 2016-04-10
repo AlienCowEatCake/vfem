@@ -1,12 +1,13 @@
-#if !defined COCG_LLT_SMOOTH_H_INCLUDED
-#define COCG_LLT_SMOOTH_H_INCLUDED
+#if !defined GMRES_COMPLEX_LLT_H_INCLUDED
+#define GMRES_COMPLEX_LLT_H_INCLUDED
 
 #include <cstdlib>
 #include <complex>
-#include "solver_interface.h"
+#include "../../solver_interface.h"
+
 using namespace std;
 
-class COCG_LLT_Smooth : public solver_interface<complex<double>, size_t>
+class GMRES_Complex_LLT : public solver_interface<complex<double>, size_t>
 {
 public:
     void init(const size_t * gi_s, const size_t * gj_s, const complex<double> * di_s,
@@ -14,24 +15,28 @@ public:
     void solve(complex<double> * solution, const complex<double> * rp_s,
                double eps, size_t max_iter);
 
-    COCG_LLT_Smooth();
-    ~COCG_LLT_Smooth();
+    GMRES_Complex_LLT();
+    ~GMRES_Complex_LLT();
 private:
     void make_LLT_decomposition();
     void mul_matrix(const complex<double> * f, complex<double> * x) const;
     void solve_L(const complex<double> * f, complex<double> * x) const;
     void solve_LT(complex<double> * f, complex<double> * x) const;
-    void solve_LLT(const complex<double> * f, complex<double> * x) const;
-    complex<double> dot_prod_nocj(const complex<double> * a, const complex<double> * b) const;
+    void mul_LT(const complex<double> * f, complex<double> * x) const;
+    void solve_LTAL(const complex<double> * f, complex<double> * x, complex<double> * tmp) const;
+    complex<double> dot_prod(const complex<double> * a, const complex<double> * b) const;
     double dot_prod_self(const complex<double> * a) const;
-    double dot_prod_real(const complex<double> * a, const complex<double> * b) const;
     bool is_fpu_error(double x) const;
+    void copy_vec(const complex<double> * f, complex<double> * x) const;
 
     size_t n;
     const size_t * gi, * gj;
     const complex<double> * di, * gg, * rp;
-    complex<double> * r, * x0, * z, * p, * s, * xs, * rs;
+    complex<double> * r, * x0;
     complex<double> * L_di, * L_gg;
+
+    size_t m, m_curr;
+    complex<double> * t, * w, ** VT, ** H, * d;
 };
 
-#endif // COCG_LLT_SMOOTH_H_INCLUDED
+#endif // GMRES_COMPLEX_LLT_H_INCLUDED

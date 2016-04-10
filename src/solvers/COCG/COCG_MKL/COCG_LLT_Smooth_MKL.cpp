@@ -10,7 +10,9 @@
 #define PRECONDITIONER_DI   0x02
 #define PRECONDITIONER_LLT  0x03
 
+#if !defined PRECONDITIONER
 #define PRECONDITIONER PRECONDITIONER_LLT
+#endif
 
 #if defined _MSC_VER
 typedef long omp_int;
@@ -37,8 +39,8 @@ inline void normal_zaxpy(size_t n, const complex<double> & a, const complex<doub
     cblas_zaxpy(m, a1, x1, 1, y1, 1);
 }
 
-void COCG_LLT_Smooth_MKL::init(size_t * gi_s, size_t * gj_s, complex<double> * di_s,
-                          complex<double> * gg_s, size_t n_s)
+void COCG_LLT_Smooth_MKL::init(const size_t * gi_s, const size_t * gj_s, const complex<double> * di_s,
+                          const complex<double> * gg_s, size_t n_s)
 {
     gi = gi_s;
     gj = gj_s;
@@ -180,7 +182,7 @@ bool COCG_LLT_Smooth_MKL::is_fpu_error(double x) const
     return x != x || y != y;
 }
 
-void COCG_LLT_Smooth_MKL::solve(complex<double> * solution, complex<double> * rp_s, double eps, size_t max_iter)
+void COCG_LLT_Smooth_MKL::solve(complex<double> * solution, const complex<double> * rp_s, double eps, size_t max_iter)
 {
     eps *= eps;
 

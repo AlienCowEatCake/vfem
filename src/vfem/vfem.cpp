@@ -342,7 +342,7 @@ void VFEM::applying_bound()
                     }
                 }
             }
-            surf_slae.solve("COCG_LLT_Smooth", config.eps_slae_bound, config.max_iter);
+            surf_slae.solve(config.solver_name_bound, config.eps_slae_bound, config.max_iter);
         }
 
         // Учет первых краевых

@@ -1,27 +1,27 @@
 #if defined _MSC_VER && !defined _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
 #endif
-#include "BiCGComplex_VC.h"
+#include "CGMComplex_VC.h"
 #include <cstdio>
 #include <cmath>
 
-BiCGComplex_VC::BiCGComplex_VC()
+CGMComplex_VC::CGMComplex_VC()
 {
-    r = z = s = p = t = t1 = NULL;
+    r = w = s = p = t = u = NULL;
 }
 
-BiCGComplex_VC::~BiCGComplex_VC()
+CGMComplex_VC::~CGMComplex_VC()
 {
     delete [] r;
-    delete [] z;
+    delete [] w;
     delete [] s;
     delete [] p;
     delete [] t;
-    delete [] t1;
+    delete [] u;
 }
 
-void BiCGComplex_VC::init(size_t * gi_s, size_t * gj_s, complex<double> * di_s,
-                          complex<double> * gg_s, size_t n_s)
+void CGMComplex_VC::init(const size_t * gi_s, const size_t * gj_s, const complex<double> * di_s,
+                         const complex<double> * gg_s, size_t n_s)
 {
     gi = gi_s;
     gj = gj_s;
@@ -30,21 +30,21 @@ void BiCGComplex_VC::init(size_t * gi_s, size_t * gj_s, complex<double> * di_s,
     n = n_s;
 
     delete [] r;
-    delete [] z;
+    delete [] w;
     delete [] s;
     delete [] p;
     delete [] t;
-    delete [] t1;
+    delete [] u;
 
     r = new complex<double> [n];
-    z = new complex<double> [n];
+    w = new complex<double> [n];
     s = new complex<double> [n];
     p = new complex<double> [n];
     t = new complex<double> [n];
-    t1 = new complex<double> [n];
+    u = new complex<double> [n];
 }
 
-complex<double> BiCGComplex_VC::dot_prod(const complex<double> * a, const complex<double> * b) const
+complex<double> CGMComplex_VC::dot_prod(const complex<double> * a, const complex<double> * b) const
 {
     complex<double> res;
     for(size_t i = 0; i < n; i++)
@@ -54,7 +54,7 @@ complex<double> BiCGComplex_VC::dot_prod(const complex<double> * a, const comple
     return res;
 }
 
-complex<double> BiCGComplex_VC::dot_prod_nocj(const complex<double> * a, const complex<double> * b) const
+complex<double> CGMComplex_VC::dot_prod_nocj(const complex<double> * a, const complex<double> * b) const
 {
     complex<double> res;
     for(size_t i = 0; i < n; i++)
@@ -64,7 +64,7 @@ complex<double> BiCGComplex_VC::dot_prod_nocj(const complex<double> * a, const c
     return res;
 }
 
-double BiCGComplex_VC::dot_prod_self(const complex<double> * a) const
+double CGMComplex_VC::dot_prod_self(const complex<double> * a) const
 {
     double res = 0.0;
     for(size_t i = 0; i < n; i++)
@@ -76,7 +76,7 @@ double BiCGComplex_VC::dot_prod_self(const complex<double> * a) const
     return res;
 }
 
-void BiCGComplex_VC::mul_matrix(const complex<double> * f, complex<double> * x) const
+void CGMComplex_VC::mul_matrix(const complex<double> * f, complex<double> * x) const
 {
     for(size_t i = 0; i < n; i++)
     {
@@ -91,11 +91,11 @@ void BiCGComplex_VC::mul_matrix(const complex<double> * f, complex<double> * x) 
     }
 }
 
-void BiCGComplex_VC::solve(complex<double> * solution, complex<double> * rp, double gamma, size_t max_iter)
+void CGMComplex_VC::solve(complex<double> * solution, const complex<double> * rp, double gamma, size_t max_iter)
 {
     double eps = gamma;
 
-    complex<double> dp1, dp2, alpha, beta;
+    complex<double> alpha, beta, alpha1, alpha2;
     double rp_norm = sqrt(dot_prod_self(rp));
     x0 = new complex<double> [n];
 
@@ -104,49 +104,45 @@ void BiCGComplex_VC::solve(complex<double> * solution, complex<double> * rp, dou
     {
         x0[i] = solution[i];
         r[i] = rp[i] - t[i];
-        p[i] = z[i] = s[i] = r[i];
+        w[i] = r[i] / di[i];
+        p[i] = 0.0;
     }
+
+    alpha1 = dot_prod_nocj(r, w);
+    beta = 0.0;
 
     bool not_end = true;
     double discr;
+
     size_t iter;
-
-    dp1 = dot_prod_nocj(p, r);
-
     for(iter = 0; iter < max_iter && not_end; iter++)
     {
         discr = sqrt(dot_prod_self(r));
 
         if(iter%10 == 0)
         {
-            printf("BiCGVC Residual:\t%5lu\t%.3e\r", (unsigned long)iter, discr / rp_norm);
+            printf("CCGMVC Residual:\t%5lu\t%.3e\r", (unsigned long)iter, discr / rp_norm);
             fflush(stdout);
         }
 
         if(discr / rp_norm > eps)
         {
-            mul_matrix(z, t);
-
-            alpha = dp1 / dot_prod_nocj(s, t);
-
-            mul_matrix(s, t1);
+            for(size_t i = 0; i < n; i++)
+                p[i] = w[i] + beta * p[i];
+            mul_matrix(p, u);
+            alpha2 = dot_prod_nocj(u, p);
+            alpha = alpha1 / alpha2;
 
             for(size_t i = 0; i < n; i++)
             {
-                x0[i] += alpha * z[i];
-                r[i] -= alpha * t[i];
-                p[i] -= alpha * t1[i];
+                x0[i] += alpha * p[i];
+                r[i] -= alpha * u[i];
+                w[i] = r[i] / di[i];
             }
 
-            dp2 = dot_prod_nocj(p, r);
-            beta = dp2 / dp1;
-            dp1 = dp2;
-
-            for(size_t i = 0; i < n; i++)
-            {
-                z[i] = r[i] + beta * z[i];
-                s[i] = p[i] + beta * s[i];
-            }
+            alpha2 = alpha1;
+            alpha1 = dot_prod_nocj(r, w);
+            beta = alpha1 / alpha2;
         }
         else
             not_end = false;
@@ -156,7 +152,7 @@ void BiCGComplex_VC::solve(complex<double> * solution, complex<double> * rp, dou
     for(size_t i = 0; i < n; i++)
         r[i] = rp[i] - r[i];
     discr = sqrt(dot_prod_self(r));
-    printf("BiCGVC Residual:\t%5lu\t%.3e\t%.3e\n", (unsigned long)iter, discr / rp_norm, gamma);
+    printf("CCGMVC Residual:\t%5lu\t%.3e\n", (unsigned long)iter, discr / rp_norm);
 
     if(iter >= max_iter)
         printf("Soulution can`t found, iteration limit exceeded!\n");

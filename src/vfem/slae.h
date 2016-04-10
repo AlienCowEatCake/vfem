@@ -11,7 +11,7 @@ public:
     SLAE();
     ~SLAE();
     void solve(const string & name, double eps, size_t max_iter);
-    void step_init(const string & name);
+    void init(const string & name);
     inline void step_solve(complex<double> * solution, const complex<double> * rp_s,
                            double eps, size_t max_iter)
     {

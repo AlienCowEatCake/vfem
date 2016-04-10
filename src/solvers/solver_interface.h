@@ -20,15 +20,9 @@ public:
                        double eps, ind_type max_iter) = 0;
 
     // Деструктор
-    virtual ~solver_interface() = 0;
+    virtual ~solver_interface() {}
 
 };
-
-template<typename val_type, typename ind_type>
-solver_interface<val_type, ind_type>::~solver_interface()
-{
-
-}
 
 #endif // SOLVER_INTERFACE_H
 

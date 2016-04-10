@@ -29,6 +29,17 @@ void config_type::load_defaults()
     v_cycle_enabled = false;
     max_iter = 15000;
     max_iter_v_cycle_local = 500;
+#if !defined USE_MKL
+    solver_name = "COCG_LLT_Smooth";
+    solver_name_bound = "COCG_LLT_Smooth";
+    solver_name_v_cycle_full = "COCG_LLT_Smooth";
+    solver_name_v_cycle_ker = "COCG_LLT_Smooth";
+#else
+    solver_name = "COCG_LLT_Smooth_MKL";
+    solver_name_bound = "COCG_LLT_Smooth_MKL";
+    solver_name_v_cycle_full = "COCG_LLT_Smooth_MKL";
+    solver_name_v_cycle_ker = "COCG_LLT_Smooth_MKL";
+#endif
     filename_mesh = "mesh.msh";
     filename_phys = "phys.ini";
     filename_pml = "";
@@ -137,6 +148,10 @@ bool config_type::load(const string & filename)
     whitelist.push_back("gamma_v_cycle_0");
     whitelist.push_back("max_iter_v_cycle_local");
     whitelist.push_back("max_iter");
+    whitelist.push_back("solver_name");
+    whitelist.push_back("solver_name_bound");
+    whitelist.push_back("solver_name_v_cycle_full");
+    whitelist.push_back("solver_name_v_cycle_ker");
     whitelist.push_back("filename_mesh");
     whitelist.push_back("filename_phys");
     whitelist.push_back("filename_slae");
@@ -156,27 +171,31 @@ bool config_type::load(const string & filename)
     jit_types_table[evaluator3::JIT_INLINE]  = "inline";
     jit_types_table[evaluator3::JIT_EXTCALL] = "extcall";
 
-    basis.order             = cfg_file.get("vfem", "", "basis_order",            basis.order);
-    basis.type              = cfg_file.get("vfem", "", "basis_type",             basis.type);
-    eps_slae                = cfg_file.get("vfem", "", "eps_slae",               eps_slae);
-    eps_slae_bound          = cfg_file.get("vfem", "", "eps_slae_bound",         eps_slae_bound);
-    gamma_v_cycle_full      = cfg_file.get("vfem", "", "gamma_v_cycle_full",     gamma_v_cycle_full);
-    gamma_v_cycle_ker       = cfg_file.get("vfem", "", "gamma_v_cycle_ker",      gamma_v_cycle_ker);
-    gamma_v_cycle_0         = cfg_file.get("vfem", "", "gamma_v_cycle_0",        gamma_v_cycle_0);
-    max_iter_v_cycle_local  = cfg_file.get("vfem", "", "max_iter_v_cycle_local", max_iter_v_cycle_local);
-    max_iter                = cfg_file.get("vfem", "", "max_iter",               max_iter);
-    filename_mesh           = cfg_file.get("vfem", "", "filename_mesh",          filename_mesh);
-    filename_phys           = cfg_file.get("vfem", "", "filename_phys",          filename_phys);
-    filename_slae           = cfg_file.get("vfem", "", "filename_slae",          filename_slae);
-    filename_pml            = cfg_file.get("vfem", "", "filename_pml",           filename_pml);
-    string jit_type_str     = cfg_file.get("vfem", "", "jit_type",               jit_types_table[jit_type]);
-    v_cycle_enabled         = cfg_file.get("vfem", "", "v_cycle_enabled",        v_cycle_enabled);
+    basis.order              = cfg_file.get("vfem", "", "basis_order",              basis.order);
+    basis.type               = cfg_file.get("vfem", "", "basis_type",               basis.type);
+    eps_slae                 = cfg_file.get("vfem", "", "eps_slae",                 eps_slae);
+    eps_slae_bound           = cfg_file.get("vfem", "", "eps_slae_bound",           eps_slae_bound);
+    gamma_v_cycle_full       = cfg_file.get("vfem", "", "gamma_v_cycle_full",       gamma_v_cycle_full);
+    gamma_v_cycle_ker        = cfg_file.get("vfem", "", "gamma_v_cycle_ker",        gamma_v_cycle_ker);
+    gamma_v_cycle_0          = cfg_file.get("vfem", "", "gamma_v_cycle_0",          gamma_v_cycle_0);
+    max_iter_v_cycle_local   = cfg_file.get("vfem", "", "max_iter_v_cycle_local",   max_iter_v_cycle_local);
+    max_iter                 = cfg_file.get("vfem", "", "max_iter",                 max_iter);
+    solver_name              = cfg_file.get("vfem", "", "solver_name",              solver_name);
+    solver_name_bound        = cfg_file.get("vfem", "", "solver_name_bound",        solver_name_bound);
+    solver_name_v_cycle_full = cfg_file.get("vfem", "", "solver_name_v_cycle_full", solver_name_v_cycle_full);
+    solver_name_v_cycle_ker  = cfg_file.get("vfem", "", "solver_name_v_cycle_ker",  solver_name_v_cycle_ker);
+    filename_mesh            = cfg_file.get("vfem", "", "filename_mesh",            filename_mesh);
+    filename_phys            = cfg_file.get("vfem", "", "filename_phys",            filename_phys);
+    filename_slae            = cfg_file.get("vfem", "", "filename_slae",            filename_slae);
+    filename_pml             = cfg_file.get("vfem", "", "filename_pml",             filename_pml);
+    string jit_type_str      = cfg_file.get("vfem", "", "jit_type",                 jit_types_table[jit_type]);
+    v_cycle_enabled          = cfg_file.get("vfem", "", "v_cycle_enabled",          v_cycle_enabled);
 
-    int tet_order           = cfg_file.get("vfem", "", "tet_integration_order",  (int)-1);
+    int tet_order            = cfg_file.get("vfem", "", "tet_integration_order",    (int)-1);
     if(tet_order > 0)
         basis.tet_int.init((size_t)tet_order);
 
-    int tr_order            = cfg_file.get("vfem", "", "tr_integration_order",   (int)-1);
+    int tr_order             = cfg_file.get("vfem", "", "tr_integration_order",     (int)-1);
     if(tr_order > 0)
         basis.tr_int.init((size_t)tr_order);
 

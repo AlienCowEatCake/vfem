@@ -100,7 +100,7 @@ void VFEM::solve()
 {
     if(!config.v_cycle_enabled)
     {
-        slae.solve("COCG_LLT_Smooth", config.eps_slae, config.max_iter);
+        slae.solve(config.solver_name, config.eps_slae, config.max_iter);
         return;
     }
 
@@ -114,8 +114,8 @@ void VFEM::solve()
     // Локальное число итераций обычно небольшое
     size_t max_iter_local = config.max_iter_v_cycle_local;
 
-    slae.step_init("COCG_LLT_Smooth");
-    ker_slae.step_init("COCG_LLT_Smooth");
+    slae.init(config.solver_name_v_cycle_full);
+    ker_slae.init(config.solver_name_v_cycle_ker);
 
     // Уточнение начального приближения на полном пространстве
     complex<double> * x_old = new complex<double> [dof_num];

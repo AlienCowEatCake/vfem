@@ -1,16 +1,16 @@
 #if defined _MSC_VER && !defined _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
 #endif
-#include "BiCGStabComplex_VC.h"
+#include "BiCGStab_Complex_Smooth.h"
 #include <cstdio>
 #include <cmath>
 
-BiCGStabComplex_VC::BiCGStabComplex_VC()
+BiCGStab_Complex_Smooth::BiCGStab_Complex_Smooth()
 {
-    r = v = s = p = t = r2 = NULL;
+    r = v = s = p = t = r2 = xs = rs = NULL;
 }
 
-BiCGStabComplex_VC::~BiCGStabComplex_VC()
+BiCGStab_Complex_Smooth::~BiCGStab_Complex_Smooth()
 {
     delete [] r;
     delete [] v;
@@ -18,10 +18,12 @@ BiCGStabComplex_VC::~BiCGStabComplex_VC()
     delete [] p;
     delete [] t;
     delete [] r2;
+    delete [] xs;
+    delete [] rs;
 }
 
-void BiCGStabComplex_VC::init(size_t * gi_s, size_t * gj_s, complex<double> * di_s,
-                              complex<double> * gg_s, size_t n_s)
+void BiCGStab_Complex_Smooth::init(const size_t * gi_s, const size_t * gj_s, const complex<double> * di_s,
+                              const complex<double> * gg_s, size_t n_s)
 {
     gi = gi_s;
     gj = gj_s;
@@ -35,6 +37,8 @@ void BiCGStabComplex_VC::init(size_t * gi_s, size_t * gj_s, complex<double> * di
     delete [] p;
     delete [] t;
     delete [] r2;
+    delete [] xs;
+    delete [] rs;
 
     r = new complex<double> [n];
     v = new complex<double> [n];
@@ -42,9 +46,11 @@ void BiCGStabComplex_VC::init(size_t * gi_s, size_t * gj_s, complex<double> * di
     p = new complex<double> [n];
     t = new complex<double> [n];
     r2 = new complex<double> [n];
+    xs = new complex<double> [n];
+    rs = new complex<double> [n];
 }
 
-complex<double> BiCGStabComplex_VC::dot_prod(const complex<double> * a, const complex<double> * b) const
+complex<double> BiCGStab_Complex_Smooth::dot_prod(const complex<double> * a, const complex<double> * b) const
 {
     complex<double> res;
     for(size_t i = 0; i < n; i++)
@@ -54,7 +60,7 @@ complex<double> BiCGStabComplex_VC::dot_prod(const complex<double> * a, const co
     return res;
 }
 
-complex<double> BiCGStabComplex_VC::dot_prod_nocj(const complex<double> * a, const complex<double> * b) const
+complex<double> BiCGStab_Complex_Smooth::dot_prod_nocj(const complex<double> * a, const complex<double> * b) const
 {
     complex<double> res;
     for(size_t i = 0; i < n; i++)
@@ -64,7 +70,7 @@ complex<double> BiCGStabComplex_VC::dot_prod_nocj(const complex<double> * a, con
     return res;
 }
 
-double BiCGStabComplex_VC::dot_prod_self(const complex<double> * a) const
+double BiCGStab_Complex_Smooth::dot_prod_self(const complex<double> * a) const
 {
     double res = 0.0;
     for(size_t i = 0; i < n; i++)
@@ -76,7 +82,15 @@ double BiCGStabComplex_VC::dot_prod_self(const complex<double> * a) const
     return res;
 }
 
-void BiCGStabComplex_VC::mul_matrix(const complex<double> * f, complex<double> * x) const
+double BiCGStab_Complex_Smooth::dot_prod_real(const complex<double> * a, const complex<double> * b) const
+{
+    double d_p = 0.0;
+    for(size_t i = 0; i < n; i++)
+        d_p += a[i].real() * b[i].real() + a[i].imag() * b[i].imag();
+    return d_p;
+}
+
+void BiCGStab_Complex_Smooth::mul_matrix(const complex<double> * f, complex<double> * x) const
 {
     for(size_t i = 0; i < n; i++)
     {
@@ -91,37 +105,37 @@ void BiCGStabComplex_VC::mul_matrix(const complex<double> * f, complex<double> *
     }
 }
 
-void BiCGStabComplex_VC::solve(complex<double> *solution, complex<double> *rp, double gamma, size_t max_iter)
+void BiCGStab_Complex_Smooth::solve(complex<double> * solution, const complex<double> * rp,
+                                    double gamma, size_t max_iter)
 {
-    double eps = gamma;
+    double eps = gamma * gamma;
 
     complex<double> omega, alpha, ro, beta;
-    double rp_norm = sqrt(dot_prod_self(rp));
-    x0 = new complex<double> [n];
+    double rp_norm = dot_prod_self(rp);
+    x0 = solution;
 
     mul_matrix(solution, t);
     for(size_t i = 0; i < n; i++)
     {
-        x0[i] = solution[i];
-        r[i] = rp[i] - t[i];
+        xs[i] = solution[i];
+        rs[i] = p[i] = r[i] = rp[i] - t[i];
         r2[i] = 1.0;
         v[i] = 0;
-        p[i] = r[i];
     }
     ro = alpha = omega = 1.0;
 
     complex<double> a1 = 0.0, a2 = 0.0, a3;
 
     bool not_end = true;
-    double discr = 2.0 * sqrt(dot_prod_self(r));
+    double discr = 0.0;
     size_t iter;
     for(iter = 0; iter < max_iter && not_end; iter++)
     {
-        discr = sqrt(dot_prod_self(r));
+        discr = dot_prod_self(rs);
 
         if(iter%10 == 0)
         {
-            printf("BiCGStabVC Residual:\t%5lu\t%.3e\r", (unsigned long)iter, discr / rp_norm);
+            printf("BiCGStab_Complex_Smooth Residual:\t%5lu\t%.3e\r", (unsigned long)iter, sqrt(discr / rp_norm));
             fflush(stdout);
         }
 
@@ -143,6 +157,17 @@ void BiCGStabComplex_VC::solve(complex<double> *solution, complex<double> *rp, d
             {
                 x0[i] += alpha * p[i] + omega * s[i];
                 r[i] = s[i] - omega * t[i];
+                s[i] = r[i] - rs[i]; // r - s, сглаживатель
+            }
+
+            double eta = - dot_prod_real(rs, s) / dot_prod_self(s);
+            if(eta < 0.0) eta = 0.0;
+            else if(eta > 1.0) eta = 1.0;
+            for(size_t i = 0; i < n ; i++)
+            {
+                double eta1 = 1.0 - eta;
+                xs[i] = eta1 * xs[i] + eta * x0[i];
+                rs[i] = eta1 * rs[i] + eta * r[i];
             }
 
             a2 = dot_prod_nocj(r, r2);
@@ -155,16 +180,15 @@ void BiCGStabComplex_VC::solve(complex<double> *solution, complex<double> *rp, d
             not_end = false;
     }
 
-    mul_matrix(x0, r);
-    for(size_t i = 0; i < n; i++)
-        r[i] = rp[i] - r[i];
-    discr = sqrt(dot_prod_self(r));
-    printf("BiCGStabVC Residual:\t%5lu\t%.3e\n", (unsigned long)iter, discr / rp_norm);
+//    mul_matrix(xs, r);
+//    for(size_t i = 0; i < n; i++)
+//        r[i] = rp[i] - r[i];
+//    discr = dot_prod_self(r);
+    printf("BiCGStab_Complex_Smooth Residual:\t%5lu\t%.3e\n", (unsigned long)iter - 1, sqrt(discr / rp_norm));
 
     if(iter >= max_iter)
         printf("Soulution can`t found, iteration limit exceeded!\n");
 
     for(size_t i = 0; i < n; i++)
-        solution[i] = x0[i];
-    delete [] x0;
+        solution[i] = xs[i];
 }

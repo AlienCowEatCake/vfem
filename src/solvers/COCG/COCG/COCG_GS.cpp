@@ -1,12 +1,12 @@
 #if defined _MSC_VER && !defined _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
 #endif
-#include "CGMComplex_LLT.h"
+#include "COCG_GS.h"
 #include <cstdio>
 #include <cmath>
 
-void CGMComplex_LLT::init(size_t * gi_s, size_t * gj_s, complex<double> * di_s,
-                          complex<double> * gg_s, size_t n_s)
+void COCG_GS::init(const size_t * gi_s, const size_t * gj_s, const complex<double> * di_s,
+                   const complex<double> * gg_s, size_t n_s)
 {
     gi = gi_s;
     gj = gj_s;
@@ -14,67 +14,18 @@ void CGMComplex_LLT::init(size_t * gi_s, size_t * gj_s, complex<double> * di_s,
     gg = gg_s;
     n = n_s;
 
-    size_t m = gi[n];
-
     delete [] r;
     delete [] z;
     delete [] p;
     delete [] s;
-    delete [] L_di;
-    delete [] L_gg;
 
     r = new complex<double> [n];
     z = new complex<double> [n];
     p = new complex<double> [n];
     s = new complex<double> [n];
-
-    L_di = new complex<double> [n];
-    L_gg = new complex<double> [m];
-
-    for(size_t i = 0; i < n; i++)
-    {
-        L_di[i] = di[i];
-        //x0[i] = 0.0;
-    }
-
-    for(size_t i = 0 ; i < m ; i++)
-        L_gg[i] = gg[i];
 }
 
-void CGMComplex_LLT::make_LLT_decomposition()
-{
-    complex<double> sum_d, sum_l;
-
-    for(size_t k = 0; k < n ; k++)
-    {
-        sum_d = 0;
-        size_t i_s = gi[k], i_e = gi[k+1];
-
-        for(size_t i = i_s; i < i_e ; i++)
-        {
-            sum_l = 0;
-            size_t j_s = gi[gj[i]], j_e = gi[gj[i]+1];
-
-            for(size_t m = i_s; m < i; m++)
-            {
-                for(size_t j = j_s; j < j_e; j++)
-                {
-                    if(gj[m] == gj[j])
-                    {
-                        sum_l += L_gg[m] * L_gg[j];
-                        j_s++;
-                    }
-                }
-            }
-            L_gg[i] = (L_gg[i] -  sum_l) / L_di[gj[i]];
-
-            sum_d += L_gg[i] * L_gg[i];
-        }
-        L_di[k] = sqrt(L_di[k] - sum_d);
-    }
-}
-
-complex<double> CGMComplex_LLT::dot_prod_nocj(const complex<double> * a, const complex<double> * b) const
+complex<double> COCG_GS::dot_prod_nocj(const complex<double> * a, const complex<double> * b) const
 {
     complex<double> d_p = 0.0;
     for(size_t i = 0; i < n; i++)
@@ -82,7 +33,7 @@ complex<double> CGMComplex_LLT::dot_prod_nocj(const complex<double> * a, const c
     return d_p;
 }
 
-double CGMComplex_LLT::dot_prod_self(const complex<double> * a) const
+double COCG_GS::dot_prod_self(const complex<double> * a) const
 {
     double d_p = 0.0;
     for(size_t i = 0; i < n; i++)
@@ -94,7 +45,7 @@ double CGMComplex_LLT::dot_prod_self(const complex<double> * a) const
     return d_p;
 }
 
-void CGMComplex_LLT::mul_matrix(const complex<double> * f, complex<double> * x) const
+void COCG_GS::mul_matrix(const complex<double> * f, complex<double> * x) const
 {
     for(size_t i = 0; i < n; i++)
     {
@@ -109,44 +60,46 @@ void CGMComplex_LLT::mul_matrix(const complex<double> * f, complex<double> * x) 
     }
 }
 
-void CGMComplex_LLT::solve_L(const complex<double> * f, complex<double> * x) const
+void COCG_GS::solve_GS(const complex<double> * f, complex<double> * x) const
 {
+    double w = 1.0;
+
+    complex<double> * tmp = new complex<double> [n];
+    for(size_t i = 0; i < n; i++)
+        tmp[i] = f[i];
+
+    // (D + L)^-1 tmp = x
     for(size_t k = 1, k1 = 0; k <= n; k++, k1++)
     {
         complex<double> sum = 0.0;
-
         for(size_t i = gi[k1]; i < gi[k]; i++)
-            sum += L_gg[i] * x[gj[i]];
-
-        x[k1] = (f[k1] - sum) / L_di[k1];
+            sum += gg[i] * x[gj[i]] * w;
+        x[k1] = (tmp[k1] - sum) / di[k1];
     }
-}
 
-void CGMComplex_LLT::solve_LT(complex<double> * f, complex<double> * x) const
-{
+    // tmp = D * x
+    for(size_t i = 0; i < n; i++)
+        tmp[i] = x[i] * di[i];
+
+    // (D + LT)^-1 * tmp = x
     for(size_t k = n, k1 = n-1; k > 0; k--, k1--)
     {
-        x[k1] = f[k1] / L_di[k1];
+        x[k1] = tmp[k1] / di[k1];
         complex<double> v_el = x[k1];
-
         for(size_t i = gi[k1]; i < gi[k]; i++)
-            f[gj[i]] -= L_gg[i] * v_el;
+            tmp[gj[i]] -= gg[i] * v_el * w;
     }
+
+    delete [] tmp;
 }
 
-void CGMComplex_LLT::solve_LLT(const complex<double> * f, complex<double> * x) const
-{
-    solve_L(f, x);
-    solve_LT(x, x);
-}
-
-bool CGMComplex_LLT::is_fpu_error(double x) const
+bool COCG_GS::is_fpu_error(double x) const
 {
     double y = x - x;
     return x != x || y != y;
 }
 
-void CGMComplex_LLT::solve(complex<double> * solution, complex<double> * rp_s, double eps, size_t max_iter)
+void COCG_GS::solve(complex<double> * solution, const complex<double> * rp_s, double eps, size_t max_iter)
 {
     rp = rp_s;
 
@@ -155,17 +108,16 @@ void CGMComplex_LLT::solve(complex<double> * solution, complex<double> * rp_s, d
         x0[i] = solution[i];
 
     mul_matrix(x0, r);
-    make_LLT_decomposition();
 
     for(size_t i = 0; i < n ; i++)
         r[i] = rp[i] - r[i];
 
-    solve_LLT(r, z);
+    solve_GS(r, z);
     for(size_t i = 0; i < n; i++)
         p[i] = z[i];
 
     complex<double> alpha, beta, prod_1, prod_2;
-    double discr, rp_norm;
+    double discr = 0.0, rp_norm;
 
     rp_norm = sqrt(dot_prod_self(rp));
     if(is_fpu_error(rp_norm))
@@ -182,7 +134,7 @@ void CGMComplex_LLT::solve(complex<double> * solution, complex<double> * rp_s, d
     bool finished = false;
 
     size_t iter;
-    for(iter = 1; iter <= max_iter && !finished; iter++)
+    for(iter = 0; iter <= max_iter && !finished; iter++)
     {
         discr = sqrt(dot_prod_self(r));
         if(is_fpu_error(discr))
@@ -197,7 +149,7 @@ void CGMComplex_LLT::solve(complex<double> * solution, complex<double> * rp_s, d
         double residual = discr / rp_norm;
         if(iter%10 == 0)
         {
-            printf("CCGM_LLT Residual:\t%5lu\t%.3e\r", (unsigned long)iter, residual);
+            printf("COCG_GS Residual:\t%5lu\t%.3e\r", (unsigned long)iter, residual);
             fflush(stdout);
         }
 
@@ -213,7 +165,7 @@ void CGMComplex_LLT::solve(complex<double> * solution, complex<double> * rp_s, d
                 r[i] -= alpha * s[i];
             }
 
-            solve_LLT(r, p);
+            solve_GS(r, p);
             prod_2 = dot_prod_nocj(p, r);
 
             beta = prod_2 / prod_1;
@@ -227,11 +179,11 @@ void CGMComplex_LLT::solve(complex<double> * solution, complex<double> * rp_s, d
             finished = true;
     }
 
-    mul_matrix(x0, r);
-    for(size_t i = 0; i < n; i++)
-        r[i] = rp[i] - r[i];
-    discr = sqrt(dot_prod_self(r));
-    printf("CCGM_LLT Residual:\t%5lu\t%.3e\n", (unsigned long)iter, discr / rp_norm);
+//    mul_matrix(x0, r);
+//    for(size_t i = 0; i < n; i++)
+//        r[i] = rp[i] - r[i];
+//    discr = sqrt(dot_prod_self(r));
+    printf("COCG_GS Residual:\t%5lu\t%.3e\n", (unsigned long)iter - 1, discr / rp_norm);
 
     if(iter >= max_iter)
         printf("Soulution can`t found, iteration limit exceeded!\n");
@@ -241,17 +193,15 @@ void CGMComplex_LLT::solve(complex<double> * solution, complex<double> * rp_s, d
     delete [] x0;
 }
 
-CGMComplex_LLT::CGMComplex_LLT()
+COCG_GS::COCG_GS()
 {
-    r = x0 = z = p = s = L_di = L_gg = NULL;
+    r = x0 = z = p = s = NULL;
 }
 
-CGMComplex_LLT::~CGMComplex_LLT()
+COCG_GS::~COCG_GS()
 {
     delete [] r;
     delete [] z;
     delete [] p;
     delete [] s;
-    delete [] L_di;
-    delete [] L_gg;
 }
