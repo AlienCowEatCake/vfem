@@ -8,12 +8,25 @@ cvector3 func_true(const point & p, const phys_area & phys, void * data)
             (pair<const config_type *, array_t<evaluator_helmholtz *, 3> > *)(data);
     cvector3 result(0, 0, 0);
     if(!params->first->analytical_enabled) return result;
+
+    // TODO: Костыль
+    phys_area * phys_editable = const_cast<phys_area *>(&phys);
+    phys_editable->sigma.set_x(p.x);
+    phys_editable->sigma.set_y(p.y);
+    phys_editable->sigma.set_z(p.z);
+    double sigma;
+    if(!phys_editable->sigma.calculate(sigma))
+        cout << "[Parser] " << phys_editable->sigma.get_error() << endl;
+    complex<double> k2(- phys.epsilon * phys.omega * phys.omega, phys.omega * sigma);
+
     for(size_t i = 0; i < 3; i++)
     {
         evaluator_helmholtz * e = params->second[i];
         e->set_x(p.x);
         e->set_y(p.y);
         e->set_z(p.z);
+        e->set_sigma(sigma);
+        e->set_k2(k2);
         bool status = e->calculate(result[i]);
         if(!status) cout << "[Parser] " << e->get_error() << endl;
     }
@@ -28,12 +41,25 @@ cvector3 func_rp(const point & p, const phys_area & phys, void * data)
             (pair<const config_type *, array_t<evaluator_helmholtz *, 3> > *)(data);
     cvector3 result(0, 0, 0);
     if(!params->first->right_enabled) return result;
+
+    // TODO: Костыль
+    phys_area * phys_editable = const_cast<phys_area *>(&phys);
+    phys_editable->sigma.set_x(p.x);
+    phys_editable->sigma.set_y(p.y);
+    phys_editable->sigma.set_z(p.z);
+    double sigma;
+    if(!phys_editable->sigma.calculate(sigma))
+        cout << "[Parser] " << phys_editable->sigma.get_error() << endl;
+    complex<double> k2(- phys.epsilon * phys.omega * phys.omega, phys.omega * sigma);
+
     for(size_t i = 0; i < 3; i++)
     {
         evaluator_helmholtz * e = params->second[i];
         e->set_x(p.x);
         e->set_y(p.y);
         e->set_z(p.z);
+        e->set_sigma(sigma);
+        e->set_k2(k2);
         bool status = e->calculate(result[i]);
         if(!status) cout << "[Parser] " << e->get_error() << endl;
     }
@@ -48,12 +74,25 @@ cvector3 func_b1(const point & p, const phys_area & phys, void * data)
             (pair<const config_type *, array_t<evaluator_helmholtz *, 3> > *)(data);
     cvector3 result(0, 0, 0);
     if(!params->first->boundary_enabled) return result;
+
+    // TODO: Костыль
+    phys_area * phys_editable = const_cast<phys_area *>(&phys);
+    phys_editable->sigma.set_x(p.x);
+    phys_editable->sigma.set_y(p.y);
+    phys_editable->sigma.set_z(p.z);
+    double sigma;
+    if(!phys_editable->sigma.calculate(sigma))
+        cout << "[Parser] " << phys_editable->sigma.get_error() << endl;
+    complex<double> k2(- phys.epsilon * phys.omega * phys.omega, phys.omega * sigma);
+
     for(size_t i = 0; i < 3; i++)
     {
         evaluator_helmholtz * e = params->second[i];
         e->set_x(p.x);
         e->set_y(p.y);
         e->set_z(p.z);
+        e->set_sigma(sigma);
+        e->set_k2(k2);
         bool status = e->calculate(result[i]);
         if(!status) cout << "[Parser] " << e->get_error() << endl;
     }

@@ -382,16 +382,13 @@ bool VFEM::input_phys(const string & phys_filename)
         it = config.analytical.values.begin(); it != config.analytical.values.end(); ++it)
     {
         phys_area * ph = &(phys.find(phys_id(MSH_TET_4, it->first))->second);
-        //complex<double> k2(- ph->omega * ph->omega * ph->epsilon, ph->omega * ph->sigma);
         for(size_t i = 0; i < 3; i++)
         {
             evaluator_helmholtz * ev_curr = &(it->second[i]);
             ev_curr->set_J0(ph->J0);
             ev_curr->set_omega(omega_global);
             ev_curr->set_epsilon(ph->epsilon);
-            //ev_curr->set_sigma(ph->sigma);
             ev_curr->set_mu(ph->mu);
-            //ev_curr->set_k2(k2);
             ev_curr->simplify();
             switch(config.jit_type)
             {
@@ -410,16 +407,13 @@ bool VFEM::input_phys(const string & phys_filename)
         it = config.boundary.values.begin(); it != config.boundary.values.end(); ++it)
     {
         phys_area * ph = &(phys.find(phys_id(MSH_TRI_3, it->first))->second);
-        //complex<double> k2(- ph->omega * ph->omega * ph->epsilon, ph->omega * ph->sigma);
         for(size_t i = 0; i < 3; i++)
         {
             evaluator_helmholtz * ev_curr = &(it->second[i]);
             ev_curr->set_J0(ph->J0);
             ev_curr->set_omega(omega_global);
             ev_curr->set_epsilon(ph->epsilon);
-            //ev_curr->set_sigma(ph->sigma);
             ev_curr->set_mu(ph->mu);
-            //ev_curr->set_k2(k2);
             ev_curr->simplify();
             switch(config.jit_type)
             {
@@ -438,16 +432,13 @@ bool VFEM::input_phys(const string & phys_filename)
         it = config.right.values.begin(); it != config.right.values.end(); ++it)
     {
         phys_area * ph = &(phys.find(phys_id(MSH_TET_4, it->first))->second);
-        //complex<double> k2(- ph->omega * ph->omega * ph->epsilon, ph->omega * ph->sigma);
         for(size_t i = 0; i < 3; i++)
         {
             evaluator_helmholtz * ev_curr = &(it->second[i]);
             ev_curr->set_J0(ph->J0);
             ev_curr->set_omega(omega_global);
             ev_curr->set_epsilon(ph->epsilon);
-            //ev_curr->set_sigma(ph->sigma);
             ev_curr->set_mu(ph->mu);
-            //ev_curr->set_k2(k2);
             ev_curr->simplify();
             switch(config.jit_type)
             {

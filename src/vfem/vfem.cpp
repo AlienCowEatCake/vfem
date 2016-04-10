@@ -200,7 +200,6 @@ void VFEM::process_fe(const T * curr_fe)
 {
     // Получение физических параметров для заданного КЭ
     phys_area ph = curr_fe->get_phys_area();
-    //complex<double> k2(- ph.epsilon * ph.omega * ph.omega, ph.omega * ph.sigma);
 
     // Инициализация параметров вычислителей для правой части
     pair<const config_type *, array_t<evaluator_helmholtz *, 3> >
@@ -218,10 +217,8 @@ void VFEM::process_fe(const T * curr_fe)
                 evaluator_helmholtz * ev_curr = &(config.right.default_value[i]);
                 params_object.second[i] = ev_curr;
                 ev_curr->set_epsilon(ph.epsilon);
-                //ev_curr->set_sigma(ph.sigma);
                 ev_curr->set_mu(ph.mu);
                 ev_curr->set_J0(ph.J0);
-                //ev_curr->set_k2(k2);
             }
     }
 
