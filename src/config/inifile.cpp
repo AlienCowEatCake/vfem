@@ -144,7 +144,7 @@ std::set<std::string> list_to_set_and_lower(const std::list<std::string> & in)
  * @brief Проверить, что в файле нет никаких секций, кроме секций из списка "whitelist"
  * @param whitelist список разрешенных секций
  * @return true - все секции присутствуют в "whitelist", false - есть неразрешенная секция
- * Полезно для контроля опечаток, так как в остальных местах это штатная ситуация
+ * @note Полезно для контроля опечаток, так как в остальных местах это штатная ситуация
  */
 bool inifile::check_sections(const std::list<std::string> & whitelist) const
 {
@@ -168,7 +168,7 @@ bool inifile::check_sections(const std::list<std::string> & whitelist) const
  * @param section секция, для которой будет выполнена проверка
  * @param whitelist список разрешенных параметров
  * @return true - все параметры присутствуют в "whitelist", false - есть неразрешенный параметр
- * Полезно для контроля опечаток, так как в остальных местах это штатная ситуация
+ * @note Полезно для контроля опечаток, так как в остальных местах это штатная ситуация
  */
 bool inifile::check_parameters(const std::string & section, const std::list<std::string> & whitelist) const
 {

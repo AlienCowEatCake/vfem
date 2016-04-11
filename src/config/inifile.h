@@ -64,7 +64,7 @@ public:
      * @param parameter параметр, который нужно искать
      * @param fallback значение по-умолчанию, которое возвращается, если искомый параметр не найден
      * @return значение параметра или fallback, если параметр не найден
-     * Функция для типа string, string не стоит получать с помощью stringstream, так как может многое потеряться
+     * @note Функция для типа string, string не стоит получать с помощью stringstream, так как может многое потеряться
      */
     template<typename U>
     std::string get(const std::string & section, const U & subsection, const std::string & parameter, const std::string & fallback) const
@@ -88,7 +88,7 @@ public:
      * @param parameter параметр, который нужно искать
      * @param fallback значение по-умолчанию, которое возвращается, если искомый параметр не найден
      * @return значение параметра или fallback, если параметр не найден
-     * Функция для типа char *, его приводим к std::string
+     * @note Функция для типа char *, его приводим к std::string
      */
     template<typename U>
     inline std::string get(const std::string & section, const U & subsection, const std::string & parameter, const char * fallback) const
@@ -103,7 +103,7 @@ public:
      * @param parameter параметр, который нужно искать
      * @param fallback значение по-умолчанию, которое возвращается, если искомый параметр не найден
      * @return значение параметра или fallback, если параметр не найден
-     * Функция для типа bool, у него нужно сделать дополнительное преобразование yes|true|1 -> true
+     * @note Функция для типа bool, у него нужно сделать дополнительное преобразование yes|true|1 -> true
      */
     template<typename U>
     bool get(const std::string & section, const U & subsection, const std::string & parameter, const bool & fallback) const
@@ -132,7 +132,7 @@ public:
      * @param parameter параметр, который нужно искать
      * @param fallback значение по-умолчанию, которое возвращается, если искомый параметр не найден
      * @return значение параметра или fallback, если параметр не найден
-     * Обобщенная функция для типов, которые не являются типами bool или string
+     * @note Обобщенная функция для типов, которые не являются типами bool или string
      */
     template<typename T, typename U>
     T get(const std::string & section, const U & subsection, const std::string & parameter, const T & fallback) const
@@ -156,7 +156,7 @@ public:
      * @param section секция, в которой нужно искать подсекции
      * @param type фиктивный указатель, из которого определяется тип возвращаемого результата
      * @return список из всех подсекций секции "section"
-     * Указатель type нигде не используется, то есть можно туда передавать что угодно, например (size_t)(NULL)
+     * @note Указатель type нигде не используется, то есть можно туда передавать что угодно, например (size_t)(NULL)
      */
     template<typename T>
     std::list<T> enumerate(const std::string & section, const T * type) const
@@ -182,7 +182,7 @@ public:
      * @brief Проверить, что в файле нет никаких секций, кроме секций из списка "whitelist"
      * @param whitelist список разрешенных секций
      * @return true - все секции присутствуют в "whitelist", false - есть неразрешенная секция
-     * Полезно для контроля опечаток, так как в остальных местах это штатная ситуация
+     * @note Полезно для контроля опечаток, так как в остальных местах это штатная ситуация
      */
     bool check_sections(const std::list<std::string> & whitelist) const;
 
@@ -191,7 +191,7 @@ public:
      * @param section секция, для которой будет выполнена проверка
      * @param whitelist список разрешенных параметров
      * @return true - все параметры присутствуют в "whitelist", false - есть неразрешенный параметр
-     * Полезно для контроля опечаток, так как в остальных местах это штатная ситуация
+     * @note Полезно для контроля опечаток, так как в остальных местах это штатная ситуация
      */
     bool check_parameters(const std::string & section, const std::list<std::string> & whitelist) const;
 
@@ -220,7 +220,7 @@ protected:
      * @brief Преобразование подсекции в строковое представление
      * @param subsection подсекция
      * @return строковое представление подсекции
-     * Если это строка, то она уже итак задана как надо
+     * @note Если это строка, то она уже итак задана как надо
      */
     inline std::string subsection_to_str(const std::string & subsection) const
     {
@@ -231,7 +231,7 @@ protected:
      * @brief Преобразование подсекции в строковое представление
      * @param subsection подсекция
      * @return строковое представление подсекции
-     * Если это char *, то просто соберем из него строку
+     * @note Если это char *, то просто соберем из него строку
      */
     inline std::string subsection_to_str(const char * subsection) const
     {
@@ -241,7 +241,7 @@ protected:
     /**
      * @brief Преобразование подсекции в строковое представление
      * @param subsection подсекция
-     * @return строковое представление подсекции
+     * @note @return строковое представление подсекции
      */
     template<typename T>
     std::string subsection_to_str(const T & subsection) const
