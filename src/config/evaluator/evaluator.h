@@ -75,9 +75,9 @@ protected:
     // Error description if m_status == false
     std::string m_error_string;
 
-#if !defined(EVALUATOR_JIT_DISABLE)
-    // Current conpiling status: true is compiled, false is not compiled
+    // Current compiling status: true is compiled, false is not compiled
     bool m_is_compiled;
+#if !defined(EVALUATOR_JIT_DISABLE)
     // Executable memory for bytecode
     char * volatile m_jit_code;
     // Function pointer to same memory
@@ -138,6 +138,12 @@ public:
     bool simplify();
     // Calculate current expression and write result to 'result'
     bool calculate(T & result);
+
+    // Get current compiling status
+    inline bool is_compiled() const
+    {
+        return m_is_compiled;
+    }
 
     // Compile expression, all functions will be inlined
     bool compile_inline();

@@ -91,9 +91,7 @@ bool evaluator<T>::parse(const std::string & str)
     m_expression.clear();
     m_error_string.clear();
     m_status = true;
-#if !defined(EVALUATOR_JIT_DISABLE)
     m_is_compiled = false;
-#endif
 
     vector<string> tokens;
     for(string::const_iterator it = str.begin(), it_end = str.end(); it != it_end;)

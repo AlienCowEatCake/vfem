@@ -337,3 +337,7 @@ COCG_Di_Smooth_OpenMP::~COCG_Di_Smooth_OpenMP()
     delete [] mv_tmp;
     delete [] mv_ind;
 }
+
+#undef PRECONDITIONER
+#undef PRECONDITIONER_NONE
+#undef PRECONDITIONER_DI

@@ -49,8 +49,8 @@ void evaluator<T>::init()
     using namespace std;
     using namespace evaluator_internal;
     m_status = false;
-#if !defined(EVALUATOR_JIT_DISABLE)
     m_is_compiled = false;
+#if !defined(EVALUATOR_JIT_DISABLE)
     m_jit_code = NULL;
     m_jit_code_size = 0;
     m_jit_stack = NULL;
@@ -105,8 +105,8 @@ void evaluator<T>::copy_from_other(const evaluator & other)
     m_status = other.m_status;
     m_error_string = other.m_error_string;
     m_transition_table = other.m_transition_table;
-#if !defined(EVALUATOR_JIT_DISABLE)
     m_is_compiled = false;
+#if !defined(EVALUATOR_JIT_DISABLE)
     m_jit_code = NULL;
     m_jit_code_size = 0;
     m_jit_stack = NULL;

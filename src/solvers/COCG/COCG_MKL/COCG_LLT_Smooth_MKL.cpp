@@ -370,6 +370,11 @@ COCG_LLT_Smooth_MKL::~COCG_LLT_Smooth_MKL()
     delete [] aa;
 }
 
+#undef PRECONDITIONER
+#undef PRECONDITIONER_NONE
+#undef PRECONDITIONER_DI
+#undef PRECONDITIONER_LLT
+
 // =================================================================================================
 
 #if defined(USE_MKL) && defined(_MSC_VER)
