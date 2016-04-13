@@ -1,4 +1,4 @@
-#if !defined COCG_DI_SMOOTH_OPENMP_H_INCLUDED
+#if !defined(COCG_DI_SMOOTH_OPENMP_H_INCLUDED)
 #define COCG_DI_SMOOTH_OPENMP_H_INCLUDED
 
 #include <cstdlib>

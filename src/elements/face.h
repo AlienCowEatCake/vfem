@@ -1,4 +1,4 @@
-#if !defined FACE_H_INCLUDED
+#if !defined(FACE_H_INCLUDED)
 #define FACE_H_INCLUDED
 
 #include "../common/common.h"

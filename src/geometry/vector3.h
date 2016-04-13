@@ -1,4 +1,4 @@
-#if !defined VECTOR3_H_INCLUDED
+#if !defined(VECTOR3_H_INCLUDED)
 #define VECTOR3_H_INCLUDED
 
 #include "../common/common.h"

@@ -1,4 +1,4 @@
-#if !defined MATRIX_H_INCLUDED
+#if !defined(MATRIX_H_INCLUDED)
 #define MATRIX_H_INCLUDED
 
 #include "../common/common.h"

@@ -14,14 +14,14 @@
 
 /**
  * @brief Обрезка whitespace символов по краям строки
- * @param str входная строка
+ * @param[in] str входная строка
  * @return обрезанная строка
  */
 std::string trim(const std::string & str);
 
 /**
  * @brief Переобразование к нижнему регистру (только для символов US-ASCII)
- * @param str входная строка
+ * @param[in] str входная строка
  * @return строка в нижнем регистре
  */
 std::string to_lowercase(const std::string & str);
@@ -40,13 +40,13 @@ public:
 
     /**
      * @brief Конструктор с именем входного файла
-     * @param filename имя входного файла
+     * @param[in] filename имя входного файла
      */
     inifile(const std::string & filename) { status = load(filename); }
 
     /**
      * @brief Загрузка ini-файла
-     * @param filename имя входного файла
+     * @param[in] filename имя входного файла
      * @return true - файл успешно считан, false - возникли ошибки
      */
     bool load(const std::string & filename);
@@ -59,10 +59,10 @@ public:
 
     /**
      * @brief Получить значение параметра с именем "parameter" в секции "section" подсекции "subsection"
-     * @param section секция, в которой нужно искать
-     * @param subsection подсекция, в которой нужно искать
-     * @param parameter параметр, который нужно искать
-     * @param fallback значение по-умолчанию, которое возвращается, если искомый параметр не найден
+     * @param[in] section секция, в которой нужно искать
+     * @param[in] subsection подсекция, в которой нужно искать
+     * @param[in] parameter параметр, который нужно искать
+     * @param[in] fallback значение по-умолчанию, которое возвращается, если искомый параметр не найден
      * @return значение параметра или fallback, если параметр не найден
      * @note Функция для типа string, string не стоит получать с помощью stringstream, так как может многое потеряться
      */
@@ -83,10 +83,10 @@ public:
 
     /**
      * @brief Получить значение параметра с именем "parameter" в секции "section" подсекции "subsection"
-     * @param section секция, в которой нужно искать
-     * @param subsection подсекция, в которой нужно искать
-     * @param parameter параметр, который нужно искать
-     * @param fallback значение по-умолчанию, которое возвращается, если искомый параметр не найден
+     * @param[in] section секция, в которой нужно искать
+     * @param[in] subsection подсекция, в которой нужно искать
+     * @param[in] parameter параметр, который нужно искать
+     * @param[in] fallback значение по-умолчанию, которое возвращается, если искомый параметр не найден
      * @return значение параметра или fallback, если параметр не найден
      * @note Функция для типа char *, его приводим к std::string
      */
@@ -98,10 +98,10 @@ public:
 
     /**
      * @brief Получить значение параметра с именем "parameter" в секции "section" подсекции "subsection"
-     * @param section секция, в которой нужно искать
-     * @param subsection подсекция, в которой нужно искать
-     * @param parameter параметр, который нужно искать
-     * @param fallback значение по-умолчанию, которое возвращается, если искомый параметр не найден
+     * @param[in] section секция, в которой нужно искать
+     * @param[in] subsection подсекция, в которой нужно искать
+     * @param[in] parameter параметр, который нужно искать
+     * @param[in] fallback значение по-умолчанию, которое возвращается, если искомый параметр не найден
      * @return значение параметра или fallback, если параметр не найден
      * @note Функция для типа bool, у него нужно сделать дополнительное преобразование yes|true|1 -> true
      */
@@ -127,10 +127,10 @@ public:
 
     /**
      * @brief Получить значение параметра с именем "parameter" в секции "section" подсекции "subsection"
-     * @param section секция, в которой нужно искать
-     * @param subsection подсекция, в которой нужно искать
-     * @param parameter параметр, который нужно искать
-     * @param fallback значение по-умолчанию, которое возвращается, если искомый параметр не найден
+     * @param[in] section секция, в которой нужно искать
+     * @param[in] subsection подсекция, в которой нужно искать
+     * @param[in] parameter параметр, который нужно искать
+     * @param[in] fallback значение по-умолчанию, которое возвращается, если искомый параметр не найден
      * @return значение параметра или fallback, если параметр не найден
      * @note Обобщенная функция для типов, которые не являются типами bool или string
      */
@@ -153,10 +153,10 @@ public:
 
     /**
      * @brief Получть список из всех подсекций секции "section"
-     * @param section секция, в которой нужно искать подсекции
-     * @param type фиктивный указатель, из которого определяется тип возвращаемого результата
+     * @param[in] section секция, в которой нужно искать подсекции
+     * @param[in] type фиктивный указатель, из которого определяется тип возвращаемого результата
      * @return список из всех подсекций секции "section"
-     * @note Указатель type нигде не используется, то есть можно туда передавать что угодно, например (size_t)(NULL)
+     * @note Указатель type нигде не используется, то есть можно туда передавать что угодно, например (size_t*)(NULL)
      */
     template<typename T>
     std::list<T> enumerate(const std::string & section, const T * type) const
@@ -180,7 +180,7 @@ public:
 
     /**
      * @brief Проверить, что в файле нет никаких секций, кроме секций из списка "whitelist"
-     * @param whitelist список разрешенных секций
+     * @param[in] whitelist список разрешенных секций
      * @return true - все секции присутствуют в "whitelist", false - есть неразрешенная секция
      * @note Полезно для контроля опечаток, так как в остальных местах это штатная ситуация
      */
@@ -188,8 +188,8 @@ public:
 
     /**
      * @brief Проверить, что в секции "section" во всех подсекциях нет никаких параметров, кроме параметров из списка "whitelist"
-     * @param section секция, для которой будет выполнена проверка
-     * @param whitelist список разрешенных параметров
+     * @param[in] section секция, для которой будет выполнена проверка
+     * @param[in] whitelist список разрешенных параметров
      * @return true - все параметры присутствуют в "whitelist", false - есть неразрешенный параметр
      * @note Полезно для контроля опечаток, так как в остальных местах это штатная ситуация
      */
@@ -209,16 +209,16 @@ protected:
 
     /**
      * @brief Получить значение параметра с именем "parameter" в секции "section" подсекции "subsection"
-     * @param section секция
-     * @param subsection подсекция
-     * @param parameter параметр
+     * @param[in] section секция
+     * @param[in] subsection подсекция
+     * @param[in] parameter параметр
      * @return значение параметра или NULL, если такого параметра нет
      */
     const std::string * get_internal(const std::string & section, const std::string & subsection, const std::string & parameter) const;
 
     /**
      * @brief Преобразование подсекции в строковое представление
-     * @param subsection подсекция
+     * @param[in] subsection подсекция
      * @return строковое представление подсекции
      * @note Если это строка, то она уже итак задана как надо
      */
@@ -229,7 +229,7 @@ protected:
 
     /**
      * @brief Преобразование подсекции в строковое представление
-     * @param subsection подсекция
+     * @param[in] subsection подсекция
      * @return строковое представление подсекции
      * @note Если это char *, то просто соберем из него строку
      */
@@ -240,7 +240,7 @@ protected:
 
     /**
      * @brief Преобразование подсекции в строковое представление
-     * @param subsection подсекция
+     * @param[in] subsection подсекция
      * @note @return строковое представление подсекции
      */
     template<typename T>

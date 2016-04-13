@@ -1,4 +1,4 @@
-#if !defined VFEM_H_INCLUDED
+#if !defined(VFEM_H_INCLUDED)
 #define VFEM_H_INCLUDED
 
 #include "../common/common.h"
@@ -16,7 +16,7 @@
 
 #define VFEM_USE_PML
 
-#if defined VFEM_USE_PML
+#if defined(VFEM_USE_PML)
 typedef tetrahedron_pml finite_element;
 #else
 typedef tetrahedron finite_element;
@@ -31,7 +31,7 @@ cvector3 func_b1(const point & p, const phys_area & phys, void * data);
 // Функция аналитического решения
 cvector3 func_true(const point & p, const phys_area & phys, void * data);
 
-#if defined VFEM_USE_PML
+#if defined(VFEM_USE_PML)
 // Коэффициент S для PML
 cvector3 get_s(const point & p, const tetrahedron_pml * fe, const phys_pml_area * phys_pml);
 
@@ -173,7 +173,7 @@ protected:
     // Добавление грани в множество граней
     size_t add_face(face fc, set<face> & faces_set);
 
-#if defined VFEM_USE_PML
+#if defined(VFEM_USE_PML)
     cpoint convert_point_to_pml(const point * p, const finite_element * fefe) const;
     void input_pml();
     // Параметры PML

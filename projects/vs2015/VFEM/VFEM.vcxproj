@@ -87,7 +87,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>USE_OMP;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <OpenMPSupport>true</OpenMPSupport>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
@@ -103,7 +103,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>USE_OMP;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <OpenMPSupport>true</OpenMPSupport>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
@@ -121,7 +121,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>USE_OMP;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <OpenMPSupport>true</OpenMPSupport>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -142,7 +142,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>USE_OMP;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <OpenMPSupport>true</OpenMPSupport>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -223,6 +223,8 @@
     <ClInclude Include="..\..\..\src\solvers\GMRES_Complex\GMRES_Complex\GMRES_Complex_LDLT.h" />
     <ClInclude Include="..\..\..\src\solvers\GMRES_Complex\GMRES_Complex\GMRES_Complex_LLT.h" />
     <ClInclude Include="..\..\..\src\solvers\solver_interface.h" />
+    <ClInclude Include="..\..\..\src\stubs\mkl_stubs.h" />
+    <ClInclude Include="..\..\..\src\stubs\omp_stubs.h" />
     <ClInclude Include="..\..\..\src\vfem\phys.h" />
     <ClInclude Include="..\..\..\src\vfem\slae.h" />
     <ClInclude Include="..\..\..\src\vfem\vfem.h" />
@@ -278,6 +280,8 @@
     <ClCompile Include="..\..\..\src\solvers\GMRES_Complex\GMRES_Complex\GMRES_Complex_Di.cpp" />
     <ClCompile Include="..\..\..\src\solvers\GMRES_Complex\GMRES_Complex\GMRES_Complex_LDLT.cpp" />
     <ClCompile Include="..\..\..\src\solvers\GMRES_Complex\GMRES_Complex\GMRES_Complex_LLT.cpp" />
+    <ClCompile Include="..\..\..\src\stubs\mkl_stubs.cpp" />
+    <ClCompile Include="..\..\..\src\stubs\omp_stubs.cpp" />
     <ClCompile Include="..\..\..\src\vfem\slae.cpp" />
     <ClCompile Include="..\..\..\src\vfem\vfem.cpp" />
     <ClCompile Include="..\..\..\src\vfem\vfem_input.cpp" />

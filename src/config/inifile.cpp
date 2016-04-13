@@ -6,7 +6,7 @@
 
 /**
  * @brief Обрезка whitespace символов по краям строки
- * @param str входная строка
+ * @param[in] str входная строка
  * @return обрезанная строка
  */
 std::string trim(const std::string & str)
@@ -20,7 +20,7 @@ std::string trim(const std::string & str)
 
 /**
  * @brief Переобразование к нижнему регистру (только для символов US-ASCII)
- * @param str входная строка
+ * @param[in] str входная строка
  * @return строка в нижнем регистре
  */
 std::string to_lowercase(const std::string & str)
@@ -33,7 +33,7 @@ std::string to_lowercase(const std::string & str)
 
 /**
  * @brief Загрузка ini-файла
- * @param filename имя входного файла
+ * @param[in] filename имя входного файла
  * @return true - файл успешно считан, false - возникли ошибки
  */
 bool inifile::load(const std::string & filename)
@@ -95,9 +95,9 @@ bool inifile::load(const std::string & filename)
 
 /**
  * @brief Получить значение параметра с именем "parameter" в секции "section" подсекции "subsection"
- * @param section секция
- * @param subsection подсекция
- * @param parameter параметр
+ * @param[in] section секция
+ * @param[in] subsection подсекция
+ * @param[in] parameter параметр
  * @return значение параметра или NULL, если такого параметра нет
  */
 const std::string * inifile::get_internal(const std::string & section, const std::string & subsection, const std::string & parameter) const
@@ -127,7 +127,7 @@ namespace
 
 /**
  * @brief Преобразование std::list<std::string> -> std::set<std::string> c приведением к нижнему регистру
- * @param in входной std::list<std::string>
+ * @param[in] in входной std::list<std::string>
  * @return выходной std::set<std::string>
  */
 std::set<std::string> list_to_set_and_lower(const std::list<std::string> & in)
@@ -142,7 +142,7 @@ std::set<std::string> list_to_set_and_lower(const std::list<std::string> & in)
 
 /**
  * @brief Проверить, что в файле нет никаких секций, кроме секций из списка "whitelist"
- * @param whitelist список разрешенных секций
+ * @param[in] whitelist список разрешенных секций
  * @return true - все секции присутствуют в "whitelist", false - есть неразрешенная секция
  * @note Полезно для контроля опечаток, так как в остальных местах это штатная ситуация
  */
@@ -165,8 +165,8 @@ bool inifile::check_sections(const std::list<std::string> & whitelist) const
 
 /**
  * @brief Проверить, что в секции "section" во всех подсекциях нет никаких параметров, кроме параметров из списка "whitelist"
- * @param section секция, для которой будет выполнена проверка
- * @param whitelist список разрешенных параметров
+ * @param[in] section секция, для которой будет выполнена проверка
+ * @param[in] whitelist список разрешенных параметров
  * @return true - все параметры присутствуют в "whitelist", false - есть неразрешенный параметр
  * @note Полезно для контроля опечаток, так как в остальных местах это штатная ситуация
  */

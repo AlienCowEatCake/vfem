@@ -48,7 +48,7 @@
 #include "../solvers/COCG/legacy/CGMComplex_VC.h"
 #include "../solvers/COCG/legacy/CGMComplex_LLT.h"
 
-#if defined QMAKE_WORKAROUND
+#if defined(QMAKE_WORKAROUND)
 // https://bugreports.qt.io/browse/QTBUG-11923
 // https://bugreports.qt.io/browse/QTBUG-24906
 #include "../solvers/COCG/COCG_OpenMP/COCG_Di_Smooth_OpenMP.cpp"
@@ -146,7 +146,7 @@ void SLAE::init(const string & name)
         solver = new CGMComplex_LLT;
     // Решатель по умолчанию
     else
-#if !defined USE_MKL
+#if !defined(USE_MKL)
         solver = new COCG_LLT_Smooth;
 #else
         solver = new COCG_LLT_Smooth_MKL;

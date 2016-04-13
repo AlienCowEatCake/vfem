@@ -1,4 +1,4 @@
-#if !defined TETRAHEDRON_H_INCLUDED
+#if !defined(TETRAHEDRON_H_INCLUDED)
 #define TETRAHEDRON_H_INCLUDED
 
 #include "../common/common.h"

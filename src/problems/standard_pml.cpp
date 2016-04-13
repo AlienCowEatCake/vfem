@@ -1,6 +1,6 @@
 #include "problems.h"
 
-#if defined VFEM_USE_PML
+#if defined(VFEM_USE_PML)
 
 // Проверка, PML или нет
 bool is_pml(const point & p, const finite_element * fe, const phys_pml_area * phys_pml)

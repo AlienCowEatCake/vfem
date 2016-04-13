@@ -163,6 +163,12 @@
     <Filter Include="Header Files\solvers\GMRES_Complex\GMRES_Complex">
       <UniqueIdentifier>{9502722b-09e4-459b-86c1-c52aea343e09}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\stubs">
+      <UniqueIdentifier>{75ddcccd-f3ed-4014-9bea-b2bc9a0f9c58}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\stubs">
+      <UniqueIdentifier>{49ae00fe-f830-4516-86e5-43fb142e3c15}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\common\trio.h">
@@ -375,6 +381,12 @@
     <ClInclude Include="..\..\..\src\solvers\GMRES_Complex\GMRES_Complex\GMRES_Complex_LLT.h">
       <Filter>Header Files\solvers\GMRES_Complex\GMRES_Complex</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\stubs\mkl_stubs.h">
+      <Filter>Header Files\stubs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\stubs\omp_stubs.h">
+      <Filter>Header Files\stubs</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\common\cubatures.cpp">
@@ -541,6 +553,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\solvers\GMRES_Complex\GMRES_Complex\GMRES_Complex_LLT.cpp">
       <Filter>Source Files\solvers\GMRES_Complex\GMRES_Complex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\stubs\mkl_stubs.cpp">
+      <Filter>Source Files\stubs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\stubs\omp_stubs.cpp">
+      <Filter>Source Files\stubs</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -1,4 +1,4 @@
-#if !defined BICGSTABCOMPLEX_VC_H_INCLUDED
+#if !defined(BICGSTABCOMPLEX_VC_H_INCLUDED)
 #define BICGSTABCOMPLEX_VC_H_INCLUDED
 
 #include "../../../common/common.h"

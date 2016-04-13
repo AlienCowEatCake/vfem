@@ -1,12 +1,12 @@
-#if !defined COMMON_H_INCLUDED
+#if !defined(COMMON_H_INCLUDED)
 #define COMMON_H_INCLUDED
 
-#if defined _MSC_VER && !defined _CRT_SECURE_NO_WARNINGS
+#if defined(_MSC_VER) && !defined(_CRT_SECURE_NO_WARNINGS)
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
-#if defined _MSC_VER
-#if !defined _USE_MATH_DEFINES
+#if defined(_MSC_VER)
+#if !defined(_USE_MATH_DEFINES)
 #define _USE_MATH_DEFINES
 #endif
 #include <math.h>
@@ -14,14 +14,14 @@
 #include <cmath>
 #endif
 
-#if !defined M_PI
+#if !defined(M_PI)
 #define M_PI 3.14159265358979323846
 #endif
 
 #if __cplusplus >= 201103L || \
-    (defined __GNUC__ && defined __GNUC_MINOR__ && defined __GXX_EXPERIMENTAL_CXX0X__ && \
+    (defined(__GNUC__) && defined(__GNUC_MINOR__) && defined(__GXX_EXPERIMENTAL_CXX0X__) && \
     (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 8))) || \
-    (defined _MSC_VER && _MSC_VER >= 1800)
+    (defined(_MSC_VER) && _MSC_VER >= 1800)
 #define USE_CXX11
 #endif
 
@@ -157,7 +157,7 @@ inline void show_progress(const char * message, size_t index, size_t num_all)
 
 inline bool is_nan(double x)
 {
-#if defined USE_CXX11
+#if defined(USE_CXX11)
     return std::isnan(x);
 #else
     return x != x;
@@ -166,7 +166,7 @@ inline bool is_nan(double x)
 
 inline bool is_inf(double x)
 {
-#if defined USE_CXX11
+#if defined(USE_CXX11)
     return std::isinf(x);
 #else
     return !is_nan(x) && is_nan(x - x);
@@ -175,7 +175,7 @@ inline bool is_inf(double x)
 
 inline bool is_fpu_error(double x)
 {
-#if defined USE_CXX11
+#if defined(USE_CXX11)
     return !std::isfinite(x);
 #else
     return is_nan(x) || is_nan(x - x);

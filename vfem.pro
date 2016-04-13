@@ -4,6 +4,78 @@ CONFIG -= app_bundle
 CONFIG -= qt
 CONFIG += warn_on
 
+CONFIG += use_mkl
+CONFIG += use_omp
+
+# https://bugreports.qt.io/browse/QTBUG-11923
+# https://bugreports.qt.io/browse/QTBUG-24906
+DEFINES += QMAKE_WORKAROUND
+
+unix:!macx:QMAKE_LIBS += -lrt
+
+*g++*|*clang* {
+    QMAKE_CXXFLAGS *= -ansi
+    QMAKE_CXXFLAGS *= -pedantic
+    QMAKE_CXXFLAGS_WARN_ON *= -Wextra
+    QMAKE_CXXFLAGS_RELEASE -= -O2
+    QMAKE_CXXFLAGS_RELEASE *= -O3
+    QMAKE_CXXFLAGS_RELEASE *= -march=native
+    QMAKE_CXXFLAGS_RELEASE *= -mtune=native
+    QMAKE_CXXFLAGS_RELEASE *= -DNDEBUG
+}
+
+*msvc* {
+    QMAKE_CXXFLAGS_RELEASE -= -O2
+    QMAKE_CXXFLAGS_RELEASE *= -Ox
+    QMAKE_CXXFLAGS_RELEASE -= -GS
+    QMAKE_CXXFLAGS_RELEASE *= -GS-
+}
+
+use_omp {
+    *g++* {
+        QMAKE_CXXFLAGS += -fopenmp
+        QMAKE_LFLAGS += -fopenmp
+        DEFINES += USE_OMP
+    }
+    # Clang пока что не умеет OpenMP
+    *msvc* {
+        QMAKE_CXXFLAGS += -openmp
+        DEFINES += USE_OMP
+    }
+}
+
+use_mkl {
+    win32:*msvc* {
+        contains(QMAKE_HOST.arch, x86_64) {
+            PROGRAMFILES = $$system("echo %ProgramFiles(x86)%")
+        } else {
+            PROGRAMFILES = $$(ProgramFiles)
+        }
+        MKLROOT = $${PROGRAMFILES}/IntelSWTools/compilers_and_libraries_2016.2.180/windows/mkl
+        exists($${MKLROOT}) {
+            QMAKE_INCDIR += $$quote($${MKLROOT}/include)
+            DEFINES += USE_MKL
+            contains(QMAKE_TARGET.arch, x86_64) {
+                QMAKE_LIBDIR += $$quote($${MKLROOT}/lib/intel64_win)
+            } else {
+                QMAKE_LIBDIR += $$quote($${MKLROOT}/lib/ia32_win)
+            }
+        }
+    }
+    linux-g++*-64: {
+        MKLROOT = /opt/intel/compilers_and_libraries_2016.2.181/linux/mkl
+        exists($${MKLROOT}) {
+            MKLLIB = $${MKLROOT}/lib/intel64
+            QMAKE_CXXFLAGS  -= -ansi
+            QMAKE_CXXFLAGS  *= -I$${MKLROOT}/include -DUSE_MKL -std=c++0x
+            QMAKE_LFLAGS    *= -Wl,-rpath -Wl,$${MKLLIB} -Wl,--no-as-needed -L$${MKLLIB}
+            QMAKE_LIBS      *= -lmkl_intel_lp64 -lmkl_core -lmkl_gnu_thread
+            #QMAKE_LIBS      *= -Wl,--start-group $${MKLLIB}/libmkl_intel_lp64.a $${MKLLIB}/libmkl_core.a $${MKLLIB}/libmkl_gnu_thread.a -Wl,--end-group
+            QMAKE_LIBS      *= -ldl -lpthread -lm
+        }
+    }
+}
+
 SOURCES += \
     src/main.cpp \
     src/config/inifile.cpp \
@@ -14,6 +86,8 @@ SOURCES += \
     src/config/evaluator/evaluator_internal/jit/oper_templates.cpp \
     src/config/evaluator/evaluator_internal/jit/real_templates.cpp \
     src/common/cubatures.cpp \
+    src/stubs/omp_stubs.cpp \
+    src/stubs/mkl_stubs.cpp \
     src/geometry/vector3.cpp \
     src/elements/edge.cpp \
     src/elements/face.cpp \
@@ -88,6 +162,8 @@ HEADERS += \
     src/common/matrix.h \
     src/common/common.h \
     src/common/cubatures.h \
+    src/stubs/omp_stubs.h \
+    src/stubs/mkl_stubs.h \
     src/geometry/point.h \
     src/geometry/vector3.h \
     src/elements/edge.h \
@@ -132,32 +208,6 @@ HEADERS += \
     src/solvers/COCG/COCG_MKL/COCG_Smooth_MKL.h \
     src/solvers/COCG/COCG_MKL/COCG_Di_Smooth_MKL.h \
     src/solvers/COCG/COCG_MKL/COCG_LLT_Smooth_MKL.h
-
-DEFINES += QMAKE_WORKAROUND
-
-unix:!macx:QMAKE_LIBS += -lrt
-
-*g++*|*clang* {
-    QMAKE_CXXFLAGS += -fopenmp
-    QMAKE_LFLAGS += -fopenmp
-    QMAKE_CXXFLAGS *= -ansi
-#    QMAKE_CXXFLAGS += -std=c++0x
-    QMAKE_CXXFLAGS *= -pedantic
-    QMAKE_CXXFLAGS_WARN_ON *= -Wextra
-    QMAKE_CXXFLAGS_RELEASE -= -O2
-    QMAKE_CXXFLAGS_RELEASE *= -O3
-    QMAKE_CXXFLAGS_RELEASE *= -march=native
-    QMAKE_CXXFLAGS_RELEASE *= -mtune=native
-    QMAKE_CXXFLAGS_RELEASE *= -DNDEBUG
-}
-
-*msvc* {
-    QMAKE_CXXFLAGS += -openmp
-    QMAKE_CXXFLAGS_RELEASE -= -O2
-    QMAKE_CXXFLAGS_RELEASE *= -Ox
-    QMAKE_CXXFLAGS_RELEASE -= -GS
-    QMAKE_CXXFLAGS_RELEASE *= -GS-
-}
 
 DESTDIR = .
 OBJECTS_DIR = build

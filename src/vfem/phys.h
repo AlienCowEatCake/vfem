@@ -1,4 +1,4 @@
-#if !defined PHYS_H_INCLUDED
+#if !defined(PHYS_H_INCLUDED)
 #define PHYS_H_INCLUDED
 
 #include "../common/common.h"

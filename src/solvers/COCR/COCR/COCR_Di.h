@@ -1,4 +1,4 @@
-#if !defined COCR_DI_H_INCLUDED
+#if !defined(COCR_DI_H_INCLUDED)
 #define COCR_DI_H_INCLUDED
 
 #include <cstdlib>

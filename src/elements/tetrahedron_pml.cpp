@@ -216,7 +216,7 @@ cvector3 tetrahedron_pml::kerw_pml(size_t i, const cpoint & p, const point & p_n
 matrix_t<complex<double> >
 tetrahedron_pml::MpG() const
 {
-//#if defined __GNUC__
+//#if defined(__GNUC__)
 //#warning conjugate
 //#endif
     const tet_integration_config * tet_integration = &(basis->tet_int);
@@ -268,7 +268,7 @@ tetrahedron_pml::MpG() const
 array_t<complex<double> >
 tetrahedron_pml::rp(eval_func func, void * data) const
 {
-//#if defined __GNUC__
+//#if defined(__GNUC__)
 //#warning conjugate
 //#endif
     const tet_integration_config * tet_integration = &(basis->tet_int);
@@ -293,7 +293,7 @@ tetrahedron_pml::rp(eval_func func, void * data) const
 matrix_t<complex<double> >
 tetrahedron_pml::K() const
 {
-//#if defined __GNUC__
+//#if defined(__GNUC__)
 //#warning conjugate
 //#endif
     const tet_integration_config * tet_integration = &(basis->tet_int);

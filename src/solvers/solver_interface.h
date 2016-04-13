@@ -1,4 +1,4 @@
-#if !defined SOLVER_INTERFACE_H
+#if !defined(SOLVER_INTERFACE_H)
 #define SOLVER_INTERFACE_H
 
 #include <cstdlib>

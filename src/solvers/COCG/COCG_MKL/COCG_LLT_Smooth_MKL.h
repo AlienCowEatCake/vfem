@@ -1,24 +1,12 @@
-#if !defined COCG_LLT_SMOOTH_MKL_H_INCLUDED
+#if !defined(COCG_LLT_SMOOTH_MKL_H_INCLUDED)
 #define COCG_LLT_SMOOTH_MKL_H_INCLUDED
-
-//#define USE_MKL
 
 #include <cstdlib>
 #include <complex>
-#include <omp.h>
 
-#if !defined USE_MKL
-#if !defined MKL_INT
-#define MKL_INT int
-typedef struct _MKL_Complex16 { double real; double imag; } MKL_Complex16;
-void cblas_zcopy(const MKL_INT N, const void * X, const MKL_INT incX, void * Y, const MKL_INT incY);
-void cblas_zaxpy(const MKL_INT N, const void * alpha, const void * X, const MKL_INT incX, void * Y, const MKL_INT incY);
-double cblas_dznrm2(const MKL_INT N, const void * X, const MKL_INT incX);
-void cblas_zdotu_sub(const MKL_INT N, const void * X, const MKL_INT incX, const void * Y, const MKL_INT incY, void * dotc);
-void mkl_zcsrsymv(const char * uplo, const MKL_INT * m, const MKL_Complex16 * a, const MKL_INT * ia,  const MKL_INT * ja, const MKL_Complex16 * x,  MKL_Complex16 * y);
-void mkl_zcsrtrsv(const char * uplo, const char * transa, const char * diag, const MKL_INT * m, const MKL_Complex16 * a, const MKL_INT * ia, const MKL_INT * ja, const MKL_Complex16 * x, MKL_Complex16 * y);
-void mkl_set_num_threads(int n);
-#endif
+#if !defined(USE_MKL)
+#include "../../../stubs/mkl_stubs.h"
+using namespace mkl_stubs;
 #else
 #include <mkl.h>
 #include <mkl_blas.h>

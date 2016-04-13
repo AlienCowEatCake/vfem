@@ -1,19 +1,25 @@
-#if defined _MSC_VER && !defined _CRT_SECURE_NO_WARNINGS
+#if defined(_MSC_VER) && !defined(_CRT_SECURE_NO_WARNINGS)
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 #include "COCG_Di_Smooth_OpenMP.h"
 #include <cstdio>
 #include <cmath>
+
+#if !defined(USE_OMP)
+#include "../../../stubs/omp_stubs.h"
+using namespace omp_stubs;
+#else
 #include <omp.h>
+#endif
 
 #define PRECONDITIONER_NONE 0x01
 #define PRECONDITIONER_DI   0x02
 
-#if !defined PRECONDITIONER
+#if !defined(PRECONDITIONER)
 #define PRECONDITIONER PRECONDITIONER_DI
 #endif
 
-#if defined _MSC_VER
+#if defined(_MSC_VER)
 typedef long omp_int;
 #else
 typedef size_t omp_int;
@@ -314,6 +320,7 @@ COCG_Di_Smooth_OpenMP::COCG_Di_Smooth_OpenMP()
         numThreads = 1;
     }
     omp_set_num_threads(numThreads);
+    numThreads = omp_get_num_threads();
     r = x0 = z = p = s = xs = rs = NULL;
     mv_tmp = NULL;
     mv_ind = NULL;

@@ -29,7 +29,7 @@ void config_type::load_defaults()
     v_cycle_enabled = false;
     max_iter = 15000;
     max_iter_v_cycle_local = 500;
-#if !defined USE_MKL
+#if !defined(USE_MKL)
     solver_name = "COCG_LLT_Smooth";
     solver_name_bound = "COCG_LLT_Smooth";
     solver_name_v_cycle_full = "COCG_LLT_Smooth";
@@ -435,8 +435,9 @@ bool config_type::load_pml(const string & filename)
         if(pml_phys != 0)
         {
             pml_config_parameter * curr = & (phys_pml.params[pml_phys]);
-            curr->chi.real(cfg_file.get("PML", pml_phys, "chi_real", chi_def.real()));
-            curr->chi.imag(cfg_file.get("PML", pml_phys, "chi_imag", chi_def.imag()));
+            double chi_re = cfg_file.get("PML", pml_phys, "chi_real", chi_def.real());
+            double chi_im = cfg_file.get("PML", pml_phys, "chi_imag", chi_def.imag());
+            curr->chi = complex<double>(chi_re, chi_im);
             curr->m     = cfg_file.get("PML", pml_phys, "m",     m_def);
             curr->width = cfg_file.get("PML", pml_phys, "width", width_def);
         }
@@ -445,15 +446,15 @@ bool config_type::load_pml(const string & filename)
     // Проверим введенное на адекватность
     pml_config_parameter def;
     double big_num = DBL_MAX * 0.999;
-    if(chi_def.real() < big_num) def.chi.real(chi_def.real());
-    if(chi_def.imag() < big_num) def.chi.imag(chi_def.real());
+    if(chi_def.real() < big_num) def.chi = complex<double>(chi_def.real(), def.chi.imag());
+    if(chi_def.imag() < big_num) def.chi = complex<double>(def.chi.real(), chi_def.imag());
     if(m_def < big_num)          def.m = m_def;
     if(width_def < big_num)      def.width = width_def;
     for(map<size_t, pml_config_parameter>::iterator it = phys_pml.params.begin(); it != phys_pml.params.end(); ++it)
     {
         pml_config_parameter * curr_par = &(it->second);
-        if(curr_par->chi.real() >= big_num) curr_par->chi.real(def.chi.real());
-        if(curr_par->chi.imag() >= big_num) curr_par->chi.imag(def.chi.imag());
+        if(curr_par->chi.real() >= big_num) curr_par->chi = complex<double>(def.chi.real(), curr_par->chi.imag());
+        if(curr_par->chi.imag() >= big_num) curr_par->chi = complex<double>(curr_par->chi.real(), def.chi.imag());
         if(curr_par->m >= big_num)          curr_par->m = def.m;
         if(curr_par->width >= big_num)      curr_par->width = def.width;
     }

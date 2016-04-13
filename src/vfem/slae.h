@@ -1,4 +1,4 @@
-#if !defined SLAE_H_INCLUDED
+#if !defined(SLAE_H_INCLUDED)
 #define SLAE_H_INCLUDED
 
 #include "../common/common.h"

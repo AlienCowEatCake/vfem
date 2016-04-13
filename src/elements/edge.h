@@ -1,4 +1,4 @@
-#if !defined EDGE_H_INCLUDED
+#if !defined(EDGE_H_INCLUDED)
 #define EDGE_H_INCLUDED
 
 #include "../common/common.h"

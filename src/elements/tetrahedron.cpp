@@ -373,8 +373,7 @@ tetrahedron_base::diff_normL2(const array_t<complex<double> > & q, eval_func fun
         {
             double re = func_d[i].real() * func_d[i].real();
             double im = func_d[i].imag() * func_d[i].imag();
-            func_d[i].real(re);
-            func_d[i].imag(im);
+            func_d[i] = complex<double>(re, im);
             result_v3[i] += tet_integration->gauss_weights[k] * (re + im);
         }
         result_cv3 += tet_integration->gauss_weights[k] * func_d;
@@ -407,8 +406,7 @@ tetrahedron_base::diff_normL2(const array_t<complex<double> > & q, const array_t
         {
             double re = func_d[i].real() * func_d[i].real();
             double im = func_d[i].imag() * func_d[i].imag();
-            func_d[i].real(re);
-            func_d[i].imag(im);
+            func_d[i] = complex<double>(re, im);
             result_v3[i] += tet_integration->gauss_weights[k] * (re + im);
         }
         result_cv3 += tet_integration->gauss_weights[k] * func_d;
@@ -435,8 +433,7 @@ tetrahedron_base::normL2(eval_func func, void * data) const
         {
             double re = func_d[i].real() * func_d[i].real();
             double im = func_d[i].imag() * func_d[i].imag();
-            func_d[i].real(re);
-            func_d[i].imag(im);
+            func_d[i] = complex<double>(re, im);
             result_v3[i] += tet_integration->gauss_weights[k] * (re + im);
         }
         result_cv3 += tet_integration->gauss_weights[k] * func_d;
@@ -465,8 +462,7 @@ tetrahedron_base::normL2(const array_t<complex<double> > & q_true) const
         {
             double re = func_d[i].real() * func_d[i].real();
             double im = func_d[i].imag() * func_d[i].imag();
-            func_d[i].real(re);
-            func_d[i].imag(im);
+            func_d[i] = complex<double>(re, im);
             result_v3[i] += tet_integration->gauss_weights[k] * (re + im);
         }
         result_cv3 += tet_integration->gauss_weights[k] * func_d;

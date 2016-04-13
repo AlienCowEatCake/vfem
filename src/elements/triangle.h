@@ -1,4 +1,4 @@
-#if !defined TRIANGLE_H_INCLUDED
+#if !defined(TRIANGLE_H_INCLUDED)
 #define TRIANGLE_H_INCLUDED
 
 #include "../common/common.h"

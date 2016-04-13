@@ -1,4 +1,4 @@
-#if !defined COCG_GS_SMOOTH_H_INCLUDED
+#if !defined(COCG_GS_SMOOTH_H_INCLUDED)
 #define COCG_GS_SMOOTH_H_INCLUDED
 
 #include <cstdlib>

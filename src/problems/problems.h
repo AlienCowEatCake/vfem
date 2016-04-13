@@ -1,4 +1,4 @@
-#if !defined PROBLEMS_H_INCLUDED
+#if !defined(PROBLEMS_H_INCLUDED)
 #define PROBLEMS_H_INCLUDED
 
 #include "../common/common.h"

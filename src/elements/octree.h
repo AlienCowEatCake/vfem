@@ -1,4 +1,4 @@
-#if !defined OCTREE_H
+#if !defined(OCTREE_H)
 #define OCTREE_H
 
 #include <vector>

@@ -271,7 +271,7 @@ void VFEM::assemble_matrix()
     for(size_t k = 0; k < fes.size(); k++)
     {
         show_progress("", k, fes.size());
-#if defined VFEM_USE_PML
+#if defined(VFEM_USE_PML)
         if(!is_pml(fes[k].barycenter, &fes[k], &phys_pml))
             process_fe(fes[k].to_std());
         else
@@ -298,7 +298,6 @@ void VFEM::applying_bound()
                 if(ph.type_of_bounds == 1)
                 {
                     // Получение физических параметров для текущего треугольника границы
-                    //complex<double> k2(- ph.epsilon * ph.omega * ph.omega, ph.omega * ph.sigma);
 
                     // Инициализация параметров вычислителей для первого краевого
                     pair<const config_type *, array_t<evaluator_helmholtz *, 3> >
@@ -314,10 +313,8 @@ void VFEM::applying_bound()
                             evaluator_helmholtz * ev_curr = &(config.boundary.default_value[i]);
                             params_object.second[i] = ev_curr;
                             ev_curr->set_epsilon(ph.epsilon);
-                            //ev_curr->set_sigma(ph.sigma);
                             ev_curr->set_mu(ph.mu);
                             ev_curr->set_J0(ph.J0);
-                            //ev_curr->set_k2(k2);
                         }
 
                     // Получение степеней свободы
@@ -642,7 +639,6 @@ void VFEM::calculate_diff()
     {
         // Получение физических параметров для заданного КЭ
         phys_area ph = fes[k].get_phys_area();
-        //complex<double> k2(- ph.epsilon * ph.omega * ph.omega, ph.omega * ph.sigma);
 
         // Инициализация параметров вычислителей для аналитики
         pair<const config_type *, array_t<evaluator_helmholtz *, 3> >
@@ -658,10 +654,8 @@ void VFEM::calculate_diff()
                 evaluator_helmholtz * ev_curr = &(config.analytical.default_value[i]);
                 params_object.second[i] = ev_curr;
                 ev_curr->set_epsilon(ph.epsilon);
-                //ev_curr->set_sigma(ph.sigma);
                 ev_curr->set_mu(ph.mu);
                 ev_curr->set_J0(ph.J0);
-                //ev_curr->set_k2(k2);
             }
 
         // Находим локальные веса, связанные с этим КЭ

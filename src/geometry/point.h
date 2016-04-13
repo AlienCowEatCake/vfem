@@ -1,4 +1,4 @@
-#if !defined POINT_H_INCLUDED
+#if !defined(POINT_H_INCLUDED)
 #define POINT_H_INCLUDED
 
 #include "../common/common.h"

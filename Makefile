@@ -1,12 +1,12 @@
 CXX ?= g++
 CXXFLAGS_EXTRA ?= -Wall -Wextra -std=c++0x -pedantic -pipe -DUSE_NOSIGHUP
 CXXFLAGS_OPTIMIZE ?= -O3 -march=native -mtune=native -DNDEBUG
-LDFLAGS_EXTRA ?= -s
+LDFLAGS_EXTRA ?= -Wl,-O1 -s
 EXECUTABLE = vfem
 
 LINK.o = $(LINK.cc)
-CXXFLAGS += $(CXXFLAGS_EXTRA) $(CXXFLAGS_OPTIMIZE) -fopenmp
-LDFLAGS += $(LDFLAGS_EXTRA) -lrt
+CXXFLAGS += $(CXXFLAGS_EXTRA) $(CXXFLAGS_OPTIMIZE) -fopenmp -DUSE_OMP
+LDFLAGS += $(LDFLAGS_EXTRA) -lrt -fopenmp
 
 SOURCES = \
 	src/main.cpp \
@@ -18,6 +18,8 @@ SOURCES = \
 	src/config/evaluator/evaluator_internal/jit/oper_templates.cpp \
 	src/config/evaluator/evaluator_internal/jit/real_templates.cpp \
 	src/common/cubatures.cpp \
+	src/stubs/omp_stubs.cpp \
+	src/stubs/mkl_stubs.cpp \
 	src/geometry/vector3.cpp \
 	src/elements/edge.cpp \
 	src/elements/face.cpp \
@@ -71,7 +73,7 @@ all: $(SOURCES) $(EXECUTABLE)
 .PHONY: clean distclean
 
 $(EXECUTABLE): $(OBJECTS)
-	$(CXX) $(CXXFLAGS) $(OBJECTS) $(LDFLAGS) -o $@
+	$(CXX) $(OBJECTS) $(LDFLAGS) -o $@
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) -c $< -o $@

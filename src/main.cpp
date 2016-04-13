@@ -1,7 +1,7 @@
 #include "problems/problems.h"
 #include <ctime>
 
-#if defined _WIN32
+#if defined(_WIN32)
 #include <windows.h>
 unsigned long mtime()
 {
@@ -25,7 +25,7 @@ unsigned long mtime()
 }
 #endif
 
-#if !defined _WIN32 && defined USE_NOSIGHUP
+#if !defined(_WIN32) && defined(USE_NOSIGHUP)
 #include <sys/types.h>
 #include <unistd.h>
 #include <signal.h>
@@ -100,7 +100,7 @@ void print_time(unsigned long msec, const string & descr)
 // Пауза, если это необходимо и поддерживаемо системой
 int paused(int ret)
 {
-#if defined _WIN32
+#if defined(_WIN32)
     char * session = getenv("SESSIONNAME");
     if(!session || _stricmp(session, "Console"))
         system("pause");
@@ -143,7 +143,7 @@ bool vfem_solve(VFEM & v, const string & config, solve_mode mode, bool nopost, c
 
     string config_dir = "";
     size_t delim_pos = config.find_last_of("/");
-#if defined _WIN32
+#if defined(_WIN32)
     size_t delim_pos_w = config.find_last_of("\\");
     if(delim_pos == string::npos || (delim_pos_w != string::npos && delim_pos_w > delim_pos))
         delim_pos = delim_pos_w;
@@ -152,7 +152,7 @@ bool vfem_solve(VFEM & v, const string & config, solve_mode mode, bool nopost, c
         config_dir = config.substr(0, delim_pos + 1);
 
     if(!v.config.load(config)) return false;
-#if defined VFEM_USE_PML
+#if defined(VFEM_USE_PML)
     if(!v.config.load_pml(v.config.filename_pml)) return false;
 #endif
     if(!v.input_phys(config_dir + v.config.filename_phys)) return false;
@@ -210,7 +210,7 @@ public:
 // Main
 int main(int argc, char * argv [])
 {
-#if !defined _WIN32 && defined USE_NOSIGHUP
+#if !defined(_WIN32) && defined(USE_NOSIGHUP)
     // Устанавливаем обработчик SIGHUP
     struct sigaction sigact;
     memset(& sigact, 0, sizeof(struct sigaction));
@@ -220,16 +220,19 @@ int main(int argc, char * argv [])
 #endif
 
     string build_conf;
-#if defined VFEM_USE_PML
+#if defined(VFEM_USE_PML)
     build_conf.append(" # VFEM_USE_PML\n");
 #endif
-#if defined USE_CXX11
+#if defined(USE_CXX11)
     build_conf.append(" # USE_CXX11\n");
 #endif
-#if defined USE_NOSIGHUP
+#if defined(USE_NOSIGHUP)
     build_conf.append(" # USE_NOSIGHUP\n");
 #endif
-#if defined USE_MKL
+#if defined(USE_OMP)
+    build_conf.append(" # USE_OMP\n");
+#endif
+#if defined(USE_MKL)
     build_conf.append(" # USE_MKL\n");
 #endif
     if(!build_conf.empty())
@@ -244,6 +247,7 @@ int main(int argc, char * argv [])
         env_conf.append(env_curr);
         env_conf.append("\n");
     }
+#if defined(USE_OMP)
     env_curr = getenv("OMP_NUM_THREADS");
     if(env_curr)
     {
@@ -251,7 +255,8 @@ int main(int argc, char * argv [])
         env_conf.append(env_curr);
         env_conf.append("\n");
     }
-#if defined USE_MKL
+#endif
+#if defined(USE_MKL)
     env_curr = getenv("MKL_NUM_THREADS");
     if(env_curr)
     {
@@ -260,7 +265,7 @@ int main(int argc, char * argv [])
         env_conf.append("\n");
     }
 #endif
-#if defined _WIN32
+#if defined(_WIN32)
     env_curr = getenv("SESSIONNAME");
     if(env_curr)
     {
@@ -292,7 +297,7 @@ int main(int argc, char * argv [])
         {
             string name(argv[0]);
             size_t delim_pos = name.find_last_of("/");
-#if defined _WIN32
+#if defined(_WIN32)
             size_t delim_pos_w = name.find_last_of("\\");
             if(delim_pos == string::npos || (delim_pos_w != string::npos && delim_pos_w > delim_pos))
                 delim_pos = delim_pos_w;

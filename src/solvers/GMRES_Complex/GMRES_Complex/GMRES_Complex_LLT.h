@@ -1,4 +1,4 @@
-#if !defined GMRES_COMPLEX_LLT_H_INCLUDED
+#if !defined(GMRES_COMPLEX_LLT_H_INCLUDED)
 #define GMRES_COMPLEX_LLT_H_INCLUDED
 
 #include <cstdlib>

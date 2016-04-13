@@ -1,4 +1,4 @@
-#if !defined CGMCOMPLEX_VC_H_INCLUDED
+#if !defined(CGMCOMPLEX_VC_H_INCLUDED)
 #define CGMCOMPLEX_VC_H_INCLUDED
 
 #include "../../../common/common.h"

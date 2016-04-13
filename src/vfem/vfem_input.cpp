@@ -675,7 +675,7 @@ bool VFEM::input_mesh(const string & gmsh_filename)
 
     gmsh_file.close();
 
-#if defined USE_CXX11
+#if defined(USE_CXX11)
     fes.shrink_to_fit();
     trs_base.shrink_to_fit();
     trs_full.shrink_to_fit();
@@ -846,7 +846,7 @@ bool VFEM::input_mesh(const string & gmsh_filename)
     tree.make(min_coord[0], max_coord[0], min_coord[1], max_coord[1],
               min_coord[2], max_coord[2], fes);
 
-#if defined VFEM_USE_PML
+#if defined(VFEM_USE_PML)
     input_pml();
 #endif
 
@@ -896,7 +896,7 @@ bool VFEM::input_mesh(const string & gmsh_filename)
     return true;
 }
 
-#if defined VFEM_USE_PML
+#if defined(VFEM_USE_PML)
 cpoint VFEM::convert_point_to_pml(const point * p, const finite_element * fefe) const
 {
     static const double pml_gauss_points_local[5] =
