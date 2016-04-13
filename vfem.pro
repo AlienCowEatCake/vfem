@@ -45,7 +45,7 @@ use_omp {
 }
 
 use_mkl {
-    win32:*msvc* {
+    win32-msvc201*|win32-icc* {
         contains(QMAKE_HOST.arch, x86_64) {
             PROGRAMFILES = $$system("echo %ProgramFiles(x86)%")
         } else {

@@ -1,7 +1,7 @@
 #include "inifile.h"
-#include <fstream>
 #include <algorithm>
 #include <cctype>
+#include <fstream>
 #include <set>
 
 /**
@@ -41,7 +41,7 @@ bool inifile::load(const std::string & filename)
     std::ifstream ifs(filename.c_str());
     if(!ifs.good())
     {
-        status = false;
+        m_status = false;
         return false;
     }
 
@@ -74,7 +74,7 @@ bool inifile::load(const std::string & filename)
                         std::string value = trim(line.substr(eq_pos + 1));
                         if(value.length() > 1 && value[0] == '\"')
                             value = trim(value.substr(1, value.length() - 2));
-                        values[section][subsection][param] = value;
+                        m_values[section][subsection][param] = value;
                     }
                 }
             }
@@ -89,7 +89,7 @@ bool inifile::load(const std::string & filename)
     while(ifs.good());
 
     ifs.close();
-    status = true;
+    m_status = true;
     return true;
 }
 
@@ -103,8 +103,8 @@ bool inifile::load(const std::string & filename)
 const std::string * inifile::get_internal(const std::string & section, const std::string & subsection, const std::string & parameter) const
 {
     // Найдем искомую секцию
-    std::map<std::string, std::map<std::string, std::map<std::string, std::string> > >::const_iterator it_section = values.find(to_lowercase(section));
-    if(it_section != values.end())
+    std::map<std::string, std::map<std::string, std::map<std::string, std::string> > >::const_iterator it_section = m_values.find(to_lowercase(section));
+    if(it_section != m_values.end())
     {
         // Найдем искомую подсекцию
         std::map<std::string, std::map<std::string, std::string> >::const_iterator it_subsection = it_section->second.find(to_lowercase(subsection));
@@ -148,11 +148,11 @@ std::set<std::string> list_to_set_and_lower(const std::list<std::string> & in)
  */
 bool inifile::check_sections(const std::list<std::string> & whitelist) const
 {
-    if(!status)
+    if(!m_status)
         return false;
     std::set<std::string> whiteset = list_to_set_and_lower(whitelist);
     for(std::map<std::string, std::map<std::string, std::map<std::string, std::string> > >::const_iterator
-        it = values.begin(), it_end = values.end(); it != it_end; ++it)
+        it = m_values.begin(), it_end = m_values.end(); it != it_end; ++it)
     {
         if(whiteset.find(it->first) == whiteset.end())
         {
@@ -172,11 +172,11 @@ bool inifile::check_sections(const std::list<std::string> & whitelist) const
  */
 bool inifile::check_parameters(const std::string & section, const std::list<std::string> & whitelist) const
 {
-    if(!status)
+    if(!m_status)
         return false;
     std::map<std::string, std::map<std::string, std::map<std::string, std::string> > >::const_iterator
-            it_section = values.find(to_lowercase(section));
-    if(it_section == values.end())
+            it_section = m_values.find(to_lowercase(section));
+    if(it_section == m_values.end())
         return true;
     std::set<std::string> whiteset = list_to_set_and_lower(whitelist);
     for(std::map<std::string, std::map<std::string, std::string> >::const_iterator it_subsection = it_section->second.begin(),

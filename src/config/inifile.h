@@ -6,11 +6,11 @@
 #pragma warning(disable : 4503)
 #endif
 
+#include <list>
 #include <map>
 #include <string>
 #include <sstream>
 #include <iostream>
-#include <list>
 
 /**
  * @brief Обрезка whitespace символов по краям строки
@@ -36,13 +36,13 @@ public:
     /**
      * @brief Конструктор по-умолчанию
      */
-    inifile() : status(false) {}
+    inifile() : m_status(false) {}
 
     /**
      * @brief Конструктор с именем входного файла
      * @param[in] filename имя входного файла
      */
-    inifile(const std::string & filename) { status = load(filename); }
+    inifile(const std::string & filename) { m_status = load(filename); }
 
     /**
      * @brief Загрузка ini-файла
@@ -55,7 +55,7 @@ public:
      * @brief Статус, разобран ли ini-файл
      * @return true - файл успешно разобран, false - возникли ошибки
      */
-    inline bool good() const { return status; }
+    inline bool good() const { return m_status; }
 
     /**
      * @brief Получить значение параметра с именем "parameter" в секции "section" подсекции "subsection"
@@ -163,8 +163,8 @@ public:
     {
         (void)(type);
         std::list<T> result;
-        typename std::map<std::string, std::map<std::string, std::map<std::string, std::string> > >::const_iterator it_section = values.find(to_lowercase(section));
-        if(it_section != values.end())
+        typename std::map<std::string, std::map<std::string, std::map<std::string, std::string> > >::const_iterator it_section = m_values.find(to_lowercase(section));
+        if(it_section != m_values.end())
         {
             for(std::map<std::string, std::map<std::string, std::string> >::const_iterator it = it_section->second.begin(); it != it_section->second.end(); ++it)
             {
@@ -200,12 +200,12 @@ protected:
     /**
      * @brief Статус, разобран ли входной конфиг
      */
-    bool status;
+    bool m_status;
 
     /**
      * @brief Конетейнер значений параметров, сгруппированных в подсекции, сгруппированные в секции
      */
-    std::map<std::string, std::map<std::string, std::map<std::string, std::string> > > values;
+    std::map<std::string, std::map<std::string, std::map<std::string, std::string> > > m_values;
 
     /**
      * @brief Получить значение параметра с именем "parameter" в секции "section" подсекции "subsection"
@@ -241,7 +241,7 @@ protected:
     /**
      * @brief Преобразование подсекции в строковое представление
      * @param[in] subsection подсекция
-     * @note @return строковое представление подсекции
+     * @return строковое представление подсекции
      */
     template<typename T>
     std::string subsection_to_str(const T & subsection) const
