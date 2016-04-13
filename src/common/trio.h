@@ -1,4 +1,4 @@
-#ifndef TRIO_H
+#if !defined(TRIO_H)
 #define TRIO_H
 
 template<typename T1, typename T2, typename T3>

@@ -1,4 +1,4 @@
-#ifndef EVALUATOR_PARSE_H
+#if !defined(EVALUATOR_PARSE_H)
 #define EVALUATOR_PARSE_H
 
 /*

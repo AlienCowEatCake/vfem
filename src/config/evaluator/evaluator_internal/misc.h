@@ -1,4 +1,4 @@
-#ifndef EVALUATOR_MISC_H
+#if !defined(EVALUATOR_MISC_H)
 #define EVALUATOR_MISC_H
 
 #include <vector>

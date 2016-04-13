@@ -1,4 +1,4 @@
-#ifndef OMP_STUBS_H
+#if !defined(OMP_STUBS_H)
 #define OMP_STUBS_H
 
 namespace omp_stubs

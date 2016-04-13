@@ -340,7 +340,7 @@ void VFEM::applying_bound()
         }
 
         // Учет первых краевых
-        for(size_t k = 0; k < slae.n; k++) 	  // Пробегаем по всей матрице
+        for(size_t k = 0; k < slae.n; k++)  // Пробегаем по всей матрице
         {
             show_progress("applying", k, slae.n);
 
@@ -377,7 +377,7 @@ void VFEM::applying_bound()
     else
     {
 
-        for(size_t k = 0; k < slae.n; k++) 	  // Пробегаем по всей матрице
+        for(size_t k = 0; k < slae.n; k++)  // Пробегаем по всей матрице
         {
             show_progress("", k, slae.n);
 

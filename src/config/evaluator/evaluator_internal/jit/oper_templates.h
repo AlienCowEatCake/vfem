@@ -1,4 +1,4 @@
-#ifndef EVALUATOR_OPER_TEMPLATES_H
+#if !defined(EVALUATOR_OPER_TEMPLATES_H)
 #define EVALUATOR_OPER_TEMPLATES_H
 
 #include <complex>

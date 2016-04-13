@@ -1,4 +1,4 @@
-#ifndef INIFILE_H
+#if !defined(INIFILE_H)
 #define INIFILE_H
 
 #if defined(_MSC_VER)

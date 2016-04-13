@@ -1,4 +1,4 @@
-#ifndef EVALUATOR_COMPILE_INLINE_H
+#if !defined(EVALUATOR_COMPILE_INLINE_H)
 #define EVALUATOR_COMPILE_INLINE_H
 
 #include <vector>

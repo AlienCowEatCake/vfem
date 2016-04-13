@@ -1,4 +1,4 @@
-#ifndef EVALUATOR_XYZ_H
+#if !defined(EVALUATOR_XYZ_H)
 #define EVALUATOR_XYZ_H
 
 /*

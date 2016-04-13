@@ -1,4 +1,4 @@
-#ifndef EVALUATOR_COMPILE_EXTCALL_H
+#if !defined(EVALUATOR_COMPILE_EXTCALL_H)
 #define EVALUATOR_COMPILE_EXTCALL_H
 
 #include <vector>

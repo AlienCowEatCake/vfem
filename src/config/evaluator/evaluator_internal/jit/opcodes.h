@@ -1,4 +1,4 @@
-#ifndef EVALUATOR_OPCODES_H
+#if !defined(EVALUATOR_OPCODES_H)
 #define EVALUATOR_OPCODES_H
 
 #include <complex>
@@ -435,14 +435,14 @@ inline void jmp(char *& code_curr, char * code_jump)
     }
 }
 
-// mov	bl,ah
+// mov  bl,ah
 inline void mov_bl_ah(char *& code_curr)
 {
     *(code_curr++) = '\x88';
     *(code_curr++) = '\xe3';
 }
 
-// test	bl,1
+// test bl,1
 inline void test_bl_1(char *& code_curr)
 {
     *(code_curr++) = '\xf6';

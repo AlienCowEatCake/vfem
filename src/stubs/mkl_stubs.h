@@ -1,4 +1,4 @@
-#ifndef MKL_STUBS_H
+#if !defined(MKL_STUBS_H)
 #define MKL_STUBS_H
 
 #if !defined(USE_OMP)

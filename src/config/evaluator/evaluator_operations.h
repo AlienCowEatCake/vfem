@@ -1,4 +1,4 @@
-#ifndef EVALUATOR_OPERATIONS_H
+#if !defined(EVALUATOR_OPERATIONS_H)
 #define EVALUATOR_OPERATIONS_H
 
 #include <cmath>

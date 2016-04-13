@@ -1,4 +1,4 @@
-#ifndef EVALUATOR_SIMPLIFY_H
+#if !defined(EVALUATOR_SIMPLIFY_H)
 #define EVALUATOR_SIMPLIFY_H
 
 #include <deque>

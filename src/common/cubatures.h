@@ -1,4 +1,4 @@
-#ifndef CUBATURES_H_INCLUDED
+#if !defined(CUBATURES_H_INCLUDED)
 #define CUBATURES_H_INCLUDED
 
 #include "../common/common.h"

@@ -1,4 +1,4 @@
-#ifndef EVALUATOR_CALCULATE_H
+#if !defined(EVALUATOR_CALCULATE_H)
 #define EVALUATOR_CALCULATE_H
 
 #include <stack>

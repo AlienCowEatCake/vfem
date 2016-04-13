@@ -1,4 +1,4 @@
-#ifndef EVALUATOR_HELMHOLTZ_H
+#if !defined(EVALUATOR_HELMHOLTZ_H)
 #define EVALUATOR_HELMHOLTZ_H
 
 #include <complex>
