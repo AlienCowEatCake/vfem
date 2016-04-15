@@ -146,7 +146,7 @@ void GMRES_Complex::solve(complex<double> * solution, const complex<double> * rp
 
         residual_prev = residual;
         residual = discr / rp_norm;
-        if(iter%10 == 0)
+        //if(iter%10 == 0)
         {
             printf("GMRES_Complex Residual:\t%5lu\t%.3e\r", (unsigned long)iter, residual);
             fflush(stdout);

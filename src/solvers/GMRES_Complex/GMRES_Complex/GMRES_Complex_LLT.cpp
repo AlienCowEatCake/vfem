@@ -242,7 +242,7 @@ void GMRES_Complex_LLT::solve(complex<double> * solution, const complex<double> 
 
         residual_prev = residual;
         residual = discr / rp_norm;
-        if(iter%10 == 0)
+        //if(iter%10 == 0)
         {
             printf("GMRES_Complex_LLT Residual:\t%5lu\t%.3e\r", (unsigned long)iter, residual);
             fflush(stdout);
