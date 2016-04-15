@@ -314,9 +314,8 @@ void VFEM::assemble_matrix()
     cout << "Assembling matrix ..." << endl;
 
     cout << " > Assembling matrix ..." << endl;
-    bool no_rp = !config.right_enabled, no_K = !config.v_cycle_enabled;
+    bool no_rp = !config.right_enabled, no_K = !config.v_cycle_enabled, no_MpG = false;
     size_t max_progress = fes.size() + (no_K ? 0 : fes.size()) + (no_rp ? 0 : fes.size());
-
     size_t k_MpG = 0, k_K = 0, k_rp = 0;
     #pragma omp parallel num_threads(std::min((int)3, (int)omp_get_max_threads()))
     {
@@ -333,10 +332,11 @@ void VFEM::assemble_matrix()
                     else
                     #endif
                         process_fe_MpG(&fes[k_MpG]);
-                    // Распечатывает прогресс тот, кто меньше всех сделал
-                    if((k_MpG < k_K || no_K) && (k_MpG < k_rp || no_rp))
+                    // Распечатывает прогресс тот, кто больше всех сделал из не закончивших
+                    if((no_K || k_MpG > k_K) && (no_rp || k_MpG > k_rp))
                         show_progress("", k_MpG + k_K + k_rp, max_progress);
                 }
+                no_MpG = true;
             }
             #pragma omp section
             {
@@ -351,11 +351,12 @@ void VFEM::assemble_matrix()
                         else
                         #endif
                             process_fe_K(&fes[k_K]);
-                        // Распечатывает прогресс тот, кто меньше всех сделал
-                        if(k_K < k_MpG && (k_K < k_rp || no_rp))
+                        // Распечатывает прогресс тот, кто больше всех сделал из не закончивших
+                        if((no_MpG || k_K > k_MpG) && (no_rp || k_K > k_rp))
                             show_progress("", k_MpG + k_K + k_rp, max_progress);
                     }
                 }
+                no_K = true;
             }
             #pragma omp section
             {
@@ -370,11 +371,12 @@ void VFEM::assemble_matrix()
                         else
                         #endif
                             process_fe_rp(&fes[k_rp]);
-                        // Распечатывает прогресс тот, кто меньше всех сделал
-                        if(k_rp < k_MpG && (k_rp < k_K || no_K))
+                        // Распечатывает прогресс тот, кто больше всех сделал из не закончивших
+                        if((no_MpG || k_rp > k_MpG) && (no_K || k_rp > k_K))
                             show_progress("", k_MpG + k_K + k_rp, max_progress);
                     }
                 }
+                no_rp = true;
             }
         }
     }

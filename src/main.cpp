@@ -274,6 +274,13 @@ int main(int argc, char * argv [])
         env_conf.append("\n");
     }
 #endif
+    env_curr = getenv("GMRES_M");
+    if(env_curr)
+    {
+        env_conf.append(" # GMRES_M = ");
+        env_conf.append(env_curr);
+        env_conf.append("\n");
+    }
     if(!env_conf.empty())
         cout << "Environment configuration:" << endl << env_conf << flush;
 

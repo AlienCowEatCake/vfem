@@ -252,7 +252,7 @@ void GMRES_Complex_LDLT::solve(complex<double> * solution, const complex<double>
         residual = discr / rp_norm;
         //if(iter%10 == 0)
         {
-            printf("GMRES_Complex_LDLT Residual:\t%5lu\t%.3e\r", (unsigned long)iter, residual);
+            printf("GMRES_Complex_LDLT(%lu) Residual:\t%5lu\t%.3e\r", (unsigned long)m, (unsigned long)iter, residual);
             fflush(stdout);
         }
 
@@ -354,7 +354,7 @@ void GMRES_Complex_LDLT::solve(complex<double> * solution, const complex<double>
 //        r[i] = rp[i] - r[i];
 //    discr = sqrt(dot_prod_self(r));
 //    rp_norm = sqrt(dot_prod_self(rp));
-    printf("GMRES_Complex_LDLT Residual:\t%5lu\t%.3e\n", (unsigned long)iter - 1, discr / rp_norm);
+    printf("GMRES_Complex_LDLT(%lu) Residual:\t%5lu\t%.3e\n", (unsigned long)m, (unsigned long)iter - 1, discr / rp_norm);
 
     if(iter >= max_iter)
         printf("Soulution can`t found, iteration limit exceeded!\n");
