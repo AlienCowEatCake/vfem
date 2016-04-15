@@ -43,6 +43,8 @@ bool is_pml(const point & p, const finite_element * fe, const phys_pml_area * ph
 class VFEM
 {
 public:
+    VFEM();
+
     // Конфигурация
     config_type config;
 
@@ -159,9 +161,16 @@ public:
     void apply_electrodes();
 
 protected:
-    // Добавление локальных матриц от одного КЭ в глобальную
+    // Добавление локальной матрицы от одного КЭ в глобальную
     template<typename T>
-    void process_fe(const T * fe);
+    void process_fe_MpG(const T * curr_fe);
+    // Добавление локальной матрицы ядра от одного КЭ в глобальную матриицу ядра
+    template<typename T>
+    void process_fe_K(const T * curr_fe);
+    // Добавление локальной правой части от одного КЭ в глобальную правую часть
+    template<typename T>
+    void process_fe_rp(const T * curr_fe);
+
     // Генерация абстрактного портрета
     template<typename U, typename V>
     void generate_abstract_portrait(size_t all_dof_num, const vector<U> & elems, SLAE & slae_curr,

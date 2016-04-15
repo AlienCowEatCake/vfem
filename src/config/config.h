@@ -14,6 +14,16 @@
 
 using namespace std;
 
+// Распределение вычислителей по тредам
+namespace threads_config
+{
+    static const size_t matrix_full = 0;
+    static const size_t matrix_ker  = 1;
+    static const size_t right_part  = 2;
+    static const size_t boundary    = 0;
+    static const size_t analytical  = 0;
+}
+
 //                                  BASIS_ORDER BASIS_TYPE
 // Первый порядок I типа (неполный)      1           1
 // Первый порядок II типа (полный)       1           2

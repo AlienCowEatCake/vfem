@@ -130,12 +130,15 @@ bool VFEM::input_phys(const string & phys_filename)
         ph->type_of_bounds = 0;
         ph->J0 = 0.0;
         ph->E0 = 0.0;
-        if(!ph->sigma.parse(sigma) || !ph->sigma.simplify())
+        for(size_t i = 0; i < ph->sigma.size(); i++)
         {
-            cout << "Error in " << __FILE__ << ":" << __LINE__
-                 << " while parsing " << sigma << " ("
-                 << ph->sigma.get_error() << ")" << endl;
-            return false;
+            if(!ph->sigma[i].parse(sigma) || !ph->sigma[i].simplify())
+            {
+                cout << "Error in " << __FILE__ << ":" << __LINE__
+                     << " while parsing " << sigma << " ("
+                     << ph->sigma[i].get_error() << ")" << endl;
+                return false;
+            }
         }
     }
 
@@ -194,7 +197,16 @@ bool VFEM::input_phys(const string & phys_filename)
         {
             ph->mu = mu_default;
             ph->epsilon = eps_default;
-            ph->sigma = sigma_default;
+            for(size_t i = 0; i < ph->sigma.size(); i++)
+            {
+                if(!ph->sigma[i].parse(sigma_default) || !ph->sigma[i].simplify())
+                {
+                    cout << "Error in " << __FILE__ << ":" << __LINE__
+                         << " while parsing " << sigma_default << " ("
+                         << ph->sigma[i].get_error() << ")" << endl;
+                    return false;
+                }
+            }
         }
     }
 
@@ -250,7 +262,16 @@ bool VFEM::input_phys(const string & phys_filename)
         {
             ph->mu = mu_default;
             ph->epsilon = eps_default;
-            ph->sigma = sigma_default;
+            for(size_t i = 0; i < ph->sigma.size(); i++)
+            {
+                if(!ph->sigma[i].parse(sigma_default) || !ph->sigma[i].simplify())
+                {
+                    cout << "Error in " << __FILE__ << ":" << __LINE__
+                         << " while parsing " << sigma_default << " ("
+                         << ph->sigma[i].get_error() << ")" << endl;
+                    return false;
+                }
+            }
         }
     }
 
@@ -346,7 +367,16 @@ bool VFEM::input_phys(const string & phys_filename)
         {
             ph->mu = mu_default;
             ph->epsilon = eps_default;
-            ph->sigma = sigma_default;
+            for(size_t i = 0; i < ph->sigma.size(); i++)
+            {
+                if(!ph->sigma[i].parse(sigma_default) || !ph->sigma[i].simplify())
+                {
+                    cout << "Error in " << __FILE__ << ":" << __LINE__
+                         << " while parsing " << sigma_default << " ("
+                         << ph->sigma[i].get_error() << ")" << endl;
+                    return false;
+                }
+            }
         }
         double I    = cfg_file.get("Electrode", gmsh_num, "I",   1.0);
         double l    = cfg_file.get("Electrode", gmsh_num, "l",   1.0);
@@ -359,21 +389,24 @@ bool VFEM::input_phys(const string & phys_filename)
 
     for(map<phys_id, phys_area>::iterator it = phys.begin(); it != phys.end(); ++it)
     {
-        if(!it->second.sigma.is_parsed())
+        for(size_t i = 0; i < it->second.sigma.size(); i++)
         {
-            cout << "[Phys Config] Bad sigma in phys area \"" << it->first.gmsh_num << "\"" << endl;
-            return false;
-        }
-        switch(config.jit_type)
-        {
-        case evaluator3::JIT_EXTCALL:
-            it->second.sigma.compile_extcall();
-            break;
-        case evaluator3::JIT_INLINE:
-            it->second.sigma.compile_inline();
-            break;
-        default:
-            break;
+            if(!it->second.sigma[i].is_parsed())
+            {
+                cout << "[Phys Config] Bad sigma in phys area \"" << it->first.gmsh_num << "\"" << endl;
+                return false;
+            }
+            switch(config.jit_type)
+            {
+            case evaluator3::JIT_EXTCALL:
+                it->second.sigma[i].compile_extcall();
+                break;
+            case evaluator3::JIT_INLINE:
+                it->second.sigma[i].compile_inline();
+                break;
+            default:
+                break;
+            }
         }
     }
 

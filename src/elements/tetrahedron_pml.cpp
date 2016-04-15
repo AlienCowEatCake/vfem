@@ -230,11 +230,11 @@ tetrahedron_pml::MpG() const
     {
         // TODO: Костыль
         phys_area * phys_editable = const_cast<phys_area *>(phys);
-        phys_editable->sigma.set_x(gauss_points[k].x);
-        phys_editable->sigma.set_y(gauss_points[k].y);
-        phys_editable->sigma.set_z(gauss_points[k].z);
+        phys_editable->sigma[threads_config::matrix_full].set_x(gauss_points[k].x);
+        phys_editable->sigma[threads_config::matrix_full].set_y(gauss_points[k].y);
+        phys_editable->sigma[threads_config::matrix_full].set_z(gauss_points[k].z);
         double sigma = 0.0;
-        phys_editable->sigma.calculate(sigma);
+        phys_editable->sigma[threads_config::matrix_full].calculate(sigma);
         complex<double> k2(- phys->epsilon * phys->omega * phys->omega, phys->omega * sigma);
 
         for(size_t i = 0; i < basis->tet_bf_num; i++)
@@ -307,11 +307,11 @@ tetrahedron_pml::K() const
     {
         // TODO: Костыль
         phys_area * phys_editable = const_cast<phys_area *>(phys);
-        phys_editable->sigma.set_x(gauss_points[k].x);
-        phys_editable->sigma.set_y(gauss_points[k].y);
-        phys_editable->sigma.set_z(gauss_points[k].z);
+        phys_editable->sigma[threads_config::matrix_ker].set_x(gauss_points[k].x);
+        phys_editable->sigma[threads_config::matrix_ker].set_y(gauss_points[k].y);
+        phys_editable->sigma[threads_config::matrix_ker].set_z(gauss_points[k].z);
         double sigma = 0.0;
-        phys_editable->sigma.calculate(sigma);
+        phys_editable->sigma[threads_config::matrix_ker].calculate(sigma);
         complex<double> k2(- phys->epsilon * phys->omega * phys->omega, phys->omega * sigma);
 
         for(size_t i = 0; i < basis->tet_ker_bf_num; i++)

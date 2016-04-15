@@ -15,6 +15,11 @@ protected:
 
 public:
 
+    size_t size()
+    {
+        return dimension;
+    }
+
     type & operator [] (size_t i)
     {
         return m_values[i];

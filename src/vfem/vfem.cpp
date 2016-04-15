@@ -1,5 +1,28 @@
 #include "vfem.h"
 
+#if !defined(USE_OMP)
+#include "../stubs/omp_stubs.h"
+using namespace omp_stubs;
+#else
+#include <omp.h>
+#endif
+
+VFEM::VFEM()
+{
+    int num_threads = -1;
+    if(num_threads <= 0)
+    {
+        char * env_num_threads = getenv("OMP_NUM_THREADS");
+        if(env_num_threads)
+            num_threads = atoi(env_num_threads);
+    }
+    if(num_threads <= 0)
+    {
+        num_threads = 1;
+    }
+    omp_set_num_threads(num_threads);
+}
+
 // Получение количества степеней свободы тетраэдра
 size_t VFEM::get_tet_dof_num(const tetrahedron_base * fe) const
 {
@@ -194,44 +217,20 @@ void VFEM::generate_surf_portrait()
     delete [] portrait;
 }
 
-// Добавление локальных матриц от одного КЭ в глобальную
+// Добавление локальной матрицы от одного КЭ в глобальную
 template<typename T>
-void VFEM::process_fe(const T * curr_fe)
+void VFEM::process_fe_MpG(const T * curr_fe)
 {
     // Получение физических параметров для заданного КЭ
     phys_area ph = curr_fe->get_phys_area();
-
-    // Инициализация параметров вычислителей для правой части
-    pair<const config_type *, array_t<evaluator_helmholtz *, 3> >
-            params_object(& config, array_t<evaluator_helmholtz *, 3>());
-    if(config.right_enabled)
-    {
-        map<size_t, array_t<evaluator_helmholtz, 3> >::iterator
-                it = config.right.values.find(ph.gmsh_num);
-        if(it != config.right.values.end())
-            for(size_t i = 0; i < 3; i++)
-                params_object.second[i] = &(it->second[i]);
-        else
-            for(size_t i = 0; i < 3; i++)
-            {
-                evaluator_helmholtz * ev_curr = &(config.right.default_value[i]);
-                params_object.second[i] = ev_curr;
-                ev_curr->set_epsilon(ph.epsilon);
-                ev_curr->set_mu(ph.mu);
-                ev_curr->set_J0(ph.J0);
-            }
-    }
 
     // Получение степеней свободы
     array_t<size_t> dof(config.basis.tet_bf_num);
     for(size_t i = 0; i < config.basis.tet_bf_num; i++)
         dof[i] = get_tet_dof(curr_fe, i);
 
-    // Получение локальных матриц и правой части
-    matrix_t<complex<double> > matrix_MpG = curr_fe->MpG();
-    array_t<complex<double> > array_rp = curr_fe->rp(func_rp, &params_object);
-
     // Основная матрица
+    matrix_t<complex<double> > matrix_MpG = curr_fe->MpG();
     for(size_t i = 0; i < config.basis.tet_bf_num; i++)
     {
         size_t i_num = dof[i];
@@ -241,12 +240,24 @@ void VFEM::process_fe(const T * curr_fe)
             slae.add(i_num, j_num, matrix_MpG[i][j]);
         }
         slae.di[i_num] += matrix_MpG[i][i];
-        slae.rp[i_num] += array_rp[i];
     }
+}
 
-    // Матрица ядра
+// Добавление локальной матрицы ядра от одного КЭ в глобальную матриицу ядра
+template<typename T>
+void VFEM::process_fe_K(const T * curr_fe)
+{
     if(config.v_cycle_enabled)
     {
+        // Получение физических параметров для заданного КЭ
+        phys_area ph = curr_fe->get_phys_area();
+
+        // Получение степеней свободы
+        array_t<size_t> dof(config.basis.tet_bf_num);
+        for(size_t i = 0; i < config.basis.tet_bf_num; i++)
+            dof[i] = get_tet_dof(curr_fe, i);
+
+        // Матрица ядра
         array_t<size_t> ker_dof(config.basis.tet_ker_bf_num);
         for(size_t i = 0; i < config.basis.tet_ker_bf_num; i++)
             ker_dof[i] = get_tet_ker_dof(curr_fe, i);
@@ -262,21 +273,107 @@ void VFEM::process_fe(const T * curr_fe)
     }
 }
 
+// Добавление локальной правой части от одного КЭ в глобальную правую часть
+template<typename T>
+void VFEM::process_fe_rp(const T * curr_fe)
+{
+    if(config.right_enabled)
+    {
+        // Получение физических параметров для заданного КЭ
+        phys_area ph = curr_fe->get_phys_area();
+
+        // Получение степеней свободы
+        array_t<size_t> dof(config.basis.tet_bf_num);
+        for(size_t i = 0; i < config.basis.tet_bf_num; i++)
+            dof[i] = get_tet_dof(curr_fe, i);
+
+        pair<const config_type *, array_t<evaluator_helmholtz *, 3> >
+                params_object(& config, array_t<evaluator_helmholtz *, 3>());
+
+        // Инициализация параметров вычислителей для правой части
+        map<size_t, array_t<evaluator_helmholtz, 3> >::iterator
+                it = config.right.values.find(ph.gmsh_num);
+        if(it != config.right.values.end())
+            for(size_t i = 0; i < 3; i++)
+                params_object.second[i] = &(it->second[i]);
+        else
+            for(size_t i = 0; i < 3; i++)
+            {
+                evaluator_helmholtz * ev_curr = &(config.right.default_value[i]);
+                params_object.second[i] = ev_curr;
+                ev_curr->set_epsilon(ph.epsilon);
+                ev_curr->set_mu(ph.mu);
+                ev_curr->set_J0(ph.J0);
+            }
+
+        // Правая часть
+        array_t<complex<double> > array_rp = curr_fe->rp(func_rp, &params_object);
+        for(size_t i = 0; i < config.basis.tet_bf_num; i++)
+        {
+            slae.rp[dof[i]] += array_rp[i];
+        }
+    }
+}
+
 void VFEM::assemble_matrix()
 {
     cout << "Assembling matrix ..." << endl;
 
     cout << " > Assembling matrix ..." << endl;
-    // Cборка основной матрицы
-    for(size_t k = 0; k < fes.size(); k++)
+    size_t k_MpG = 0, k_K = 0, k_rp = 0, max_progress = 3 * fes.size();
+#pragma omp parallel num_threads(std::min((int)3, (int)omp_get_max_threads()))
     {
-        show_progress("", k, fes.size());
+#pragma omp sections
+        {
+#pragma omp section
+            {
+                // Cборка основной матрицы
+                for(k_MpG = 0; k_MpG < fes.size(); k_MpG++)
+                {
 #if defined(VFEM_USE_PML)
-        if(!is_pml(fes[k].barycenter, &fes[k], &phys_pml))
-            process_fe(fes[k].to_std());
-        else
+                    if(!is_pml(fes[k_MpG].barycenter, &fes[k_MpG], &phys_pml))
+                        process_fe_MpG(fes[k_MpG].to_std());
+                    else
 #endif
-            process_fe(&fes[k]);
+                        process_fe_MpG(&fes[k_MpG]);
+                    // Распечатывает прогресс тот, кто меньше всех сделал
+                    if(k_MpG < k_K && k_MpG < k_rp)
+                        show_progress("", k_MpG + k_K + k_rp, max_progress);
+                }
+            }
+#pragma omp section
+            {
+                // Сборка матрицы ядра
+                for(k_K = 0; k_K < fes.size(); k_K++)
+                {
+#if defined(VFEM_USE_PML)
+                    if(!is_pml(fes[k_K].barycenter, &fes[k_K], &phys_pml))
+                        process_fe_K(fes[k_K].to_std());
+                    else
+#endif
+                        process_fe_K(&fes[k_K]);
+                    // Распечатывает прогресс тот, кто меньше всех сделал
+                    if(k_K < k_MpG && k_K < k_rp)
+                        show_progress("", k_MpG + k_K + k_rp, max_progress);
+                }
+            }
+#pragma omp section
+            {
+                // Сборка правой части
+                for(k_rp = 0; k_rp < fes.size(); k_rp++)
+                {
+#if defined(VFEM_USE_PML)
+                    if(!is_pml(fes[k_rp].barycenter, &fes[k_rp], &phys_pml))
+                        process_fe_rp(fes[k_rp].to_std());
+                    else
+#endif
+                        process_fe_rp(&fes[k_rp]);
+                    // Распечатывает прогресс тот, кто меньше всех сделал
+                    if(k_rp < k_MpG && k_rp < k_K)
+                        show_progress("", k_MpG + k_K + k_rp, max_progress);
+                }
+            }
+        }
     }
 }
 
