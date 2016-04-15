@@ -78,7 +78,7 @@ void mkl_zcsrsymv(const char * uplo, const MKL_INT * m, const MKL_Complex16 * a,
     MKL_INT n = * m;
     if(uplo[0] == 'L' || uplo[0] == 'l')
     {
-/**/
+/*
         for(MKL_INT i = 0; i < n; i++)
         {
             complex<double> v_el = xx[i];
@@ -90,11 +90,12 @@ void mkl_zcsrsymv(const char * uplo, const MKL_INT * m, const MKL_Complex16 * a,
                 yy[j] += aa[k] * v_el;
             }
         }
+*/
 /**/
-/*
         complex<double> * mv_tmp;
         MKL_INT * mv_ind, nt1;
-        int numThreads = omp_get_num_threads();
+        int numThreads = omp_get_max_threads();
+        (void)numThreads;
 
 #pragma omp parallel num_threads(numThreads)
         {
@@ -168,7 +169,7 @@ void mkl_zcsrsymv(const char * uplo, const MKL_INT * m, const MKL_Complex16 * a,
 
         delete [] mv_tmp;
         delete [] mv_ind;
-*/
+/**/
         return;
     }
     fprintf(stderr, "mkl_zcsrsymv is not fully implemented!\n");
@@ -223,7 +224,7 @@ void mkl_set_num_threads(int n)
 
 int mkl_get_max_threads()
 {
-    return omp_get_num_threads();
+    return omp_get_max_threads();
 }
 
 }

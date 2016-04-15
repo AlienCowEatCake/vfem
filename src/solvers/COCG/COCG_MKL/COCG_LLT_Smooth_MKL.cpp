@@ -330,17 +330,15 @@ COCG_LLT_Smooth_MKL::COCG_LLT_Smooth_MKL()
     numThreads = -1;
     if(numThreads <= 0)
     {
-        char * env_num_threads;
-        env_num_threads = getenv("MKL_NUM_THREADS");
+        char * env_num_threads = getenv("MKL_NUM_THREADS");
         if(env_num_threads)
-            sscanf(env_num_threads, "%d", &numThreads);
+            numThreads = atoi(env_num_threads);
     }
     if(numThreads <= 0)
     {
-        char * env_num_threads;
-        env_num_threads = getenv("OMP_NUM_THREADS");
+        char * env_num_threads = getenv("OMP_NUM_THREADS");
         if(env_num_threads)
-            sscanf(env_num_threads, "%d", &numThreads);
+            numThreads = atoi(env_num_threads);
     }
     if(numThreads <= 0)
     {
@@ -348,7 +346,7 @@ COCG_LLT_Smooth_MKL::COCG_LLT_Smooth_MKL()
     }
     mkl_set_num_threads(numThreads);
     omp_set_num_threads(numThreads);
-    numThreads = mkl_get_max_threads();
+    numThreads = std::max(mkl_get_max_threads(), omp_get_max_threads());
     r = x0 = z = p = s = xs = rs = NULL;
     L_aa = LLT_tmp = NULL;
     ia = ja = NULL;

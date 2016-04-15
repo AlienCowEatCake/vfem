@@ -228,7 +228,7 @@ void COCG_Di_Smooth_OpenMP::solve(complex<double> * solution, const complex<doub
         }
 
         double residual = discr / rp_norm;
-        if(iter%100 == 0)
+        if(iter%10 == 0)
         {
 #if PRECONDITIONER == PRECONDITIONER_DI
             printf("COCG_Di_Smooth_OpenMP [%d] Residual:\t%5lu\t%.3e\r", numThreads, (unsigned long)iter, sqrt(residual));
@@ -310,17 +310,16 @@ COCG_Di_Smooth_OpenMP::COCG_Di_Smooth_OpenMP()
     numThreads = -1;
     if(numThreads <= 0)
     {
-        char * env_num_threads;
-        env_num_threads = getenv("OMP_NUM_THREADS");
+        char * env_num_threads = getenv("OMP_NUM_THREADS");
         if(env_num_threads)
-            sscanf(env_num_threads, "%d", &numThreads);
+            numThreads = atoi(env_num_threads);
     }
     if(numThreads <= 0)
     {
         numThreads = 1;
     }
     omp_set_num_threads(numThreads);
-    numThreads = omp_get_num_threads();
+    numThreads = omp_get_max_threads();
     r = x0 = z = p = s = xs = rs = NULL;
     mv_tmp = NULL;
     mv_ind = NULL;

@@ -22,6 +22,12 @@ int omp_get_num_threads();
  */
 int omp_get_thread_num();
 
+/**
+ * @brief Returns an integer that is equal to or greater than the number of threads that would be available if a parallel region without num_threads were defined at that point in the code.
+ * @return An integer that is equal to or greater than the number of threads that would be available if a parallel region without num_threads were defined at that point in the code.
+ */
+int omp_get_max_threads();
+
 }
 
 #endif // OMP_STUBS_H
