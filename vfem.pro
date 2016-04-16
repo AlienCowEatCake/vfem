@@ -7,10 +7,6 @@ CONFIG += warn_on
 CONFIG += use_mkl
 CONFIG += use_omp
 
-# https://bugreports.qt.io/browse/QTBUG-11923
-# https://bugreports.qt.io/browse/QTBUG-24906
-DEFINES += QMAKE_WORKAROUND
-
 unix:!macx:QMAKE_LIBS += -lrt
 
 *g++*|*clang* {
@@ -119,6 +115,11 @@ SOURCES += \
     src/solvers/GMRES_Complex/GMRES_Complex/GMRES_Complex_Di.cpp \
     src/solvers/GMRES_Complex/GMRES_Complex/GMRES_Complex_LDLT.cpp \
     src/solvers/GMRES_Complex/GMRES_Complex/GMRES_Complex_LLT.cpp \
+    src/solvers/GMRES_Complex/GMRES_Complex_OpenMP/GMRES_Complex_OpenMP.cpp \
+    src/solvers/GMRES_Complex/GMRES_Complex_OpenMP/GMRES_Complex_Di_OpenMP.cpp \
+    src/solvers/GMRES_Complex/GMRES_Complex_MKL/GMRES_Complex_MKL.cpp \
+    src/solvers/GMRES_Complex/GMRES_Complex_MKL/GMRES_Complex_Di_MKL.cpp \
+    src/solvers/GMRES_Complex/GMRES_Complex_MKL/GMRES_Complex_LLT_MKL.cpp \
     src/solvers/COCG/COCG/COCG.cpp \
     src/solvers/COCG/COCG/COCG_Di.cpp \
     src/solvers/COCG/COCG/COCG_GS.cpp \
@@ -193,6 +194,11 @@ HEADERS += \
     src/solvers/GMRES_Complex/GMRES_Complex/GMRES_Complex_Di.h \
     src/solvers/GMRES_Complex/GMRES_Complex/GMRES_Complex_LDLT.h \
     src/solvers/GMRES_Complex/GMRES_Complex/GMRES_Complex_LLT.h \
+    src/solvers/GMRES_Complex/GMRES_Complex_OpenMP/GMRES_Complex_OpenMP.h \
+    src/solvers/GMRES_Complex/GMRES_Complex_OpenMP/GMRES_Complex_Di_OpenMP.h \
+    src/solvers/GMRES_Complex/GMRES_Complex_MKL/GMRES_Complex_MKL.h \
+    src/solvers/GMRES_Complex/GMRES_Complex_MKL/GMRES_Complex_Di_MKL.h \
+    src/solvers/GMRES_Complex/GMRES_Complex_MKL/GMRES_Complex_LLT_MKL.h \
     src/solvers/COCG/COCG/COCG_Di.h \
     src/solvers/COCG/COCG/COCG_GS.h \
     src/solvers/COCG/COCG/COCG.h \

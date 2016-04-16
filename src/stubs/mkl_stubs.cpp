@@ -70,6 +70,25 @@ void cblas_zdotu_sub(const MKL_INT N, const void * X, const MKL_INT incX, const 
     result->imag = dp_i;
 }
 
+void cblas_zdotc_sub(const MKL_INT N, const void * X, const MKL_INT incX, const void * Y, const MKL_INT incY, void * dotc)
+{
+    const complex<double> * x = static_cast<const complex<double> *>(X);
+    const complex<double> * y = static_cast<const complex<double> *>(Y);
+    double dp_r = 0.0, dp_i = 0.0;
+#pragma omp parallel for reduction(+ : dp_r, dp_i)
+    for(MKL_INT i = 0; i < N; i++)
+    {
+        MKL_INT j = i * incX;
+        MKL_INT k = i * incY;
+        complex<double> t = conj(x[j]) * y[k];
+        dp_r += t.real();
+        dp_i += t.imag();
+    }
+    MKL_Complex16 * result = static_cast<MKL_Complex16 *>(dotc);
+    result->real = dp_r;
+    result->imag = dp_i;
+}
+
 void mkl_zcsrsymv(const char * uplo, const MKL_INT * m, const MKL_Complex16 * a, const MKL_INT * ia,  const MKL_INT * ja, const MKL_Complex16 * x,  MKL_Complex16 * y)
 {
     const complex<double> * aa = reinterpret_cast<const complex<double> *>(a);

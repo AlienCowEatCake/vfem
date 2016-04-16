@@ -191,7 +191,8 @@ void GMRES_Complex_LDLT::mul_LT(const complex<double> * f, complex<double> * x) 
     for(size_t i = 0; i < n; i++)
     {
         complex<double> v_el = f[i];
-        x[i] = L_di[i] * v_el;
+        //x[i] = L_di[i] * v_el;
+        x[i] = v_el;
         for(size_t k = gi[i], k1 = gi[i+1]; k < k1; k++)
             x[gj[k]] += L_gg[k] * v_el;
     }

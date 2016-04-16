@@ -118,8 +118,7 @@ void GMRES_Complex_Di::solve(complex<double> * solution, const complex<double> *
 {
     rp = rp_s;
 
-    x0 = new complex<double> [n];
-    copy_vec(solution, x0);
+    x0 = solution;
 
     mul_matrix(solution, r);
     for(size_t i = 0; i < n ; i++)
@@ -133,8 +132,6 @@ void GMRES_Complex_Di::solve(complex<double> * solution, const complex<double> *
     if(is_fpu_error(rp_norm))
     {
         fprintf(stderr, "Error: FPU error detected in right part!\n");
-        copy_vec(x0, solution);
-        delete [] x0;
         return;
     }
 
@@ -147,8 +144,6 @@ void GMRES_Complex_Di::solve(complex<double> * solution, const complex<double> *
         if(is_fpu_error(discr))
         {
             fprintf(stderr, "Error: FPU error detected in (r, r)!\n");
-            copy_vec(x0, solution);
-            delete [] x0;
             return;
         }
 
@@ -248,9 +243,6 @@ void GMRES_Complex_Di::solve(complex<double> * solution, const complex<double> *
         else
             finished = true;
     }
-
-    copy_vec(x0, solution);
-    delete [] x0;
 
 //    mul_matrix(solution, r);
 //    for(size_t i = 0; i < n; i++)

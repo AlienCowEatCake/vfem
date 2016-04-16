@@ -234,6 +234,11 @@
     <ClInclude Include="..\..\..\src\solvers\GMRES_Complex\GMRES_Complex\GMRES_Complex_Di.h" />
     <ClInclude Include="..\..\..\src\solvers\GMRES_Complex\GMRES_Complex\GMRES_Complex_LDLT.h" />
     <ClInclude Include="..\..\..\src\solvers\GMRES_Complex\GMRES_Complex\GMRES_Complex_LLT.h" />
+    <ClInclude Include="..\..\..\src\solvers\GMRES_Complex\GMRES_Complex_MKL\GMRES_Complex_Di_MKL.h" />
+    <ClInclude Include="..\..\..\src\solvers\GMRES_Complex\GMRES_Complex_MKL\GMRES_Complex_LLT_MKL.h" />
+    <ClInclude Include="..\..\..\src\solvers\GMRES_Complex\GMRES_Complex_MKL\GMRES_Complex_MKL.h" />
+    <ClInclude Include="..\..\..\src\solvers\GMRES_Complex\GMRES_Complex_OpenMP\GMRES_Complex_Di_OpenMP.h" />
+    <ClInclude Include="..\..\..\src\solvers\GMRES_Complex\GMRES_Complex_OpenMP\GMRES_Complex_OpenMP.h" />
     <ClInclude Include="..\..\..\src\solvers\solver_interface.h" />
     <ClInclude Include="..\..\..\src\stubs\mkl_stubs.h" />
     <ClInclude Include="..\..\..\src\stubs\omp_stubs.h" />
@@ -292,6 +297,11 @@
     <ClCompile Include="..\..\..\src\solvers\GMRES_Complex\GMRES_Complex\GMRES_Complex_Di.cpp" />
     <ClCompile Include="..\..\..\src\solvers\GMRES_Complex\GMRES_Complex\GMRES_Complex_LDLT.cpp" />
     <ClCompile Include="..\..\..\src\solvers\GMRES_Complex\GMRES_Complex\GMRES_Complex_LLT.cpp" />
+    <ClCompile Include="..\..\..\src\solvers\GMRES_Complex\GMRES_Complex_MKL\GMRES_Complex_Di_MKL.cpp" />
+    <ClCompile Include="..\..\..\src\solvers\GMRES_Complex\GMRES_Complex_MKL\GMRES_Complex_LLT_MKL.cpp" />
+    <ClCompile Include="..\..\..\src\solvers\GMRES_Complex\GMRES_Complex_MKL\GMRES_Complex_MKL.cpp" />
+    <ClCompile Include="..\..\..\src\solvers\GMRES_Complex\GMRES_Complex_OpenMP\GMRES_Complex_Di_OpenMP.cpp" />
+    <ClCompile Include="..\..\..\src\solvers\GMRES_Complex\GMRES_Complex_OpenMP\GMRES_Complex_OpenMP.cpp" />
     <ClCompile Include="..\..\..\src\stubs\mkl_stubs.cpp" />
     <ClCompile Include="..\..\..\src\stubs\omp_stubs.cpp" />
     <ClCompile Include="..\..\..\src\vfem\slae.cpp" />

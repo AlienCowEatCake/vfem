@@ -13,14 +13,6 @@ using namespace omp_stubs;
 #include <omp.h>
 #endif
 
-#define PRECONDITIONER_NONE 0x01
-#define PRECONDITIONER_DI   0x02
-#define PRECONDITIONER_LLT  0x03
-
-#if !defined(PRECONDITIONER)
-#define PRECONDITIONER PRECONDITIONER_LLT
-#endif
-
 #if defined(_MSC_VER)
 typedef long omp_int;
 #else
@@ -97,13 +89,11 @@ void COCG_LLT_Smooth_MKL::init(const size_t * gi_s, const size_t * gj_s, const c
         aa[ind].imag = di[i].imag();
     }
 
-#if PRECONDITIONER == PRECONDITIONER_LLT
     delete [] L_aa;
     delete [] LLT_tmp;
     LLT_tmp = new MKL_Complex16 [n];
     L_aa = new MKL_Complex16 [gi[n] + n];
     make_LLT_decomposition();
-#endif
 }
 
 void COCG_LLT_Smooth_MKL::make_LLT_decomposition()
@@ -202,16 +192,8 @@ void COCG_LLT_Smooth_MKL::solve(complex<double> * solution, const complex<double
     for(omp_int i = 0; i < (omp_int)n; i++)
     {
         r[i] = rp[i] - r[i];
-#if PRECONDITIONER == PRECONDITIONER_DI
-        z[i] = r[i] / di[i];
-#endif
-#if PRECONDITIONER == PRECONDITIONER_NONE
-        z[i] = r[i];
-#endif
     }
-#if PRECONDITIONER == PRECONDITIONER_LLT
     solve_LLT(r, z);
-#endif
     normal_zcopy(n, solution, xs);
     normal_zcopy(n, r, rs);
     normal_zcopy(n, z, p);
@@ -244,16 +226,7 @@ void COCG_LLT_Smooth_MKL::solve(complex<double> * solution, const complex<double
         double residual = discr / rp_norm;
         if(iter%10 == 0)
         {
-#if PRECONDITIONER == PRECONDITIONER_LLT
             printf("COCG_LLT_Smooth_MKL [%d] Residual:\t%5lu\t%.3e\r", numThreads, (unsigned long)iter, sqrt(residual));
-#endif
-#if PRECONDITIONER == PRECONDITIONER_DI
-            printf("COCG_Di_Smooth_MKL [%d] Residual:\t%5lu\t%.3e\r", numThreads, (unsigned long)iter, sqrt(residual));
-#endif
-#if PRECONDITIONER == PRECONDITIONER_NONE
-            printf("COCG_Smooth_MKL [%d] Residual:\t%5lu\t%.3e\r", numThreads, (unsigned long)iter, sqrt(residual));
-#endif
-
             fflush(stdout);
         }
 
@@ -268,12 +241,6 @@ void COCG_LLT_Smooth_MKL::solve(complex<double> * solution, const complex<double
 #pragma omp parallel for
             for(omp_int i = 0; i < (omp_int)n ; i++)
             {
-#if PRECONDITIONER == PRECONDITIONER_DI
-                p[i] = r[i] / di[i];
-#endif
-#if PRECONDITIONER == PRECONDITIONER_NONE
-                p[i] = r[i];
-#endif
                 s[i] = r[i] - rs[i]; // r - s, сглаживатель
             }
 
@@ -288,9 +255,8 @@ void COCG_LLT_Smooth_MKL::solve(complex<double> * solution, const complex<double
                 rs[i] = eta1 * rs[i] + eta * r[i];
             }
 
-#if PRECONDITIONER == PRECONDITIONER_LLT
             solve_LLT(r, p);
-#endif
+
             prod_2 = dot_prod_nocj(p, r);
 
             beta = prod_2 / prod_1;
@@ -309,16 +275,7 @@ void COCG_LLT_Smooth_MKL::solve(complex<double> * solution, const complex<double
 //            for(omp_int i = 0; i < (omp_int)n; i++)
 //        r[i] = rp[i] - r[i];
 //    discr = dot_prod_self(r);
-#if PRECONDITIONER == PRECONDITIONER_LLT
     printf("COCG_LLT_Smooth_MKL [%d] Residual:\t%5lu\t%.3e\n", numThreads, (unsigned long)iter - 1, sqrt(discr / rp_norm));
-#endif
-#if PRECONDITIONER == PRECONDITIONER_DI
-    printf("COCG_Di_Smooth_MKL [%d] Residual:\t%5lu\t%.3e\n", numThreads, (unsigned long)iter - 1, sqrt(discr / rp_norm));
-#endif
-#if PRECONDITIONER == PRECONDITIONER_NONE
-    printf("COCG_Smooth_MKL [%d] Residual:\t%5lu\t%.3e\n", numThreads, (unsigned long)iter - 1, sqrt(discr / rp_norm));
-#endif
-
     if(iter >= max_iter)
         printf("Soulution can`t found, iteration limit exceeded!\n");
 
@@ -367,11 +324,6 @@ COCG_LLT_Smooth_MKL::~COCG_LLT_Smooth_MKL()
     delete [] ja;
     delete [] aa;
 }
-
-#undef PRECONDITIONER
-#undef PRECONDITIONER_NONE
-#undef PRECONDITIONER_DI
-#undef PRECONDITIONER_LLT
 
 // =================================================================================================
 

@@ -27,6 +27,15 @@
 #include "../solvers/GMRES_Complex/GMRES_Complex/GMRES_Complex_LLT.h"
 #include "../solvers/GMRES_Complex/GMRES_Complex/GMRES_Complex_LDLT.h"
 
+// Решатели GMRES с OpenMP
+#include "../solvers/GMRES_Complex/GMRES_Complex_OpenMP/GMRES_Complex_OpenMP.h"
+#include "../solvers/GMRES_Complex/GMRES_Complex_OpenMP/GMRES_Complex_Di_OpenMP.h"
+
+// Решатели GMRES с MKL
+#include "../solvers/GMRES_Complex/GMRES_Complex_MKL/GMRES_Complex_MKL.h"
+#include "../solvers/GMRES_Complex/GMRES_Complex_MKL/GMRES_Complex_Di_MKL.h"
+#include "../solvers/GMRES_Complex/GMRES_Complex_MKL/GMRES_Complex_LLT_MKL.h"
+
 // Решатели BiCG
 #include "../solvers/BiCG_Complex/BiCG_Complex/BiCG_Complex_Smooth.h"
 
@@ -47,13 +56,6 @@
 #include "../solvers/BiCGStab_Complex/legacy/BiCGStabComplex_VC.h"
 #include "../solvers/COCG/legacy/CGMComplex_VC.h"
 #include "../solvers/COCG/legacy/CGMComplex_LLT.h"
-
-#if defined(QMAKE_WORKAROUND)
-// https://bugreports.qt.io/browse/QTBUG-11923
-// https://bugreports.qt.io/browse/QTBUG-24906
-#include "../solvers/COCG/COCG_OpenMP/COCG_Di_Smooth_OpenMP.cpp"
-#include "../solvers/COCG/COCG_MKL/COCG_LLT_Smooth_MKL.cpp"
-#endif
 
 SLAE::SLAE()
 {
@@ -114,6 +116,18 @@ void SLAE::init(const string & name)
         solver = new GMRES_Complex_LLT;
     else if(name == "GMRES_Complex_LDLT")
         solver = new GMRES_Complex_LDLT;
+    // Решатели GMRES с OpenMP
+    else if(name == "GMRES_Complex_OpenMP")
+        solver = new GMRES_Complex_OpenMP;
+    else if(name == "GMRES_Complex_Di_OpenMP")
+        solver = new GMRES_Complex_Di_OpenMP;
+    // Решатели GMRES с MKL
+    else if(name == "GMRES_Complex_MKL")
+        solver = new GMRES_Complex_MKL;
+    else if(name == "GMRES_Complex_Di_MKL")
+        solver = new GMRES_Complex_Di_MKL;
+    else if(name == "GMRES_Complex_LLT_MKL")
+        solver = new GMRES_Complex_LLT_MKL;
     // Решатели BiCG
     else if(name == "BiCG_Complex_Smooth")
         solver = new BiCG_Complex_Smooth;
@@ -146,11 +160,15 @@ void SLAE::init(const string & name)
         solver = new CGMComplex_LLT;
     // Решатель по умолчанию
     else
+    {
+        cout << "Warning in " << __FILE__ << ":" << __LINE__
+             << " - unknown solver \"" << name << "\"" << endl;
 #if !defined(USE_MKL)
         solver = new COCG_LLT_Smooth;
 #else
         solver = new COCG_LLT_Smooth_MKL;
 #endif
+    }
     solver->init(ig, jg, di, gg, n);
 }
 

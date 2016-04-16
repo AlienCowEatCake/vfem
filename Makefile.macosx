@@ -51,6 +51,11 @@ SOURCES = \
 	src/solvers/GMRES_Complex/GMRES_Complex/GMRES_Complex_Di.cpp \
 	src/solvers/GMRES_Complex/GMRES_Complex/GMRES_Complex_LDLT.cpp \
 	src/solvers/GMRES_Complex/GMRES_Complex/GMRES_Complex_LLT.cpp \
+	src/solvers/GMRES_Complex/GMRES_Complex_OpenMP/GMRES_Complex_OpenMP.cpp \
+	src/solvers/GMRES_Complex/GMRES_Complex_OpenMP/GMRES_Complex_Di_OpenMP.cpp \
+	src/solvers/GMRES_Complex/GMRES_Complex_MKL/GMRES_Complex_MKL.cpp \
+	src/solvers/GMRES_Complex/GMRES_Complex_MKL/GMRES_Complex_Di_MKL.cpp \
+	src/solvers/GMRES_Complex/GMRES_Complex_MKL/GMRES_Complex_LLT_MKL.cpp \
 	src/solvers/COCG/COCG/COCG.cpp \
 	src/solvers/COCG/COCG/COCG_Di.cpp \
 	src/solvers/COCG/COCG/COCG_GS.cpp \
