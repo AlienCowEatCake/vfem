@@ -321,43 +321,7 @@ void VFEM::assemble_matrix()
     {
         #pragma omp sections
         {
-            #pragma omp section
-            {
-                // Cборка основной матрицы
-                for(k_MpG = 0; k_MpG < fes.size(); k_MpG++)
-                {
-                    #if defined(VFEM_USE_PML)
-                    if(!is_pml(fes[k_MpG].barycenter, &fes[k_MpG], &phys_pml))
-                        process_fe_MpG(fes[k_MpG].to_std());
-                    else
-                    #endif
-                        process_fe_MpG(&fes[k_MpG]);
-                    // Распечатывает прогресс тот, кто больше всех сделал из не закончивших
-                    if((no_K || k_MpG > k_K) && (no_rp || k_MpG > k_rp))
-                        show_progress("", k_MpG + k_K + k_rp, max_progress);
-                }
-                no_MpG = true;
-            }
-            #pragma omp section
-            {
-                if(config.v_cycle_enabled)
-                {
-                    // Сборка матрицы ядра
-                    for(k_K = 0; k_K < fes.size(); k_K++)
-                    {
-                        #if defined(VFEM_USE_PML)
-                        if(!is_pml(fes[k_K].barycenter, &fes[k_K], &phys_pml))
-                            process_fe_K(fes[k_K].to_std());
-                        else
-                        #endif
-                            process_fe_K(&fes[k_K]);
-                        // Распечатывает прогресс тот, кто больше всех сделал из не закончивших
-                        if((no_MpG || k_K > k_MpG) && (no_rp || k_K > k_rp))
-                            show_progress("", k_MpG + k_K + k_rp, max_progress);
-                    }
-                }
-                no_K = true;
-            }
+            // Правая часть, если включена, жрет больше всего ресурсов, поэтому ее считаем сначала
             #pragma omp section
             {
                 if(config.right_enabled)
@@ -377,6 +341,45 @@ void VFEM::assemble_matrix()
                     }
                 }
                 no_rp = true;
+            }
+            // Основная матрица на втором месте, поэтому ее пускаем второй
+            #pragma omp section
+            {
+                // Cборка основной матрицы
+                for(k_MpG = 0; k_MpG < fes.size(); k_MpG++)
+                {
+                    #if defined(VFEM_USE_PML)
+                    if(!is_pml(fes[k_MpG].barycenter, &fes[k_MpG], &phys_pml))
+                        process_fe_MpG(fes[k_MpG].to_std());
+                    else
+                    #endif
+                        process_fe_MpG(&fes[k_MpG]);
+                    // Распечатывает прогресс тот, кто больше всех сделал из не закончивших
+                    if((no_K || k_MpG > k_K) && (no_rp || k_MpG > k_rp))
+                        show_progress("", k_MpG + k_K + k_rp, max_progress);
+                }
+                no_MpG = true;
+            }
+            // Матрица ядра считается быстро, поэтому ее поместим в конец
+            #pragma omp section
+            {
+                if(config.v_cycle_enabled)
+                {
+                    // Сборка матрицы ядра
+                    for(k_K = 0; k_K < fes.size(); k_K++)
+                    {
+                        #if defined(VFEM_USE_PML)
+                        if(!is_pml(fes[k_K].barycenter, &fes[k_K], &phys_pml))
+                            process_fe_K(fes[k_K].to_std());
+                        else
+                        #endif
+                            process_fe_K(&fes[k_K]);
+                        // Распечатывает прогресс тот, кто больше всех сделал из не закончивших
+                        if((no_MpG || k_K > k_MpG) && (no_rp || k_K > k_rp))
+                            show_progress("", k_MpG + k_K + k_rp, max_progress);
+                    }
+                }
+                no_K = true;
             }
         }
     }
