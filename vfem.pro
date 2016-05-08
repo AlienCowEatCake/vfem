@@ -1,3 +1,10 @@
+# Пример генерации проекта для MSVC:
+# set QMAKESPEC=win32-msvc2008
+# qmake -tp vc
+#
+# Пример получения списка cpp-шников для заполнения Makefile:
+# cat src/core/core.pri vfem.pro | grep '.cpp' | sed 's/$$PWD/src\/core/g ; s/^    /\t/g ; s/cpp$/cpp \\/'
+#
 TEMPLATE = app
 CONFIG += console
 CONFIG -= app_bundle
