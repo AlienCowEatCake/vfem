@@ -9,7 +9,7 @@ namespace core { namespace solvers { namespace CSRC { namespace preconditioners 
  * @brief Диагональный предобуславливатель, S = Di, Q = I, распараллеленный через OpenMP
  */
 template<typename val_type, typename ind_type = std::size_t>
-class preconditioner_Di_OpenMP : public preconditioner_Nothing<val_type, ind_type>
+class preconditioner_Di_OpenMP : public preconditioner_Nothing_OpenMP<val_type, ind_type>
 {
     typedef wrappers::omp::omp_int omp_int;
 
@@ -21,7 +21,7 @@ public:
 
     preconditioner_Di_OpenMP(const ind_type * gi, const ind_type * gj, const val_type * di,
                              const val_type * gg, ind_type n)
-        : preconditioner_Nothing<val_type, ind_type>(gi, gj, di, gg, n)
+        : preconditioner_Nothing_OpenMP<val_type, ind_type>(gi, gj, di, gg, n)
     {}
 
     virtual std::string get_name() const

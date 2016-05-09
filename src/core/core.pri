@@ -37,6 +37,7 @@ HEADERS += \
     $$PWD/solvers/CSRC/preconditioners/Nothing/preconditioner_Nothing_MKL.h \
     $$PWD/solvers/CSRC/preconditioners/Nothing/preconditioner_Nothing_OpenMP.h \
     $$PWD/solvers/CSRC/preconditioners/Di/preconditioner_Di.h \
+    $$PWD/solvers/CSRC/preconditioners/Di/preconditioner_Di_MKL.h \
     $$PWD/solvers/CSRC/preconditioners/Di/preconditioner_Di_OpenMP.h \
     $$PWD/solvers/CSRC/preconditioners/GS/preconditioner_GS.h \
     $$PWD/solvers/CSRC/preconditioners/LDLT/preconditioner_LDLT.h \

@@ -7,6 +7,7 @@
 #include "preconditioners/Nothing/preconditioner_Nothing_MKL.h"
 #include "preconditioners/Di/preconditioner_Di.h"
 #include "preconditioners/Di/preconditioner_Di_OpenMP.h"
+#include "preconditioners/Di/preconditioner_Di_MKL.h"
 #include "preconditioners/GS/preconditioner_GS.h"
 #include "preconditioners/LDLT/preconditioner_LDLT.h"
 #include "preconditioners/LLT/preconditioner_LLT.h"
@@ -56,6 +57,8 @@ preconditioners::preconditioner_interface<std::complex<double>, std::size_t> * c
         return new preconditioners::preconditioner_Di<std::complex<double>, std::size_t>(gi, gj, di, gg, n);
     if(utils::strings::compare_ci(name, "Di_OpenMP") == 0)
         return new preconditioners::preconditioner_Di_OpenMP<std::complex<double>, std::size_t>(gi, gj, di, gg, n);
+    if(utils::strings::compare_ci(name, "Di_MKL") == 0)
+        return new preconditioners::preconditioner_Di_MKL<std::complex<double>, std::size_t>(gi, gj, di, gg, n);
     if(utils::strings::compare_ci(name, "GS") == 0)
         return new preconditioners::preconditioner_GS<std::complex<double>, std::size_t>(gi, gj, di, gg, n);
     if(utils::strings::compare_ci(name, "LDLT") == 0)
