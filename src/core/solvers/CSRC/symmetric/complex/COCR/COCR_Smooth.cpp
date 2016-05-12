@@ -79,7 +79,7 @@ void COCR_Smooth::solve(std::complex<double> * solution, const std::complex<doub
         residual = discr / rp_norm;
         //if(iter%10 == 0)
         {
-            printf("COCR_Smooth<%s> Residual:\t%5lu\t%.3e\r", precond_name, (unsigned long)iter, residual);
+            printf("COCR_Smooth<%s> Residual:\t%5lu\t%.3e\r", precond_name, static_cast<unsigned long>(iter), residual);
             fflush(stdout);
         }
 
@@ -121,7 +121,7 @@ void COCR_Smooth::solve(std::complex<double> * solution, const std::complex<doub
 //    for(std::size_t i = 0; i < m_n; i++)
 //        m_r[i] = m_rp[i] - m_r[i];
 //    discr = sqrt(dot_prod_self(m_r));
-    printf("COCR_Smooth<%s> Residual:\t%5lu\t%.3e\n", precond_name_str.c_str(), (unsigned long)iter - 1, discr / rp_norm);
+    printf("COCR_Smooth<%s> Residual:\t%5lu\t%.3e\n", precond_name_str.c_str(), static_cast<unsigned long>(iter) - 1, discr / rp_norm);
 
     if(iter >= max_iter)
         printf("Soulution can`t found, iteration limit exceeded!\n");

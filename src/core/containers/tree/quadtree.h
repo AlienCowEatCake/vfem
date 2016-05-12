@@ -26,12 +26,12 @@ private:
         quadtree_node();
         ~quadtree_node();
         void clear();
-        void init_node(double x0, double x1, double y0, double y1, size_t split_constant, size_t level_barier);
+        void init_node(double x0, double x1, double y0, double y1, std::size_t split_constant, std::size_t level_barier);
         void add_element(std::vector<element_type *> & added_elements);
         bool add_element(element_type * added_element);
         element_type * find(double x, double y) const;
 
-        size_t level;
+        std::size_t level;
 
     private:
         bool point_in_node(double x, double y) const;
@@ -42,8 +42,8 @@ private:
         quadtree_node * sub_nodes;
         double x0, x1, y0, y1;
         double eps_x, eps_y;
-        size_t split_constant;
-        size_t level_barier;
+        std::size_t split_constant;
+        std::size_t level_barier;
     };
 
     quadtree_node root;
@@ -68,7 +68,7 @@ void quadtree<element_type>::quadtree_node::clear()
 {
     if(sub_nodes)
     {
-        for(size_t i = 0; i < 4; i++)
+        for(std::size_t i = 0; i < 4; i++)
             sub_nodes[i].clear();
         delete [] sub_nodes;
         sub_nodes = NULL;
@@ -77,7 +77,7 @@ void quadtree<element_type>::quadtree_node::clear()
 }
 
 template<class element_type>
-void quadtree<element_type>::quadtree_node::init_node(double x0, double x1, double y0, double y1, size_t split_constant, size_t level_barier)
+void quadtree<element_type>::quadtree_node::init_node(double x0, double x1, double y0, double y1, std::size_t split_constant, std::size_t level_barier)
 {
     this->x0 = x0;
     this->x1 = x1;
@@ -124,7 +124,7 @@ bool quadtree<element_type>::quadtree_node::add_element(element_type * added_ele
         }
         else   //если узел не терминальный (есть поддеревья)
         {
-            for(size_t i = 0; i < 4; i++)
+            for(std::size_t i = 0; i < 4; i++)
                 sub_nodes[i].add_element(added_element);
         }
         return true;
@@ -135,7 +135,7 @@ bool quadtree<element_type>::quadtree_node::add_element(element_type * added_ele
 template<class element_type>
 void quadtree<element_type>::quadtree_node::add_element(std::vector<element_type *> & added_elements)
 {
-    for(size_t i = 0 ; i < added_elements.size(); i++)
+    for(std::size_t i = 0 ; i < added_elements.size(); i++)
         add_element(added_elements[i]);
 }
 
@@ -151,7 +151,7 @@ void quadtree<element_type>::quadtree_node::split()
     sub_nodes[2].init_node(x0, x0+dx, y0+dy, y1, split_constant, level_barier);
     sub_nodes[3].init_node(x0+dx, x1, y0+dy, y1, split_constant, level_barier);
 
-    for(size_t i = 0; i < 4; i++)
+    for(std::size_t i = 0; i < 4; i++)
         sub_nodes[i].level = level + 1;
 
     add_element(elements);
@@ -165,13 +165,13 @@ element_type * quadtree<element_type>::quadtree_node::find(double x, double y) c
     {
         if(!sub_nodes)
         {
-            for(size_t i = 0; i < elements.size(); i++)
+            for(std::size_t i = 0; i < elements.size(); i++)
                 if(elements[i]->inside(x, y))
                     return elements[i];
         }
         else
         {
-            for(size_t i = 0; i < 4; i++)
+            for(std::size_t i = 0; i < 4; i++)
             {
                 element_type * finded = sub_nodes[i].find(x, y);
                 if(finded != NULL)
@@ -185,13 +185,13 @@ element_type * quadtree<element_type>::quadtree_node::find(double x, double y) c
 template<class element_type>
 void quadtree<element_type>::make(double x0, double x1, double y0, double y1, std::vector<element_type> & elements)
 {
-    size_t total_num = elements.size();
-    size_t level_barier = (size_t)(log((double)total_num + 1) / log(4.0)) + 1;
-    size_t split_constant = (size_t)(pow((double)total_num, 1.0 / 4.0) * 100.0);
+    std::size_t total_num = elements.size();
+    std::size_t level_barier = static_cast<std::size_t>(std::log(static_cast<double>(total_num) + 1) / std::log(4.0)) + 1;
+    std::size_t split_constant = static_cast<std::size_t>(std::pow(static_cast<double>(total_num), 1.0 / 4.0) * 100.0);
     root.init_node(x0, x1, y0, y1, split_constant, level_barier);
     root.level = 0;
     std::vector<element_type *> el_v(total_num);
-    for(size_t i = 0; i < total_num; i++)
+    for(std::size_t i = 0; i < total_num; i++)
         el_v[i] = &elements[i];
     root.add_element(el_v);
 }

@@ -3,7 +3,7 @@
 # qmake -tp vc
 #
 # Пример получения списка cpp-шников для заполнения Makefile:
-# cat src/core/core.pri vfem.pro | grep '.cpp' | sed 's/$$PWD/src\/core/g ; s/^    /\t/g ; s/cpp$/cpp \\/'
+# find src -name '*.cpp' | sort | sed 's/^/\t/ ; s/$/ \\/'
 #
 TEMPLATE = app
 CONFIG += console

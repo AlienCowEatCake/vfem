@@ -46,7 +46,7 @@ void GMRES_Complex_OpenMP::init(const std::size_t * gi, const std::size_t * gj, 
     {
         int temp_m = atoi(env_m);
         if(temp_m >= 1)
-            m_m = m_m_curr = (std::size_t)temp_m;
+            m_m = m_m_curr = static_cast<std::size_t>(temp_m);
     }
 
     m_VT = new std::complex<double> * [m_m];
@@ -232,7 +232,7 @@ void GMRES_Complex_OpenMP::solve(std::complex<double> * solution, const std::com
         residual = discr / rp_norm;
         //if(iter%10 == 0)
         {
-            printf("GMRES_Complex_OpenMP<%s>(%lu) [%d] Residual:\t%5lu\t%.3e\r", precond_name, (unsigned long)m_m, m_num_threads, (unsigned long)iter, residual);
+            printf("GMRES_Complex_OpenMP<%s>(%lu) [%d] Residual:\t%5lu\t%.3e\r", precond_name, static_cast<unsigned long>(m_m), m_num_threads, static_cast<unsigned long>(iter), residual);
             fflush(stdout);
         }
 
@@ -344,7 +344,7 @@ void GMRES_Complex_OpenMP::solve(std::complex<double> * solution, const std::com
 //        m_r[i] = m_rp[i] - m_r[i];
 //    discr = sqrt(dot_prod_self(m_r));
 //    rp_norm = sqrt(dot_prod_self(m_rp));
-    printf("GMRES_Complex_OpenMP<%s>(%lu) [%d] Residual:\t%5lu\t%.3e\n", precond_name_str.c_str(), (unsigned long)m_m, m_num_threads, (unsigned long)iter - 1, discr / rp_norm);
+    printf("GMRES_Complex_OpenMP<%s>(%lu) [%d] Residual:\t%5lu\t%.3e\n", precond_name_str.c_str(), static_cast<unsigned long>(m_m), m_num_threads, static_cast<unsigned long>(iter) - 1, discr / rp_norm);
 
     if(iter >= max_iter)
         printf("Soulution can`t found, iteration limit exceeded!\n");

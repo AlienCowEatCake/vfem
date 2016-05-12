@@ -134,7 +134,7 @@ void BiCG_Complex::solve(std::complex<double> * solution, const std::complex<dou
 
         //if(iter%10 == 0)
         {
-            printf("BiCG_Complex Residual:\t%5lu\t%.3e\r", (unsigned long)iter, sqrt(discr / rp_norm));
+            printf("BiCG_Complex Residual:\t%5lu\t%.3e\r", static_cast<unsigned long>(iter), sqrt(discr / rp_norm));
             fflush(stdout);
         }
 
@@ -171,7 +171,7 @@ void BiCG_Complex::solve(std::complex<double> * solution, const std::complex<dou
 //    for(std::size_t i = 0; i < m_n; i++)
 //        m_r[i] = rp[i] - m_r[i];
 //    discr = dot_prod_self(m_r);
-    printf("BiCG_Complex Residual:\t%5lu\t%.3e\n", (unsigned long)iter - 1, sqrt(discr / rp_norm));
+    printf("BiCG_Complex Residual:\t%5lu\t%.3e\n", static_cast<unsigned long>(iter) - 1, sqrt(discr / rp_norm));
 
     if(iter >= max_iter)
         printf("Soulution can`t found, iteration limit exceeded!\n");

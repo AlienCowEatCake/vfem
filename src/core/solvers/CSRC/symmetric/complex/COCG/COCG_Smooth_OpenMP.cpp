@@ -214,7 +214,7 @@ void COCG_Smooth_OpenMP::solve(std::complex<double> * solution, const std::compl
         double residual = discr / rp_norm;
 //        if(iter%10 == 0)
         {
-            printf("COCG_Smooth_OpenMP<%s> [%d] Residual:\t%5lu\t%.3e\r", precond_name, m_num_threads, (unsigned long)iter, sqrt(residual));
+            printf("COCG_Smooth_OpenMP<%s> [%d] Residual:\t%5lu\t%.3e\r", precond_name, m_num_threads, static_cast<unsigned long>(iter), sqrt(residual));
             fflush(stdout);
         }
 
@@ -263,7 +263,7 @@ void COCG_Smooth_OpenMP::solve(std::complex<double> * solution, const std::compl
 //    for(omp_int i = 0; i < static_cast<omp_int>(m_n); i++)
 //        m_r[i] = m_rp[i] - m_r[i];
 //    discr = dot_prod_self(m_r);
-    printf("COCG_Smooth_OpenMP<%s> [%d] Residual:\t%5lu\t%.3e\n", precond_name_str.c_str(), m_num_threads, (unsigned long)iter - 1, sqrt(discr / rp_norm));
+    printf("COCG_Smooth_OpenMP<%s> [%d] Residual:\t%5lu\t%.3e\n", precond_name_str.c_str(), m_num_threads, static_cast<unsigned long>(iter) - 1, sqrt(discr / rp_norm));
 
     if(iter >= max_iter)
         printf("Soulution can`t found, iteration limit exceeded!\n");

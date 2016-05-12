@@ -78,7 +78,7 @@ void COCG_Smooth::solve(std::complex<double> * solution, const std::complex<doub
         double residual = discr / rp_norm;
 //        if(iter%10 == 0)
         {
-            printf("COCG_Smooth<%s> Residual:\t%5lu\t%.3e\r", precond_name, (unsigned long)iter, sqrt(residual));
+            printf("COCG_Smooth<%s> Residual:\t%5lu\t%.3e\r", precond_name, static_cast<unsigned long>(iter), sqrt(residual));
             fflush(stdout);
         }
 
@@ -123,7 +123,7 @@ void COCG_Smooth::solve(std::complex<double> * solution, const std::complex<doub
 //    for(std::size_t i = 0; i < m_n; i++)
 //        m_r[i] = m_rp[i] - m_r[i];
 //    discr = dot_prod_self(m_r);
-    printf("COCG_Smooth<%s> Residual:\t%5lu\t%.3e\n", precond_name_str.c_str(), (unsigned long)iter - 1, sqrt(discr / rp_norm));
+    printf("COCG_Smooth<%s> Residual:\t%5lu\t%.3e\n", precond_name_str.c_str(), static_cast<unsigned long>(iter) - 1, sqrt(discr / rp_norm));
 
     if(iter >= max_iter)
         printf("Soulution can`t found, iteration limit exceeded!\n");

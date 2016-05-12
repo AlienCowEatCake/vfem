@@ -82,7 +82,7 @@ void BiCGStab_Complex_Smooth::solve(std::complex<double> * solution, const std::
 
         //if(iter%10 == 0)
         {
-            printf("BiCGStab_Complex_Smooth Residual:\t%5lu\t%.3e\r", (unsigned long)iter, sqrt(discr / rp_norm));
+            printf("BiCGStab_Complex_Smooth Residual:\t%5lu\t%.3e\r", static_cast<unsigned long>(iter), sqrt(discr / rp_norm));
             fflush(stdout);
         }
 
@@ -131,7 +131,7 @@ void BiCGStab_Complex_Smooth::solve(std::complex<double> * solution, const std::
 //    for(std::size_t i = 0; i < m_n; i++)
 //        m_r[i] = rp[i] - m_r[i];
 //    discr = dot_prod_self(m_r);
-    printf("BiCGStab_Complex_Smooth Residual:\t%5lu\t%.3e\n", (unsigned long)iter - 1, sqrt(discr / rp_norm));
+    printf("BiCGStab_Complex_Smooth Residual:\t%5lu\t%.3e\n", static_cast<unsigned long>(iter) - 1, sqrt(discr / rp_norm));
 
     if(iter >= max_iter)
         printf("Soulution can`t found, iteration limit exceeded!\n");
