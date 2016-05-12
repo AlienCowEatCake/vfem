@@ -1,31 +1,6 @@
 #include "common/common.h"
 #include "problems/problems.h"
 
-#if !defined(_WIN32) && defined(USE_NOSIGHUP)
-#include <sys/types.h>
-#include <unistd.h>
-#include <signal.h>
-
-// Обработчик SIGHUP
-void sighup_handler(int)
-{
-    // Обычно этот сигнал приходит, когда отключается терминал
-    // Перехватим этот сигнал и перенаправим выходные потоки консоли
-    // куда-нибудь в файлы, чтобы не потерять информацию или
-    // проследить за процессом (не использовать при отладке!)
-    char timebuf[24];
-    time_t seconds = time(NULL);
-    strftime(timebuf, 24, "%Y-%m-%d_%H-%M-%S", localtime(&seconds));
-    stringstream ss;
-    ss << getpid() << "_" << timebuf << ".txt";
-    string fn_out = "stdout_" + ss.str();
-    string fn_err = "stderr_" + ss.str();
-    * stdout = * fopen(fn_out.c_str(), "w");
-    * stderr = * fopen(fn_err.c_str(), "w");
-    std::ios::sync_with_stdio();
-}
-#endif
-
 // Пауза, если это необходимо и поддерживаемо системой
 int paused(int ret)
 {
@@ -139,13 +114,8 @@ public:
 // Main
 int main(int argc, char * argv [])
 {
-#if !defined(_WIN32) && defined(USE_NOSIGHUP)
-    // Устанавливаем обработчик SIGHUP
-    struct sigaction sigact;
-    memset(& sigact, 0, sizeof(struct sigaction));
-    sigemptyset(& sigact.sa_mask);
-    sigact.sa_handler = sighup_handler;
-    sigaction(SIGHUP, & sigact, 0);
+#if defined(USE_NOSIGHUP)
+    set_nosighup();
 #endif
 
     string build_conf;

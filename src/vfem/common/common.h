@@ -47,6 +47,7 @@
 #include "../../core/containers/tree/octree.h"
 #include "../../core/utils/cxxversion.h"
 #include "../../core/utils/fpu.h"
+#include "../../core/utils/nosighup.h"
 #include "../../core/utils/strings.h"
 #include "../../core/utils/progress.h"
 #include "../../core/utils/timers.h"
@@ -61,6 +62,7 @@ using namespace core::containers::generic;
 using namespace core::containers::geometry;
 using namespace core::containers::tree;
 using namespace core::utils;
+using namespace core::utils::nosighup;
 using namespace core::utils::strings;
 using namespace core::utils::progress;
 using namespace core::utils::timers;
