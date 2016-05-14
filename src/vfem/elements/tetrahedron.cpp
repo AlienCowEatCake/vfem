@@ -27,44 +27,6 @@ namespace tet_basis_indexes
 
 // ============================================================================
 
-tetrahedron_base::tetrahedron_base()
-{
-    for(size_t i = 0; i < 4; i++)
-        nodes[i] = NULL;
-    for(size_t i = 0; i < 6; i++)
-        edges[i] = NULL;
-    for(size_t i = 0; i < 4; i++)
-        faces[i] = NULL;
-    phys = NULL;
-}
-
-const point & tetrahedron_base::get_node(size_t i) const
-{
-    assert(i < 4);
-    assert(nodes[i] != NULL);
-    return (* nodes[i]);
-}
-
-const edge & tetrahedron_base::get_edge(size_t i) const
-{
-    assert(i < 6);
-    assert(edges[i] != NULL);
-    return (* edges[i]);
-}
-
-const face & tetrahedron_base::get_face(size_t i) const
-{
-    assert(i < 4);
-    assert(faces[i] != NULL);
-    return (* faces[i]);
-}
-
-const phys_area & tetrahedron_base::get_phys_area() const
-{
-    assert(phys != NULL);
-    return * phys;
-}
-
 double tetrahedron_base::lambda(size_t i, const point & p) const
 {
     assert(i < 4); // Если i == 4, то явно где-то косяк
@@ -234,7 +196,7 @@ vector3 tetrahedron_base::kerw(size_t i, const point & p) const
 
 void tetrahedron_base::init(const basis_type * basis)
 {
-    const tet_integration_config * tet_integration = &(basis->tet_int);
+    const tetrahedron_integration * tet_integration = &(basis->tet_int);
 
     matrix_t<double, 4, 4> D;
     for(size_t i = 0; i < 3; i++)
@@ -248,14 +210,14 @@ void tetrahedron_base::init(const basis_type * basis)
     jacobian = fabs(D_det);
 
     // Перевод точек Гаусса с мастер-элемента на текущий тетраэдр
-    gauss_points.resize(tet_integration->gauss_num);
+    gauss_points.resize(tet_integration->get_gauss_num());
     for(size_t i = 0; i < 3; i++)
     {
-        for(size_t j = 0 ; j < tet_integration->gauss_num; j++)
+        for(size_t j = 0 ; j < tet_integration->get_gauss_num(); j++)
         {
             gauss_points[j][i] = 0;
             for(size_t k = 0; k < 4; k++)
-                gauss_points[j][i] += D[i][k] * tet_integration->gauss_points_master[j][k];
+                gauss_points[j][i] += D[i][k] * tet_integration->get_gauss_point_master(j, k);
         }
     }
 
@@ -355,28 +317,28 @@ bool tetrahedron_base::in_cube(double x0, double x1, double y0, double y1, doubl
 }
 
 trio<double, vector3, cvector3>
-tetrahedron_base::diff_normL2(const array_t<complex<double> > & q, eval_func func, void * data) const
+tetrahedron_base::diff_normL2(const array_t<complex<double> > & q, eval_func func, void * data)
 {
-    const tet_integration_config * tet_integration = &(basis->tet_int);
+    const tetrahedron_integration * tet_integration = &(basis->tet_int);
     complex<double> result = 0.0;
     vector3 result_v3(0.0, 0.0, 0.0);
     cvector3 result_cv3(0.0, 0.0, 0.0);
-    for(size_t k = 0; k < tet_integration->gauss_num; k++)
+    for(size_t k = 0; k < tet_integration->get_gauss_num(); k++)
     {
         cvector3 val(0.0, 0.0, 0.0);
         for(size_t i = 0; i < basis->tet_bf_num; i++)
             val = val + q[i] * cvector3(w(i, gauss_points[k]));
         cvector3 func_d = func(gauss_points[k], get_phys_area(), data) - val;
         //result += gauss_weights[k] * (func_d * func_d.cj());
-        result += tet_integration->gauss_weights[k] * func_d.norm2();
+        result += tet_integration->get_gauss_weight(k) * func_d.norm2();
         for(size_t i = 0; i < 3; i++)
         {
             double re = func_d[i].real() * func_d[i].real();
             double im = func_d[i].imag() * func_d[i].imag();
             func_d[i] = complex<double>(re, im);
-            result_v3[i] += tet_integration->gauss_weights[k] * (re + im);
+            result_v3[i] += tet_integration->get_gauss_weight(k) * (re + im);
         }
-        result_cv3 += tet_integration->gauss_weights[k] * func_d;
+        result_cv3 += tet_integration->get_gauss_weight(k) * func_d;
     }
     result *= jacobian;
     result_v3 *= jacobian;
@@ -385,13 +347,13 @@ tetrahedron_base::diff_normL2(const array_t<complex<double> > & q, eval_func fun
 }
 
 trio<double, vector3, cvector3>
-tetrahedron_base::diff_normL2(const array_t<complex<double> > & q, const array_t<complex<double> > & q_true) const
+tetrahedron_base::diff_normL2(const array_t<complex<double> > & q, const array_t<complex<double> > & q_true)
 {
-    const tet_integration_config * tet_integration = &(basis->tet_int);
+    const tetrahedron_integration * tet_integration = &(basis->tet_int);
     complex<double> result = 0.0;
     vector3 result_v3(0.0, 0.0, 0.0);
     cvector3 result_cv3(0.0, 0.0, 0.0);
-    for(size_t k = 0; k < tet_integration->gauss_num; k++)
+    for(size_t k = 0; k < tet_integration->get_gauss_num(); k++)
     {
         cvector3 val(0.0, 0.0, 0.0), val_true(0.0, 0.0, 0.0);
         for(size_t i = 0; i < basis->tet_bf_num; i++)
@@ -401,15 +363,15 @@ tetrahedron_base::diff_normL2(const array_t<complex<double> > & q, const array_t
         }
         cvector3 func_d = val_true - val;
         //result += gauss_weights[k] * (func_d * func_d.cj());
-        result += tet_integration->gauss_weights[k] * func_d.norm2();
+        result += tet_integration->get_gauss_weight(k) * func_d.norm2();
         for(size_t i = 0; i < 3; i++)
         {
             double re = func_d[i].real() * func_d[i].real();
             double im = func_d[i].imag() * func_d[i].imag();
             func_d[i] = complex<double>(re, im);
-            result_v3[i] += tet_integration->gauss_weights[k] * (re + im);
+            result_v3[i] += tet_integration->get_gauss_weight(k) * (re + im);
         }
-        result_cv3 += tet_integration->gauss_weights[k] * func_d;
+        result_cv3 += tet_integration->get_gauss_weight(k) * func_d;
     }
     result *= jacobian;
     result_v3 *= jacobian;
@@ -418,25 +380,25 @@ tetrahedron_base::diff_normL2(const array_t<complex<double> > & q, const array_t
 }
 
 trio<double, vector3, cvector3>
-tetrahedron_base::normL2(eval_func func, void * data) const
+tetrahedron_base::normL2(eval_func func, void * data)
 {
-    const tet_integration_config * tet_integration = &(basis->tet_int);
+    const tetrahedron_integration * tet_integration = &(basis->tet_int);
     complex<double> result = 0.0;
     vector3 result_v3(0.0, 0.0, 0.0);
     cvector3 result_cv3(0.0, 0.0, 0.0);
-    for(size_t k = 0; k < tet_integration->gauss_num; k++)
+    for(size_t k = 0; k < tet_integration->get_gauss_num(); k++)
     {
         cvector3 func_d = func(gauss_points[k], get_phys_area(), data);
         //result += gauss_weights[k] * (func_d * func_d.cj());
-        result += tet_integration->gauss_weights[k] * func_d.norm2();
+        result += tet_integration->get_gauss_weight(k) * func_d.norm2();
         for(size_t i = 0; i < 3; i++)
         {
             double re = func_d[i].real() * func_d[i].real();
             double im = func_d[i].imag() * func_d[i].imag();
             func_d[i] = complex<double>(re, im);
-            result_v3[i] += tet_integration->gauss_weights[k] * (re + im);
+            result_v3[i] += tet_integration->get_gauss_weight(k) * (re + im);
         }
-        result_cv3 += tet_integration->gauss_weights[k] * func_d;
+        result_cv3 += tet_integration->get_gauss_weight(k) * func_d;
     }
     result *= jacobian;
     result_v3 *= jacobian;
@@ -445,27 +407,27 @@ tetrahedron_base::normL2(eval_func func, void * data) const
 }
 
 trio<double, vector3, cvector3>
-tetrahedron_base::normL2(const array_t<complex<double> > & q_true) const
+tetrahedron_base::normL2(const array_t<complex<double> > & q_true)
 {
-    const tet_integration_config * tet_integration = &(basis->tet_int);
+    const tetrahedron_integration * tet_integration = &(basis->tet_int);
     complex<double> result = 0.0;
     vector3 result_v3(0.0, 0.0, 0.0);
     cvector3 result_cv3(0.0, 0.0, 0.0);
-    for(size_t k = 0; k < tet_integration->gauss_num; k++)
+    for(size_t k = 0; k < tet_integration->get_gauss_num(); k++)
     {
         cvector3 func_d;
         for(size_t i = 0; i < basis->tet_bf_num; i++)
             func_d = func_d + q_true[i] * cvector3(w(i, gauss_points[k]));
         //result += gauss_weights[k] * (func_d * func_d.cj());
-        result += tet_integration->gauss_weights[k] * func_d.norm2();
+        result += tet_integration->get_gauss_weight(k) * func_d.norm2();
         for(size_t i = 0; i < 3; i++)
         {
             double re = func_d[i].real() * func_d[i].real();
             double im = func_d[i].imag() * func_d[i].imag();
             func_d[i] = complex<double>(re, im);
-            result_v3[i] += tet_integration->gauss_weights[k] * (re + im);
+            result_v3[i] += tet_integration->get_gauss_weight(k) * (re + im);
         }
-        result_cv3 += tet_integration->gauss_weights[k] * func_d;
+        result_cv3 += tet_integration->get_gauss_weight(k) * func_d;
     }
     result *= jacobian;
     result_v3 *= jacobian;
@@ -477,24 +439,23 @@ tetrahedron_base::normL2(const array_t<complex<double> > & q_true) const
 
 // Локальная матрица полного пространства
 matrix_t<complex<double> >
-tetrahedron::MpG() const
+tetrahedron::MpG()
 {
-    const tet_integration_config * tet_integration = &(basis->tet_int);
+    const tetrahedron_integration * tet_integration = &(basis->tet_int);
     matrix_t<complex<double> > matr(basis->tet_bf_num, basis->tet_bf_num);
+    phys_area * phys = get_phys_area_ptr();
 
     for(size_t i = 0; i < basis->tet_bf_num; i++)
         for(size_t j = 0; j < basis->tet_bf_num; j++)
             matr[i][j] = 0.0;
 
-    for(size_t k = 0; k < tet_integration->gauss_num; k++)
+    for(size_t k = 0; k < tet_integration->get_gauss_num(); k++)
     {
-        // TODO: Костыль
-        phys_area * phys_editable = const_cast<phys_area *>(phys);
-        phys_editable->sigma[threads_config::matrix_full].set_x(gauss_points[k].x);
-        phys_editable->sigma[threads_config::matrix_full].set_y(gauss_points[k].y);
-        phys_editable->sigma[threads_config::matrix_full].set_z(gauss_points[k].z);
+        phys->sigma[threads_config::matrix_full].set_x(gauss_points[k].x);
+        phys->sigma[threads_config::matrix_full].set_y(gauss_points[k].y);
+        phys->sigma[threads_config::matrix_full].set_z(gauss_points[k].z);
         double sigma = 0.0;
-        phys_editable->sigma[threads_config::matrix_full].calculate(sigma);
+        phys->sigma[threads_config::matrix_full].calculate(sigma);
         complex<double> k2(- phys->epsilon * phys->omega * phys->omega, phys->omega * sigma);
 
         for(size_t i = 0; i < basis->tet_bf_num; i++)
@@ -508,7 +469,7 @@ tetrahedron::MpG() const
                 vector3 curlwi = rotw(i, gauss_points[k]);
                 vector3 curlwj = rotw(j, gauss_points[k]);
                 // Почти элемент локальной матрицы
-                matr[i][j] += tet_integration->gauss_weights[k] * (wi * wj * k2 + curlwi * curlwj / phys->mu);
+                matr[i][j] += tet_integration->get_gauss_weight(k) * (wi * wj * k2 + curlwi * curlwj / phys->mu);
             }
         }
     }
@@ -526,20 +487,20 @@ tetrahedron::MpG() const
 
 // Локальная правая часть
 array_t<complex<double> >
-tetrahedron::rp(eval_func func, void * data) const
+tetrahedron::rp(eval_func func, void * data)
 {
-    const tet_integration_config * tet_integration = &(basis->tet_int);
+    const tetrahedron_integration * tet_integration = &(basis->tet_int);
     array_t<complex<double> > arr(basis->tet_bf_num);
     for(size_t i = 0; i < basis->tet_bf_num; i++)
     {
         complex<double> value(0, 0);
-        for(size_t k = 0; k < tet_integration->gauss_num; k++)
+        for(size_t k = 0; k < tet_integration->get_gauss_num(); k++)
         {
             // Интеграл от ф-и правой части на бф
             vector3 wi = w(i, gauss_points[k]);
             cvector3 f = func(gauss_points[k], get_phys_area(), data);
             // Почти элемент локальной правой части
-            value += tet_integration->gauss_weights[k] * f * wi;
+            value += tet_integration->get_gauss_weight(k) * f * wi;
         }
         arr[i] = value * jacobian;
     }
@@ -548,24 +509,23 @@ tetrahedron::rp(eval_func func, void * data) const
 
 // Локальная матрица ядра
 matrix_t<complex<double> >
-tetrahedron::K() const
+tetrahedron::K()
 {
-    const tet_integration_config * tet_integration = &(basis->tet_int);
+    const tetrahedron_integration * tet_integration = &(basis->tet_int);
     matrix_t<complex<double> > matr(basis->tet_ker_bf_num, basis->tet_ker_bf_num);
+    phys_area * phys = get_phys_area_ptr();
 
     for(size_t i = 0; i < basis->tet_ker_bf_num; i++)
         for(size_t j = 0; j < basis->tet_ker_bf_num; j++)
             matr[i][j] = 0.0;
 
-    for(size_t k = 0; k < tet_integration->gauss_num; k++)
+    for(size_t k = 0; k < tet_integration->get_gauss_num(); k++)
     {
-        // TODO: Костыль
-        phys_area * phys_editable = const_cast<phys_area *>(phys);
-        phys_editable->sigma[threads_config::matrix_ker].set_x(gauss_points[k].x);
-        phys_editable->sigma[threads_config::matrix_ker].set_y(gauss_points[k].y);
-        phys_editable->sigma[threads_config::matrix_ker].set_z(gauss_points[k].z);
+        phys->sigma[threads_config::matrix_ker].set_x(gauss_points[k].x);
+        phys->sigma[threads_config::matrix_ker].set_y(gauss_points[k].y);
+        phys->sigma[threads_config::matrix_ker].set_z(gauss_points[k].z);
         double sigma = 0.0;
-        phys_editable->sigma[threads_config::matrix_ker].calculate(sigma);
+        phys->sigma[threads_config::matrix_ker].calculate(sigma);
         complex<double> k2(- phys->epsilon * phys->omega * phys->omega, phys->omega * sigma);
 
         for(size_t i = 0; i < basis->tet_ker_bf_num; i++)
@@ -576,7 +536,7 @@ tetrahedron::K() const
                 vector3 kerwi = kerw(i, gauss_points[k]);
                 vector3 kerwj = kerw(j, gauss_points[k]);
                 // Почти элемент локальной матрицы
-                matr[i][j] += tet_integration->gauss_weights[k] * kerwi * kerwj * k2;
+                matr[i][j] += tet_integration->get_gauss_weight(k) * kerwi * kerwj * k2;
             }
         }
     }

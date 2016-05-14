@@ -16,47 +16,13 @@ namespace tr_basis_indexes
 
 // ============================================================================
 
-triangle_base::triangle_base()
-{
-    for(size_t i = 0; i < 3; i++)
-        nodes[i] = NULL;
-    for(size_t i = 0; i < 3; i++)
-        edges[i] = NULL;
-    faces = NULL;
-    phys = NULL;
-}
-
-const point & triangle_base::get_node(size_t i) const
-{
-    assert(nodes[i] != NULL);
-    return (* nodes[i]);
-}
-
-const edge & triangle_base::get_edge(size_t i) const
-{
-    assert(edges[i] != NULL);
-    return (* edges[i]);
-}
-
-const face & triangle_base::get_face() const
-{
-    assert(faces != NULL);
-    return * faces;
-}
-
-const phys_area & triangle_base::get_phys_area() const
-{
-    assert(phys != NULL);
-    return * phys;
-}
-
 matrix_t<double> triangle_base::M() const
 {
     assert(false);
     return matrix_t<double>(1, 1);
 }
 
-array_t<complex<double> > triangle_base::rp(eval_func, void *) const
+array_t<complex<double> > triangle_base::rp(eval_func, void *)
 {
     assert(false);
     return array_t<complex<double> >(1);
@@ -72,7 +38,7 @@ triangle_full::triangle_full(const triangle_base & other) : triangle_base(other)
 
 void triangle_full::init(const basis_type * basis)
 {
-    const tr_integration_config * tr_integration = &(basis->tr_int);
+    const triangle_integration * tr_integration = &(basis->tr_int);
 
     // Построение локальной системы координат
     vector3 g1(get_node(0), get_node(1));
@@ -110,21 +76,21 @@ void triangle_full::init(const basis_type * basis)
     jacobian = fabs(D_det);
 
     // Точки Гаусса в локальной системе координат
-    array_t<point> gauss_points_local(tr_integration->gauss_num);
-    for(size_t j = 0 ; j < tr_integration->gauss_num; j++)
+    array_t<point> gauss_points_local(tr_integration->get_gauss_num());
+    for(size_t j = 0 ; j < tr_integration->get_gauss_num(); j++)
     {
         for(size_t i = 0; i < 2; i++)
         {
             gauss_points_local[j][i] = 0.0;
             for(size_t k = 0; k < 3; k++)
-                gauss_points_local[j][i] += D[i][k] * tr_integration->gauss_points_master[j][k];
+                gauss_points_local[j][i] += D[i][k] * tr_integration->get_gauss_point_master(j, k);
         }
         gauss_points_local[j][2] = 0.0;
     }
 
     // Точки Гаусса в глобальной системе координат
-    gauss_points.resize(tr_integration->gauss_num);
-    for(size_t i = 0; i < tr_integration->gauss_num; i++)
+    gauss_points.resize(tr_integration->get_gauss_num());
+    for(size_t i = 0; i < tr_integration->get_gauss_num(); i++)
         gauss_points[i] = to_global(gauss_points_local[i]);
 
     // Инициализируем параметры базиса
@@ -245,21 +211,21 @@ vector3 triangle_full::w(size_t i, const point & p) const
 
 double triangle_full::integrate_w(size_t i, size_t j) const
 {
-    const tr_integration_config * tr_integration = &(basis->tr_int);
+    const triangle_integration * tr_integration = &(basis->tr_int);
     double result = 0.0;
-    for(size_t k = 0; k < tr_integration->gauss_num; k++)
-        result += tr_integration->gauss_weights[k] *
+    for(size_t k = 0; k < tr_integration->get_gauss_num(); k++)
+        result += tr_integration->get_gauss_weight(k) *
                   w(i, gauss_points[k]) *
                   w(j, gauss_points[k]);
     return result * jacobian;
 }
 
-complex<double> triangle_full::integrate_fw(eval_func func, size_t i, void * data) const
+complex<double> triangle_full::integrate_fw(eval_func func, size_t i, void * data)
 {
-    const tr_integration_config * tr_integration = &(basis->tr_int);
+    const triangle_integration * tr_integration = &(basis->tr_int);
     complex<double> result(0.0, 0.0);
-    for(size_t k = 0; k < tr_integration->gauss_num; k++)
-        result += tr_integration->gauss_weights[k] *
+    for(size_t k = 0; k < tr_integration->get_gauss_num(); k++)
+        result += tr_integration->get_gauss_weight(k) *
                   func(gauss_points[k], get_phys_area(), data) *
                   w(i, gauss_points[k]);
     return result * jacobian;
@@ -275,7 +241,7 @@ matrix_t<double> triangle_full::M() const
 }
 
 array_t<complex<double> >
-triangle_full::rp(eval_func func, void * data) const
+triangle_full::rp(eval_func func, void * data)
 {
     array_t<complex<double> > arr(basis->tr_bf_num);
     for(size_t i = 0; i < basis->tr_bf_num; i++)

@@ -2,7 +2,7 @@
 #define VFEM_H_INCLUDED
 
 #include "../common/common.h"
-#include "../config/config.h"
+#include "../common/config.h"
 #include "../elements/edge.h"
 #include "../elements/triangle.h"
 #include "../elements/tetrahedron.h"
@@ -18,13 +18,13 @@ typedef tetrahedron finite_element;
 #endif
 
 // Правая часть
-cvector3 func_rp(const point & p, const phys_area & phys, void * data);
+cvector3 func_rp(const point & p, phys_area & phys, void * data);
 
 // Функция неоднородных первых краевых условий
-cvector3 func_b1(const point & p, const phys_area & phys, void * data);
+cvector3 func_b1(const point & p, phys_area & phys, void * data);
 
 // Функция аналитического решения
-cvector3 func_true(const point & p, const phys_area & phys, void * data);
+cvector3 func_true(const point & p, phys_area & phys, void * data);
 
 #if defined(VFEM_USE_PML)
 // Коэффициент S для PML
@@ -158,13 +158,13 @@ public:
 protected:
     // Добавление локальной матрицы от одного КЭ в глобальную
     template<typename T>
-    void process_fe_MpG(const T * curr_fe);
+    void process_fe_MpG(T * curr_fe);
     // Добавление локальной матрицы ядра от одного КЭ в глобальную матриицу ядра
     template<typename T>
-    void process_fe_K(const T * curr_fe);
+    void process_fe_K(T * curr_fe);
     // Добавление локальной правой части от одного КЭ в глобальную правую часть
     template<typename T>
-    void process_fe_rp(const T * curr_fe);
+    void process_fe_rp(T * curr_fe);
 
     // Генерация абстрактного портрета
     template<typename U, typename V>

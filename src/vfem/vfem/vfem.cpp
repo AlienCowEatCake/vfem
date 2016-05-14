@@ -16,12 +16,12 @@ size_t VFEM::get_tet_dof_num(const tetrahedron_base * fe) const
 size_t VFEM::get_tet_dof(const tetrahedron_base * fe, size_t i) const
 {
     assert(i < config.basis.tet_bf_num);
-    if(i < 6)       return fe->edges[i]->num;
-    else if(i < 12) return fe->edges[i-6]->num + edges.size();
-    else if(i < 16) return fe->faces[i-12]->num + 2 * edges.size();
-    else if(i < 20) return fe->faces[i-16]->num + 2 * edges.size() + faces.size();
-    else if(i < 24) return fe->faces[i-20]->num + 2 * edges.size() + 2 * faces.size();
-    else if(i < 30) return fe->edges[i-24]->num + 2 * edges.size() + 3 * faces.size();
+    if(i < 6)       return fe->get_edge(i).num;
+    else if(i < 12) return fe->get_edge(i-6).num + edges.size();
+    else if(i < 16) return fe->get_face(i-12).num + 2 * edges.size();
+    else if(i < 20) return fe->get_face(i-16).num + 2 * edges.size() + faces.size();
+    else if(i < 24) return fe->get_face(i-20).num + 2 * edges.size() + 2 * faces.size();
+    else if(i < 30) return fe->get_edge(i-24).num + 2 * edges.size() + 3 * faces.size();
     return 0;
 }
 
@@ -36,10 +36,10 @@ size_t VFEM::get_tet_ker_dof_num(const tetrahedron_base * fe) const
 size_t VFEM::get_tet_ker_dof(const tetrahedron_base * fe, size_t i) const
 {
     assert(i < config.basis.tet_ker_bf_num);
-    if(i < 4)   return fe->nodes[i]->num;
-    if(i < 10)  return fe->edges[i-4]->num + nodes.size();
-    if(i < 14)  return fe->faces[i-10]->num + edges.size() + nodes.size();
-    if(i < 20)  return fe->edges[i-14]->num + faces.size() + edges.size() + nodes.size();
+    if(i < 4)   return fe->get_node(i).num;
+    if(i < 10)  return fe->get_edge(i-4).num + nodes.size();
+    if(i < 14)  return fe->get_face(i-10).num + edges.size() + nodes.size();
+    if(i < 20)  return fe->get_edge(i-14).num + faces.size() + edges.size() + nodes.size();
     return 0;
 }
 
@@ -47,12 +47,12 @@ size_t VFEM::get_tet_ker_dof(const tetrahedron_base * fe, size_t i) const
 size_t VFEM::get_tr_dof(const triangle * tr, size_t i) const
 {
     assert(i < config.basis.tr_bf_num);
-    if(i < 3)       return tr->edges[i]->num;
-    else if(i < 6)  return tr->edges[i-3]->num + edges.size();
-    else if(i < 7)  return tr->faces->num + 2 * edges.size();
-    else if(i < 8)  return tr->faces->num + 2 * edges.size() + faces.size();
-    else if(i < 9)  return tr->faces->num + 2 * edges.size() + 2 * faces.size();
-    else if(i < 12) return tr->edges[i-9]->num + 2 * edges.size() + 3 * faces.size();
+    if(i < 3)       return tr->get_edge(i).num;
+    else if(i < 6)  return tr->get_edge(i-3).num + edges.size();
+    else if(i < 7)  return tr->get_face().num + 2 * edges.size();
+    else if(i < 8)  return tr->get_face().num + 2 * edges.size() + faces.size();
+    else if(i < 9)  return tr->get_face().num + 2 * edges.size() + 2 * faces.size();
+    else if(i < 12) return tr->get_edge(i-9).num + 2 * edges.size() + 3 * faces.size();
     return 0;
 }
 
@@ -60,10 +60,10 @@ size_t VFEM::get_tr_dof(const triangle * tr, size_t i) const
 size_t VFEM::get_tr_ker_dof(const triangle * tr, size_t i) const
 {
     assert(i < config.basis.tr_ker_bf_num);
-    if(i < 3)       return tr->nodes[i]->num;
-    else if(i < 6)  return tr->edges[i-3]->num + nodes.size();
-    else if(i < 7)  return tr->faces->num + edges.size() + nodes.size();
-    else if(i < 10) return tr->edges[i-7]->num + edges.size() + faces.size() + nodes.size();
+    if(i < 3)       return tr->get_node(i).num;
+    else if(i < 6)  return tr->get_edge(i-3).num + nodes.size();
+    else if(i < 7)  return tr->get_face().num + edges.size() + nodes.size();
+    else if(i < 10) return tr->get_edge(i-7).num + edges.size() + faces.size() + nodes.size();
     return 0;
 }
 
@@ -156,7 +156,7 @@ void VFEM::generate_surf_portrait()
         for(size_t i = 0; i < config.basis.tr_bf_num; i++)
             dof_surf[i] = get_tr_surf_dof(trs[k], i);
 
-        if(trs[k]->phys->type_of_bounds == 1)
+        if(trs[k]->get_phys_area().type_of_bounds == 1)
         {
             for(size_t i = 0; i < config.basis.tr_bf_num; i++)
             {
@@ -201,7 +201,7 @@ void VFEM::generate_surf_portrait()
 
 // Добавление локальной матрицы от одного КЭ в глобальную
 template<typename T>
-void VFEM::process_fe_MpG(const T * curr_fe)
+void VFEM::process_fe_MpG(T * curr_fe)
 {
     // Получение физических параметров для заданного КЭ
     phys_area ph = curr_fe->get_phys_area();
@@ -227,7 +227,7 @@ void VFEM::process_fe_MpG(const T * curr_fe)
 
 // Добавление локальной матрицы ядра от одного КЭ в глобальную матриицу ядра
 template<typename T>
-void VFEM::process_fe_K(const T * curr_fe)
+void VFEM::process_fe_K(T * curr_fe)
 {
     // Получение физических параметров для заданного КЭ
     phys_area ph = curr_fe->get_phys_area();
@@ -254,7 +254,7 @@ void VFEM::process_fe_K(const T * curr_fe)
 
 // Добавление локальной правой части от одного КЭ в глобальную правую часть
 template<typename T>
-void VFEM::process_fe_rp(const T * curr_fe)
+void VFEM::process_fe_rp(T * curr_fe)
 {
     // Получение физических параметров для заданного КЭ
     phys_area ph = curr_fe->get_phys_area();
@@ -520,7 +520,7 @@ void VFEM::apply_point_sources()
         show_progress("", k, pss.size());
         finite_element * fe = get_fe(pss[k].first);
         for(size_t i = 0; i < config.basis.tet_bf_num; i++)
-            slae.rp[get_tet_dof(fe, i)] += complex<double>(0.0, -1.0) * fe->phys->omega * pss[k].second * fe->w(i, pss[k].first);
+            slae.rp[get_tet_dof(fe, i)] += complex<double>(0.0, -1.0) * fe->get_phys_area().omega * pss[k].second * fe->w(i, pss[k].first);
     }
 }
 

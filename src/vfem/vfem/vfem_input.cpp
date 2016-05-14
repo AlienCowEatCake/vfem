@@ -589,7 +589,7 @@ bool VFEM::input_mesh(const string & gmsh_filename)
         {
             map<phys_id, phys_area>::iterator ph = phys.find(phys_id(MSH_TET_4, phys_num));
             if(ph != phys.end())
-                fake_element.phys = &(ph->second);
+                fake_element.set_phys_area(ph->second);
             else
             {
                 cout << "Error in " << __FILE__ << ":" << __LINE__
@@ -602,21 +602,21 @@ bool VFEM::input_mesh(const string & gmsh_filename)
                 gmsh_file >> local_nodes_tet[j];
             sort(local_nodes_tet.begin(), local_nodes_tet.end());
             for(size_t j = 0; j < 4; j++)
-                fake_element.nodes[j] = & nodes[local_nodes_tet[j] - 1];
+                fake_element.set_node(j, nodes[local_nodes_tet[j] - 1]);
 
-            fake_element.edges[0] = (edge *) add_edge(edge(fake_element.nodes[0], fake_element.nodes[1]), edges);
-            fake_element.edges[1] = (edge *) add_edge(edge(fake_element.nodes[0], fake_element.nodes[2]), edges);
-            fake_element.edges[2] = (edge *) add_edge(edge(fake_element.nodes[0], fake_element.nodes[3]), edges);
-            fake_element.edges[3] = (edge *) add_edge(edge(fake_element.nodes[1], fake_element.nodes[2]), edges);
-            fake_element.edges[4] = (edge *) add_edge(edge(fake_element.nodes[1], fake_element.nodes[3]), edges);
-            fake_element.edges[5] = (edge *) add_edge(edge(fake_element.nodes[2], fake_element.nodes[3]), edges);
+            fake_element.set_edge(0, (edge *) add_edge(edge(fake_element.get_node(0), fake_element.get_node(1)), edges));
+            fake_element.set_edge(1, (edge *) add_edge(edge(fake_element.get_node(0), fake_element.get_node(2)), edges));
+            fake_element.set_edge(2, (edge *) add_edge(edge(fake_element.get_node(0), fake_element.get_node(3)), edges));
+            fake_element.set_edge(3, (edge *) add_edge(edge(fake_element.get_node(1), fake_element.get_node(2)), edges));
+            fake_element.set_edge(4, (edge *) add_edge(edge(fake_element.get_node(1), fake_element.get_node(3)), edges));
+            fake_element.set_edge(5, (edge *) add_edge(edge(fake_element.get_node(2), fake_element.get_node(3)), edges));
 
             if(config.basis.order >= 2)
             {
-                fake_element.faces[0] = (face *) add_face(face(fake_element.nodes[0], fake_element.nodes[1], fake_element.nodes[2]), faces);
-                fake_element.faces[1] = (face *) add_face(face(fake_element.nodes[0], fake_element.nodes[1], fake_element.nodes[3]), faces);
-                fake_element.faces[2] = (face *) add_face(face(fake_element.nodes[0], fake_element.nodes[2], fake_element.nodes[3]), faces);
-                fake_element.faces[3] = (face *) add_face(face(fake_element.nodes[1], fake_element.nodes[2], fake_element.nodes[3]), faces);
+                fake_element.set_face(0, (face *) add_face(face(fake_element.get_node(0), fake_element.get_node(1), fake_element.get_node(2)), faces));
+                fake_element.set_face(1, (face *) add_face(face(fake_element.get_node(0), fake_element.get_node(1), fake_element.get_node(3)), faces));
+                fake_element.set_face(2, (face *) add_face(face(fake_element.get_node(0), fake_element.get_node(2), fake_element.get_node(3)), faces));
+                fake_element.set_face(3, (face *) add_face(face(fake_element.get_node(1), fake_element.get_node(2), fake_element.get_node(3)), faces));
             }
 
             push_back_wrapper(fes, fake_element);
@@ -625,7 +625,7 @@ bool VFEM::input_mesh(const string & gmsh_filename)
         {
             map<phys_id, phys_area>::iterator ph = phys.find(phys_id(MSH_TRI_3, phys_num));
             if(ph != phys.end())
-                fake_triangle.phys = &(ph->second);
+                fake_triangle.set_phys_area(ph->second);
             else
             {
                 cout << "Error in " << __FILE__ << ":" << __LINE__
@@ -634,7 +634,7 @@ bool VFEM::input_mesh(const string & gmsh_filename)
                 return false;
             }
 
-            size_t bound_type = fake_triangle.phys->type_of_bounds;
+            size_t bound_type = fake_triangle.get_phys_area().type_of_bounds;
             if(bound_type != 1 && bound_type != 2)
             {
                 cout << "Error: unaccounted bound, breaking..." << endl;
@@ -645,20 +645,20 @@ bool VFEM::input_mesh(const string & gmsh_filename)
                 gmsh_file >> local_nodes_tr[j];
             sort(local_nodes_tr.begin(), local_nodes_tr.end());
             for(size_t j = 0; j < 3; j++)
-                fake_triangle.nodes[j] = & nodes[local_nodes_tr[j] - 1];
+                fake_triangle.set_node(j, nodes[local_nodes_tr[j] - 1]);
 
-            fake_triangle.edges[0] = (edge *) add_edge(edge(fake_triangle.nodes[0], fake_triangle.nodes[1]), edges);
-            fake_triangle.edges[1] = (edge *) add_edge(edge(fake_triangle.nodes[0], fake_triangle.nodes[2]), edges);
-            fake_triangle.edges[2] = (edge *) add_edge(edge(fake_triangle.nodes[1], fake_triangle.nodes[2]), edges);
+            fake_triangle.set_edge(0, (edge *) add_edge(edge(fake_triangle.get_node(0), fake_triangle.get_node(1)), edges));
+            fake_triangle.set_edge(1, (edge *) add_edge(edge(fake_triangle.get_node(0), fake_triangle.get_node(2)), edges));
+            fake_triangle.set_edge(2, (edge *) add_edge(edge(fake_triangle.get_node(1), fake_triangle.get_node(2)), edges));
             if(config.basis.order >= 2)
-                fake_triangle.faces = (face *) add_face(face(fake_triangle.nodes[0], fake_triangle.nodes[1], fake_triangle.nodes[2]), faces);
+                fake_triangle.set_face((face *) add_face(face(fake_triangle.get_node(0), fake_triangle.get_node(1), fake_triangle.get_node(2)), faces));
             if(config.boundary_enabled && bound_type == 1)
             {
-                add_edge(edge(fake_triangle.nodes[0], fake_triangle.nodes[1]), edges_surf_temp);
-                add_edge(edge(fake_triangle.nodes[0], fake_triangle.nodes[2]), edges_surf_temp);
-                add_edge(edge(fake_triangle.nodes[1], fake_triangle.nodes[2]), edges_surf_temp);
+                add_edge(edge(fake_triangle.get_node(0), fake_triangle.get_node(1)), edges_surf_temp);
+                add_edge(edge(fake_triangle.get_node(0), fake_triangle.get_node(2)), edges_surf_temp);
+                add_edge(edge(fake_triangle.get_node(1), fake_triangle.get_node(2)), edges_surf_temp);
                 if(config.basis.order >= 2)
-                    add_face(face(fake_triangle.nodes[0], fake_triangle.nodes[1], fake_triangle.nodes[2]), faces_surf_temp);
+                    add_face(face(fake_triangle.get_node(0), fake_triangle.get_node(1), fake_triangle.get_node(2)), faces_surf_temp);
             }
             if(config.boundary_enabled)
                 push_back_wrapper(trs_full, triangle_full(fake_triangle));
@@ -767,10 +767,10 @@ bool VFEM::input_mesh(const string & gmsh_filename)
         show_progress("tetrahedrons", i, fes.size());
         // Переносим ребра и грани
         for(size_t j = 0; j < 6; j++)
-            fes[i].edges[j] = edges_ind[(size_t)fes[i].edges[j]];
+            fes[i].set_edge(j, edges_ind[(size_t)fes[i].get_edge_ptr(j)]);
         if(config.basis.order >= 2)
             for(size_t j = 0; j < 4; j++)
-                fes[i].faces[j] = faces_ind[(size_t)fes[i].faces[j]];
+                fes[i].set_face(j, faces_ind[(size_t)fes[i].get_face_ptr(j)]);
         // Инициализируем
         fes[i].init(& config.basis);
     }
@@ -790,60 +790,60 @@ bool VFEM::input_mesh(const string & gmsh_filename)
     {
         show_progress("triangles", i, trs.size());
         for(size_t j = 0; j < 3; j++)
-            trs[i]->edges[j] = edges_ind[(size_t)trs[i]->edges[j]];
+            trs[i]->set_edge(j, edges_ind[(size_t)trs[i]->get_edge_ptr(j)]);
         if(config.basis.order >= 2)
-            trs[i]->faces = faces_ind[(size_t)trs[i]->faces];
+            trs[i]->set_face(faces_ind[(size_t)trs[i]->get_face_ptr()]);
 
         // Заполняем степени свободы для первых краевых
-        if(trs[i]->phys->type_of_bounds == 1)
+        if(trs[i]->get_phys_area().type_of_bounds == 1)
         {
             array_t<size_t> dof(config.basis.tr_bf_num);
             array_t<size_t> dof_surf(config.basis.tr_bf_num);
             array_t<size_t> ker_dof(config.basis.tr_ker_bf_num);
             // Первый неполный
             for(size_t j = 0; j < 3; j++)
-                dof[j] = trs[i]->edges[j]->num;
+                dof[j] = trs[i]->get_edge(j).num;
             for(size_t j = 0; j < 3; j++)
-                ker_dof[j] = trs[i]->nodes[j]->num;
+                ker_dof[j] = trs[i]->get_node(j).num;
             if(config.boundary_enabled)
                 for(size_t j = 0; j < 3; j++)
-                    dof_surf[j] = edges_surf_temp.find(* trs[i]->edges[j])->num;
+                    dof_surf[j] = edges_surf_temp.find(trs[i]->get_edge(j))->num;
             // Первый полный
             if(config.basis.order >= 2 || config.basis.type == 2)
             {
                 for(size_t j = 0; j < 3; j++)
-                    dof[j + 3] = trs[i]->edges[j]->num + edges.size();
+                    dof[j + 3] = trs[i]->get_edge(j).num + edges.size();
                 for(size_t j = 0; j < 3; j++)
-                    ker_dof[j + 3] = trs[i]->edges[j]->num + nodes.size();
+                    ker_dof[j + 3] = trs[i]->get_edge(j).num + nodes.size();
                 if(config.boundary_enabled)
                     for(size_t j = 0; j < 3; j++)
-                        dof_surf[j + 3] = edges_surf_temp.find(* trs[i]->edges[j])->num + edges_surf_temp.size();
+                        dof_surf[j + 3] = edges_surf_temp.find(trs[i]->get_edge(j))->num + edges_surf_temp.size();
             }
             // Второй неполный
             if(config.basis.order >= 2)
             {
-                dof[6] = trs[i]->faces->num + 2 * edges.size();
-                dof[7] = trs[i]->faces->num + 2 * edges.size() + faces.size();
+                dof[6] = trs[i]->get_face().num + 2 * edges.size();
+                dof[7] = trs[i]->get_face().num + 2 * edges.size() + faces.size();
                 if(config.boundary_enabled)
                 {
-                    dof_surf[6] = faces_surf_temp.find(* trs[i]->faces)->num + 2 * edges_surf_temp.size();
-                    dof_surf[7] = faces_surf_temp.find(* trs[i]->faces)->num + 2 * edges_surf_temp.size() + faces_surf_temp.size();
+                    dof_surf[6] = faces_surf_temp.find(trs[i]->get_face())->num + 2 * edges_surf_temp.size();
+                    dof_surf[7] = faces_surf_temp.find(trs[i]->get_face())->num + 2 * edges_surf_temp.size() + faces_surf_temp.size();
                 }
             }
             // Второй полный
             if(config.basis.order > 2 || (config.basis.type == 2 && config.basis.order == 2))
             {
-                dof[8] = trs[i]->faces->num + 2 * edges.size() + 2 * faces.size();
+                dof[8] = trs[i]->get_face().num + 2 * edges.size() + 2 * faces.size();
                 for(size_t j = 0; j < 3; j++)
-                    dof[j + 9] = trs[i]->edges[j]->num + 2 * edges.size() + 3 * faces.size();
-                ker_dof[6] = trs[i]->faces->num + edges.size() + nodes.size();
+                    dof[j + 9] = trs[i]->get_edge(j).num + 2 * edges.size() + 3 * faces.size();
+                ker_dof[6] = trs[i]->get_face().num + edges.size() + nodes.size();
                 for(size_t j = 0; j < 3; j++)
-                    ker_dof[j + 7] = trs[i]->edges[j]->num + edges.size() + faces.size() + nodes.size();
+                    ker_dof[j + 7] = trs[i]->get_edge(j).num + edges.size() + faces.size() + nodes.size();
                 if(config.boundary_enabled)
                 {
-                    dof_surf[8] = faces_surf_temp.find(* trs[i]->faces)->num + 2 * edges_surf_temp.size() + 2 * faces_surf_temp.size();
+                    dof_surf[8] = faces_surf_temp.find(trs[i]->get_face())->num + 2 * edges_surf_temp.size() + 2 * faces_surf_temp.size();
                     for(size_t j = 0; j < 3; j++)
-                        dof_surf[j + 9] = edges_surf_temp.find(* trs[i]->edges[j])->num + 2 * edges_surf_temp.size() + 3 * faces_surf_temp.size();
+                        dof_surf[j + 9] = edges_surf_temp.find(trs[i]->get_edge(j))->num + 2 * edges_surf_temp.size() + 3 * faces_surf_temp.size();
                 }
             }
             // Теперь все собираем
@@ -1050,13 +1050,13 @@ void VFEM::input_pml()
         if(is_pml(fes_i->barycenter, fes_i, & phys_pml))
         {
             for(size_t j = 0; j < 4; j++)
-                pml_nodes_cache[fes_i->nodes[j]] = make_pair(cpoint(), fes_i);
+                pml_nodes_cache[fes_i->get_node_ptr(j)] = make_pair(cpoint(), fes_i);
         }
         else
         {
             for(size_t j = 0; j < 4; j++)
             {
-                point * nodes_j = fes_i->nodes[j];
+                point * nodes_j = fes_i->get_node_ptr(j);
                 if(nodes_j->x > x1) x1 = nodes_j->x;
                 if(nodes_j->y > y1) y1 = nodes_j->y;
                 if(nodes_j->z > z1) z1 = nodes_j->z;
@@ -1092,18 +1092,18 @@ void VFEM::input_pml()
     {
         show_progress("re-init tetrahedrons", i, fes.size());
         cpoint cp[4];
-        size_t ph_curr = fes[i].phys->gmsh_num;
+        size_t ph_curr = fes[i].get_phys_area().gmsh_num;
         if(is_pml(fes[i].barycenter, & (fes[i]), & phys_pml))
         {
             for(size_t j = 0; j < 4; j++)
             {
-                map<point *, pair<cpoint, finite_element *> >::iterator it = pml_nodes_cache.find(fes[i].nodes[j]);
+                map<point *, pair<cpoint, finite_element *> >::iterator it = pml_nodes_cache.find(fes[i].get_node_ptr(j));
                 // Если есть в кэше, то возьмем из него
-                if(it->second.second->phys->gmsh_num == ph_curr)
+                if(it->second.second->get_phys_area().gmsh_num == ph_curr)
                     cp[j] = it->second.first;
                 // А иначе рассчитаем
                 else
-                    cp[j] = convert_point_to_pml(fes[i].nodes[j], &(fes[i]));
+                    cp[j] = convert_point_to_pml(fes[i].get_node_ptr(j), &(fes[i]));
             }
             fes[i].init_pml(get_s, & phys_pml, cp);
         }

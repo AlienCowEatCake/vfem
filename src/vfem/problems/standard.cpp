@@ -1,7 +1,7 @@
 #include "problems.h"
 
 // Функция аналитического решения
-cvector3 func_true(const point & p, const phys_area & phys, void * data)
+cvector3 func_true(const point & p, phys_area & phys, void * data)
 {
     (void)(phys);
     pair<const config_type *, array_t<evaluator_helmholtz *, 3> > * params =
@@ -9,14 +9,12 @@ cvector3 func_true(const point & p, const phys_area & phys, void * data)
     cvector3 result(0, 0, 0);
     if(!params->first->analytical_enabled) return result;
 
-    // TODO: Костыль
-    phys_area * phys_editable = const_cast<phys_area *>(&phys);
-    phys_editable->sigma[threads_config::analytical].set_x(p.x);
-    phys_editable->sigma[threads_config::analytical].set_y(p.y);
-    phys_editable->sigma[threads_config::analytical].set_z(p.z);
+    phys.sigma[threads_config::analytical].set_x(p.x);
+    phys.sigma[threads_config::analytical].set_y(p.y);
+    phys.sigma[threads_config::analytical].set_z(p.z);
     double sigma;
-    if(!phys_editable->sigma[threads_config::analytical].calculate(sigma))
-        cout << "[Parser] " << phys_editable->sigma[threads_config::analytical].get_error() << endl;
+    if(!phys.sigma[threads_config::analytical].calculate(sigma))
+        cout << "[Parser] " << phys.sigma[threads_config::analytical].get_error() << endl;
     complex<double> k2(- phys.epsilon * phys.omega * phys.omega, phys.omega * sigma);
 
     for(size_t i = 0; i < 3; i++)
@@ -34,7 +32,7 @@ cvector3 func_true(const point & p, const phys_area & phys, void * data)
 }
 
 // Правая часть
-cvector3 func_rp(const point & p, const phys_area & phys, void * data)
+cvector3 func_rp(const point & p, phys_area & phys, void * data)
 {
     (void)(phys);
     pair<const config_type *, array_t<evaluator_helmholtz *, 3> > * params =
@@ -42,14 +40,12 @@ cvector3 func_rp(const point & p, const phys_area & phys, void * data)
     cvector3 result(0, 0, 0);
     if(!params->first->right_enabled) return result;
 
-    // TODO: Костыль
-    phys_area * phys_editable = const_cast<phys_area *>(&phys);
-    phys_editable->sigma[threads_config::right_part].set_x(p.x);
-    phys_editable->sigma[threads_config::right_part].set_y(p.y);
-    phys_editable->sigma[threads_config::right_part].set_z(p.z);
+    phys.sigma[threads_config::right_part].set_x(p.x);
+    phys.sigma[threads_config::right_part].set_y(p.y);
+    phys.sigma[threads_config::right_part].set_z(p.z);
     double sigma;
-    if(!phys_editable->sigma[threads_config::right_part].calculate(sigma))
-        cout << "[Parser] " << phys_editable->sigma[threads_config::right_part].get_error() << endl;
+    if(!phys.sigma[threads_config::right_part].calculate(sigma))
+        cout << "[Parser] " << phys.sigma[threads_config::right_part].get_error() << endl;
     complex<double> k2(- phys.epsilon * phys.omega * phys.omega, phys.omega * sigma);
 
     for(size_t i = 0; i < 3; i++)
@@ -67,7 +63,7 @@ cvector3 func_rp(const point & p, const phys_area & phys, void * data)
 }
 
 // Функция неоднородных первых краевых условий
-cvector3 func_b1(const point & p, const phys_area & phys, void * data)
+cvector3 func_b1(const point & p, phys_area & phys, void * data)
 {
     (void)(phys);
     pair<const config_type *, array_t<evaluator_helmholtz *, 3> > * params =
@@ -75,14 +71,12 @@ cvector3 func_b1(const point & p, const phys_area & phys, void * data)
     cvector3 result(0, 0, 0);
     if(!params->first->boundary_enabled) return result;
 
-    // TODO: Костыль
-    phys_area * phys_editable = const_cast<phys_area *>(&phys);
-    phys_editable->sigma[threads_config::boundary].set_x(p.x);
-    phys_editable->sigma[threads_config::boundary].set_y(p.y);
-    phys_editable->sigma[threads_config::boundary].set_z(p.z);
+    phys.sigma[threads_config::boundary].set_x(p.x);
+    phys.sigma[threads_config::boundary].set_y(p.y);
+    phys.sigma[threads_config::boundary].set_z(p.z);
     double sigma;
-    if(!phys_editable->sigma[threads_config::boundary].calculate(sigma))
-        cout << "[Parser] " << phys_editable->sigma[threads_config::boundary].get_error() << endl;
+    if(!phys.sigma[threads_config::boundary].calculate(sigma))
+        cout << "[Parser] " << phys.sigma[threads_config::boundary].get_error() << endl;
     complex<double> k2(- phys.epsilon * phys.omega * phys.omega, phys.omega * sigma);
 
     for(size_t i = 0; i < 3; i++)

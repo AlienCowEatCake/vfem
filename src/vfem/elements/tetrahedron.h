@@ -2,12 +2,11 @@
 #define TETRAHEDRON_H_INCLUDED
 
 #include "../common/common.h"
-#include "../common/cubatures.h"
-#include "../config/config.h"
+#include "../common/config.h"
 #include "../elements/edge.h"
 #include "../vfem/phys.h"
 
-typedef cvector3(* eval_func)(const point &, const phys_area &, void *);
+typedef cvector3(* eval_func)(const point &, phys_area &, void *);
 
 // Индексы для построения базисных функций на тетраэдрах
 namespace tet_basis_indexes
@@ -19,23 +18,12 @@ namespace tet_basis_indexes
 }
 
 // Класс тетраэдр (абстрактный)
-class tetrahedron_base
+class tetrahedron_base : public tetrahedron_basic<point, edge, face, phys_area>
 {
 public:
-    tetrahedron_base();
     void init(const basis_type * basis);
     bool inside(const point & p) const;
     bool inside(double x, double y, double z) const;
-
-    point * nodes[4];   // Узлы
-    edge * edges[6];    // Ребра
-    const point & get_node(size_t i) const;
-    const edge & get_edge(size_t i) const;
-    face * faces[4];    // Грани
-    const face & get_face(size_t i) const;
-
-    phys_area * phys;   // Физическая область
-    const phys_area & get_phys_area() const;
 
     const basis_type * basis;   // Параметры базиса
 
@@ -53,13 +41,13 @@ public:
     bool in_cube(double x0, double x1, double y0, double y1, double z0, double z1) const;
 
     trio<double, vector3, cvector3>
-    diff_normL2(const array_t<complex<double> > & q, eval_func func, void * data) const;
+    diff_normL2(const array_t<complex<double> > & q, eval_func func, void * data);
     trio<double, vector3, cvector3>
-    diff_normL2(const array_t<complex<double> > & q, const array_t<complex<double> > & q_true) const;
+    diff_normL2(const array_t<complex<double> > & q, const array_t<complex<double> > & q_true);
     trio<double, vector3, cvector3>
-    normL2(eval_func func, void * data) const;
+    normL2(eval_func func, void * data);
     trio<double, vector3, cvector3>
-    normL2(const array_t<complex<double> > & q_true) const;
+    normL2(const array_t<complex<double> > & q_true);
 
 protected:
     // Матрица L-координат
@@ -83,11 +71,11 @@ class tetrahedron : public tetrahedron_base
 {
 public:
     // Локальная правая часть
-    array_t<complex<double> > rp(eval_func func, void * data) const;
+    array_t<complex<double> > rp(eval_func func, void * data);
     // Локальная матрица полного пространства
-    matrix_t<complex<double> > MpG() const;
+    matrix_t<complex<double> > MpG();
     // Локальная матрица ядра
-    matrix_t<complex<double> > K() const;
+    matrix_t<complex<double> > K();
 };
 
 // Класс тетраэдр (для работы с PML-краевыми)
@@ -99,14 +87,15 @@ public:
     void init_pml(cvector3(* get_s)(const point &, const tetrahedron_pml *, const phys_pml_area *), const phys_pml_area * phys_pml, const cpoint * nodes_pml);
 
     // Локальная правая часть
-    array_t<complex<double> > rp(eval_func func, void * data) const;
+    array_t<complex<double> > rp(eval_func func, void * data);
     // Локальная матрица полного пространства
-    matrix_t<complex<double> > MpG() const;
+    matrix_t<complex<double> > MpG();
     // Локальная матрица ядра
-    matrix_t<complex<double> > K() const;
+    matrix_t<complex<double> > K();
 
     // Получить указатель на обычный тетраэдр
     const tetrahedron * to_std() const;
+    tetrahedron * to_std();
 
 protected:
     cvector3(* get_s)(const point &, const tetrahedron_pml *, const phys_pml_area *);

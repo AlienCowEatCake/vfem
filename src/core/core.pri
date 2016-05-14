@@ -4,9 +4,11 @@ CONFIG += object_with_source object_parallel_to_source
 CONFIG += no_batch
 
 HEADERS += \
+    $$PWD/containers/fem/*.h \
     $$PWD/containers/generic/*.h \
     $$PWD/containers/geometry/*.h \
     $$PWD/containers/tree/*.h \
+    $$PWD/cubatures/*.h \
     $$PWD/evaluator/evaluator_internal/jit/*.h \
     $$PWD/evaluator/evaluator_internal/*.h \
     $$PWD/evaluator/*.h \
@@ -27,6 +29,7 @@ HEADERS += \
     $$PWD/wrappers/*.h
 
 SOURCES += \
+    $$PWD/cubatures/*.cpp \
     $$PWD/evaluator/evaluator_internal/jit/*.cpp \
     $$PWD/evaluator/evaluator_internal/*.cpp \
     $$PWD/solvers/CSRC/symmetric/complex/COCG/*.cpp \

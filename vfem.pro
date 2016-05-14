@@ -26,8 +26,7 @@ include(src/core/core.pri)
 
 SOURCES += \
     src/vfem/main.cpp \
-    src/vfem/config/config.cpp \
-    src/vfem/common/cubatures.cpp \
+    src/vfem/common/config.cpp \
     src/vfem/elements/edge.cpp \
     src/vfem/elements/triangle.cpp \
     src/vfem/elements/tetrahedron.cpp \
@@ -42,10 +41,9 @@ SOURCES += \
     src/vfem/problems/standard_pml.cpp
 
 HEADERS += \
-    src/vfem/config/config.h \
-    src/vfem/config/evaluator_helmholtz.h \
+    src/vfem/common/config.h \
+    src/vfem/common/evaluator_helmholtz.h \
     src/vfem/common/common.h \
-    src/vfem/common/cubatures.h \
     src/vfem/elements/edge.h \
     src/vfem/elements/triangle.h \
     src/vfem/elements/tetrahedron.h \

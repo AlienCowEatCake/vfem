@@ -2,43 +2,22 @@
 #define TRIANGLE_H_INCLUDED
 
 #include "../common/common.h"
-#include "../common/cubatures.h"
-#include "../config/config.h"
+#include "../common/config.h"
 #include "../elements/edge.h"
 #include "../vfem/phys.h"
 
-typedef cvector3(* eval_func)(const point &, const phys_area &, void *);
-
-// Индексы для построения базисных функций на треугольниках
-namespace tr_basis_indexes
-{
-    // Edges (Ребра) // k, l : k < l
-    extern const size_t ind_e[3][2];
-}
+typedef cvector3(* eval_func)(const point &, phys_area &, void *);
 
 // Класс треугольник (обычный)
-class triangle_base
+struct triangle_base : public triangle_basic<point, edge, face, phys_area>
 {
-public:
-    triangle_base();
-
-    point * nodes[3];   // Узлы
-    edge * edges[3];    // Ребра
-    const point & get_node(size_t i) const;
-    const edge & get_edge(size_t i) const;
-    face * faces;       // Грани
-    const face & get_face() const;
-
-    phys_area * phys;   // Физическая область
-    const phys_area & get_phys_area() const;
-
     virtual void init(const basis_type *) {}
     virtual matrix_t<double> M() const;
-    virtual array_t<complex<double> > rp(eval_func, void *) const;
+    virtual array_t<complex<double> > rp(eval_func, void *);
 };
 
 // Класс треугольник (полный, для работы с первыми неоднородными краевыми)
-class triangle_full : public triangle_base
+struct triangle_full : public triangle_base
 {
 public:
     triangle_full(const triangle_base & other = triangle_base());
@@ -47,7 +26,7 @@ public:
     // Локальная матрица массы
     virtual matrix_t<double> M() const;
     // Локальная правая часть
-    virtual array_t<complex<double> > rp(eval_func func, void * data) const;
+    virtual array_t<complex<double> > rp(eval_func func, void * data);
 
 protected:
     // Матрица L-координат
@@ -74,7 +53,7 @@ protected:
     double jacobian;
 
     double integrate_w(size_t i, size_t j) const;
-    complex<double> integrate_fw(eval_func func, size_t i, void * data) const;
+    complex<double> integrate_fw(eval_func func, size_t i, void * data);
 };
 
 typedef triangle_base triangle;

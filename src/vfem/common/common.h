@@ -36,6 +36,8 @@
 #include <list>
 #include <ctime>
 
+#include "../../core/containers/fem/triangle_basic.h"
+#include "../../core/containers/fem/tetrahedron_basic.h"
 #include "../../core/containers/generic/trio.h"
 #include "../../core/containers/generic/array_t.h"
 #include "../../core/containers/generic/matrix_t.h"
@@ -45,6 +47,8 @@
 #include "../../core/containers/geometry/vector3_t.h"
 #include "../../core/containers/tree/quadtree.h"
 #include "../../core/containers/tree/octree.h"
+#include "../../core/cubatures/triangle_integration.h"
+#include "../../core/cubatures/tetrahedron_integration.h"
 #include "../../core/utils/cxxversion.h"
 #include "../../core/utils/fpu.h"
 #include "../../core/utils/nosighup.h"
@@ -58,9 +62,11 @@
 #include "../../core/wrappers/omp_wrapper.h"
 
 using namespace std;
+using namespace core::containers::fem;
 using namespace core::containers::generic;
 using namespace core::containers::geometry;
 using namespace core::containers::tree;
+using namespace core::cubatures;
 using namespace core::utils;
 using namespace core::utils::nosighup;
 using namespace core::utils::strings;

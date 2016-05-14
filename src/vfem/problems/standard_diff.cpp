@@ -67,7 +67,7 @@ void compare_simple(VFEM & master, VFEM & slave, const vector<diff_area> & areas
 }
 
 // Функция для получения решения (прототипом соответствующая func_true) для сравнения решений
-cvector3 func_diff(const point & p, const phys_area & phys, void * data)
+cvector3 func_diff(const point & p, phys_area & phys, void * data)
 {
     (void)(phys);
     VFEM * v = (VFEM *)(data);

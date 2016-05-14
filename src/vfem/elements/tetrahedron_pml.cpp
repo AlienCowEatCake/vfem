@@ -10,7 +10,7 @@ tetrahedron_pml::tetrahedron_pml()
 // Инициализация PML-координат
 void tetrahedron_pml::init_pml(cvector3(* get_s)(const point &, const tetrahedron_pml *, const phys_pml_area *), const phys_pml_area * phys_pml, const cpoint * nodes_pml)
 {
-    const tet_integration_config * tet_integration = &(basis->tet_int);
+    const tetrahedron_integration * tet_integration = &(basis->tet_int);
 
     this->get_s = get_s;
     this->phys_pml = phys_pml;
@@ -27,14 +27,14 @@ void tetrahedron_pml::init_pml(cvector3(* get_s)(const point &, const tetrahedro
     jacobian_pml = abs(D_det);
 
     // Перевод точек Гаусса с мастер-элемента на текущий тетраэдр
-    gauss_points_pml.resize(tet_integration->gauss_num);
+    gauss_points_pml.resize(tet_integration->get_gauss_num());
     for(size_t i = 0; i < 3; i++)
     {
-        for(size_t j = 0 ; j < tet_integration->gauss_num; j++)
+        for(size_t j = 0 ; j < tet_integration->get_gauss_num(); j++)
         {
             gauss_points_pml[j][i] = 0;
             for(size_t k = 0; k < 4; k++)
-                gauss_points_pml[j][i] += D[i][k] * tet_integration->gauss_points_master[j][k];
+                gauss_points_pml[j][i] += D[i][k] * tet_integration->get_gauss_point_master(j, k);
         }
     }
 }
@@ -43,6 +43,12 @@ void tetrahedron_pml::init_pml(cvector3(* get_s)(const point &, const tetrahedro
 const tetrahedron * tetrahedron_pml::to_std() const
 {
     const tetrahedron * tet = reinterpret_cast<const tetrahedron *>(this);
+    return tet;
+}
+
+tetrahedron * tetrahedron_pml::to_std()
+{
+    tetrahedron * tet = reinterpret_cast<tetrahedron *>(this);
     return tet;
 }
 
@@ -214,27 +220,26 @@ cvector3 tetrahedron_pml::kerw_pml(size_t i, const cpoint & p, const point & p_n
 
 // Локальная матрица полного пространства
 matrix_t<complex<double> >
-tetrahedron_pml::MpG() const
+tetrahedron_pml::MpG()
 {
 //#if defined(__GNUC__)
 //#warning conjugate
 //#endif
-    const tet_integration_config * tet_integration = &(basis->tet_int);
+    const tetrahedron_integration * tet_integration = &(basis->tet_int);
     matrix_t<complex<double> > matr(basis->tet_bf_num, basis->tet_bf_num);
+    phys_area * phys = get_phys_area_ptr();
 
     for(size_t i = 0; i < basis->tet_bf_num; i++)
         for(size_t j = 0; j < basis->tet_bf_num; j++)
             matr[i][j] = 0.0;
 
-    for(size_t k = 0; k < tet_integration->gauss_num; k++)
+    for(size_t k = 0; k < tet_integration->get_gauss_num(); k++)
     {
-        // TODO: Костыль
-        phys_area * phys_editable = const_cast<phys_area *>(phys);
-        phys_editable->sigma[threads_config::matrix_full].set_x(gauss_points[k].x);
-        phys_editable->sigma[threads_config::matrix_full].set_y(gauss_points[k].y);
-        phys_editable->sigma[threads_config::matrix_full].set_z(gauss_points[k].z);
+        phys->sigma[threads_config::matrix_full].set_x(gauss_points[k].x);
+        phys->sigma[threads_config::matrix_full].set_y(gauss_points[k].y);
+        phys->sigma[threads_config::matrix_full].set_z(gauss_points[k].z);
         double sigma = 0.0;
-        phys_editable->sigma[threads_config::matrix_full].calculate(sigma);
+        phys->sigma[threads_config::matrix_full].calculate(sigma);
         complex<double> k2(- phys->epsilon * phys->omega * phys->omega, phys->omega * sigma);
 
         for(size_t i = 0; i < basis->tet_bf_num; i++)
@@ -248,7 +253,7 @@ tetrahedron_pml::MpG() const
                 cvector3 curlwi = rotw_pml(i, gauss_points_pml[k], gauss_points[k]).conj();
                 cvector3 curlwj = rotw_pml(j, gauss_points_pml[k], gauss_points[k]).conj();
                 // Почти элемент локальной матрицы
-                matr[i][j] += tet_integration->gauss_weights[k] * (wi * wj * k2 + curlwi * curlwj / phys->mu);
+                matr[i][j] += tet_integration->get_gauss_weight(k) * (wi * wj * k2 + curlwi * curlwj / phys->mu);
             }
         }
     }
@@ -266,23 +271,23 @@ tetrahedron_pml::MpG() const
 
 // Локальная правая часть
 array_t<complex<double> >
-tetrahedron_pml::rp(eval_func func, void * data) const
+tetrahedron_pml::rp(eval_func func, void * data)
 {
 //#if defined(__GNUC__)
 //#warning conjugate
 //#endif
-    const tet_integration_config * tet_integration = &(basis->tet_int);
+    const tetrahedron_integration * tet_integration = &(basis->tet_int);
     array_t<complex<double> > arr(basis->tet_bf_num);
     for(size_t i = 0; i < basis->tet_bf_num; i++)
     {
         complex<double> value(0, 0);
-        for(size_t k = 0; k < tet_integration->gauss_num; k++)
+        for(size_t k = 0; k < tet_integration->get_gauss_num(); k++)
         {
             // Интеграл от ф-и правой части на бф
             cvector3 wi = w_pml(i, gauss_points_pml[k]).conj();
             cvector3 f = func(gauss_points[k], get_phys_area(), data);
             // Почти элемент локальной правой части
-            value += tet_integration->gauss_weights[k] * wi * f;
+            value += tet_integration->get_gauss_weight(k) * wi * f;
         }
         arr[i] = value * jacobian_pml;
     }
@@ -291,27 +296,26 @@ tetrahedron_pml::rp(eval_func func, void * data) const
 
 // Локальная матрица ядра
 matrix_t<complex<double> >
-tetrahedron_pml::K() const
+tetrahedron_pml::K()
 {
 //#if defined(__GNUC__)
 //#warning conjugate
 //#endif
-    const tet_integration_config * tet_integration = &(basis->tet_int);
+    const tetrahedron_integration * tet_integration = &(basis->tet_int);
     matrix_t<complex<double> > matr(basis->tet_ker_bf_num, basis->tet_ker_bf_num);
+    phys_area * phys = get_phys_area_ptr();
 
     for(size_t i = 0; i < basis->tet_ker_bf_num; i++)
         for(size_t j = 0; j < basis->tet_ker_bf_num; j++)
             matr[i][j] = 0.0;
 
-    for(size_t k = 0; k < tet_integration->gauss_num; k++)
+    for(size_t k = 0; k < tet_integration->get_gauss_num(); k++)
     {
-        // TODO: Костыль
-        phys_area * phys_editable = const_cast<phys_area *>(phys);
-        phys_editable->sigma[threads_config::matrix_ker].set_x(gauss_points[k].x);
-        phys_editable->sigma[threads_config::matrix_ker].set_y(gauss_points[k].y);
-        phys_editable->sigma[threads_config::matrix_ker].set_z(gauss_points[k].z);
+        phys->sigma[threads_config::matrix_ker].set_x(gauss_points[k].x);
+        phys->sigma[threads_config::matrix_ker].set_y(gauss_points[k].y);
+        phys->sigma[threads_config::matrix_ker].set_z(gauss_points[k].z);
         double sigma = 0.0;
-        phys_editable->sigma[threads_config::matrix_ker].calculate(sigma);
+        phys->sigma[threads_config::matrix_ker].calculate(sigma);
         complex<double> k2(- phys->epsilon * phys->omega * phys->omega, phys->omega * sigma);
 
         for(size_t i = 0; i < basis->tet_ker_bf_num; i++)
@@ -322,7 +326,7 @@ tetrahedron_pml::K() const
                 cvector3 kerwi = kerw_pml(i, gauss_points_pml[k], gauss_points[k]).conj();
                 cvector3 kerwj = kerw_pml(j, gauss_points_pml[k], gauss_points[k]).conj();
                 // Почти элемент локальной матрицы
-                matr[i][j] += tet_integration->gauss_weights[k] * kerwi * kerwj * k2;
+                matr[i][j] += tet_integration->get_gauss_weight(k) * kerwi * kerwj * k2;
             }
         }
     }
