@@ -41,14 +41,12 @@ public:
     inline const point * get_node_ptr(std::size_t i) const
     {
         assert(i < 4);
-        assert(m_nodes[i] != NULL);
         return m_nodes[i];
     }
 
     inline point * get_node_ptr(std::size_t i)
     {
         assert(i < 4);
-        assert(m_nodes[i] != NULL);
         return m_nodes[i];
     }
 
@@ -81,14 +79,12 @@ public:
     inline const edge * get_edge_ptr(std::size_t i) const
     {
         assert(i < 6);
-        assert(m_edges[i] != NULL);
         return m_edges[i];
     }
 
     inline edge * get_edge_ptr(std::size_t i)
     {
         assert(i < 6);
-        assert(m_edges[i] != NULL);
         return m_edges[i];
     }
 
@@ -121,14 +117,12 @@ public:
     inline const face * get_face_ptr(std::size_t i) const
     {
         assert(i < 4);
-        assert(m_faces != NULL);
         return m_faces[i];
     }
 
     inline face * get_face_ptr(std::size_t i)
     {
         assert(i < 4);
-        assert(m_faces != NULL);
         return m_faces[i];
     }
 
@@ -158,13 +152,11 @@ public:
 
     inline const phys_area * get_phys_area_ptr() const
     {
-        assert(m_phys != NULL);
         return m_phys;
     }
 
     inline phys_area * get_phys_area_ptr()
     {
-        assert(m_phys != NULL);
         return m_phys;
     }
 

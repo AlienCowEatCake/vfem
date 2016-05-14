@@ -18,12 +18,10 @@ namespace tet_basis_indexes
 }
 
 // Класс тетраэдр (абстрактный)
-class tetrahedron_base : public tetrahedron_basic<point, edge, face, phys_area>
+class tetrahedron_base : public tetrahedron_basic_3d<edge, face, phys_area>
 {
 public:
     void init(const basis_type * basis);
-    bool inside(const point & p) const;
-    bool inside(double x, double y, double z) const;
 
     const basis_type * basis;   // Параметры базиса
 
@@ -36,10 +34,6 @@ public:
     // Базисные функции ядра
     vector3 kerw(size_t i, const point & p) const;
 
-    point barycenter;
-
-    bool in_cube(double x0, double x1, double y0, double y1, double z0, double z1) const;
-
     trio<double, vector3, cvector3>
     diff_normL2(const array_t<complex<double> > & q, eval_func func, void * data);
     trio<double, vector3, cvector3>
@@ -48,22 +42,6 @@ public:
     normL2(eval_func func, void * data);
     trio<double, vector3, cvector3>
     normL2(const array_t<complex<double> > & q_true);
-
-protected:
-    // Матрица L-координат
-    matrix_t<double> L;
-    // Градиент L-координаты
-    vector3 grad_lambda(size_t i) const;
-    // L-координаты
-    double lambda(size_t i, const point & p) const;
-
-    // Точки Гаусса
-    array_t<point> gauss_points;
-    // Якобиан
-    double jacobian;
-
-    // Параметры прямых для дерева
-    matrix_t<double> edges_a, edges_b;
 };
 
 // Класс тетраэдр (обычный)

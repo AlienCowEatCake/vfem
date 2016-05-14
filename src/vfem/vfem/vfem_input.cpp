@@ -1047,7 +1047,7 @@ void VFEM::input_pml()
     {
         show_progress("scanned tetrahedrons", i, fes.size());
         finite_element * fes_i = &(fes[i]);
-        if(is_pml(fes_i->barycenter, fes_i, & phys_pml))
+        if(is_pml(fes_i->get_barycenter(), fes_i, & phys_pml))
         {
             for(size_t j = 0; j < 4; j++)
                 pml_nodes_cache[fes_i->get_node_ptr(j)] = make_pair(cpoint(), fes_i);
@@ -1093,7 +1093,7 @@ void VFEM::input_pml()
         show_progress("re-init tetrahedrons", i, fes.size());
         cpoint cp[4];
         size_t ph_curr = fes[i].get_phys_area().gmsh_num;
-        if(is_pml(fes[i].barycenter, & (fes[i]), & phys_pml))
+        if(is_pml(fes[i].get_barycenter(), & (fes[i]), & phys_pml))
         {
             for(size_t j = 0; j < 4; j++)
             {

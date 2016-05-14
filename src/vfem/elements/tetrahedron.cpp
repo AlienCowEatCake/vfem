@@ -27,18 +27,6 @@ namespace tet_basis_indexes
 
 // ============================================================================
 
-double tetrahedron_base::lambda(size_t i, const point & p) const
-{
-    assert(i < 4); // Если i == 4, то явно где-то косяк
-    return L[i][3] + L[i][0] * p.x + L[i][1] * p.y + L[i][2] * p.z;
-}
-
-vector3 tetrahedron_base::grad_lambda(size_t i) const
-{
-    assert(i < 4); // Если i == 4, то явно где-то косяк
-    return vector3(L[i][0], L[i][1], L[i][2]);
-}
-
 vector3 tetrahedron_base::w(size_t i, const point & p) const
 {
     using namespace tet_basis_indexes;
@@ -196,124 +184,8 @@ vector3 tetrahedron_base::kerw(size_t i, const point & p) const
 
 void tetrahedron_base::init(const basis_type * basis)
 {
-    const tetrahedron_integration * tet_integration = &(basis->tet_int);
-
-    matrix_t<double, 4, 4> D;
-    for(size_t i = 0; i < 3; i++)
-        for(size_t j = 0; j < 4; j++)
-            D[i][j] = get_node(j)[i];
-    for(size_t j = 0; j < 4; j++)
-        D[3][j] = 1.0;
-    double D_det;
-    L = inverse(D, D_det);
-
-    jacobian = fabs(D_det);
-
-    // Перевод точек Гаусса с мастер-элемента на текущий тетраэдр
-    gauss_points.resize(tet_integration->get_gauss_num());
-    for(size_t i = 0; i < 3; i++)
-    {
-        for(size_t j = 0 ; j < tet_integration->get_gauss_num(); j++)
-        {
-            gauss_points[j][i] = 0;
-            for(size_t k = 0; k < 4; k++)
-                gauss_points[j][i] += D[i][k] * tet_integration->get_gauss_point_master(j, k);
-        }
-    }
-
-    // Расчет барицентра
-    for(size_t i = 0; i < 3; i++)
-    {
-        barycenter[i] = 0.0;
-        for(size_t j = 0; j < 4; j++)
-            barycenter[i] += get_node(j)[i];
-        barycenter[i] /= 4.0;
-    }
-
-    // Представление прямых тетраэдра в параметрическом виде a*t + b
-    // Само ребо получается при 0<=t<=1
-    edges_a.resize(6, 3);
-    edges_b.resize(6, 3);
-    for(size_t i = 0; i < 3; i++)
-    {
-        edges_a[0][i] = get_node(1)[i] - get_node(0)[i];
-        edges_b[0][i] = get_node(0)[i];
-        edges_a[1][i] = get_node(2)[i] - get_node(0)[i];
-        edges_b[1][i] = get_node(0)[i];
-        edges_a[2][i] = get_node(3)[i] - get_node(0)[i];
-        edges_b[2][i] = get_node(0)[i];
-        edges_a[3][i] = get_node(2)[i] - get_node(1)[i];
-        edges_b[3][i] = get_node(1)[i];
-        edges_a[4][i] = get_node(3)[i] - get_node(1)[i];
-        edges_b[4][i] = get_node(1)[i];
-        edges_a[5][i] = get_node(3)[i] - get_node(2)[i];
-        edges_b[5][i] = get_node(2)[i];
-    }
-
+    init_3d(basis->tet_int);
     this->basis = basis;
-}
-
-bool tetrahedron_base::inside(const point & p) const
-{
-    for(size_t i = 0; i < 4; i++)
-    {
-        double a = lambda(i, p);
-        if(a -1e-12 > 1.0 || a +1e-12 < 0.0)
-            return false;
-    }
-    return true;
-}
-
-bool tetrahedron_base::inside(double x, double y, double z) const
-{
-    return inside(point(x, y, z));
-}
-
-bool tetrahedron_base::in_cube(double x0, double x1, double y0, double y1, double z0, double z1) const
-{
-    // Тетраэдр внутри куба
-    if(barycenter.inside(x0, x1, y0, y1, z0, z1))
-        return true;
-    for(size_t i = 0; i < 4; i++)
-        if(get_node(i).inside(x0, x1, y0, y1, z0, z1))
-            return true;
-
-    // Куб внутри тетраэдра
-    if(inside(x0, y0, z0) || inside(x1, y0, z0) || inside(x0, y1, z0) || inside(x1, y1, z0) ||
-            inside(x0, y0, z1) || inside(x1, y0, z1) || inside(x0, y1, z1) || inside(x1, y1, z1))
-        return true;
-
-    // Пересечение куба и тетраэдра, не обработанное выше
-    double t[6][6];     // Параметры прямых для всех прямых (6) и всех плоскостей (6)
-    double cords_t[6][6][3];    // Прямая, плоскость, координата
-    for(size_t i = 0; i < 6; i++)
-    {
-        t[i][0] = (x0 - edges_b[i][0]) / edges_a[i][0]; // x = x0
-        t[i][1] = (x1 - edges_b[i][0]) / edges_a[i][0]; // x = x1
-        t[i][2] = (y0 - edges_b[i][1]) / edges_a[i][1]; // y = y0
-        t[i][3] = (y1 - edges_b[i][1]) / edges_a[i][1]; // y = y1
-        t[i][4] = (z0 - edges_b[i][2]) / edges_a[i][2]; // z = z0
-        t[i][5] = (z1 - edges_b[i][2]) / edges_a[i][2]; // z = z1
-    }
-
-    for(size_t i = 0; i < 6; i++)
-        for(size_t j = 0; j < 6; j++)
-            for(size_t k = 0; k < 3; k++)
-                cords_t[i][j][k] = edges_a[i][k] * t[i][j] + edges_b[i][k];
-
-    for(size_t i = 0; i < 6; i++)   // Берем прямую и проверяем, что пересечение с плоскостью попадает в раcсматриваемый отрезок прямой и в рассатриваемую часть плоскости
-    {
-        if(
-            (t[i][0] >= 0.0 && t[i][0] <= 1.0 && cords_t[i][0][1] >= y0 && cords_t[i][0][1] >= y1 && cords_t[i][0][2] >= z0 && cords_t[i][0][2] <= z1) || // x = x0
-            (t[i][1] >= 0.0 && t[i][1] <= 1.0 && cords_t[i][1][1] >= y0 && cords_t[i][1][1] >= y1 && cords_t[i][1][2] >= z0 && cords_t[i][1][2] <= z1) || // x = x1
-            (t[i][2] >= 0.0 && t[i][2] <= 1.0 && cords_t[i][2][0] >= x0 && cords_t[i][2][0] <= x1 && cords_t[i][2][2] >= z0 && cords_t[i][2][2] <= z1) || // y = y0
-            (t[i][3] >= 0.0 && t[i][3] <= 1.0 && cords_t[i][3][0] >= x0 && cords_t[i][3][0] <= x1 && cords_t[i][3][2] >= z0 && cords_t[i][3][2] <= z1) || // y = y1
-            (t[i][4] >= 0.0 && t[i][4] <= 1.0 && cords_t[i][4][0] >= x0 && cords_t[i][4][0] <= x1 && cords_t[i][4][1] >= y0 && cords_t[i][4][1] <= y1) || // z = z0
-            (t[i][5] >= 0.0 && t[i][5] <= 1.0 && cords_t[i][5][0] >= x0 && cords_t[i][5][0] <= x1 && cords_t[i][5][1] >= y0 && cords_t[i][5][1] <= y1)    // z = z1
-        )
-            return true;
-    }
-    return false;
 }
 
 trio<double, vector3, cvector3>
@@ -327,9 +199,8 @@ tetrahedron_base::diff_normL2(const array_t<complex<double> > & q, eval_func fun
     {
         cvector3 val(0.0, 0.0, 0.0);
         for(size_t i = 0; i < basis->tet_bf_num; i++)
-            val = val + q[i] * cvector3(w(i, gauss_points[k]));
-        cvector3 func_d = func(gauss_points[k], get_phys_area(), data) - val;
-        //result += gauss_weights[k] * (func_d * func_d.cj());
+            val = val + q[i] * cvector3(w(i, get_gauss_point(k)));
+        cvector3 func_d = func(get_gauss_point(k), get_phys_area(), data) - val;
         result += tet_integration->get_gauss_weight(k) * func_d.norm2();
         for(size_t i = 0; i < 3; i++)
         {
@@ -340,9 +211,9 @@ tetrahedron_base::diff_normL2(const array_t<complex<double> > & q, eval_func fun
         }
         result_cv3 += tet_integration->get_gauss_weight(k) * func_d;
     }
-    result *= jacobian;
-    result_v3 *= jacobian;
-    result_cv3 *= jacobian;
+    result *= get_jacobian();
+    result_v3 *= get_jacobian();
+    result_cv3 *= get_jacobian();
     return make_trio(result.real(), result_v3, result_cv3);
 }
 
@@ -358,11 +229,10 @@ tetrahedron_base::diff_normL2(const array_t<complex<double> > & q, const array_t
         cvector3 val(0.0, 0.0, 0.0), val_true(0.0, 0.0, 0.0);
         for(size_t i = 0; i < basis->tet_bf_num; i++)
         {
-            val = val + q[i] * cvector3(w(i, gauss_points[k]));
-            val_true = val_true + q_true[i] * cvector3(w(i, gauss_points[k]));
+            val = val + q[i] * cvector3(w(i, get_gauss_point(k)));
+            val_true = val_true + q_true[i] * cvector3(w(i, get_gauss_point(k)));
         }
         cvector3 func_d = val_true - val;
-        //result += gauss_weights[k] * (func_d * func_d.cj());
         result += tet_integration->get_gauss_weight(k) * func_d.norm2();
         for(size_t i = 0; i < 3; i++)
         {
@@ -373,9 +243,9 @@ tetrahedron_base::diff_normL2(const array_t<complex<double> > & q, const array_t
         }
         result_cv3 += tet_integration->get_gauss_weight(k) * func_d;
     }
-    result *= jacobian;
-    result_v3 *= jacobian;
-    result_cv3 *= jacobian;
+    result *= get_jacobian();
+    result_v3 *= get_jacobian();
+    result_cv3 *= get_jacobian();
     return make_trio(result.real(), result_v3, result_cv3);
 }
 
@@ -388,8 +258,7 @@ tetrahedron_base::normL2(eval_func func, void * data)
     cvector3 result_cv3(0.0, 0.0, 0.0);
     for(size_t k = 0; k < tet_integration->get_gauss_num(); k++)
     {
-        cvector3 func_d = func(gauss_points[k], get_phys_area(), data);
-        //result += gauss_weights[k] * (func_d * func_d.cj());
+        cvector3 func_d = func(get_gauss_point(k), get_phys_area(), data);
         result += tet_integration->get_gauss_weight(k) * func_d.norm2();
         for(size_t i = 0; i < 3; i++)
         {
@@ -400,9 +269,9 @@ tetrahedron_base::normL2(eval_func func, void * data)
         }
         result_cv3 += tet_integration->get_gauss_weight(k) * func_d;
     }
-    result *= jacobian;
-    result_v3 *= jacobian;
-    result_cv3 *= jacobian;
+    result *= get_jacobian();
+    result_v3 *= get_jacobian();
+    result_cv3 *= get_jacobian();
     return make_trio(result.real(), result_v3, result_cv3);
 }
 
@@ -417,8 +286,7 @@ tetrahedron_base::normL2(const array_t<complex<double> > & q_true)
     {
         cvector3 func_d;
         for(size_t i = 0; i < basis->tet_bf_num; i++)
-            func_d = func_d + q_true[i] * cvector3(w(i, gauss_points[k]));
-        //result += gauss_weights[k] * (func_d * func_d.cj());
+            func_d = func_d + q_true[i] * cvector3(w(i, get_gauss_point(k)));
         result += tet_integration->get_gauss_weight(k) * func_d.norm2();
         for(size_t i = 0; i < 3; i++)
         {
@@ -429,9 +297,9 @@ tetrahedron_base::normL2(const array_t<complex<double> > & q_true)
         }
         result_cv3 += tet_integration->get_gauss_weight(k) * func_d;
     }
-    result *= jacobian;
-    result_v3 *= jacobian;
-    result_cv3 *= jacobian;
+    result *= get_jacobian();
+    result_v3 *= get_jacobian();
+    result_cv3 *= get_jacobian();
     return make_trio(result.real(), result_v3, result_cv3);
 }
 
@@ -451,9 +319,9 @@ tetrahedron::MpG()
 
     for(size_t k = 0; k < tet_integration->get_gauss_num(); k++)
     {
-        phys->sigma[threads_config::matrix_full].set_x(gauss_points[k].x);
-        phys->sigma[threads_config::matrix_full].set_y(gauss_points[k].y);
-        phys->sigma[threads_config::matrix_full].set_z(gauss_points[k].z);
+        phys->sigma[threads_config::matrix_full].set_x(get_gauss_point(k).x);
+        phys->sigma[threads_config::matrix_full].set_y(get_gauss_point(k).y);
+        phys->sigma[threads_config::matrix_full].set_z(get_gauss_point(k).z);
         double sigma = 0.0;
         phys->sigma[threads_config::matrix_full].calculate(sigma);
         complex<double> k2(- phys->epsilon * phys->omega * phys->omega, phys->omega * sigma);
@@ -463,11 +331,11 @@ tetrahedron::MpG()
             for(size_t j = 0; j <= i; j++)
             {
                 // Интеграл от бф
-                vector3 wi = w(i, gauss_points[k]);
-                vector3 wj = w(j, gauss_points[k]);
+                vector3 wi = w(i, get_gauss_point(k));
+                vector3 wj = w(j, get_gauss_point(k));
                 // Интеграл от ротора бф
-                vector3 curlwi = rotw(i, gauss_points[k]);
-                vector3 curlwj = rotw(j, gauss_points[k]);
+                vector3 curlwi = rotw(i, get_gauss_point(k));
+                vector3 curlwj = rotw(j, get_gauss_point(k));
                 // Почти элемент локальной матрицы
                 matr[i][j] += tet_integration->get_gauss_weight(k) * (wi * wj * k2 + curlwi * curlwj / phys->mu);
             }
@@ -478,7 +346,7 @@ tetrahedron::MpG()
     {
         for(size_t j = 0; j <= i; j++)
         {
-            matr[i][j] *= jacobian;
+            matr[i][j] *= get_jacobian();
             matr[j][i] = matr[i][j];
         }
     }
@@ -497,12 +365,12 @@ tetrahedron::rp(eval_func func, void * data)
         for(size_t k = 0; k < tet_integration->get_gauss_num(); k++)
         {
             // Интеграл от ф-и правой части на бф
-            vector3 wi = w(i, gauss_points[k]);
-            cvector3 f = func(gauss_points[k], get_phys_area(), data);
+            vector3 wi = w(i, get_gauss_point(k));
+            cvector3 f = func(get_gauss_point(k), get_phys_area(), data);
             // Почти элемент локальной правой части
             value += tet_integration->get_gauss_weight(k) * f * wi;
         }
-        arr[i] = value * jacobian;
+        arr[i] = value * get_jacobian();
     }
     return arr;
 }
@@ -521,9 +389,9 @@ tetrahedron::K()
 
     for(size_t k = 0; k < tet_integration->get_gauss_num(); k++)
     {
-        phys->sigma[threads_config::matrix_ker].set_x(gauss_points[k].x);
-        phys->sigma[threads_config::matrix_ker].set_y(gauss_points[k].y);
-        phys->sigma[threads_config::matrix_ker].set_z(gauss_points[k].z);
+        phys->sigma[threads_config::matrix_ker].set_x(get_gauss_point(k).x);
+        phys->sigma[threads_config::matrix_ker].set_y(get_gauss_point(k).y);
+        phys->sigma[threads_config::matrix_ker].set_z(get_gauss_point(k).z);
         double sigma = 0.0;
         phys->sigma[threads_config::matrix_ker].calculate(sigma);
         complex<double> k2(- phys->epsilon * phys->omega * phys->omega, phys->omega * sigma);
@@ -533,8 +401,8 @@ tetrahedron::K()
             for(size_t j = 0; j <= i; j++)
             {
                 // Интегралы от базисных функций ядра
-                vector3 kerwi = kerw(i, gauss_points[k]);
-                vector3 kerwj = kerw(j, gauss_points[k]);
+                vector3 kerwi = kerw(i, get_gauss_point(k));
+                vector3 kerwj = kerw(j, get_gauss_point(k));
                 // Почти элемент локальной матрицы
                 matr[i][j] += tet_integration->get_gauss_weight(k) * kerwi * kerwj * k2;
             }
@@ -545,7 +413,7 @@ tetrahedron::K()
     {
         for(size_t j = 0; j <= i; j++)
         {
-            matr[i][j] *= jacobian;
+            matr[i][j] *= get_jacobian();
             matr[j][i] = matr[i][j];
         }
     }

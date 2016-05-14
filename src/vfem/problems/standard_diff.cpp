@@ -15,9 +15,9 @@ void compare_simple(VFEM & master, VFEM & slave, const vector<diff_area> & areas
         for(size_t j = 0; j < areas.size(); j++)
         {
             const point * p1 = &(areas[j].p1), * p2 = &(areas[j].p2);
-            if(fe_m->barycenter.x >= p1->x && fe_m->barycenter.x <= p2->x &&
-               fe_m->barycenter.y >= p1->y && fe_m->barycenter.y <= p2->y &&
-               fe_m->barycenter.z >= p1->z && fe_m->barycenter.z <= p2->z)
+            if(fe_m->get_barycenter().x >= p1->x && fe_m->get_barycenter().x <= p2->x &&
+               fe_m->get_barycenter().y >= p1->y && fe_m->get_barycenter().y <= p2->y &&
+               fe_m->get_barycenter().z >= p1->z && fe_m->get_barycenter().z <= p2->z)
             {
                 if(areas[j].included)
                     flag = true;
@@ -31,7 +31,7 @@ void compare_simple(VFEM & master, VFEM & slave, const vector<diff_area> & areas
         // Если нужно - обработаем
         if(flag)
         {
-            finite_element * fe_s = slave.get_fe(fe_m->barycenter);
+            finite_element * fe_s = slave.get_fe(fe_m->get_barycenter());
             assert(fe_s);
 
             // Находим локальные веса
@@ -89,9 +89,9 @@ void compare_complex(VFEM & master, VFEM & slave, const vector<diff_area> & area
         for(size_t j = 0; j < areas.size(); j++)
         {
             const point * p1 = &(areas[j].p1), *p2 = &(areas[j].p2);
-            if (fe_m->barycenter.x >= p1->x && fe_m->barycenter.x <= p2->x &&
-                fe_m->barycenter.y >= p1->y && fe_m->barycenter.y <= p2->y &&
-                fe_m->barycenter.z >= p1->z && fe_m->barycenter.z <= p2->z)
+            if (fe_m->get_barycenter().x >= p1->x && fe_m->get_barycenter().x <= p2->x &&
+                fe_m->get_barycenter().y >= p1->y && fe_m->get_barycenter().y <= p2->y &&
+                fe_m->get_barycenter().z >= p1->z && fe_m->get_barycenter().z <= p2->z)
             {
                 if(areas[j].included)
                     flag = true;

@@ -9,7 +9,7 @@ bool VFEM::output(const string & tecplot_filename)
     vector<cvector3> E_vals;
     E_vals.resize(fes_num);
     for(size_t k = 0; k < fes_num; k++)
-        E_vals[k] = solution(fes[k].barycenter, &fes[k]);
+        E_vals[k] = solution(fes[k].get_barycenter(), &fes[k]);
 
     ofstream tecplot_file;
     tecplot_file.open(tecplot_filename.c_str(), ios::out);
