@@ -12,19 +12,19 @@ HEADERS += \
     $$PWD/evaluator/evaluator_internal/jit/*.h \
     $$PWD/evaluator/evaluator_internal/*.h \
     $$PWD/evaluator/*.h \
-    $$PWD/solvers/CSRC/preconditioners/Nothing/*.h \
-    $$PWD/solvers/CSRC/preconditioners/Di/*.h \
-    $$PWD/solvers/CSRC/preconditioners/GS/*.h \
-    $$PWD/solvers/CSRC/preconditioners/LDLT/*.h \
-    $$PWD/solvers/CSRC/preconditioners/LLT/*.h \
-    $$PWD/solvers/CSRC/preconditioners/*.h \
-    $$PWD/solvers/CSRC/symmetric/complex/COCG/*.h \
-    $$PWD/solvers/CSRC/symmetric/complex/COCR/*.h \
-    $$PWD/solvers/CSRC/symmetric/complex/BiCG_Complex/*.h \
-    $$PWD/solvers/CSRC/symmetric/complex/BiCGStab_Complex/*.h \
-    $$PWD/solvers/CSRC/symmetric/complex/GMRES_Complex/*.h \
-    $$PWD/solvers/CSRC/symmetric/*.h \
-    $$PWD/solvers/CSRC/*.h \
+    $$PWD/solvers/CSLR/preconditioners/Nothing/*.h \
+    $$PWD/solvers/CSLR/preconditioners/Di/*.h \
+    $$PWD/solvers/CSLR/preconditioners/GS/*.h \
+    $$PWD/solvers/CSLR/preconditioners/LDLT/*.h \
+    $$PWD/solvers/CSLR/preconditioners/LLT/*.h \
+    $$PWD/solvers/CSLR/preconditioners/*.h \
+    $$PWD/solvers/CSLR/symmetric/complex/COCG/*.h \
+    $$PWD/solvers/CSLR/symmetric/complex/COCR/*.h \
+    $$PWD/solvers/CSLR/symmetric/complex/BiCG_Complex/*.h \
+    $$PWD/solvers/CSLR/symmetric/complex/BiCGStab_Complex/*.h \
+    $$PWD/solvers/CSLR/symmetric/complex/GMRES_Complex/*.h \
+    $$PWD/solvers/CSLR/symmetric/*.h \
+    $$PWD/solvers/CSLR/*.h \
     $$PWD/utils/*.h \
     $$PWD/wrappers/*.h
 
@@ -32,12 +32,12 @@ SOURCES += \
     $$PWD/cubatures/*.cpp \
     $$PWD/evaluator/evaluator_internal/jit/*.cpp \
     $$PWD/evaluator/evaluator_internal/*.cpp \
-    $$PWD/solvers/CSRC/symmetric/complex/COCG/*.cpp \
-    $$PWD/solvers/CSRC/symmetric/complex/COCR/*.cpp \
-    $$PWD/solvers/CSRC/symmetric/complex/BiCG_Complex/*.cpp \
-    $$PWD/solvers/CSRC/symmetric/complex/BiCGStab_Complex/*.cpp \
-    $$PWD/solvers/CSRC/symmetric/complex/GMRES_Complex/*.cpp \
-    $$PWD/solvers/CSRC/*.cpp \
+    $$PWD/solvers/CSLR/symmetric/complex/COCG/*.cpp \
+    $$PWD/solvers/CSLR/symmetric/complex/COCR/*.cpp \
+    $$PWD/solvers/CSLR/symmetric/complex/BiCG_Complex/*.cpp \
+    $$PWD/solvers/CSLR/symmetric/complex/BiCGStab_Complex/*.cpp \
+    $$PWD/solvers/CSLR/symmetric/complex/GMRES_Complex/*.cpp \
+    $$PWD/solvers/CSLR/*.cpp \
     $$PWD/utils/*.cpp \
     $$PWD/wrappers/*.cpp
 

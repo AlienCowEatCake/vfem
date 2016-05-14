@@ -58,7 +58,7 @@
 #include "../../core/utils/inifile.h"
 #include "../../core/evaluator/evaluator.h"
 #include "../../core/evaluator/evaluator_xyz.h"
-#include "../../core/solvers/CSRC/solvers_factory.h"
+#include "../../core/solvers/CSLR/solvers_factory.h"
 #include "../../core/wrappers/omp_wrapper.h"
 
 using namespace std;
@@ -73,9 +73,9 @@ using namespace core::utils::strings;
 using namespace core::utils::progress;
 using namespace core::utils::timers;
 using namespace core::utils::fpu;
-using namespace core::solvers::CSRC::factory;
-using namespace core::solvers::CSRC::preconditioners;
-using namespace core::solvers::CSRC::symmetric;
+using namespace core::solvers::CSLR::factory;
+using namespace core::solvers::CSLR::preconditioners;
+using namespace core::solvers::CSLR::symmetric;
 using namespace core::wrappers::omp;
 
 typedef point3_t<double> point;
