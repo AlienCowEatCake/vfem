@@ -40,7 +40,7 @@ bool inifile::load(const std::string & filename)
             {
                 getline(ifs, line);
                 line = strings::trim(line);
-                if(line.length() > 1 && line[0] != ';')
+                if(line.length() > 1 && line[0] != ';' && line[0] != '#')
                 {
                     size_t eq_pos = line.find_first_of("=");
                     if(eq_pos != std::string::npos)
