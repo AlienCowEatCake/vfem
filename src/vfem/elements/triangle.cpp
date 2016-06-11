@@ -30,7 +30,7 @@ array_t<complex<double> > triangle_base::rp(eval_func, void *)
 
 // ============================================================================
 
-triangle_full::triangle_full(const triangle_base & other) : triangle_basic(other)
+triangle_full::triangle_full(const triangle_base & other) : triangle_basic<point, edge, face, phys_area>(other)
 {
     basis = NULL;
 }
