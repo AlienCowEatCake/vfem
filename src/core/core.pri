@@ -4,42 +4,42 @@ CONFIG += object_with_source object_parallel_to_source
 CONFIG += no_batch
 
 HEADERS += \
-    $$PWD/containers/fem/*.h \
-    $$PWD/containers/generic/*.h \
-    $$PWD/containers/geometry/*.h \
-    $$PWD/containers/tree/*.h \
-    $$PWD/cubatures/*.h \
-    $$PWD/evaluator/evaluator_internal/jit/*.h \
-    $$PWD/evaluator/evaluator_internal/*.h \
-    $$PWD/evaluator/*.h \
-    $$PWD/solvers/CSLR/preconditioners/Nothing/*.h \
-    $$PWD/solvers/CSLR/preconditioners/Di/*.h \
-    $$PWD/solvers/CSLR/preconditioners/GS/*.h \
-    $$PWD/solvers/CSLR/preconditioners/LDLT/*.h \
-    $$PWD/solvers/CSLR/preconditioners/LLT/*.h \
-    $$PWD/solvers/CSLR/preconditioners/*.h \
-    $$PWD/solvers/CSLR/symmetric/complex/COCG/*.h \
-    $$PWD/solvers/CSLR/symmetric/complex/COCR/*.h \
-    $$PWD/solvers/CSLR/symmetric/complex/BiCG_Complex/*.h \
-    $$PWD/solvers/CSLR/symmetric/complex/BiCGStab_Complex/*.h \
-    $$PWD/solvers/CSLR/symmetric/complex/GMRES_Complex/*.h \
-    $$PWD/solvers/CSLR/symmetric/*.h \
-    $$PWD/solvers/CSLR/*.h \
-    $$PWD/utils/*.h \
-    $$PWD/wrappers/*.h
+    $$files($$PWD/containers/fem/*.h) \
+    $$files($$PWD/containers/generic/*.h) \
+    $$files($$PWD/containers/geometry/*.h) \
+    $$files($$PWD/containers/tree/*.h) \
+    $$files($$PWD/cubatures/*.h) \
+    $$files($$PWD/evaluator/evaluator_internal/jit/*.h) \
+    $$files($$PWD/evaluator/evaluator_internal/*.h) \
+    $$files($$PWD/evaluator/*.h) \
+    $$files($$PWD/solvers/CSLR/preconditioners/Nothing/*.h) \
+    $$files($$PWD/solvers/CSLR/preconditioners/Di/*.h) \
+    $$files($$PWD/solvers/CSLR/preconditioners/GS/*.h) \
+    $$files($$PWD/solvers/CSLR/preconditioners/LDLT/*.h) \
+    $$files($$PWD/solvers/CSLR/preconditioners/LLT/*.h) \
+    $$files($$PWD/solvers/CSLR/preconditioners/*.h) \
+    $$files($$PWD/solvers/CSLR/symmetric/complex/COCG/*.h) \
+    $$files($$PWD/solvers/CSLR/symmetric/complex/COCR/*.h) \
+    $$files($$PWD/solvers/CSLR/symmetric/complex/BiCG_Complex/*.h) \
+    $$files($$PWD/solvers/CSLR/symmetric/complex/BiCGStab_Complex/*.h) \
+    $$files($$PWD/solvers/CSLR/symmetric/complex/GMRES_Complex/*.h) \
+    $$files($$PWD/solvers/CSLR/symmetric/*.h) \
+    $$files($$PWD/solvers/CSLR/*.h) \
+    $$files($$PWD/utils/*.h) \
+    $$files($$PWD/wrappers/*.h)
 
 SOURCES += \
-    $$PWD/cubatures/*.cpp \
-    $$PWD/evaluator/evaluator_internal/jit/*.cpp \
-    $$PWD/evaluator/evaluator_internal/*.cpp \
-    $$PWD/solvers/CSLR/symmetric/complex/COCG/*.cpp \
-    $$PWD/solvers/CSLR/symmetric/complex/COCR/*.cpp \
-    $$PWD/solvers/CSLR/symmetric/complex/BiCG_Complex/*.cpp \
-    $$PWD/solvers/CSLR/symmetric/complex/BiCGStab_Complex/*.cpp \
-    $$PWD/solvers/CSLR/symmetric/complex/GMRES_Complex/*.cpp \
-    $$PWD/solvers/CSLR/*.cpp \
-    $$PWD/utils/*.cpp \
-    $$PWD/wrappers/*.cpp
+    $$files($$PWD/cubatures/*.cpp) \
+    $$files($$PWD/evaluator/evaluator_internal/jit/*.cpp) \
+    $$files($$PWD/evaluator/evaluator_internal/*.cpp) \
+    $$files($$PWD/solvers/CSLR/symmetric/complex/COCG/*.cpp) \
+    $$files($$PWD/solvers/CSLR/symmetric/complex/COCR/*.cpp) \
+    $$files($$PWD/solvers/CSLR/symmetric/complex/BiCG_Complex/*.cpp) \
+    $$files($$PWD/solvers/CSLR/symmetric/complex/BiCGStab_Complex/*.cpp) \
+    $$files($$PWD/solvers/CSLR/symmetric/complex/GMRES_Complex/*.cpp) \
+    $$files($$PWD/solvers/CSLR/*.cpp) \
+    $$files($$PWD/utils/*.cpp) \
+    $$files($$PWD/wrappers/*.cpp)
 
 unix:!macx:QMAKE_LIBS += -lrt
 
