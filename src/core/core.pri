@@ -67,7 +67,8 @@ use_mkl {
         KNOWN_MKLROOTS = \
             $${PROGRAMFILES}/IntelSWTools/compilers_and_libraries_2016.0.110/windows/mkl \
             $${PROGRAMFILES}/IntelSWTools/compilers_and_libraries_2016.1.146/windows/mkl \
-            $${PROGRAMFILES}/IntelSWTools/compilers_and_libraries_2016.2.180/windows/mkl
+            $${PROGRAMFILES}/IntelSWTools/compilers_and_libraries_2016.2.180/windows/mkl \
+            $${PROGRAMFILES}/IntelSWTools/compilers_and_libraries_2016.3.207/windows/mkl
         for(TEST_MKLROOT, KNOWN_MKLROOTS):exists($${TEST_MKLROOT}):MKLROOT=$${TEST_MKLROOT}
         exists($${MKLROOT}) {
             QMAKE_INCDIR += $$quote($${MKLROOT}/include)
@@ -79,21 +80,33 @@ use_mkl {
             }
         }
     }
-    linux-g++*-64: {
+    linux-g++* {
         MKLROOT =
         KNOWN_MKLROOTS = \
             /opt/intel/compilers_and_libraries_2016.0.109/linux/mkl \
             /opt/intel/compilers_and_libraries_2016.1.150/linux/mkl \
-            /opt/intel/compilers_and_libraries_2016.2.181/linux/mkl
+            /opt/intel/compilers_and_libraries_2016.2.181/linux/mkl \
+            /opt/intel/compilers_and_libraries_2016.3.210/linux/mkl
         for(TEST_MKLROOT, KNOWN_MKLROOTS):exists($${TEST_MKLROOT}):MKLROOT=$${TEST_MKLROOT}
         exists($${MKLROOT}) {
-            MKLLIB = $${MKLROOT}/lib/intel64
-            QMAKE_CXXFLAGS  *= -I$${MKLROOT}/include -DUSE_MKL -Wno-long-long
-            QMAKE_LFLAGS    *= -Wl,-rpath -Wl,$${MKLLIB} -Wl,--no-as-needed -L$${MKLLIB}
-            QMAKE_LIBS      *= -lmkl_intel_lp64 -lmkl_core -lmkl_gnu_thread
-            #QMAKE_LIBS      *= -Wl,--start-group $${MKLLIB}/libmkl_intel_lp64.a $${MKLLIB}/libmkl_core.a $${MKLLIB}/libmkl_gnu_thread.a -Wl,--end-group
-            QMAKE_LIBS      *= -ldl -lpthread -lm
-            !use_omp:CONFIG+=use_omp
+            MKLLIBDIR =
+            MKLLIBS =
+            linux-g++*-64 {
+                MKLLIBDIR = $${MKLROOT}/lib/intel64
+                MKLLIBS = -lmkl_intel_lp64 -lmkl_core -lmkl_gnu_thread
+                #MKLLIBS = -Wl,--start-group $${MKLLIBDIR}/libmkl_intel_lp64.a $${MKLLIBDIR}/libmkl_core.a $${MKLLIBDIR}/libmkl_gnu_thread.a -Wl,--end-group
+            }
+            linux-g++*-32 {
+                MKLLIBDIR = $${MKLROOT}/lib/ia32
+                MKLLIBS = -lmkl_intel -lmkl_core -lmkl_gnu_thread
+                #MKLLIBS = -Wl,--start-group $${MKLLIBDIR}/libmkl_intel.a $${MKLLIBDIR}/libmkl_core.a $${MKLLIBDIR}/libmkl_gnu_thread.a -Wl,--end-group
+            }
+            exists($${MKLLIBDIR}) {
+                QMAKE_CXXFLAGS  *= -I$${MKLROOT}/include -DUSE_MKL -Wno-long-long
+                QMAKE_LFLAGS    *= -Wl,-rpath -Wl,$${MKLLIBDIR} -Wl,--no-as-needed -L$${MKLLIBDIR}
+                QMAKE_LIBS      *= $${MKLLIBS} -ldl -lpthread -lm
+                !use_omp:CONFIG+=use_omp
+            }
         }
     }
 }
