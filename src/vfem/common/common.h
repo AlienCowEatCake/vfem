@@ -49,6 +49,7 @@
 #include "../../core/containers/tree/octree.h"
 #include "../../core/cubatures/triangle_integration.h"
 #include "../../core/cubatures/tetrahedron_integration.h"
+#include "../../core/cubatures/line_integration.h"
 #include "../../core/utils/cxxversion.h"
 #include "../../core/utils/fpu.h"
 #include "../../core/utils/nosighup.h"
