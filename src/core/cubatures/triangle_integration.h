@@ -10,6 +10,7 @@ namespace core { namespace cubatures {
 
 /**
  * @brief Класс для хранения точек интегрирования на треугольниках
+ * @note Мастер-элемент - треугольник с вершинами (0,0), (1,0) и (0,1)
  */
 class triangle_integration
 {
@@ -29,6 +30,7 @@ public:
      * @brief Получить вес одной из точек интегрирования
      * @param[in] point_num
      * @return
+     * @note Веса заданы с учетом площади мастер-элемента, в вычислении якобиана ее учитывать не требуется
      */
     inline double get_gauss_weight(std::size_t point_num) const
     {
@@ -51,7 +53,7 @@ public:
 
     /**
      * @brief Инициализация структуры для заданного порядка интегрирования
-     * @param[in] order Порядок интегрирования
+     * @param[in] order Порядок интегрирования (от 2 до 29 включительно)
      */
     void init(std::size_t order);
 
