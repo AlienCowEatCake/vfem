@@ -5,15 +5,14 @@
 
 namespace consts
 {
-    static const double c = 299792458.0;                // Скорость света
-    static const double mu0 = 4.0e-7 * M_PI;            // Магн. пр. вакуума
-    static const double epsilon0 = 1.0 / (mu0 * c * c); // Диэл. пр. вакуума
+    extern const double c;          // Скорость света
+    extern const double mu0;        // Магн. пр. вакуума
+    extern const double epsilon0;   // Диэл. пр. вакуума
 }
 
-// Класс физическая область
-class phys_area
+// Структура физическая область
+struct phys_area
 {
-public:
     double omega;                // Циклическая частота
     double mu;                   // Магнитная проницаемость (относительная)
     array_t<evaluator_xyz<double>, 3> sigma;    // Электрическая проводимость
@@ -23,58 +22,30 @@ public:
     size_t type_of_bounds;       // Тип краевого условия
     double J0;                   // Мощность источника
     double E0;                   // Электрическое поле от электрода
-    phys_area()                  // Конструктор по умолчанию
-    {
-        for(size_t i = 0; i < sigma.size(); i++)
-            sigma[i].parse("0.0");
-        omega = mu = epsilon = J0 = E0 = 0.0;
-        gmsh_num = type_of_elem = type_of_bounds = 0;
-    }
+    phys_area();                 // Конструктор по умолчанию
 };
 
-// Класс для индексации физических областей
-class phys_id
+// Структура для индексации физических областей
+struct phys_id
 {
-public:
     size_t type_of_element;
     size_t gmsh_num;
-    phys_id()
-    {
-        type_of_element = 0;
-        gmsh_num = 0;
-    }
-    phys_id(size_t type_of_element, size_t gmsh_num)
-    {
-        this->type_of_element = type_of_element;
-        this->gmsh_num = gmsh_num;
-    }
-    bool operator < (const phys_id & other) const
-    {
-        if(type_of_element < other.type_of_element) return true;
-        if(type_of_element > other.type_of_element) return false;
-        return gmsh_num < other.gmsh_num;
-    }
+    phys_id(size_t type_of_element = 0, size_t gmsh_num = 0);
+    bool operator < (const phys_id & other) const;
 };
 
-// Класс для хранения параметров PML для одной физической области
-class pml_config_parameter
+// Структура для хранения параметров PML для одной физической области
+struct pml_config_parameter
 {
-public:
     complex<double> chi;
     double width;
     double m;
-    pml_config_parameter(complex<double> n_chi = 1.0, double n_width = 100.0, double n_m = 3.0)
-    {
-        chi = n_chi;
-        width = n_width;
-        m = n_m;
-    }
+    pml_config_parameter(complex<double> n_chi = 1.0, double n_width = 100.0, double n_m = 3.0);
 };
 
-// Класс для хранения параметров PML
-class phys_pml_area
+// Структура для хранения параметров PML
+struct phys_pml_area
 {
-public:
     double x0, x1;
     double y0, y1;
     double z0, z1;
