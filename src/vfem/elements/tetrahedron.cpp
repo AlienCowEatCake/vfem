@@ -324,7 +324,7 @@ tetrahedron::MpG()
         phys->sigma[threads_config::matrix_full].set_z(get_gauss_point(k).z);
         double sigma = 0.0;
         phys->sigma[threads_config::matrix_full].calculate(sigma);
-        complex<double> k2(- phys->epsilon * phys->omega * phys->omega, phys->omega * sigma);
+        complex<double> k2 = consts::i * phys->omega * sigma - phys->epsilon * phys->omega * phys->omega;
 
         for(size_t i = 0; i < basis->tet_bf_num; i++)
         {
@@ -394,7 +394,7 @@ tetrahedron::K()
         phys->sigma[threads_config::matrix_ker].set_z(get_gauss_point(k).z);
         double sigma = 0.0;
         phys->sigma[threads_config::matrix_ker].calculate(sigma);
-        complex<double> k2(- phys->epsilon * phys->omega * phys->omega, phys->omega * sigma);
+        complex<double> k2 = consts::i * phys->omega * sigma - phys->epsilon * phys->omega * phys->omega;
 
         for(size_t i = 0; i < basis->tet_ker_bf_num; i++)
         {
