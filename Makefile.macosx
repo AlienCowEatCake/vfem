@@ -9,6 +9,7 @@ CXXFLAGS += $(CXXFLAGS_EXTRA) $(CXXFLAGS_OPTIMIZE) -Wno-unknown-pragmas
 LDFLAGS += $(LDFLAGS_EXTRA)
 
 SOURCES = \
+	src/core/cubatures/line_integration.cpp \
 	src/core/cubatures/tetrahedron_integration.cpp \
 	src/core/cubatures/triangle_integration.cpp \
 	src/core/evaluator/evaluator_internal/jit/common.cpp \

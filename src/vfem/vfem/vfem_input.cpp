@@ -931,22 +931,7 @@ bool VFEM::input_mesh(const string & gmsh_filename)
 #if defined(VFEM_USE_PML)
 cpoint VFEM::convert_point_to_pml(const point * p, const finite_element * fefe) const
 {
-    static const double pml_gauss_points_local[5] =
-    {
-        0.0,
-        sqrt(5.0 - 2.0 * sqrt(10.0 / 7.0)) / 3.0,
-        -sqrt(5.0 - 2.0 * sqrt(10.0 / 7.0)) / 3.0,
-        sqrt(5.0 + 2.0 * sqrt(10.0 / 7.0)) / 3.0,
-        -sqrt(5.0 + 2.0 * sqrt(10.0 / 7.0)) / 3.0,
-    };
-    static const double pml_gauss_weights[5] =
-    {
-        128.0 / 225.0,
-        (322.0 + 13.0 * sqrt(70.0)) / 900.0,
-        (322.0 + 13.0 * sqrt(70.0)) / 900.0,
-        (322.0 - 13.0 * sqrt(70.0)) / 900.0,
-        (322.0 - 13.0 * sqrt(70.0)) / 900.0
-    };
+    static line_integration pml_integration(9, 10);
 
     double h[3] = {0, 0, 0}, beg[3] = {0, 0, 0};
     bool flag[3] = {false, false, false};
@@ -992,27 +977,19 @@ cpoint VFEM::convert_point_to_pml(const point * p, const finite_element * fefe) 
 
     complex<double> new_point[3] = {0, 0, 0};
 
-    size_t num_steps = 10;
-    point h_small;
-    for(size_t k = 0; k < 3; k++)
-        h_small[k] = h[k] / (double)num_steps;
-
-    for(size_t m = 0; m < num_steps; m++)
+    for(size_t k = 0; k < pml_integration.get_gauss_num(); k++)
     {
-        for(size_t k = 0; k < 5; k++)
-        {
-            point gauss_point_global((pml_gauss_points_local[k] + 1.0) / 2.0 * (h_small[0] * (double)m) + beg[0],
-                                     (pml_gauss_points_local[k] + 1.0) / 2.0 * (h_small[1] * (double)m) + beg[1],
-                                     (pml_gauss_points_local[k] + 1.0) / 2.0 * (h_small[2] * (double)m) + beg[2]);
-            cvector3 s(0, 0, 0);
-            if(flag[0] || flag[1] || flag[2])
-                s = get_s(gauss_point_global, fefe, & phys_pml);
+        point gauss_point_global((pml_integration.get_gauss_point_master(k) + 1.0) / 2.0 * h[0] + beg[0],
+                                 (pml_integration.get_gauss_point_master(k) + 1.0) / 2.0 * h[1] + beg[1],
+                                 (pml_integration.get_gauss_point_master(k) + 1.0) / 2.0 * h[2] + beg[2]);
+        cvector3 s(0, 0, 0);
+        if(flag[0] || flag[1] || flag[2])
+            s = get_s(gauss_point_global, fefe, & phys_pml);
 
-            for(size_t j = 0; j < 3; j++)
-            {
-                if(flag[j])
-                    new_point[j] += s[j] * pml_gauss_weights[k];
-            }
+        for(size_t j = 0; j < 3; j++)
+        {
+            if(flag[j])
+                new_point[j] += s[j] * pml_integration.get_gauss_weight(k);
         }
     }
 
@@ -1020,7 +997,7 @@ cpoint VFEM::convert_point_to_pml(const point * p, const finite_element * fefe) 
     for(size_t j = 0; j < 3; j++)
     {
         if(flag[j])
-            cp[j] = new_point[j] * h_small[j] / 2.0 + beg[j];
+            cp[j] = new_point[j] * h[j] + beg[j];
     }
     return cp;
 }
