@@ -138,14 +138,11 @@ public:
     /**
      * @brief Получть список из всех подсекций секции "section"
      * @param[in] section секция, в которой нужно искать подсекции
-     * @param[in] type фиктивный указатель, из которого определяется тип возвращаемого результата
      * @return список из всех подсекций секции "section"
-     * @note Указатель type нигде не используется, то есть можно туда передавать что угодно, например (size_t*)(NULL)
      */
     template<typename T>
-    std::list<T> enumerate(const std::string & section, const T * type) const
+    std::list<T> enumerate(const std::string & section) const
     {
-        (void)(type);
         std::list<T> result;
         std::map<std::string, section_t>::const_iterator it_section = m_values.find(strings::to_lowercase(section));
         if(it_section != m_values.end())

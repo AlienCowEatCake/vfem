@@ -248,7 +248,7 @@ bool config_type::load(const string & filename)
                 cfg_file.get(evaluators_and_sections[k].first, "", "z", string("0.0"))
             };
             // А теперь уже можно пройтись по всем подсекциям
-            list<size_t> subsections = cfg_file.enumerate(evaluators_and_sections[k].first, (size_t*)NULL);
+            list<size_t> subsections = cfg_file.enumerate<size_t>(evaluators_and_sections[k].first);
             for(list<size_t>::iterator it = subsections.begin(); it != subsections.end(); ++it)
             {
                 size_t subsection = * it;
@@ -330,7 +330,7 @@ bool config_type::load(const string & filename)
     post_types_table[2] = "2d";
     post_types_table[3] = "3d";
 
-    list<size_t> post_subsections = cfg_file.enumerate("Postprocessing", (size_t*)NULL);
+    list<size_t> post_subsections = cfg_file.enumerate<size_t>("Postprocessing");
     for(list<size_t>::iterator it = post_subsections.begin(); it != post_subsections.end(); ++it)
     {
         size_t subsection = * it;
@@ -427,7 +427,7 @@ bool config_type::load_pml(const string & filename)
     phys_pml.z0      = cfg_file.get("PML", "", "z0",    DBL_MAX);
     phys_pml.z1      = cfg_file.get("PML", "", "z1",   -DBL_MAX);
 
-    list<size_t> pml_subsections = cfg_file.enumerate("PML", (size_t*)NULL);
+    list<size_t> pml_subsections = cfg_file.enumerate<size_t>("PML");
     for(list<size_t>::iterator it = pml_subsections.begin(), it_end = pml_subsections.end(); it != it_end; ++it)
     {
         size_t pml_phys = * it;

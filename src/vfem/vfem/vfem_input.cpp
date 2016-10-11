@@ -110,7 +110,7 @@ bool VFEM::input_phys(const string & phys_filename)
     }
     whitelist.clear();
 
-    list<size_t> subsections_3d = cfg_file.enumerate("Phys3D", (size_t*)NULL);
+    list<size_t> subsections_3d = cfg_file.enumerate<size_t>("Phys3D");
     for(list<size_t>::iterator it = subsections_3d.begin(); it != subsections_3d.end(); ++it)
     {
         size_t gmsh_num = * it;
@@ -156,7 +156,7 @@ bool VFEM::input_phys(const string & phys_filename)
     }
     whitelist.clear();
 
-    list<size_t> subsections_2d = cfg_file.enumerate("Phys2D", (size_t*)NULL);
+    list<size_t> subsections_2d = cfg_file.enumerate<size_t>("Phys2D");
     for(list<size_t>::iterator it = subsections_2d.begin(); it != subsections_2d.end(); ++it)
     {
         size_t gmsh_num = * it;
@@ -221,7 +221,7 @@ bool VFEM::input_phys(const string & phys_filename)
     }
     whitelist.clear();
 
-    list<size_t> subsections_1d = cfg_file.enumerate("Phys1D", (size_t*)NULL);
+    list<size_t> subsections_1d = cfg_file.enumerate<size_t>("Phys1D");
     for(list<size_t>::iterator it = subsections_1d.begin(); it != subsections_1d.end(); ++it)
     {
         size_t gmsh_num = * it;
@@ -290,7 +290,7 @@ bool VFEM::input_phys(const string & phys_filename)
     }
     whitelist.clear();
 
-    list<size_t> subsections_0d = cfg_file.enumerate("Phys0D", (size_t*)NULL);
+    list<size_t> subsections_0d = cfg_file.enumerate<size_t>("Phys0D");
     for(list<size_t>::iterator it = subsections_0d.begin(); it != subsections_0d.end(); ++it)
     {
         size_t gmsh_num = * it;
@@ -327,7 +327,7 @@ bool VFEM::input_phys(const string & phys_filename)
     }
     whitelist.clear();
 
-    list<size_t> subsections_el = cfg_file.enumerate("Electrode", (size_t*)NULL);
+    list<size_t> subsections_el = cfg_file.enumerate<size_t>("Electrode");
     for(list<size_t>::iterator it = subsections_el.begin(); it != subsections_el.end(); ++it)
     {
         size_t gmsh_num = * it;
