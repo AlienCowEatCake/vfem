@@ -35,6 +35,7 @@ bool inifile::load(const std::string & filename)
                 section = line.substr(0, dot_pos);
                 subsection = line.substr(dot_pos + 1);
             }
+            m_values[section]._[subsection]; ///< Пустая секция - тоже валидная секция
 
             do
             {
