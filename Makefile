@@ -9,6 +9,7 @@ CXXFLAGS += $(CXXFLAGS_EXTRA) $(CXXFLAGS_OPTIMIZE) -fopenmp -DUSE_OMP
 LDFLAGS += $(LDFLAGS_EXTRA) -lrt -fopenmp
 
 SOURCES = \
+	src/core/cubatures/line_integration.cpp \
 	src/core/cubatures/tetrahedron_integration.cpp \
 	src/core/cubatures/triangle_integration.cpp \
 	src/core/evaluator/evaluator_internal/jit/common.cpp \

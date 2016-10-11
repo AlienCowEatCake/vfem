@@ -13,6 +13,7 @@ LDFLAGS += $(LDFLAGS_EXTRA) -fopenmp -m64 -Wl,-rpath -Wl,${MKLROOT}/lib/intel64 
 #LDFLAGS += $(LDFLAGS_EXTRA) -fopenmp -m64 -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_lp64.a ${MKLROOT}/lib/intel64/libmkl_core.a ${MKLROOT}/lib/intel64/libmkl_gnu_thread.a -Wl,--end-group -ldl -lpthread -lm -lrt
 
 SOURCES = \
+	src/core/cubatures/line_integration.cpp \
 	src/core/cubatures/tetrahedron_integration.cpp \
 	src/core/cubatures/triangle_integration.cpp \
 	src/core/evaluator/evaluator_internal/jit/common.cpp \
