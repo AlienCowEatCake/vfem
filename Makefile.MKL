@@ -50,6 +50,7 @@ SOURCES = \
 	src/vfem/problems/standard.cpp \
 	src/vfem/problems/standard_diff.cpp \
 	src/vfem/problems/standard_pml.cpp \
+	src/vfem/vfem/phys.cpp \
 	src/vfem/vfem/slae.cpp \
 	src/vfem/vfem/vfem.cpp \
 	src/vfem/vfem/vfem_input.cpp \
