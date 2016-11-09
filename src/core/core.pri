@@ -78,6 +78,18 @@ use_mkl {
             } else {
                 QMAKE_LIBDIR += $$quote($${MKLROOT}/lib/ia32_win)
             }
+        } else {
+            MKLROOT = C:/Software/MKL/11.3.3.207
+            exists($${MKLROOT})
+            {
+                QMAKE_INCDIR += $$quote($${MKLROOT}/include)
+                DEFINES += USE_MKL
+                contains(QMAKE_TARGET.arch, x86_64) {
+                    QMAKE_LIBDIR += $$quote($${MKLROOT}/intel64/lib)
+                } else {
+                    QMAKE_LIBDIR += $$quote($${MKLROOT}/ia32/lib)
+                }
+            }
         }
     }
     linux-g++* {
