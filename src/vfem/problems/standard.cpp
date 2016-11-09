@@ -15,7 +15,7 @@ cvector3 func_true(const point & p, phys_area & phys, void * data)
     double sigma;
     if(!phys.sigma[threads_config::analytical].calculate(sigma))
         cout << "[Parser] " << phys.sigma[threads_config::analytical].get_error() << endl;
-    complex<double> k2(- phys.epsilon * phys.omega * phys.omega, phys.omega * sigma);
+    complex<double> k2 = consts::i * phys.omega * sigma - phys.epsilon * phys.omega * phys.omega;
 
     for(size_t i = 0; i < 3; i++)
     {
@@ -46,7 +46,7 @@ cvector3 func_rp(const point & p, phys_area & phys, void * data)
     double sigma;
     if(!phys.sigma[threads_config::right_part].calculate(sigma))
         cout << "[Parser] " << phys.sigma[threads_config::right_part].get_error() << endl;
-    complex<double> k2(- phys.epsilon * phys.omega * phys.omega, phys.omega * sigma);
+    complex<double> k2 = consts::i * phys.omega * sigma - phys.epsilon * phys.omega * phys.omega;
 
     for(size_t i = 0; i < 3; i++)
     {
@@ -77,7 +77,7 @@ cvector3 func_b1(const point & p, phys_area & phys, void * data)
     double sigma;
     if(!phys.sigma[threads_config::boundary].calculate(sigma))
         cout << "[Parser] " << phys.sigma[threads_config::boundary].get_error() << endl;
-    complex<double> k2(- phys.epsilon * phys.omega * phys.omega, phys.omega * sigma);
+    complex<double> k2 = consts::i * phys.omega * sigma - phys.epsilon * phys.omega * phys.omega;
 
     for(size_t i = 0; i < 3; i++)
     {

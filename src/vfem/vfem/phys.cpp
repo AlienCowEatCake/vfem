@@ -5,6 +5,7 @@ namespace consts
     const double c = 299792458.0;                // Скорость света
     const double mu0 = 4.0e-7 * M_PI;            // Магн. пр. вакуума
     const double epsilon0 = 1.0 / (mu0 * c * c); // Диэл. пр. вакуума
+    const complex<double> i(0, 1);               // Мнимая единица
 }
 
 phys_area::phys_area()

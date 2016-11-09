@@ -8,15 +8,16 @@ namespace consts
     extern const double c;          // Скорость света
     extern const double mu0;        // Магн. пр. вакуума
     extern const double epsilon0;   // Диэл. пр. вакуума
+    extern const complex<double> i; // Мнимая единица
 }
 
 // Структура физическая область
 struct phys_area
 {
     double omega;                // Циклическая частота
-    double mu;                   // Магнитная проницаемость (относительная)
+    complex<double> mu;          // Магнитная проницаемость (относительная)
     array_t<evaluator_xyz<double>, 3> sigma;    // Электрическая проводимость
-    double epsilon;              // Диэлектрическая проницаемость (относительная)
+    complex<double> epsilon;     // Диэлектрическая проницаемость (относительная)
     size_t gmsh_num;             // Номер области в Gmsh
     size_t type_of_elem;         // Тип элементов
     size_t type_of_bounds;       // Тип краевого условия
