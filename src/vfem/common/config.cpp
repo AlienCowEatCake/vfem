@@ -398,6 +398,7 @@ bool config_type::load_pml(const string & filename)
 
     // Секция PML
 
+    whitelist.push_back("chi");
     whitelist.push_back("chi_imag");
     whitelist.push_back("chi_real");
     whitelist.push_back("m");
@@ -417,7 +418,9 @@ bool config_type::load_pml(const string & filename)
     whitelist.clear();
 
     // Умолчательные значения зададим пока огромными числами
-    complex<double> chi_def(cfg_file.get("PML", "", "chi_real", DBL_MAX), cfg_file.get("PML", "", "chi_imag", DBL_MAX));
+    double chi_def_real = cfg_file.get("PML", "", "chi_real", DBL_MAX);
+    double chi_def_imag = cfg_file.get("PML", "", "chi_imag", DBL_MAX);
+    complex<double> chi_def(cfg_file.get("PML", "", "chi", complex<double>(chi_def_real, chi_def_imag)));
     double m_def     = cfg_file.get("PML", "", "m",     DBL_MAX);
     double width_def = cfg_file.get("PML", "", "width", DBL_MAX);
     phys_pml.x0      = cfg_file.get("PML", "", "x0",    DBL_MAX);
@@ -436,7 +439,7 @@ bool config_type::load_pml(const string & filename)
             pml_config_parameter * curr = & (phys_pml.params[pml_phys]);
             double chi_re = cfg_file.get("PML", pml_phys, "chi_real", chi_def.real());
             double chi_im = cfg_file.get("PML", pml_phys, "chi_imag", chi_def.imag());
-            curr->chi = complex<double>(chi_re, chi_im);
+            curr->chi = cfg_file.get("PML", pml_phys, "chi", complex<double>(chi_re, chi_im));
             curr->m     = cfg_file.get("PML", pml_phys, "m",     m_def);
             curr->width = cfg_file.get("PML", pml_phys, "width", width_def);
         }
