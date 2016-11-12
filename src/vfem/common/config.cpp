@@ -114,7 +114,7 @@ bool config_type::load(const string & filename)
 {
     cout << "Reading config file ..." << endl;
 
-    inifile cfg_file(filename);
+    evaluable_inifile cfg_file(filename);
     if(!cfg_file.good())
     {
         cout << "[Config] Error in " << __FILE__ << ":" << __LINE__
@@ -378,7 +378,7 @@ bool config_type::load_pml(const string & filename)
         return true;
     }
 
-    inifile cfg_file(filename);
+    evaluable_inifile cfg_file(filename);
     if(!cfg_file.good())
     {
         cout << "[PML Config] Error in " << __FILE__ << ":" << __LINE__

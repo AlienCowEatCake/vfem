@@ -48,7 +48,7 @@ bool VFEM::input_phys(const string & phys_filename)
     cout << "Reading physical parameters ..." << endl;
 
     // Чтение параметров физических областей
-    inifile cfg_file(phys_filename);
+    evaluable_inifile cfg_file(phys_filename);
     if(!cfg_file.good())
     {
         cout << "[Phys Config] Error in " << __FILE__ << ":" << __LINE__
@@ -85,28 +85,10 @@ bool VFEM::input_phys(const string & phys_filename)
     }
     whitelist.clear();
 
-    string mu_default_str  = cfg_file.get("Global", "", "mu",         "1.0");
-    string eps_default_str = cfg_file.get("Global", "", "eps",        "1.0");
-    string sigma_default   = cfg_file.get("Global", "", "sigma",      "0.0");
-    double omega_global    = cfg_file.get("Global", "", "frequency",  -1.0) * 2.0 * M_PI;
-
-    evaluator<complex<double> > evaluator_complex;
-    complex<double> mu_default_val;
-    if(!evaluator_complex.parse(mu_default_str) || !evaluator_complex.calculate(mu_default_val))
-    {
-        cout << "Error in " << __FILE__ << ":" << __LINE__
-             << " while parsing " << mu_default_str << " ("
-             << evaluator_complex.get_error() << ")" << endl;
-        return false;
-    }
-    complex<double> eps_default_val;
-    if(!evaluator_complex.parse(eps_default_str) || !evaluator_complex.calculate(eps_default_val))
-    {
-        cout << "Error in " << __FILE__ << ":" << __LINE__
-             << " while parsing " << eps_default_str << " ("
-             << evaluator_complex.get_error() << ")" << endl;
-        return false;
-    }
+    complex<double> mu_default  = cfg_file.get("Global", "", "mu",         complex<double>(1.0, 0.0));
+    complex<double> eps_default = cfg_file.get("Global", "", "eps",        complex<double>(1.0, 0.0));
+    string sigma_default        = cfg_file.get("Global", "", "sigma",      "0.0");
+    double omega_global         = cfg_file.get("Global", "", "frequency",  -1.0) * 2.0 * M_PI;
 
     if(omega_global < 0)
     {
@@ -140,24 +122,8 @@ bool VFEM::input_phys(const string & phys_filename)
         phys_area * ph = &(phys[phys_id(MSH_TET_4, gmsh_num)]);
         ph->gmsh_num = gmsh_num;
         ph->type_of_elem = MSH_TET_4;
-        string mu = cfg_file.get("Phys3D", gmsh_num, "mu", mu_default_str);
-        if(!evaluator_complex.parse(eps_default_str) || !evaluator_complex.calculate(ph->mu))
-        {
-            cout << "Error in " << __FILE__ << ":" << __LINE__
-                 << " while parsing " << mu << " ("
-                 << evaluator_complex.get_error() << ")" << endl;
-            return false;
-        }
-        ph->mu *= consts::mu0;
-        string eps = cfg_file.get("Phys3D", gmsh_num, "eps", eps_default_str);
-        if(!evaluator_complex.parse(eps_default_str) || !evaluator_complex.calculate(ph->epsilon))
-        {
-            cout << "Error in " << __FILE__ << ":" << __LINE__
-                 << " while parsing " << eps << " ("
-                 << evaluator_complex.get_error() << ")" << endl;
-            return false;
-        }
-        ph->epsilon *= consts::epsilon0;
+        ph->mu = cfg_file.get("Phys3D", gmsh_num, "mu", mu_default) * consts::mu0;
+        ph->epsilon = cfg_file.get("Phys3D", gmsh_num, "eps", eps_default) * consts::epsilon0;
         string sigma = cfg_file.get("Phys3D", gmsh_num, "sigma", sigma_default);
         ph->omega = omega_global;
         ph->type_of_bounds = 0;
@@ -175,8 +141,8 @@ bool VFEM::input_phys(const string & phys_filename)
         }
     }
 
-    mu_default_val *= consts::mu0;
-    eps_default_val *= consts::epsilon0;
+    mu_default *= consts::mu0;
+    eps_default *= consts::epsilon0;
 
     // Секция Phys2D
 
@@ -228,8 +194,8 @@ bool VFEM::input_phys(const string & phys_filename)
         }
         if(parent_num == 0)
         {
-            ph->mu = mu_default_val;
-            ph->epsilon = eps_default_val;
+            ph->mu = mu_default;
+            ph->epsilon = eps_default;
             for(size_t i = 0; i < ph->sigma.size(); i++)
             {
                 if(!ph->sigma[i].parse(sigma_default) || !ph->sigma[i].simplify())
@@ -293,8 +259,8 @@ bool VFEM::input_phys(const string & phys_filename)
         }
         if(parent_num == 0)
         {
-            ph->mu = mu_default_val;
-            ph->epsilon = eps_default_val;
+            ph->mu = mu_default;
+            ph->epsilon = eps_default;
             for(size_t i = 0; i < ph->sigma.size(); i++)
             {
                 if(!ph->sigma[i].parse(sigma_default) || !ph->sigma[i].simplify())
@@ -398,8 +364,8 @@ bool VFEM::input_phys(const string & phys_filename)
         }
         if(parent_num == 0)
         {
-            ph->mu = mu_default_val;
-            ph->epsilon = eps_default_val;
+            ph->mu = mu_default;
+            ph->epsilon = eps_default;
             for(size_t i = 0; i < ph->sigma.size(); i++)
             {
                 if(!ph->sigma[i].parse(sigma_default) || !ph->sigma[i].simplify())

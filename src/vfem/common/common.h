@@ -57,6 +57,7 @@
 #include "../../core/utils/progress.h"
 #include "../../core/utils/timers.h"
 #include "../../core/utils/inifile.h"
+#include "../../core/utils/evaluable_inifile.h"
 #include "../../core/evaluator/evaluator.h"
 #include "../../core/evaluator/evaluator_xyz.h"
 #include "../../core/solvers/CSLR/solvers_factory.h"
