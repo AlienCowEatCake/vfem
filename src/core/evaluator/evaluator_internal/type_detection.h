@@ -102,90 +102,29 @@ inline bool is_complex_double(const T *)
 
 #if defined(EVALUATOR_NO_RTTI)
 
-inline std::string get_type_name(const signed char *)
-{
-    return "signed char";
-}
-
-inline std::string get_type_name(const unsigned char *)
-{
-    return "unsigned char";
-}
-
-inline std::string get_type_name(const char *)
-{
-    return "char";
-}
-
-inline std::string get_type_name(const signed short *)
-{
-    return "signed short";
-}
-
-inline std::string get_type_name(const unsigned short *)
-{
-    return "unsigned short";
-}
-
-inline std::string get_type_name(const signed int *)
-{
-    return "signed int";
-}
-
-inline std::string get_type_name(const unsigned int *)
-{
-    return "unsigned int";
-}
-
-inline std::string get_type_name(const signed long *)
-{
-    return "signed long";
-}
-
-inline std::string get_type_name(const unsigned long *)
-{
-    return "unsigned long";
-}
-
-inline std::string get_type_name(const signed long long *)
-{
-    return "signed long long";
-}
-
-inline std::string get_type_name(const unsigned long long *)
-{
-    return "unsigned long long";
-}
-
-inline std::string get_type_name(const float *)
-{
-    return "float";
-}
-
-inline std::string get_type_name(const double *)
-{
-    return "double";
-}
-
-inline std::string get_type_name(const long double *)
-{
-    return "long double";
-}
-
-inline std::string get_type_name(const std::complex<float> *)
-{
-    return "complex<float>";
-}
-
-inline std::string get_type_name(const std::complex<double> *)
-{
-    return "complex<double>";
-}
-
-inline std::string get_type_name(const std::complex<long double> *)
-{
-    return "complex<long double>";
-}
+#define ADD_GET_TYPE_NAME(TYPE) \
+    inline std::string get_type_name(const TYPE *) \
+    { \
+        return std::string(#TYPE); \
+    }
+    ADD_GET_TYPE_NAME(signed char)
+    ADD_GET_TYPE_NAME(unsigned char)
+    ADD_GET_TYPE_NAME(char)
+    ADD_GET_TYPE_NAME(signed short)
+    ADD_GET_TYPE_NAME(unsigned short)
+    ADD_GET_TYPE_NAME(signed int)
+    ADD_GET_TYPE_NAME(unsigned int)
+    ADD_GET_TYPE_NAME(signed long)
+    ADD_GET_TYPE_NAME(unsigned long)
+    ADD_GET_TYPE_NAME(signed long long) /// @note C++11
+    ADD_GET_TYPE_NAME(unsigned long long) /// @note C++11
+    ADD_GET_TYPE_NAME(float)
+    ADD_GET_TYPE_NAME(double)
+    ADD_GET_TYPE_NAME(long double)
+    ADD_GET_TYPE_NAME(std::complex<float>)
+    ADD_GET_TYPE_NAME(std::complex<double>)
+    ADD_GET_TYPE_NAME(std::complex<long double>)
+#undef ADD_GET_TYPE_NAME
 
 template<typename T>
 inline std::string get_type_name(const T *)

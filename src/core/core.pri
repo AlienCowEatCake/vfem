@@ -44,6 +44,7 @@ SOURCES += \
 unix:!macx:QMAKE_LIBS += -lrt
 
 *g++*|*clang* {
+    QMAKE_CXXFLAGS *= -Wno-long-long
     QMAKE_CXXFLAGS_RELEASE -= -O2
     QMAKE_CXXFLAGS_RELEASE *= -O3
     QMAKE_CXXFLAGS_RELEASE *= -DNDEBUG
@@ -114,7 +115,7 @@ use_mkl {
                 #MKLLIBS = -Wl,--start-group $${MKLLIBDIR}/libmkl_intel.a $${MKLLIBDIR}/libmkl_core.a $${MKLLIBDIR}/libmkl_gnu_thread.a -Wl,--end-group
             }
             exists($${MKLLIBDIR}) {
-                QMAKE_CXXFLAGS  *= -I$${MKLROOT}/include -DUSE_MKL -Wno-long-long
+                QMAKE_CXXFLAGS  *= -I$${MKLROOT}/include -DUSE_MKL
                 QMAKE_LFLAGS    *= -Wl,-rpath -Wl,$${MKLLIBDIR} -Wl,--no-as-needed -L$${MKLLIBDIR}
                 QMAKE_LIBS      *= $${MKLLIBS} -ldl -lpthread -lm
                 !use_omp:CONFIG+=use_omp
