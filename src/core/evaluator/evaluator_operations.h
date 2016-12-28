@@ -265,13 +265,12 @@ namespace evaluator_internal
     template<typename T>
     void init_constants(std::map<std::string, T> & consts_map)
     {
-        T * type_test = NULL;
-        if(is_floating(type_test) || is_floating_complex(type_test))
+        if(is_floating<T>() || is_floating_complex<T>())
         {
             consts_map["pi"] = static_cast<T>(4) * eval_atan(static_cast<T>(1));
             consts_map["e"] = eval_exp(static_cast<T>(1));
         }
-        if(is_floating_complex(type_test))
+        if(is_floating_complex<T>())
         {
             T complex_I = eval_sqrt(static_cast<T>(-1));
             consts_map["i"] = complex_I;
