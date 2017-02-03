@@ -22,7 +22,7 @@ CONFIG += use_omp
     QMAKE_CXXFLAGS_RELEASE *= -mtune=native
 }
 
-include(src/core/core.pri)
+include(src/fem_core/fem_core.pri)
 
 SOURCES += \
     src/vfem/main.cpp \

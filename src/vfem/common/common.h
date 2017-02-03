@@ -36,49 +36,49 @@
 #include <list>
 #include <ctime>
 
-#include "../../core/containers/fem/triangle_basic_3d.h"
-#include "../../core/containers/fem/tetrahedron_basic_3d.h"
-#include "../../core/containers/generic/trio.h"
-#include "../../core/containers/generic/array_t.h"
-#include "../../core/containers/generic/matrix_t.h"
-#include "../../core/containers/geometry/edge_basic.h"
-#include "../../core/containers/geometry/face_triangle_basic.h"
-#include "../../core/containers/geometry/point3_t.h"
-#include "../../core/containers/geometry/vector3_t.h"
-#include "../../core/containers/tree/quadtree.h"
-#include "../../core/containers/tree/octree.h"
-#include "../../core/cubatures/triangle_integration.h"
-#include "../../core/cubatures/tetrahedron_integration.h"
-#include "../../core/cubatures/line_integration.h"
-#include "../../core/utils/cxxversion.h"
-#include "../../core/utils/fpu.h"
-#include "../../core/utils/nosighup.h"
-#include "../../core/utils/strings.h"
-#include "../../core/utils/progress.h"
-#include "../../core/utils/timers.h"
-#include "../../core/utils/inifile.h"
-#include "../../core/utils/evaluable_inifile.h"
-#include "../../core/evaluator/evaluator.h"
-#include "../../core/evaluator/evaluator_xyz.h"
-#include "../../core/solvers/CSLR/solvers_factory.h"
-#include "../../core/wrappers/omp_wrapper.h"
+#include "../../fem_core/containers/fem/triangle_basic_3d.h"
+#include "../../fem_core/containers/fem/tetrahedron_basic_3d.h"
+#include "../../fem_core/containers/generic/trio.h"
+#include "../../fem_core/containers/generic/array_t.h"
+#include "../../fem_core/containers/generic/matrix_t.h"
+#include "../../fem_core/containers/geometry/edge_basic.h"
+#include "../../fem_core/containers/geometry/face_triangle_basic.h"
+#include "../../fem_core/containers/geometry/point3_t.h"
+#include "../../fem_core/containers/geometry/vector3_t.h"
+#include "../../fem_core/containers/tree/quadtree.h"
+#include "../../fem_core/containers/tree/octree.h"
+#include "../../fem_core/cubatures/triangle_integration.h"
+#include "../../fem_core/cubatures/tetrahedron_integration.h"
+#include "../../fem_core/cubatures/line_integration.h"
+#include "../../fem_core/utils/cxxversion.h"
+#include "../../fem_core/utils/fpu.h"
+#include "../../fem_core/utils/nosighup.h"
+#include "../../fem_core/utils/strings.h"
+#include "../../fem_core/utils/progress.h"
+#include "../../fem_core/utils/timers.h"
+#include "../../fem_core/utils/inifile.h"
+#include "../../fem_core/utils/evaluable_inifile.h"
+#include "../../fem_core/evaluator/evaluator.h"
+#include "../../fem_core/evaluator/evaluator_xyz.h"
+#include "../../fem_core/solvers/CSLR/solvers_factory.h"
+#include "../../fem_core/wrappers/omp_wrapper.h"
 
 using namespace std;
-using namespace core::containers::fem;
-using namespace core::containers::generic;
-using namespace core::containers::geometry;
-using namespace core::containers::tree;
-using namespace core::cubatures;
-using namespace core::utils;
-using namespace core::utils::nosighup;
-using namespace core::utils::strings;
-using namespace core::utils::progress;
-using namespace core::utils::timers;
-using namespace core::utils::fpu;
-using namespace core::solvers::CSLR::factory;
-using namespace core::solvers::CSLR::preconditioners;
-using namespace core::solvers::CSLR::symmetric;
-using namespace core::wrappers::omp;
+using namespace fem_core::containers::fem;
+using namespace fem_core::containers::generic;
+using namespace fem_core::containers::geometry;
+using namespace fem_core::containers::tree;
+using namespace fem_core::cubatures;
+using namespace fem_core::utils;
+using namespace fem_core::utils::nosighup;
+using namespace fem_core::utils::strings;
+using namespace fem_core::utils::progress;
+using namespace fem_core::utils::timers;
+using namespace fem_core::utils::fpu;
+using namespace fem_core::solvers::CSLR::factory;
+using namespace fem_core::solvers::CSLR::preconditioners;
+using namespace fem_core::solvers::CSLR::symmetric;
+using namespace fem_core::wrappers::omp;
 
 typedef point3_t<double> point;
 typedef point3_t< complex<double> > cpoint;
